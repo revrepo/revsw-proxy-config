@@ -1,0 +1,7 @@
+{
+    "title": "Third party servers",
+    "type": "object",
+    "properties": {
+    },
+    "additionalProperties": false
+}

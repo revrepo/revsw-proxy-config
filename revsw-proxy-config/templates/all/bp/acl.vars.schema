@@ -1,0 +1,56 @@
+{
+    "title": "Browser Proxy Access Control Lists",
+    "type": "object",
+    "properties": {
+        "enabled": {
+            "type": "boolean"
+        },
+        "action": {
+            "type": "string",
+            "oneOf": [
+                {"pattern": "allow_except"},
+                {"pattern": "deny_except"}
+            ]
+        },
+        "acl_rules": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "host_name": {
+                        "type": "string",
+                        "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*)?$"
+                    },
+                    "subnet_mask": {
+                        "type": "string",
+                        "pattern": "^(([0-9]{1,2})|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))?$"
+                    },
+                    "country_code": {
+                        "type": "string",
+                        "pattern": "^([A-Z][A-Z])?$"
+                    },
+                    "header_name": {
+                        "type": "string"
+                    },
+                    "header_value": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": true,
+                "required": [
+                    "host_name",
+                    "subnet_mask",
+                    "country_code",
+                    "header_name",
+                    "header_value"
+                ]
+            }
+        }
+    },
+    "required": [
+        "enabled",
+        "action",
+        "acl_rules"
+    ],
+   "additionalProperties": true
+}

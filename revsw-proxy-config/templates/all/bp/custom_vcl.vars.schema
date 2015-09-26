@@ -1,0 +1,92 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+	  	"backends": {
+	  		"type": "array",
+	  		"items": {
+	  			"type": "object",
+	  			"additionalProperties": false,
+	  			"properties": {
+	  				"name": {
+	  					"type": "string",
+	  					"pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+	  				},
+	  				"host": {
+	  					"type": "string",
+	  					"format": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+	  				},
+	  				"port": {
+	  					"type": "integer",
+	  					"minimum": 1
+	  				},
+	  				"dynamic": {
+	  					"type": "boolean"
+	  				},
+	  				"vcl": {
+	  					"type": "string"
+	  				}
+	  			},
+	  			"required": [
+	  				"name",
+	  				"host",
+	  				"port",
+	  				"dynamic",
+	  				"vcl"
+	  			]
+	  		}
+	  	},
+	    "recv": {
+	    	"type": "string"
+	    },
+	    "hash": {
+	    	"type": "string"
+	    },
+	    "pipe": {
+	    	"type": "string"
+	    },
+	    "purge": {
+	    	"type": "string"
+	    },
+	    "hit": {
+	    	"type": "string"
+	    },
+	    "miss": {
+	    	"type": "string"
+	    },
+	    "pass": {
+	    	"type": "string"
+	    },
+	    "deliver": {
+	    	"type": "string"
+	    },
+	    "synth": {
+	    	"type": "string"
+	    },
+	    "backend_fetch": {
+	    	"type": "string"
+	    },
+	    "backend_response": {
+	    	"type": "string"
+	    },
+	    "backend_error": {
+	    	"type": "string"
+	    }
+	},
+	"required": [
+		"backends",
+		"recv",
+		"hash",
+		"pipe",
+		"purge",
+		"hit",
+		"miss",
+		"pass",
+		"deliver",
+		"synth",
+		"backend_fetch",
+		"backend_response",
+		"backend_error"
+	]
+}

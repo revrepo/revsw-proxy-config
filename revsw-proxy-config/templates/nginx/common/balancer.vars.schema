@@ -1,0 +1,7 @@
+{
+    "title": "OWS balancer config",
+    "type": "object",
+    "properties": {
+    },
+    "additionalProperties": false
+}

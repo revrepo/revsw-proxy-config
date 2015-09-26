@@ -1,0 +1,7 @@
+{
+    "title": "Loop detection",
+    "type": "object",
+    "properties": {
+    },
+    "additionalProperties": false
+}

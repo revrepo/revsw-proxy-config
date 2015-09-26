@@ -1,0 +1,193 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+	"version": {
+	    "type": "integer"
+	},
+	"target_domains": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"include": {
+		    "type": "boolean"
+		},
+		"include_or_exclude_domains": {
+		    "type": "array",
+		    "items": {
+			"type": "string",
+			"pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+		    }
+		},
+		"include_or_exclude_wildcard": {
+		    "type": "string"
+		}
+	    },
+	    "required": [
+		"include",
+		"include_or_exclude_domains",
+		"include_or_exclude_wildcard"
+	    ]
+	},
+	"url": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"is_wildcard": {
+		    "type": "boolean"
+		},
+		"value": {
+		    "type": "string"
+		}
+	    },
+	    "required": [
+		"is_wildcard",
+		"value"
+	    ]
+	},
+	"serve_stale": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"enable": {
+		    "type": "boolean"
+		},
+		"while_fetching_ttl": {
+		    "type": "integer"
+		},
+		"origin_sick_ttl": {
+		    "type": "integer"
+		}
+	    },
+	    "required": [
+		"enable",
+		"while_fetching_ttl",
+		"origin_sick_ttl"
+	    ]
+	},
+	"origin_redirects": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"override": {
+		    "type": "boolean"
+		},
+		"follow": {
+		    "type": "boolean"
+		}
+	    }
+	},
+	"edge_caching": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"override_origin": {
+		    "type": "boolean"
+		},
+		"override_no_cc": {
+		    "type": "boolean"
+		},
+		"new_ttl": {
+		    "type": "integer",
+		    "minimum": 0
+		},
+		"query_string_keep_or_remove_list": {
+		    "type": "array",
+		    "items": {
+			"type": "string"
+		    }
+		},
+		"query_string_list_is_keep": {
+		    "type": "boolean"
+		}
+	    },
+	    "required": [
+		"override_origin",
+		"new_ttl"
+	    ]
+	},
+	"browser_caching": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"override_edge": {
+		    "type": "boolean"
+		},
+		"new_ttl": {
+		    "type": "integer",
+		    "minimum": 0
+		},
+		"force_revalidate": {
+		    "type": "boolean"
+		}
+	    },
+	    "required": [
+		"override_edge",
+		"new_ttl",
+		"force_revalidate"
+	    ]
+	},
+	"cookies": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"override": {
+		    "type": "boolean"
+		},
+		"ignore_all": {
+		    "type": "boolean"
+		},
+		"keep_or_ignore_list": {
+		    "type": "array",
+		    "items": {
+			"type": "string"
+		    }
+		},
+		"list_is_keep": {
+		    "type": "boolean"
+		},
+		"remove_ignored_from_request": {
+		    "type": "boolean"
+		},
+		"remove_ignored_from_response": {
+		    "type": "boolean"
+		}
+	    },
+	    "required": [
+		"override",
+		"ignore_all",
+		"keep_or_ignore_list",
+		"list_is_keep",
+		"remove_ignored_from_request",
+		"remove_ignored_from_response"
+	    ]
+	},
+	"cookies_cache_bypass": {
+	    "type": "object",
+	    "additionalProperties": false,
+	    "properties": {
+		"enable": {
+		    "type": "boolean"
+		},
+		"list": {
+		    "type": "array",
+		    "items": {
+			"type": "string"
+		    }
+		}
+	    },
+	    "required": [
+		"enable",
+		"list"
+	    ]
+	    }
+    },
+    "required": [
+	"version",
+	"url",
+	"edge_caching",
+	"browser_caching",
+	"cookies"
+    ]
+}

@@ -1,0 +1,7 @@
+/opt/revsw-config/log/*.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    notifempty
+}

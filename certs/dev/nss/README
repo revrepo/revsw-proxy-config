@@ -1,0 +1,17 @@
+# Created using the following commands:
+
+CERT_DB_DIR=`readlink -f .`
+CERT_IN_DIR=`readlink -f ..`
+
+# Import GoDaddy cert bundle - this will also create the DB if it doesn't exist
+certutil -A -d $CERT_DB_DIR -n "Go Daddy G2" -t "CT,," -a -i $CERT_IN_DIR/gd_bundle-g2.crt
+# Make sure the DB is readable by Apache
+chown www-data:www-data $CERT_DB_DIR/*
+# Convert RevSW cert to PKCS12
+openssl pkcs12 -export -in $CERT_IN_DIR/revsw.net.crt -inkey $CERT_IN_DIR/revsw.net.key -out revsw.net.p12 -name revsw.net #-passout pass:foo
+# Import PKCS12 cert
+pk12util -i revsw.net.p12 -d $CERT_DB_DIR #-W foo
+# Verify that it worked
+certutil -L -d $CERT_DB_DIR
+# Verifiy the cert is valid
+certutil -V -u V -d $CERT_DB_DIR -n revsw.net

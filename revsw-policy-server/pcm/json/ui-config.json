@@ -1,0 +1,188 @@
+NEW JSON DEFINITIONS
+--------------------
+
+1. ADD/UPDATE DOMAIN CASE
+-------------------------
+{
+    "version": "1.0.11",
+    "domain_name": "testingtechv.com",
+    "domain_aliases": ["www.testingtechv.com", "www1.testingtechv.com"],
+    "domain_wildcard_alias": "",
+    "origin_domain": "www.dell.com",
+    "operation": "config",
+    "origin_server": "www.dell.com",
+    "origin_health_probe": {
+        "enable": true,
+        "url": "/object_that_never_fails",
+        "headers": [
+            ["X-Foo", "Bar"],
+            ["X-Extra-Header", "some value"]
+        ],
+        "method": "GET",
+        "interval": 10,
+        "timeout": 2,
+        "expected_status": 200
+    },
+    "proxy_timeout": 5,
+    "config_command_options": "options",
+    "rev_component_co": {
+        "co_apache_custom_config": "ProxyTimeout 300 \n",
+        "enable_rum": true,
+        "rum_beacon_url": "https://rum-lb-prod-va.revsw.net/service",
+        "enable_optimization": false,
+        "mode": "custom",
+        "img_choice": "none",
+        "js_choice": "none",
+        "css_choice": "none",
+        "origin_http_keepalive_enabled": true,
+        "origin_http_keepalive_ttl": 80,
+        "rev_custom_json": {}
+    },
+    "rev_traffic_mgr": {
+        "tier": "SILVER",
+        "page_views": "40M",
+        "transfer_size": "160 TB",
+        "overage": 30,
+        "apdex_threshold_ms": 2000
+    },
+    "rev_component_bp": {
+        "bp_apache_custom_config": "custom config",
+        "bp_apache_fe_custom_config": "custom config",
+        "block_crawlers": false,
+        "enable_cache": true,
+        "caching_rules_mode": "best",     # "first","best"; default to best
+        "cache_bypass_locations": [
+            "url1",
+            "url2"
+        ],
+        "co_bypass_locations": [
+            "url1",
+            "url2"
+        ],
+        "cache_opt_choice": "Rev CDN",
+        "cdn_overlay_urls": [
+            ""
+        ],
+        "caching_rules": [
+            {
+                "version": 3,
+                "target_domains": {
+                    "include": true,
+                    "include_or_exclude_domains": [
+                        "list of only domains in domain group the rule is applied to (include) or not applied to (exclude)"
+                    ],
+                    "include_or_exclude_wildcard": "*.testingtechv.com"
+                },
+                "url": {
+                    "is_wildcard": true,
+                    "value": "**"
+                },
+                "serve_stale": {
+                    "enable": true,
+                    "while_fetching_ttl": 10,
+                    "origin_sick_ttl": 3600
+                },
+                "origin_redirects": {
+                    "override": true,
+                    "follow": true
+                },
+                "edge_caching": {
+                    "override_origin": false,
+                    "new_ttl": 0,
+                    "override_no_cc": false,
+                    "query_string_keep_or_remove_list": ["list", "of", "querystring", "parameters", "to", "keep", "or", "ignore"],
+                    "query_string_list_is_keep": false
+                },
+                "browser_caching": {
+                    "override_edge": false,
+                    "new_ttl": 0,
+                    "force_revalidate": false
+                },
+                "cookies": {
+                    "override": false,
+                    "ignore_all": false,
+                    "list_is_keep": false,
+                    "keep_or_ignore_list": [
+                        "str1",
+                        "str2"
+                    ],
+                    "remove_ignored_from_request": false,
+                    "remove_ignored_from_response": false
+                }
+            }
+        ],
+        "enable_security": true,
+        "web_app_firewall": "off",
+        "ssl_certificates": "rev_certs",
+        "certificate_urls": [],
+        "acl": {
+            "enabled": false,
+            "action": "allow_except/deny_except",
+            "acl_rules": [
+                {
+                    "host_name": "hostnameorip",
+                    "subnet_mask": "maskvalueorempty",
+                    "country_code": "twocharactercountrycode",
+                    "header_name": "httpheadernameorempty",
+                    "header_value": "string"
+                }
+            ]
+        },
+        "custom_vcl": {
+            "enabled": false,
+            "backends": [
+                {
+                    "name": "my_backend_0",
+                    "host": "www.mybackend.com",
+                    "port": 80,
+                    "dynamic": false,
+                    "vcl": "VCL code containing backend properties"
+                }
+            ],
+            "recv": "VCL code for vcl_recv",
+            "hash": "VCL code for vcl_hash",
+            "pipe": "VCL code for vcl_pipe",
+            "purge": "VCL code for vcl_purge",
+            "hit": "VCL code for vcl_hit",
+            "miss": "VCL code for vcl_miss",
+            "pass": "VCL code for vcl_pass",
+            "deliver": "VCL code for vcl_deliver",
+            "synth": "VCL code for vcl_synth",
+            "backend_fetch": "VCL code for vcl_backend_fetch",
+            "backend_response": "VCL code for vcl_backend_response",
+            "backend_error": "VCL code for vcl_backend_error"
+        },
+        "enable_vcl_geoip_headers": false,
+        "rev_custom_json": {}
+    },
+    "bp_list": [
+        "bp_01.revsw.net",
+        "bp_02.revsw.net"
+    ],
+    "co_list": [
+        "co_01.revsw.net",
+        "co_02.revsw.net"
+    ],
+    "co_cnames": [
+        "co_cname1",
+        "co_cname2"
+    ],
+    "3rd_party_rewrite": {
+        "enable_3rd_party_rewrite": false,
+        "3rd_party_urls": "comma separated domains to rewrite",
+        "enable_3rd_party_runtime_rewrite": false,
+        "3rd_party_runtime_domains": "comma separated domains to rewrite",
+        "enable_3rd_party_root_rewrite": false,
+        "3rd_party_root_rewrite_domains": "comma separated domains to rewrite"
+    },
+    "rev_custom_json": {}
+}
+
+2. DELETE DOMAIN CASE
+---------------------
+{
+    "version": "1.0.1",
+    "domain_name": "www.chocolate.com",
+    "operation": "delete"
+}
+

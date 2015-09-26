@@ -1,0 +1,42 @@
+
+   time_namelookup:  0.124
+      time_connect:  0.143
+   time_appconnect:  0.000
+  time_pretransfer:  0.143
+     time_redirect:  0.000
+time_starttransfer:  0.171
+               -----------
+        time_total:  0.172
+
+     size_download:  13091
+       size_header:  211
+    speed_download:  76318.000
+
+
+   time_namelookup:  0.028
+      time_connect:  0.047
+   time_appconnect:  0.000
+  time_pretransfer:  0.047
+     time_redirect:  0.000
+time_starttransfer:  0.077
+               -----------
+        time_total:  0.096
+
+     size_download:  13091
+       size_header:  211
+    speed_download:  136586.000
+
+
+   time_namelookup:  0.124
+      time_connect:  0.143
+   time_appconnect:  0.000
+  time_pretransfer:  0.143
+     time_redirect:  0.000
+time_starttransfer:  0.177
+               -----------
+        time_total:  0.178
+
+     size_download:  13091
+       size_header:  211
+    speed_download:  73352.000
+

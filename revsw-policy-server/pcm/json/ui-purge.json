@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "request_id": "1112",
+    "purges": [
+        {
+            "url": {
+                "is_wildcard": true,
+                "expression": "/temp/*.png",
+                "domain": "mini.net"
+            }
+        }
+    ]
+}

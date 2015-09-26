@@ -1,0 +1,11 @@
+Source: revsw-config-common
+Version: 1.0.0
+Section: base
+Priority: optional
+Maintainer: Victor Brunko <vbrunko@revsw.com>
+Package: revsw-config-common
+Architecture: all
+Depends: python-jinja2 (>= 2.7), python-jsonschema (>= 2.3), python-dnspython
+Description: Rev Software common configuration Python modules
+Preinst: preinst
+Postinst: postinst

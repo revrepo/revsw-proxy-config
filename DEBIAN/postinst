@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "postinst procedures: start"
+
+/etc/init.d/revsw-pcm-config start
+/etc/init.d/revsw-pcm-purge start
+
+echo "postinst procedures: end"

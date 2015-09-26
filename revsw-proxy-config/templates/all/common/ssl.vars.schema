@@ -1,0 +1,7 @@
+{
+    "title": "SSL setup",
+    "type": "object",
+    "properties": {
+    },
+    "additionalProperties": false
+}

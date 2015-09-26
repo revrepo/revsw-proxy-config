@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+import argparse
+import fnmatch
+import json
+import os
+import subprocess
+import sys
+import errno
+import re
+import jsonschema
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "common"))
+
+from revsw_apache_config import wildcard_to_regex
+from revsw.logger import RevSysLogger
+
+from  revsw_apache_config.varnishadmin import VarnishAdmin
+admin = VarnishAdmin()
+
+_UI_PURGE_VERSION = 1
+
+def json_validator(jsonfile, schemafile):#returns stiring with error code if any
+    json1 = open(jsonfile).read()
+    schema1 = open(schemafile).read()
+    jdata = json.loads(json1)
+    #check version
+        #validate json against schema
+    try:
+        jsonschema.validate(json.loads(json1),json.loads(schema1))
+        urls1 = jdata["purges"]
+        if jdata["version"] != _UI_PURGE_VERSION:
+            return "Failure:_Version error"
+        for url in urls1:
+            expression = urls1[0]["url"]["expression"]
+            domain = urls1[0]["url"]["domain"]
+            wildcard = urls1[0]["url"]["is_wildcard"]
+            if wildcard:
+                expression = fnmatch.translate(expression)#converts shell wildcards to regex
+                domain = fnmatch.translate(domain)#converts shell wildcards to regex
+        return "Pass"
+    except jsonschema.ValidationError as e:
+        return "Failure:_%r" %e.message
+    except jsonschema.SchemaError as e:
+        return "Failure:_%r" %e
+
+def fatal(msg):
+    log.LOGE(msg)
+    sys.exit(1)
+        
+status = json_validator("/opt/revsw-config/policy/ui-purge.json","/opt/revsw-config/varnish/ui-purge.vars.schema")#test file here
+if status != "Pass":
+    print "json validation failed [%s]" % status
+
+with open('/opt/revsw-config/policy/ui-purge.json') as json_file:
+    Json = json.load(json_file)
+
+urls = Json["purges"]
+
+for rule in urls:
+    wildcard = rule["url"]["is_wildcard"]
+    domain = rule["url"]["domain"]
+    expression = rule["url"]["expression"]
+    if wildcard:
+        print "This rule is wildcard converted to regex"
+        regex = wildcard_to_regex(expression)
+    else:
+        print "This rule received regex"
+        regex = expression
+    
+    command = "obj.http.X-Rev-Host == %s && obj.http.X-Rev-Url ~ %s" % (domain, regex)
+    admin.ban(command)

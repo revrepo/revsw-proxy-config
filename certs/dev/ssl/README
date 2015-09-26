@@ -1,0 +1,7 @@
+A 1-to-1 copy of the certs from the parent dir, renamed thus:
+
+gd_bundle-g2.crt -> ca-bundle.crt
+revsw.net.crt    -> server.crt
+revsw.net.key    -> server.key
+
+They are used by the Apache config utilities.

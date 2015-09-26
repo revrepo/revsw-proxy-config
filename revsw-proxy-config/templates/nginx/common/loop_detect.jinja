@@ -1,0 +1,16 @@
+{% macro loop_detect(this) %}
+{%      set header_name = "X-Rev-Nodes" %}
+{%      set header_name_var = "http_x_rev_nodes" %}
+{%      set node_name = HOSTNAME_SHORT %}
+    # If we've already visited this server during this request, in the same role (BP or CO),
+    # return an error page and status 508 (loop detected).
+    if (${{ header_name_var }} ~ {{node_name}}) {
+        return 508 "A redirection loop was detected on '{{node_name}}'. Please review the server configuration.";
+    }
+    # Add this host to the request list of visited nodes
+    proxy_set_header {{header_name}} "${{"{"}}{{ header_name_var }}{{"}"}} {{node_name}}";
+{%      if this.DEBUG_MODE %}
+    # Add this host to the response list of visited nodes
+    add_header {{header_name}} "${{"{"}}{{ header_name_var }}{{"}"}} {{node_name}}";
+{%      endif %}
+{% endmacro %}{# loop_detect #}

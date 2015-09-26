@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://jsonschema.net#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "id": "http://jsonschema.net/version#",
+      "type": "integer",
+      "default": 1,
+      "additionalProperties": false
+    },
+    "purges": {
+      "id": "http://jsonschema.net/purges#",
+      "type": "array",
+      "additionalProperties": false,
+      "items": {
+        "id": "http://jsonschema.net/purges/0#",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "id": "http://jsonschema.net/purges/0/url#",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "is_wildcard": {
+                "id": "http://jsonschema.net/purges/0/url/is_wildcard#",
+                "type": "boolean",
+                "default": true,
+                "additionalProperties": false
+              },
+              "domain": {
+                "id": "http://jsonschema.net/purges/0/url/domain#",
+                "type": "string",
+                "default": "rf-eng.revsw.net",
+                "additionalProperties": false
+              },
+              "expression": {
+                "id": "http://jsonschema.net/purges/0/url/expression#",
+                "type": "string",
+                "default": "/assets/themes/default/images/homepage/*.png",
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "is_wildcard",
+              "domain",
+              "expression"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "required": [
+        "0"
+      ]
+    }
+  },
+  "required": [
+    "version",
+    "purges"
+  ]
+}

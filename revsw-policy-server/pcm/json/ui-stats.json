@@ -1,0 +1,30 @@
+{
+    "version": "1.0.0",
+    "host_name": "bp-sidde-dyn-sjc.revsw.net",
+    "domains": [
+        {
+            "domain_name": "landoceanrestaurants.revsw.net",
+            "rev_stats": {
+                "time_stamp": 1406391083,
+                "page_count": 0,
+                "bytes_count": 0,
+                "attack_count": 0,
+                "status": "success"
+            }
+        },
+        {
+            "domain_name": "switchfly.revsw.net",
+            "rev_stats": {
+                "time_stamp": 1406391083,
+                "page_count": 0,
+                "bytes_count": 0,
+                "attack_count": 0,
+                "status": "success"
+            }
+        },
+        {
+            "": ""
+        }
+    ]
+}
+
