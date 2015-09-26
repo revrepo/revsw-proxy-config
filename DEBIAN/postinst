@@ -2,6 +2,7 @@
 
 echo "postinst procedures: start"
 
+ldconfig
 /etc/init.d/revsw-pcm-config start
 /etc/init.d/revsw-pcm-purge start
 

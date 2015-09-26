@@ -4,8 +4,9 @@
 VERSION='1.0.0'
 TODAYS_PACKAGE='revsw-config-'$VERSION
 TMP=/tmp/$(date +%F)
-DST='opt/revsw-config3'
+DST='opt/revsw-config'
 ETC='etc'
+USRLIB='usr/lib'
 
 # make tmp dirs for packaging:
 rm -rf $TMP
@@ -16,6 +17,7 @@ mkdir -p $TMP/$DST/apache
 mkdir -p $TMP/$DST/varnish/sites
 mkdir -p $TMP/$DST/templates
 mkdir -p $TMP/$ETC/
+mkdir -p $TMP/$USRLIB/
 # .
 
 # build policy and purge server
@@ -34,6 +36,7 @@ cp revsw-proxy-config/__init__.py $TMP/$DST/bin
 cp -r revsw-policy-server/pcm/install/init.d $TMP/etc/
 cp revsw-policy-server/pcm/install/revsw-pcm-config $TMP/$DST/bin
 cp revsw-policy-server/pcm/install/revsw-pcm-purge $TMP/$DST/bin
+cp revsw-policy-server/lib/librev_infra.so $TMP/$USRLIB/
 
 cp -r DEBIAN $TMP
 # .
