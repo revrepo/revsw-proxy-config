@@ -1,3 +1,9 @@
+revsw-config-common (1.0-1) unstable; urgency=medium
+
+  * Dirty release
+
+ -- Victor Brunko <wildneuro@gmail.com>  Sat, 26 Sep 2015 23:00:20 +0000
+
 revsw-config-common (1.0-0) unstable; urgency=medium
 
   * Initial release.

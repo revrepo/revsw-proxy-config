@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Yet fixed version
-VERSION='1.0.0'
+VERSION='1.0.1'
 TODAYS_PACKAGE='revsw-config-'$VERSION
 TMP=/tmp/$(date +%F)
 DST='opt/revsw-config'
@@ -29,9 +29,7 @@ cd ../
 # copy packaging files to the structured tree:
 cp certs/conf-tools/*.pem $TMP/$DST
 
-cp revsw-proxy-config/pc-apache-config.py $TMP/$DST/bin
-cp revsw-proxy-config/conf_files_formatter.sh $TMP/$DST/bin
-cp revsw-proxy-config/__init__.py $TMP/$DST/bin
+cp -r revsw-proxy-config/* $TMP/$DST/bin
 
 cp -r revsw-policy-server/pcm/install/init.d $TMP/etc/
 cp revsw-policy-server/pcm/install/revsw-pcm-config $TMP/$DST/bin
