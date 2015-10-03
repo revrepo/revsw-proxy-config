@@ -510,10 +510,14 @@ def _get_server_role():
         child = subprocess.Popen("dpkg -l", shell=True, stdout=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
         for line in stdout.split("\n"):
-            if line.find("revsw-browser-proxy") >= 0:
-                return "bp"
-            elif line.find("revsw-content-optimizer") >= 0:
+            # if line.find("revsw-browser-proxy") >= 0:
+            #     return "bp"
+            # elif line.find("revsw-content-optimizer") >= 0:
+            #     return "co"
+            if line.find("revsw-content-optimizer") >= 0:
                 return "co"
+            elif line.find("revsw-varnish4") >= 0:
+                return "bp"
     except OSError as e:
         log.LOGE("Execution of 'dpkg -l' failed:", e)
         raise

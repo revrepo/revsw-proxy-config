@@ -13,28 +13,32 @@ rm -rf $TMP
 mkdir -p $TMP/$DST/bin
 mkdir -p $TMP/$DST/policy
 mkdir -p $TMP/$DST/log
-mkdir -p $TMP/$DST/apache
+mkdir -p $TMP/$DST/apache/generic-site
 mkdir -p $TMP/$DST/varnish/sites
-mkdir -p $TMP/$DST/templates
+mkdir -p $TMP/$DST/templates/all/bp
 mkdir -p $TMP/$ETC/
 mkdir -p $TMP/$USRLIB/
 # .
 
 # build policy and purge server
-cd revsw-policy-server/
-make
-cd ../
+
+# cd revsw-policy-server/
+# make
+# cd ../
+
 # .
 
 # copy packaging files to the structured tree:
 cp certs/conf-tools/*.pem $TMP/$DST
-
 cp -r revsw-proxy-config/* $TMP/$DST/bin
+cp -r generic-site $TMP/$DST/apache
+cp revsw-proxy-config/templates/all/bp/* $TMP/$DST/varnish/
+cp -r revsw-proxy-config/templates/all/bp/* $TMP/$DST/templates/all/bp
 
-cp -r revsw-policy-server/pcm/install/init.d $TMP/etc/
-cp revsw-policy-server/pcm/install/revsw-pcm-config $TMP/$DST/bin
-cp revsw-policy-server/pcm/install/revsw-pcm-purge $TMP/$DST/bin
-cp revsw-policy-server/lib/librev_infra.so $TMP/$USRLIB/
+# cp -r revsw-policy-server/pcm/install/init.d $TMP/etc/
+# cp revsw-policy-server/pcm/install/revsw-pcm-config $TMP/$DST/bin
+# cp revsw-policy-server/pcm/install/revsw-pcm-purge $TMP/$DST/bin
+# cp revsw-policy-server/lib/librev_infra.so $TMP/$USRLIB/
 
 cp -r DEBIAN $TMP
 # .
