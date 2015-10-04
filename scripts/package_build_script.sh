@@ -28,6 +28,10 @@ if [ ! -d $PACKAGEDIR ]; then
         fi
 fi
 
+# building:
+make
+# .
+
 WORKDIR="package_build_dir"
 
 sudo rm -rf $WORKDIR
@@ -71,13 +75,13 @@ mkdir -p $foldername/$DST/apache/generic-site
 mkdir -p $foldername/$DST/varnish/sites
 mkdir -p $foldername/$DST/templates/all/bp
 mkdir -p $foldername/etc
-mkdir -p $foldername/usr/lib/
 
 # copy packaging files to the structured tree:
 
 # conf
 cp $WORKSPACE/certs/conf-tools/*.pem $foldername/$DST
-cp -r $WORKSPACE/revsw-proxy-config/* $foldername/$DST/bin
+cp -r $WORKSPACE/revsw-proxy-config/*.py $foldername/$DST/bin
+cp -r $WORKSPACE/revsw-proxy-config/*.sh $foldername/$DST/bin
 cp -r $WORKSPACE/generic-site $foldername/$DST/apache
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/varnish/
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/templates/all/bp
