@@ -81,6 +81,8 @@ mkdir -p $FOLDERNAME/etc
 cp $WORKSPACE/certs/conf-tools/*.pem $FOLDERNAME/$DST
 cp -r $WORKSPACE/revsw-proxy-config/*.py $FOLDERNAME/$DST/bin
 cp -r $WORKSPACE/revsw-proxy-config/*.sh $FOLDERNAME/$DST/bin
+cp -r $WORKSPACE/revsw-proxy-config/revsw_apache_config $FOLDERNAME/$DST/bin
+cp -r $WORKSPACE/revsw-proxy-config/revsw $FOLDERNAME/$DST/bin
 cp -r $WORKSPACE/generic-site $FOLDERNAME/$DST/apache
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/varnish/
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/templates/all/bp
