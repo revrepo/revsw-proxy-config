@@ -2,7 +2,6 @@
 
 echo "postinst procedures: start"
 
-apt-get remove revsw-apache-config-python-common revsw-policy-controller
 /etc/init.d/revsw-pcm-config stop
 /etc/init.d/revsw-pcm-purge stop
 
