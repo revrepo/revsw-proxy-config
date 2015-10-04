@@ -96,4 +96,6 @@ cp -r $WORKSPACE/DEBIAN $foldername/
 
 sudo chown -R root:root $foldername
 
-time dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
+dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
+
+exit 0
