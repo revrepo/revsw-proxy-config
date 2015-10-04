@@ -1,0 +1,46 @@
+{% macro replace_urls(this, proto, has_pagespeed) %}
+{% 	set preserve_https = this.ENABLE_HTTP and this.ENABLE_HTTPS %}
+{% 	if preserve_https %}
+{%  	set https_proto = "https" %}
+{%  	set https_url_prefix = "https://" + this.SERVER_NAME if proto != "https" else "" %}
+{% 	else %}
+{%  	set https_proto = proto %}
+{%  	set https_url_prefix = "" %}
+{% 	endif %}
+
+{% 	if this.DOMAINS_TO_PROXY_HTTP %}
+    # Third-party HTTP-only static servers go through Varnish directly
+{%  	for host in this.DOMAINS_TO_PROXY_HTTP %}
+{% 			if has_pagespeed %}
+    ModPagespeedMapProxyDomain {{proto}}://{{this.SERVER_NAME}}/rev-ps-http-{{host}} http://{{host}}
+{%  		endif %}
+    # Make sure absolute URLs pointing to the server go through us instead
+    Substitute "s|([\"'])(http:)?//{{host}}|$1/rev-third-party-http/{{host}}|q"
+{%  	endfor %}
+{% 	endif %}
+
+{% 	if this.DOMAINS_TO_PROXY_HTTPS %}
+    # Third-party HTTPS-only static servers go through Apache, then Varnish
+{%  	for host in this.DOMAINS_TO_PROXY_HTTPS %}
+{% 			if has_pagespeed %}
+    ModPagespeedMapProxyDomain {{https_proto}}://{{this.SERVER_NAME}}/rev-ps-https-{{host}} https://{{host}}
+{%  		endif %}
+    # Make sure absolute URLs pointing to the server go through us instead
+    Substitute "s|([\"'])(https:)?//{{host}}|$1{{https_url_prefix}}/rev-third-party-https/{{host}}|q"
+{%  	endfor %}
+{% 	endif %}
+
+{% 	if this.ENABLE_JS_SUBSTITUTE %}
+    # JS substitute must be the first script we load
+    Substitute "s|<head([^>]*)>|<head$1><script>var revJSSubst={nshards:{{this.DOMAIN_SHARDS_COUNT}},domains:{
+{%- 	set first=True -%}
+{%- 	for host in this.DOMAINS_TO_OPTIMIZE_HTTP %}{{ "" if first else "," }}'{{"http://" if not host in this.DOMAINS_TO_OPTIMIZE_HTTPS else ""}}{{host}}':1{% set first=False %}{% endfor -%}
+{%- 	set first=False if this.DOMAINS_TO_OPTIMIZE_HTTP else True -%}
+{%- 	for host in this.DOMAINS_TO_OPTIMIZE_HTTPS %}{% if not host in this.DOMAINS_TO_OPTIMIZE_HTTP %}{{ "" if first else "," }}'https://{{host}}':1{% set first=False %}{% endif %}{% endfor -%}
+    },keep_https:{{ "1" if preserve_https else "0" }}};</script><script src='/rev-js/rev-js-substitute.min.js'></script>|q"
+{% 		if has_pagespeed %}
+    ModPagespeedDisallow "{{proto}}://{{this.SERVER_NAME}}/rev-js/*"
+{%  	endif %}
+{% 	endif %}{# ENABLE_JS_SUBSTITUTE #}
+
+{% endmacro %}

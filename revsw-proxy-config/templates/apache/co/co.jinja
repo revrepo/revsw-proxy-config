@@ -1,0 +1,175 @@
+{% import "common/ssl.jinja" as ssl_mod %}
+{% import "common/third_party.jinja" as third_party_mod %}
+{% import "common/loop_detect.jinja" as loop_detect_mod %}
+
+{% macro _co_profile_factory(co_profiles_mod, co_profiles, index) -%}
+{% 		if index == 0 -%}
+{{ 			co_profiles_mod.profile0(co_profiles) }}
+{%  	elif index == 1 -%}
+{{     		co_profiles_mod.profile1(co_profiles) }}
+{%  	elif index == 2 -%}
+{{     		co_profiles_mod.profile2(co_profiles) }}
+{%  	elif index == 3 -%}
+{{     		co_profiles_mod.profile3(co_profiles) }}
+{%  	elif index == 4 -%}
+{{     		co_profiles_mod.profile4(co_profiles) }}
+{%  	else %}
+	# PROFILE OUT OF RANGE - using profile #0
+{{ 			co_profiles_mod.profile0(co_profiles) }}
+{%  	endif %}
+{%- endmacro %}
+
+{% macro setup(this, co_profiles_mod, co_profiles) -%}
+{% 		set is_https = False %}
+{% 		set enable_pagespeed = this.ENABLE_OPTIMIZATION and co_profiles.REV_OPTIMIZATION_LEVEL|default("none") != "none" %}
+{% 		for enable in (this.ENABLE_HTTP, this.ENABLE_HTTPS) %}
+{% 			if enable %}
+{% 				for p in range(this.REV_PROFILES_COUNT) %}
+# Profile #{{p}}
+{% 					set profile_port = (this.REV_PROFILES_BASE_PORT_HTTPS if is_https else this.REV_PROFILES_BASE_PORT_HTTP) + p %}
+{% 					set proto = "https" if is_https else "http" %}
+{% 					if (this.LISTEN_REV_PROFILES_BASE_PORT_HTTPS if is_https else this.LISTEN_REV_PROFILES_BASE_PORT_HTTP) %}
+Listen {{profile_port}}
+{% 					endif %}
+<VirtualHost *:{{profile_port}}>
+    ServerName {{this.SERVER_NAME}}
+{% 					for shard in range(this.DOMAIN_SHARDS_COUNT) %}
+    # Sharding alias
+    ServerAlias s{{shard}}-{{this.SERVER_NAME}}
+{% 					endfor %}
+
+{% 					if this.DEBUG_MODE %}
+    LogLevel trace6
+{% 					endif %}
+
+{{ 					loop_detect_mod.loop_detect(this) }}
+
+    # Optional customizations before generic options
+{{ 					caller(True, is_https) }}
+    # End optional customizations before generic options
+
+{% 					if is_https %}
+{{  					ssl_mod.setup_bp_co(this.ssl) }}
+{% 					elif this.ORIGIN_SERVERS_HTTPS %}
+    # Must enable SSL proxy support for HTTPS origin servers
+{{  					ssl_mod.setup_proxy_only(this.ssl) }}
+{% 					endif %}
+
+    # For RUM/Boomerang data and URL substitutions
+{% 					if enable_pagespeed %}
+    AddOutputFilterByType SUBSTITUTE text/html
+{% 					else %}
+    FilterDeclare decompress CONTENT_SET
+    FilterProvider decompress INFLATE "%{CONTENT_TYPE} =~ m|^text/html| && %{REQUEST_METHOD} != 'HEAD'"
+
+    FilterDeclare compress CONTENT_SET
+    FilterProvider compress DEFLATE "%{CONTENT_TYPE} =~ m|^text/html| && %{REQUEST_METHOD} != 'HEAD'"
+
+    FilterDeclare replace CONTENT_SET
+    FilterProvider replace SUBSTITUTE "%{CONTENT_TYPE} =~ m|^text/html| && %{REQUEST_METHOD} != 'HEAD'"
+
+    FilterChain =decompress replace compress
+{% 					endif %}
+
+{% 					set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+    # Wait at most for this many seconds for reply from Origin, then return error message.
+    ProxyTimeout {{this.PROXY_TIMEOUT}}
+
+{%                  set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
+{% 					if origins|length == 1 %}
+    ProxyPass / {{origins[0]}}/ retry=0 {{proxy_params}}
+    ProxyPassReverse / {{origins[0]}}/
+{% 					else %}{# origins|length == 1 #}
+    <Proxy balancer://co_ows>
+{% 						set route_no = 1 %}
+{% 						for ows in origins %}
+        BalancerMember {{ows}} route={{route_no}} {{proxy_params}}
+{% 							set route_no = route_no + 1 %}
+{% 						endfor %}
+        ProxySet stickysession=ROUTEID
+    </Proxy>
+    ProxyPass / balancer://co_ows/
+    ProxyPassReverse / balancer://co_ows/
+{% 					endif %}
+    # Don't add X-Forwarded-For here, already added by BP
+    ProxyAddHeaders Off
+    # Make sure the origin sees the right Host header
+    ProxyPreserveHost On
+    ProxySSLHostname {{this.ORIGIN_SERVER_NAME}}
+    RequestHeader set Host {{this.ORIGIN_SERVER_NAME}}
+
+{% 					if enable_pagespeed %}
+    # Resources from these domains are candidates for optimization
+    ModPagespeedDomain {{this.SERVER_NAME}}
+    ModPagespeedMapOriginDomain {{proto}}://127.0.0.1:{{profile_port}} {{proto}}://{{this.SERVER_NAME}}
+{% 						for ows in origins %}
+{% 							set host = ows|replace("://","-")|replace(":","-")|replace("/","-") %}
+    ModPagespeedMapProxyDomain {{proto}}://{{this.SERVER_NAME}}/rev-ps-{{host}} {{ows}}
+{% 						endfor %}
+
+    # Faster locking means faster response time, see:
+    # http://www.webperformance.com/load-testing/blog/2012/12/google-pagespeed-performance-with-memory-locking/
+    ModPagespeedSharedMemoryLocks On
+
+    # Allow cacheable, but modified HTML to be cached by Varnish
+    # See: https://developers.google.com/speed/pagespeed/module/downstream-caching
+    ModPagespeedDownstreamCachePurgeLocationPrefix {{proto}}://{{this.SERVER_NAME}}
+    ModPagespeedDownstreamCachePurgeMethod PURGE
+    ModPagespeedDownstreamCacheRewrittenPercentageThreshold 95
+
+    # Disable all filters and start from scratch
+    ModPagespeedRewriteLevel PassThrough
+
+{% 						if this.DOMAIN_SHARDS_COUNT %}
+    # Apply domain mapping rules to all resources, even if not optimized by PS, to shard everything
+    ModPagespeedEnableFilters rewrite_domains
+    ModPagespeedShardDomain {{this.SERVER_NAME}} {% for shard in range(this.DOMAIN_SHARDS_COUNT) %}s{{shard}}-{{this.SERVER_NAME}},{% endfor %}
+{% 						endif %}
+
+{% 						if this.ENABLE_OPTIMIZATION %}
+    # Allow optimization of JS-referenced resources
+    ModPagespeedInPlaceResourceOptimization on
+
+    # Turn on browser-specific optimizations
+    ModPagespeedEnableFilters in_place_optimize_for_browser
+
+    # Customer profile settings
+{{ 							_co_profile_factory(co_profiles_mod, co_profiles, p) }}
+{% 						endif %}
+{% 					else %}{# enable_pagespeed #}
+    # Disable pagespeed
+    ModPagespeed Off
+{% 					endif %}{# enable_pagespeed #}
+
+    # Optional customizations after generic options
+{{ 					caller(False, is_https) }}
+{{ 					this.CUSTOM_APACHE_CODE_AFTER }}
+    # End optional customizations after generic options
+
+{%                  if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
+    # Make sure absolute URLs pointing to the origin go through us instead
+{%                      if (this.ENABLE_HTTP and this.ENABLE_HTTPS) and not is_https %}{# both supported; must prevent conversion from secure to unsecure #}
+    # HTTPS links are turned into absolute ones to our own server
+    Substitute "s|([\"'])https://{{this.ORIGIN_SERVER_NAME}}|$1https://{{this.SERVER_NAME}}|q"
+    # HTTP links are turned into relative ones
+    Substitute "s|([\"'])(http:)?//{{this.ORIGIN_SERVER_NAME}}|$1|q"
+{%                      else %}{# only HTTP or only HTTPS #}
+    Substitute "s|([\"'])(https?:)?//{{this.ORIGIN_SERVER_NAME}}|$1|q"
+{%                      endif %}{# HTTP and/or HTTPS #}
+{%                  endif %}{# this.SERVER_NAME != this.ORIGIN_SERVER_NAME #}
+
+{{ 					third_party_mod.replace_urls(this, proto, this.ENABLE_OPTIMIZATION) }}
+
+{%      			if this.REV_RUM_BEACON_URL %}
+{%          			set rum_beacon_url = this.REV_RUM_BEACON_URL if this.REV_RUM_BEACON_URL|truncate(4,True,"") == "http" else proto + "://" + this.REV_RUM_BEACON_URL %}
+    # RUM beacon
+    Substitute "s|</head>|<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: '{{rum_beacon_url}}'}); BOOMR.addVar('user_ip', '%{HTTP_X_FORWARDED_FOR}');</script></head>|q"
+
+    ModPagespeedDisallow "{{proto}}://{{this.SERVER_NAME}}/rev-diablo/*"
+{%      			endif %}
+</VirtualHost>
+{% 				endfor %}
+{% 			endif %}
+{% 			set is_https = True %}
+{% 		endfor %}
+{%- endmacro %}

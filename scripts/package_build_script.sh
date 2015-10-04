@@ -74,15 +74,22 @@ mkdir -p $foldername/etc
 mkdir -p $foldername/usr/lib/
 
 # copy packaging files to the structured tree:
+
+# conf
 cp $WORKSPACE/certs/conf-tools/*.pem $foldername/$DST
 cp -r $WORKSPACE/revsw-proxy-config/* $foldername/$DST/bin
 cp -r $WORKSPACE/generic-site $foldername/$DST/apache
 cp $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/varnish/
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/templates/all/bp
 
+# pol
+cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $foldername/etc/
+cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $foldername/$DST/bin
+cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $foldername/$DST/bin
+cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $foldername/$DST/bin
+
 cp -r $WORKSPACE/DEBIAN $foldername/
 
 sudo chown -R root:root $foldername
 
 dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
-

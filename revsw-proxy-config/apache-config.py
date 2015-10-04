@@ -7,7 +7,7 @@ import sys
 import itertools
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "../../common/python")))
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
 
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string

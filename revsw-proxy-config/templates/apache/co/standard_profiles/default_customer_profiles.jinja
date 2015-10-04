@@ -1,0 +1,211 @@
+{% macro _base_filters(this) -%}
+    # Begin base filters
+    ModPagespeedEnableFilters add_head
+    ModPagespeedEnableFilters inline_import_to_link
+    ModPagespeedEnableFilters insert_ga
+    ModPagespeedEnableFilters remove_comments
+    ModPagespeedEnableFilters collapse_whitespace
+    ModPagespeedEnableFilters extend_cache
+    ModPagespeedEnableFilters extend_cache_pdfs
+    ModPagespeedEnableFilters remove_quotes
+    # We already use Boomerang, don't need this
+    #ModPagespeedEnableFilters add_instrumentation
+    ModPagespeedEnableFilters convert_meta_tags
+    ModPagespeedEnableFilters insert_dns_prefetch
+
+    # Allow AJAX loaded resources to be optimized
+    # See: https://developers.google.com/speed/pagespeed/module/system#ipro
+    ModPagespeedInPlaceResourceOptimization on
+
+    # Filters to lower bandwidth usage
+    ModPagespeedEnableFilters combine_heads
+    ModPagespeedEnableFilters elide_attributes
+    ModPagespeedEnableFilters trim_urls
+    # End base filters
+{%- endmacro %}
+
+{% macro profile_selection(this) -%}
+{% if this.REV_OPTIMIZATION_LEVEL == "adaptive" -%}
+    # TODO: implement
+{% endif %}
+    # Always use profile 0 by default
+    RevProfilesAddSelectionRule 0 1==1
+{%- endmacro %}
+
+{% macro _optimize_up_to_level(level) -%}
+{% if level == "low" %}
+{% set lvl = 1 %}
+{% elif level == "medium" %}
+{% set lvl = 2 %}
+{% elif level == "high" %}
+{% set lvl = 3 %}
+{% else %}
+{% set lvl = 0 %}
+{% endif %}
+{% if lvl >= 1 %}
+{{ caller("low") }}
+{% endif %}
+{% if lvl >= 2 %}
+{{ caller("medium") }}
+{% endif %}
+{% if lvl == 3 %}
+{{ caller("high") }}
+{% endif %}
+{%- endmacro %}
+
+{% macro _custom_js_optimizations(js_level) -%}
+{% call(level) _optimize_up_to_level(js_level) %}
+{% if level == "low" -%}
+    # Begin custom JS optimizations - low
+# See this bug: https://code.google.com/p/modpagespeed/issues/detail?id=821
+#<ModPagespeedIf spdy>
+#    ModPagespeedEnableFilters outline_javascript
+#</ModPagespeedIf>
+    # End custom JS optimizations - low
+{% elif level == "medium" %}
+    # Begin custom JS optimizations - medium
+    ModPagespeedEnableFilters extend_cache_scripts
+    ModPagespeedEnableFilters rewrite_javascript
+    #ModPagespeedUseExperimentalJsMinifier On
+<ModPagespeedIf !spdy>
+    ModPagespeedEnableFilters inline_javascript
+</ModPagespeedIf>
+    # End custom JS optimizations - medium
+{% elif level == "high" %}
+    # Begin custom JS optimizations - high
+    ModPagespeedEnableFilters defer_javascript
+    ModPagespeedEnableFilters combine_javascript
+    # Don't let PageSpeed externalize JS - all JS files must pass through the BP
+    #ModPagespeedEnableFilters canonicalize_javascript_libraries
+    ModPagespeedEnableFilters make_google_analytics_async
+    # End custom JS optimizations - high
+{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{% macro _custom_css_optimizations(css_level) -%}
+{% call(level) _optimize_up_to_level(css_level) %}
+{% if level == "low" -%}
+    # Begin custom CSS optimizations - low
+    ModPagespeedEnableFilters move_css_above_scripts
+    ModPagespeedEnableFilters move_css_to_head
+# See this bug: https://code.google.com/p/modpagespeed/issues/detail?id=821
+#<ModPagespeedIf spdy>
+#    ModPagespeedEnableFilters outline_css
+#</ModPagespeedIf>
+    ModPagespeedEnableFilters rewrite_style_attributes
+    # End custom CSS optimizations - low
+{% elif level == "medium" %}
+    # Begin custom CSS optimizations - medium
+    ModPagespeedEnableFilters extend_cache_css
+    ModPagespeedEnableFilters combine_css
+<ModPagespeedIf !spdy>
+    ModPagespeedEnableFilters inline_css
+</ModPagespeedIf>
+    ModPagespeedEnableFilters flatten_css_imports
+    ModPagespeedEnableFilters rewrite_css
+    ModPagespeedEnableFilters fallback_rewrite_css_urls
+    ModPagespeedEnableFilters rewrite_style_attributes_with_url
+    # End custom CSS optimizations - medium
+{% elif level == "high" %}
+    # Begin custom CSS optimizations - high
+<ModPagespeedIf !spdy>
+    ModPagespeedEnableFilters inline_google_font_css
+</ModPagespeedIf>
+    ModPagespeedEnableFilters prioritize_critical_css
+    # End custom CSS optimizations - high
+{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{% macro _custom_img_optimizations(img_level) -%}
+{% call(level) _optimize_up_to_level(img_level) %}
+{% if level == "low" -%}
+    # Begin custom IMG optimizations - low
+    ModPagespeedEnableFilters insert_image_dimensions
+    ModPagespeedEnableFilters dedup_inlined_images
+    # End custom IMG optimizations - low
+{% elif level == "medium" %}
+    # Begin custom IMG optimizations - medium
+    ModPagespeedEnableFilters sprite_images
+    ModPagespeedEnableFilters extend_cache_images
+    ModPagespeedEnableFilters rewrite_images
+    #ModPagespeedEnableFilters convert_jpeg_to_progressive
+<ModPagespeedIf !spdy>
+    ModPagespeedEnableFilters inline_images
+</ModPagespeedIf>
+    ModPagespeedEnableFilters recompress_images
+    ModPagespeedEnableFilters recompress_jpeg
+    ModPagespeedEnableFilters recompress_png
+    ModPagespeedEnableFilters recompress_webp
+    ModPagespeedEnableFilters convert_gif_to_png
+    ModPagespeedEnableFilters strip_image_color_profile
+    ModPagespeedEnableFilters strip_image_meta_data
+    ModPagespeedEnableFilters resize_images
+    ModPagespeedEnableFilters resize_rendered_image_dimensions
+    ModPagespeedEnableFilters lazyload_images
+    ModPagespeedCriticalImagesBeaconEnabled Off
+
+    ModPagespeedImageRecompressionQuality 70
+    # End custom IMG optimizations - medium
+{% elif level == "high" %}
+    # Begin custom IMG optimizations - high
+    ModPagespeedEnableFilters convert_png_to_jpeg
+    # webp conversion is costly and not all browsers support webp
+    #ModPagespeedEnableFilters convert_jpeg_to_webp
+    #ModPagespeedEnableFilters inline_preview_images
+    ModPagespeedEnableFilters resize_mobile_images
+    # End custom IMG optimizations - high
+{% endif %}
+{% endcall %}
+{%- endmacro %}
+
+{% macro _custom_optimizations(this) -%}
+    # Optimization level: Custom
+    {{_custom_js_optimizations(this.REV_CUSTOM_JS_LEVEL)}}
+    {{_custom_css_optimizations(this.REV_CUSTOM_CSS_LEVEL)}}
+    {{_custom_img_optimizations(this.REV_CUSTOM_IMG_LEVEL)}}
+    # End optimization level: Custom
+{%- endmacro %}
+
+{% macro _level_optimizations(level) -%}
+    # Optimization level: {{level}}
+    {{_custom_js_optimizations(level)}}
+    {{_custom_css_optimizations(level)}}
+    {{_custom_img_optimizations(level)}}
+    # End optimization level: {{level}}
+{%- endmacro %}
+
+{% macro profile0(this) -%}
+    {{_base_filters()}}
+{% if this.REV_OPTIMIZATION_LEVEL == "min" %}
+    {{_level_optimizations("low")}}
+{% elif this.REV_OPTIMIZATION_LEVEL == "med" %}
+    {{_level_optimizations("medium")}}
+{% elif this.REV_OPTIMIZATION_LEVEL == "max" %}
+    {{_level_optimizations("high")}}
+{% elif this.REV_OPTIMIZATION_LEVEL == "custom" %}
+    {{_custom_optimizations(this)}}
+{% else %}{# including "adaptive", where profile0 means "don't optimize" #}
+    # Optimizations turned off
+{% endif %}
+    # End optimizations
+{%- endmacro %}
+
+{% macro profile1(this) -%}
+    {{_base_filters()}}
+    {{_level_optimizations("low")}}
+    # End optimizations
+{%- endmacro %}
+
+{% macro profile2(this) -%}
+    {{_base_filters()}}
+    {{_level_optimizations("medium")}}
+    # End optimizations
+{%- endmacro %}
+
+{% macro profile3(this) -%}
+    {{_base_filters()}}
+    {{_level_optimizations("high")}}
+    # End optimizations
+{%- endmacro %}

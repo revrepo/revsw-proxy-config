@@ -10,6 +10,12 @@ SUB_DIRS := infra pcm # add dirs here
 all:
 	set -e; for d in $(SUB_DIRS); do $(MAKE) -C $$d; done
 
+install:
+	cp -r pcm/install/init.d /etc/
+	cp pcm/install/revsw-pcm-config /opt/revsw-config/bin
+	cp pcm/install/revsw-pcm-purge /opt/revsw-config/bin
+	cp lib/librev_infra.so /opt/revsw-config/bin
+
 ECH := @echo
 CMD := @
 

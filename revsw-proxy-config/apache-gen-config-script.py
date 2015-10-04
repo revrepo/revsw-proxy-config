@@ -9,7 +9,7 @@ import json
 import shlex
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "../../common/python")))
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
 
 from revsw_apache_config import sorted_non_empty
 
