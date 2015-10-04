@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set +e
+#!/bin/bash -e
 
 #
 # This script builds Rev Proxy Configuration Management Debian package
@@ -45,10 +43,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-foldername=$PACKAGENAME'_'$VERSION
-
-mkdir -p $foldername/DEBIAN
-touch $foldername/DEBIAN/control
+FOLDERNAME=$PACKAGENAME'_'$VERSION
+mkdir -p "$FOLDERNAME/DEBIAN"
+touch $FOLDERNAME/DEBIAN/control
 
 PackageName=$PACKAGENAME
 PackageVersion=$VERSION
@@ -66,38 +63,36 @@ Depends: python-jinja2 (>= 2.7), python-jsonschema (>= 2.3), python-dnspython, l
 Description: Rev Proxy Configuration Service
 Preinst: preinst
 Postinst: postinst
-Homepage: www.revsw.com" >> $foldername/DEBIAN/control
+Homepage: www.revsw.com" >> $FOLDERNAME/DEBIAN/control
 
 DST='opt/revsw-config'
 
-mkdir -p $foldername/$DST/bin
-mkdir -p $foldername/$DST/policy
-mkdir -p $foldername/$DST/log
-mkdir -p $foldername/$DST/apache/generic-site
-mkdir -p $foldername/$DST/varnish/sites
-mkdir -p $foldername/$DST/templates/all/bp
-mkdir -p $foldername/etc
+mkdir -p $FOLDERNAME/$DST/bin
+mkdir -p $FOLDERNAME/$DST/policy
+mkdir -p $FOLDERNAME/$DST/log
+mkdir -p $FOLDERNAME/$DST/apache/generic-site
+mkdir -p $FOLDERNAME/$DST/varnish/sites
+mkdir -p $FOLDERNAME/$DST/templates/all/bp
+mkdir -p $FOLDERNAME/etc
 
 # copy packaging files to the structured tree:
 
 # conf
-cp $WORKSPACE/certs/conf-tools/*.pem $foldername/$DST
-cp -r $WORKSPACE/revsw-proxy-config/*.py $foldername/$DST/bin
-cp -r $WORKSPACE/revsw-proxy-config/*.sh $foldername/$DST/bin
-cp -r $WORKSPACE/generic-site $foldername/$DST/apache
-cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/varnish/
-cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/templates/all/bp
+cp $WORKSPACE/certs/conf-tools/*.pem $FOLDERNAME/$DST
+cp -r $WORKSPACE/revsw-proxy-config/*.py $FOLDERNAME/$DST/bin
+cp -r $WORKSPACE/revsw-proxy-config/*.sh $FOLDERNAME/$DST/bin
+cp -r $WORKSPACE/generic-site $FOLDERNAME/$DST/apache
+cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/varnish/
+cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/templates/all/bp
 
 # pol
-cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $foldername/etc/
-cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $foldername/$DST/bin
-cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $foldername/$DST/bin
-cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $foldername/$DST/bin
+cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $FOLDERNAME/etc/
+cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $FOLDERNAME/$DST/bin
+cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/bin
+cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/bin
 
-cp -r $WORKSPACE/DEBIAN $foldername/
+cp -r $WORKSPACE/DEBIAN $FOLDERNAME/
 
-sudo chown -R root:root $foldername
+sudo chown -R root:root $FOLDERNAME
 
-dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
-
-exit 0
+dpkg -b $FOLDERNAME  $WORKSPACE/$PACKAGEDIR/$FOLDERNAME.deb
