@@ -68,6 +68,7 @@ Homepage: www.revsw.com" >> $FOLDERNAME/DEBIAN/control
 DST='opt/revsw-config'
 
 mkdir -p $FOLDERNAME/$DST/bin
+mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/log
 mkdir -p $FOLDERNAME/$DST/apache/generic-site
@@ -91,7 +92,7 @@ cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/template
 cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $FOLDERNAME/etc/
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/bin
-cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/bin
+cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
 
 cp -r $WORKSPACE/DEBIAN $FOLDERNAME/ || 1
 

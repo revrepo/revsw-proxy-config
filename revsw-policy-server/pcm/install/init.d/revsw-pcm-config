@@ -16,6 +16,8 @@ DAEMON_ARGS="10000000"
 
 DAEMON_USER=root
 
+LD_LIBRARY_PATH=/opt/revsw-config/lib 
+
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/$DAEMON_NAME.pid
 
