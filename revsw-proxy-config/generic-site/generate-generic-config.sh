@@ -37,3 +37,5 @@ apache-gen-config-script.py --no-flush --no-send --no-bp --copy-to $OUT_DIR/co.j
 
 chmod +x configure.sh
 ./configure.sh
+
+exit 0
