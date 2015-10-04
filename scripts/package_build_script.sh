@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set +e
+
 #
 # This script builds Rev Proxy Configuration Management Debian package
 #
