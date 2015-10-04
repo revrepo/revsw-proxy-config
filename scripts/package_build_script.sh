@@ -79,7 +79,7 @@ mkdir -p $foldername/usr/lib/
 cp $WORKSPACE/certs/conf-tools/*.pem $foldername/$DST
 cp -r $WORKSPACE/revsw-proxy-config/* $foldername/$DST/bin
 cp -r $WORKSPACE/generic-site $foldername/$DST/apache
-cp $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/varnish/
+cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/varnish/
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $foldername/$DST/templates/all/bp
 
 # pol
@@ -92,4 +92,4 @@ cp -r $WORKSPACE/DEBIAN $foldername/
 
 sudo chown -R root:root $foldername
 
-dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
+time dpkg -b $foldername  $WORKSPACE/$PACKAGEDIR/$foldername.deb
