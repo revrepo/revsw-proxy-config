@@ -91,10 +91,10 @@ cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $FOLDERNAME/$DST/
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/bin
 
-cp -r $WORKSPACE/DEBIAN $FOLDERNAME/
+cp -r $WORKSPACE/DEBIAN $FOLDERNAME/ || 1
 
-sudo chown -R root:root $FOLDERNAME
+sudo chown -R root:root $FOLDERNAME || 1
 
-dpkg -b $FOLDERNAME $WORKSPACE/$PACKAGEDIR/$FOLDERNAME.deb
+dpkg -b $FOLDERNAME $WORKSPACE/$PACKAGEDIR/$FOLDERNAME.deb || 1
 
 exit 0
