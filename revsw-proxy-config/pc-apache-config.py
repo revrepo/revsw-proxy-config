@@ -514,14 +514,14 @@ def _get_server_role():
             #     return "bp"
             # elif line.find("revsw-content-optimizer") >= 0:
             #     return "co"
-            if line.find("revsw-content-optimizer") >= 0:
-                return "co"
-            elif line.find("revsw-varnish4") >= 0:
+            if line.find("revsw-varnish4") >= 0:
                 return "bp"
+            elif line.find("revsw-nginx-full") >= 0:
+                return "co"
     except OSError as e:
         log.LOGE("Execution of 'dpkg -l' failed:", e)
         raise
-    raise EnvironmentError("Neither 'revsw-browser-proxy' nor 'revsw-content-optimizer' packages are installed; "
+    raise EnvironmentError("Neither 'revsw-varnish4' nor 'revsw-nginx-full' packages are installed; "
                            "can't configure new site")
 
 
