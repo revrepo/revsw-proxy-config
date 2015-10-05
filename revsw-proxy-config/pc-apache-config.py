@@ -514,9 +514,9 @@ def _get_server_role():
             #     return "bp"
             # elif line.find("revsw-content-optimizer") >= 0:
             #     return "co"
-            if line.find("revsw-varnish4") >= 1:
+            if line.find("revsw-libvarnish4api") >= 0:
                 return "bp"
-            elif line.find("revsw-nginx-full") >= 1:
+            elif line.find("revsw-nginx-full") >= 0:
                 return "co"
     except OSError as e:
         log.LOGE("Execution of 'dpkg -l' failed:", e)
