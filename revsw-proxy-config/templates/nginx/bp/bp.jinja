@@ -283,7 +283,7 @@
     {% for url in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-      {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, rel_url)|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+      {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
 
       # TODO: RevProfilesMode full
       }
