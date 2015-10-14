@@ -274,6 +274,7 @@
     .probe = {
     .request =
     "{{ site.ORIGIN_HEALTH_PROBE.HTTP_REQUEST }}"
+    "Connection: close"
     "Host: {{ site.SERVER_NAME }}";
     .expected_response = {{ site.ORIGIN_HEALTH_PROBE.HTTP_STATUS }};
     .interval = {{ site.ORIGIN_HEALTH_PROBE.PROBE_INTERVAL }}s;
