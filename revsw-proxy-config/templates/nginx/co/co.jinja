@@ -93,7 +93,7 @@
 	{% endif %}
 
 	{% if ((this.ENABLE_DECOMPRESSION) or (not enable_pagespeed)) %}
-	  # add compression if the decompression is enabled
+	  # add compression if the enable_decompression flag is enabled
 	  # For RUM/Boomerang data and URL substitutions - the subs filter works on uncompressed data
 	  gzip_proxied any;
 	  gunzip on;
