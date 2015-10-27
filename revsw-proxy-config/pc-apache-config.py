@@ -139,7 +139,7 @@ class ConfigCommon:
             return val
 
         enable_opt = content["enable_optimization"]
-        enable_decompression = content["enable_decompression"]
+        # enable_decompression = content["enable_decompression"]
         profiles_count = 1
 
         if not enable_opt:
