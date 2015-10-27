@@ -369,7 +369,6 @@ def parse_line(line):
         elif arg == "disable-decompression":
             check_unused_and_set_domain(arg, States.DISABLE_DECOMPRESSION)
             domain["enable_decompression"] = False
-            Nl.needs_param = False
         elif arg == "enable-js-substitute":
             check_unused_and_set_domain(arg, States.ENABLE_JS_SUBST)
             domain["enable_js_subst"] = True
