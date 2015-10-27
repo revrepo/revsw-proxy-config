@@ -166,7 +166,7 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
+        #self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
         self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
 
         self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
