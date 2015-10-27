@@ -950,6 +950,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 14 < new_ver:
             co["ORIGIN_REQUEST_HEADERS"] = []
 
+        if ver <= 15 < new_ver:
+            co["ENABLE_DECOMPRESSION"] = False
+
         co["VERSION"] = new_ver
 
     if "co_profiles" in vars_:
