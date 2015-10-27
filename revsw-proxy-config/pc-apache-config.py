@@ -436,6 +436,7 @@ class ConfigCommon:
         self._patch_if_changed_co_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
         self._patch_if_changed_co_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
         self._patch_if_changed_co_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
+        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", misc.get("enable_decompression", True))
 
         http = "http" if self.cmd_opts["ows_http"] else "https"
         https = "https" if self.cmd_opts["ows_https"] else "http"
