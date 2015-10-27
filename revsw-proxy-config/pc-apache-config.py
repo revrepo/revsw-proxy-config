@@ -21,7 +21,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
 
 _UI_CONFIG_VERSION = "1.0.6"
 _BP_CONFIG_VERSION = 23
-_CO_CONFIG_VERSION = 14
+_CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
 
@@ -139,6 +139,7 @@ class ConfigCommon:
             return val
 
         enable_opt = content["enable_optimization"]
+        enable_decompression = content["enable_decompression"]
         profiles_count = 1
 
         if not enable_opt:
@@ -165,6 +166,7 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
+        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
         self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
 
         self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)

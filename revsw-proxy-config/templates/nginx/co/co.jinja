@@ -92,7 +92,8 @@
 	  {{ ssl_mod.setup_proxy_only(this.ssl) }}
 	{% endif %}
 
-	{% if not enable_pagespeed %}
+	{% if ((this.ENABLE_DECOMPRESSION) or (not enable_pagespeed)) %}
+	  # add compression if the enable_decompression flag is enabled
 	  # For RUM/Boomerang data and URL substitutions - the subs filter works on uncompressed data
 	  gzip_proxied any;
 	  gunzip on;
