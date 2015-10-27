@@ -4,8 +4,8 @@
     "properties": {
         "VERSION": {
             "type": "integer",
-            "minimum": 14,
-            "maximum": 14
+            "minimum": 15,
+            "maximum": 15
         },
         "ssl": {% include "common/ssl" %},
         "SERVER_NAME": {
@@ -97,6 +97,9 @@
             "minimum": 0
         },
         "ENABLE_OPTIMIZATION": {
+            "type": "boolean"
+        },
+        "ENABLE_DECOMPRESSION": {
             "type": "boolean"
         },
         "ENABLE_JS_SUBSTITUTE": {
