@@ -154,7 +154,7 @@ _ignore_cookies_default = [
 ]
 
 _BP_CONFIG_VERSION = 23
-_CO_CONFIG_VERSION = 14
+_CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
 
@@ -366,6 +366,10 @@ def parse_line(line):
             check_unused_and_set_domain(arg, States.DISABLE_OPTIMIZATION)
             domain["enable_opt"] = False
             Nl.needs_param = False
+        elif arg == "disable-decompression":
+            check_unused_and_set_domain(arg, States.DISABLE_DECOMPRESSION)
+            domain["enable_decompression"] = False
+            Nl.needs_param = False
         elif arg == "enable-js-substitute":
             check_unused_and_set_domain(arg, States.ENABLE_JS_SUBST)
             domain["enable_js_subst"] = True
@@ -476,6 +480,7 @@ def parse_line(line):
     domain.setdefault("ows_https", True)
     domain.setdefault("shards_count", 0)
     domain.setdefault("enable_opt", True)
+    domain.setdefault("enable_decompression", False)
     domain.setdefault("enable_js_subst", False)
     domain.setdefault("enable_html_subst", False)
     if not domain["ignore_cookies"]:
@@ -815,6 +820,7 @@ def generate_co_domain_json(domain):
         "REV_RUM_BEACON_URL": RUM_BEACON_URL,
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
+        "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "CUSTOM_WEBSERVER_CODE_AFTER": "",
         "ENABLE_JS_SUBSTITUTE": domain["enable_js_subst"],
         "ENABLE_HTML_SUBSTITUTE": domain["enable_html_subst"],
@@ -959,6 +965,7 @@ def generate_co_ui_config_json(domain):
         "enable_rum": True,
         "rum_beacon_url": RUM_BEACON_URL,
         "enable_optimization": domain["enable_opt"],
+        "enable_decompression": domain["enable_decompression"],
         "mode": "custom",
         "img_choice": "medium",
         "js_choice": "medium",
