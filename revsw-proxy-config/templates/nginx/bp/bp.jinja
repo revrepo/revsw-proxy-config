@@ -477,7 +477,8 @@
   {% endif %}
   {{ balancer_mod.define_bp_ows_balancer(this, true) }}
   server {
-  listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
+  # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
+  listen 443 ssl;
 
   {% if this.ENABLE_VARNISH and not this.BYPASS_VARNISH_LOCATIONS %}
     {{ ssl_mod.setup_no_proxy(this.ssl) }}
