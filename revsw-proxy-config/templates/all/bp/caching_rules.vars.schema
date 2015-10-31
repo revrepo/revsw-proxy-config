@@ -46,7 +46,7 @@
 		"value"
 	    ]
 	},
-        "varnish_origin_request_headers": {
+        "origin_request_headers": {
             "type": "object",
             "additionalProperties": false,
             "properties" : {
@@ -65,7 +65,7 @@
                 "header_name"
             ]
         },
-        "varnish_end_user_response_headers": {
+        "end_user_response_headers": {
             "type": "object",
             "additionalProperties": false,
             "properties" : {
