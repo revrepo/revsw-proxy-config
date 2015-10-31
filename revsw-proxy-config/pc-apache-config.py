@@ -21,9 +21,9 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
 
 _UI_CONFIG_VERSION = "1.0.6"
 _BP_CONFIG_VERSION = 23
-_CO_CONFIG_VERSION = 16
+_CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 16
+_VARNISH_CONFIG_VERSION = 15
 
 
 class ConfigCommon:
