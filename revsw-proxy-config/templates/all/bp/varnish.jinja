@@ -127,6 +127,16 @@
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
     {% if only_some_domains or rule.cookies.override or rule.edge_caching.query_string_keep_or_remove_list|default([]) %}
       {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (req.url ~ "{{url_re}}") {
+       {% if rule.varnish_origin_request_headers|default({}) %}
+       {% if rule.varnish_origin_request_headers.operation == "add" %}
+         set req.http.{{rule.varnish_origin_request_headers.header_name}} = "{{rule.varnish_origin_request_headers.
+       {%- elif rule.varnish_origin_request_headers.operation == "replace" %}
+         set req.http.{{rule.varnish_origin_request_headers.header_name}} = "{{rule.varnish_origin_request_headers.
+       {%- elif rule.varnish_origin_request_headers.operation == "remove" %}
+         unset req.http.{{rule.varnish_origin_request_headers.header_name}};
+       {% endif %}
+       {% endif %}
+
       {% if only_some_domains %}
 	set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":{{ _caching_rule_hash_key(rule) }}";
       {% endif %}
@@ -243,6 +253,16 @@
       {% if origin_redirects.override %}
 	revvar.set_bool({{VAR_BERESP}}, {{_var_idx("follow_redirects")}}, {{ "true" if origin_redirects.follow else "false" }});
       {% endif %}
+       {% if rule.varnish_end_user_response_headers|default({}) %}
+       {% if rule.varnish_end_user_response_headers.operation == "add" %}
+         set beresp.http.{{rule.varnish_end_user_response_headers.header_name}} = "{{rule.varnish_end_user_response
+       {%- elif rule.varnish_end_user_response_headers.operation == "replace" %}
+         set beresp.http.{{rule.varnish_end_user_response_headers.header_name}} = "{{rule.varnish_end_user_response
+       {%- elif rule.varnish_end_user_response_headers.operation == "remove" %}
+         unset beresp.http.{{rule.varnish_end_user_response_headers.header_name}};
+       {% endif %}
+       {% endif %}
+ 
       }
       {% set first = global_var_set("FOR_EACH_RULE_FIRST_ITEM", False) %}
     {% endif %}{# override_origin or override_edge or origin_redirects.override#}
