@@ -46,6 +46,44 @@
 		"value"
 	    ]
 	},
+        "varnish_origin_request_headers": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties" : {
+                "operation": {
+                    "type": "string"
+                },
+                "header_name": {
+                    "type": "string"
+                },
+                "header_value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "operation",
+                "header_name"
+            ]
+        },
+        "varnish_end_user_response_headers": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties" : {
+                "operation": {
+                    "type": "string"
+                },
+                "header_name": {
+                    "type": "string"
+                },
+                "header_value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "operation",
+                "header_name"
+            ]
+        },
 	"serve_stale": {
 	    "type": "object",
 	    "additionalProperties": false,
