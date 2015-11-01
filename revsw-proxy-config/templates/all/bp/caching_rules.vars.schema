@@ -46,6 +46,54 @@
 		"value"
 	    ]
 	},
+        "origin_request_headers": {
+            "type": "array",
+            "items": {
+                    "type": "object",
+                    "properties": {
+                        "operation": {
+                                "type": "string",
+                                "pattern": "^(add|replace|remove)$"
+                        },
+                        "header_name": {
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9_-]{0,64})$"
+                        },
+                        "header_value": {
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
+                        }
+                    },
+                    "required": [
+                        "operation",
+                        "header_name"
+                    ]
+            }
+        },
+        "end_user_response_headers": {
+            "type": "array",
+            "items": {
+                    "type": "object",
+                    "properties": {
+                        "operation": {
+                                "type": "string",
+                                "pattern": "^(add|replace|remove)$"
+                        },
+                        "header_name": {
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9 _-]{0,64})$"
+                        },
+                        "header_value": {
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
+                        }
+                    },
+                    "required": [
+                        "operation",
+                        "header_name"
+                    ]
+            }
+        },
 	"serve_stale": {
 	    "type": "object",
 	    "additionalProperties": false,

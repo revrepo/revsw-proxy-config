@@ -126,7 +126,21 @@
 
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
     {% if only_some_domains or rule.cookies.override or rule.edge_caching.query_string_keep_or_remove_list|default([]) %}
-      {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (req.url ~ "{{url_re}}") {
+       {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (req.url ~ "{{url_re}}") {
+      
+       {% if rule.origin_request_headers|default({}) %}
+           {% for item in rule.origin_request_headers %}
+               {% if item.operation == "add" %}
+                 set req.http.{{item.header_name}} = "{{item.header_value}}";
+               {%- elif item.operation == "replace" %}
+                 set req.http.{{item.header_name}} = "{{item.header_value}}";
+               {%- elif item.operation == "remove" %}
+                 unset req.http.{{item.header_name}};
+               {% endif %}
+ 
+           {% endfor %}
+       {% endif %}
+
       {% if only_some_domains %}
 	set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":{{ _caching_rule_hash_key(rule) }}";
       {% endif %}
@@ -243,6 +257,20 @@
       {% if origin_redirects.override %}
 	revvar.set_bool({{VAR_BERESP}}, {{_var_idx("follow_redirects")}}, {{ "true" if origin_redirects.follow else "false" }});
       {% endif %}
+      
+      {% if rule.end_user_response_headers|default({}) %}
+          {% for item in rule.end_user_response_headers %}
+              {% if item.operation == "add" %}
+                set beresp.http.{{item.header_name}} = "{{item.header_value}}";
+              {%- elif item.operation == "replace" %}
+                set beresp.http.{{item.header_name}} = "{{item.header_value}}";
+              {%- elif item.operation == "remove" %}
+                unset beresp.http.{{item.header_name}};
+              {% endif %}
+
+          {% endfor %}
+      {% endif %}
+ 
       }
       {% set first = global_var_set("FOR_EACH_RULE_FIRST_ITEM", False) %}
     {% endif %}{# override_origin or override_edge or origin_redirects.override#}
