@@ -57,11 +57,11 @@
                         },
                         "header_name": {
                                 "type": "string",
-                                "pattern": "^([a-zA-Z0-9_-]{0,64})$"
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
                         },
                         "header_value": {
                                 "type": "string",
-                                "pattern": "^([a-zA-Z0-9_-]{0,64})$"
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
                         }
                     },
                     "required": [
@@ -81,11 +81,11 @@
                         },
                         "header_name": {
                                 "type": "string",
-                                "pattern": "^([a-zA-Z0-9_-]{0,64})$"
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
                         },
                         "header_value": {
                                 "type": "string",
-                                "pattern": "^([a-zA-Z0-9_-]{0,64})$"
+                                "pattern": "^([a-zA-Z0-9 `~!@#%^&*()+;:'"?<>,.|\_-]{0,64})$"
                         }
                     },
                     "required": [
