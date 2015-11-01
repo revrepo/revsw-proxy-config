@@ -480,6 +480,8 @@
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
   listen 443 ssl;
 
+  # Test for Igor
+
   {% if this.ENABLE_VARNISH and not this.BYPASS_VARNISH_LOCATIONS %}
     {{ ssl_mod.setup_no_proxy(this.ssl) }}
   {% else %}{# If this.BYPASS_VARNISH_LOCATIONS is true, we need SSL proxy support for direct connections to CO #}
