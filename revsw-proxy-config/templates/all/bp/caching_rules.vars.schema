@@ -59,7 +59,8 @@
                                 "type": "string"
                         },
                         "header_value": {
-                                "type": "string"
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9 -~]{0,128})$"
                         }
                     },
                     "required": [
@@ -81,7 +82,8 @@
                                 "type": "string"
                         },
                         "header_value": {
-                                "type": "string"
+                                "type": "string",
+                                "pattern": "^([a-zA-Z0-9 -~]{0,128})$"
                         }
                     },
                     "required": [
