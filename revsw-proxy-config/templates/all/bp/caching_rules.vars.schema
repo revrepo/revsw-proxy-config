@@ -56,12 +56,10 @@
                                 "pattern": "^(add|replace|remove)$"
                         },
                         "header_name": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9_\\-]{0,64})$"
+                                "type": "string"
                         },
                         "header_value": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9_\\-,\\s]{0,64})$"
+                                "type": "string"
                         }
                     },
                     "required": [
@@ -80,12 +78,10 @@
                                 "pattern": "^(add|replace|remove)$"
                         },
                         "header_name": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9_\\-]{0,64})$"
+                                "type": "string"
                         },
                         "header_value": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9_\\-,\\s]{0,64})$"
+                                "type": "string"
                         }
                     },
                     "required": [
