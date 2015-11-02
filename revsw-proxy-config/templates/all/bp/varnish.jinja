@@ -14,7 +14,7 @@
   {%- elif var_name == "new_ttl_DEBUG" %}8
   {%- elif var_name == "rgxdelrsp_cook" %}9
   {%- elif var_name == "RROUTEID" %}10
-  {%- elif var_name == "new_cache_control" %}11
+  {%- elif var_name == "new_cache_control" %}11 # not used anymore # {# not used anymore #}
   {%- elif var_name == "querystr_keep_args" %}12
   {%- elif var_name == "querystr_del_args" %}13
   {%- elif var_name == "was_hit" %}14
@@ -207,12 +207,13 @@
 
 
 {% macro _rule_override_caching(site, rule) %}
+  {% set override_cache_control = None %}
   {% if rule.edge_caching.override_origin %}
     {% set cc_edge = ("public, max-age=" + rule.edge_caching.new_ttl|string) if rule.edge_caching.new_ttl else "no-cache, max-age=0" %}
     set beresp.ttl = {{rule.edge_caching.new_ttl}}s;
     revvar.set_bool({{VAR_BERESP}}, {{_var_idx("delay_age")}}, true);
     {% if not rule.browser_caching.override_edge %}{# else it will be overwritten below #}
-      revvar.set_string_literal({{VAR_BERESP}}, {{_var_idx("new_cache_control")}}, "{{cc_edge}}");
+      {% set override_cache_control = cc_edge %}
     {% endif %}
     {% if site.DEBUG_MODE %}
       revvar.set_duration({{VAR_BERESP}}, {{_var_idx("new_ttl_DEBUG")}}, {{rule.edge_caching.new_ttl}}s);
@@ -222,12 +223,18 @@
     # Override browser caching; don't use either edge or origin value.
     revvar.set_bool({{VAR_BERESP}}, {{_var_idx("del_age")}}, true); # will always set Age to 0 before returning to browser
     {% if rule.browser_caching.new_ttl == 0 %}
-      revvar.set_string_literal({{VAR_BERESP}}, {{_var_idx("new_cache_control")}}, "no-cache, max-age=0");
+      {% set override_cache_control = "no-cache, max-age=0" %}
     {% else %}{# new_ttl > 0 #}
       {% set cc_browser = "public, max-age=" + rule.browser_caching.new_ttl|string + (", must-revalidate" if rule.browser_caching.force_revalidate else "") %}
-      revvar.set_string_literal({{VAR_BERESP}}, {{_var_idx("new_cache_control")}}, "{{cc_browser}}");
+      {% set override_cache_control = cc_browser %}
     {%- endif %}{# new_ttl #}
   {% endif %}{# override_edge #}
+  {% if override_cache_control %}
+    set beresp.http.Cache-Control = "{{override_cache_control}}";
+    {% if site.DEBUG_MODE %}
+      chromelogger.log("backend_response NONE: new_cache_control={{override_cache_control}}");
+    {% endif %}
+  {% endif %}
 {%- endmacro %}{# _rule_override_caching #}
 
 
@@ -270,7 +277,6 @@
 
           {% endfor %}
       {% endif %}
- 
       }
       {% set first = global_var_set("FOR_EACH_RULE_FIRST_ITEM", False) %}
     {% endif %}{# override_origin or override_edge or origin_redirects.override#}
@@ -278,11 +284,7 @@
       revvar.set_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}, {{ rule.serve_stale.origin_sick_ttl if rule.serve_stale.origin_sick_ttl > rule.serve_stale.while_fetching_ttl else rule.serve_stale.while_fetching_ttl }}s);
     {% endif %}{# rule.serve_stale|default({}) and rule.serve_stale.enable #}
   {% endcall %}{# _for_each_rule #}
-  if (revvar.get_string({{VAR_BERESP}}, {{_var_idx("new_cache_control")}})) {
-  set beresp.http.Cache-Control = revvar.get_string({{VAR_BERESP}}, {{_var_idx("new_cache_control")}});
-  }
   {% if site.DEBUG_MODE %}
-    chromelogger.log("backend_response " + bereq.xid + ": new_cache_control=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("new_cache_control")}}));
     chromelogger.log("backend_response " + bereq.xid + ": new_ttl=" + revvar.get_duration({{VAR_BERESP}}, {{_var_idx("new_ttl_DEBUG")}}));
     chromelogger.log("backend_response " + bereq.xid + ": del_age=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("del_age")}}));
     chromelogger.log("backend_response " + bereq.xid + ": delay_age=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delay_age")}}));
