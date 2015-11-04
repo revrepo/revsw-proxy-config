@@ -360,7 +360,7 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
         self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
         self._patch_if_changed_bp_webserver("ENABLE_SPDY", self.cmd_opts["spdy"])
-        self._patch_if_changed_bp_webserver("ENABLE_HTTP2", self.ui_config.get("enable_http2"))
+        self._patch_if_changed_bp_webserver("ENABLE_HTTP2", misc.get("enable_http2", True))
         self._patch_if_changed_bp_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
 
         self._patch_if_changed_bp_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
