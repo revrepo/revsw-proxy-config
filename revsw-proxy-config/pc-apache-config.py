@@ -20,7 +20,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 23
+_BP_CONFIG_VERSION = 24
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -360,6 +360,7 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
         self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
         self._patch_if_changed_bp_webserver("ENABLE_SPDY", self.cmd_opts["spdy"])
+        self._patch_if_changed_bp_webserver("ENABLE_HTTP2", self.ui_config.get("enable_http2"))
         self._patch_if_changed_bp_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
 
         self._patch_if_changed_bp_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
@@ -893,6 +894,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         # (BP-92) BP
         if ver <= 22 < new_ver:
             bp["END_USER_RESPONSE_HEADERS"] = []
+
+        if ver <= 24 < new_ver:
+            bp["ENABLE_HTTP2"] = True
 
         bp["VERSION"] = new_ver
 

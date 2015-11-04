@@ -478,7 +478,7 @@
   {{ balancer_mod.define_bp_ows_balancer(this, true) }}
   server {
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
-  listen 443 ssl;
+  listen 443 ssl{{ " http2" if this.ENABLE_HTTP2 else "" }};
 
   # Test for Igor
 
