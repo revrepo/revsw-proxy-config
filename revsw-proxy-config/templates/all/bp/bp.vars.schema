@@ -4,8 +4,8 @@
     "properties": {
         "VERSION": {
             "type": "integer",
-            "minimum": 23,
-            "maximum": 23
+            "minimum": 24,
+            "maximum": 24
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -196,6 +196,7 @@
         "ENABLE_HTTP",
         "ENABLE_HTTPS",
         "ENABLE_SPDY",
+        "ENABLE_HTTP2",
         "REV_PROFILES_BASE_PORT_HTTP",
         "REV_PROFILES_BASE_PORT_HTTPS",
         "CONTENT_OPTIMIZERS_HTTP",
