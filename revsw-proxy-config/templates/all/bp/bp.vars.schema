@@ -44,6 +44,9 @@
         "ENABLE_SPDY": {
             "type": "boolean"
         },
+        "ENABLE_HTTP2": {
+            "type": "boolean"
+        },
         "REV_PROFILES_BASE_PORT_HTTP": {
             "type": "integer",
             "minimum": 0,
