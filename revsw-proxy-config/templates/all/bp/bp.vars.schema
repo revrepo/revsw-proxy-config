@@ -4,8 +4,8 @@
     "properties": {
         "VERSION": {
             "type": "integer",
-            "minimum": 24,
-            "maximum": 24
+            "minimum": 23,
+            "maximum": 23
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
