@@ -751,8 +751,18 @@ unset bereq.http.X-Rev-Longitude;
 sub vcl_backend_response {
 {{ _for_each_site_custom_vcl("backend_response", "bereq") }}
 
-# Don't cache error pages.
-if (beresp.status > 307) {
+# Don't cache 4XX requests
+if (beresp.status > 307 || beresp.status <= 499) {
+set beresp.ttl = 0s;
+{% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
+  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
+  call save_backend_chromelogger;
+{%- endcall %}
+return (deliver);
+}
+
+# Serve stale object if problem with backend
+if (beresp.status >= 500) {
 set beresp.ttl = 0s;
 {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
   chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 307; don't cache; return stale object if available and rety to get good object from the backend");
