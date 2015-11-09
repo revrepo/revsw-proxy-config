@@ -125,7 +125,7 @@
     # END: (BP-344) Check for bypass cookies
 
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
-    {% if only_some_domains or rule.cookies.override or rule.edge_caching.query_string_keep_or_remove_list|default([]) %}
+    {% if only_some_domains or rule.serve_stale|default({}) or rule.cookies.override or rule.edge_caching.query_string_keep_or_remove_list|default([]) %}
        {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (req.url ~ "{{url_re}}") {
       
        {% if rule.origin_request_headers|default({}) %}
@@ -141,12 +141,13 @@
            {% endfor %}
        {% endif %}
 
+       {% if rule.serve_stale|default({}) and rule.serve_stale.enable %}
+         revvar.set_duration({{VAR_REQ}}, {{_var_idx("grace_req")}}, {{ rule.serve_stale.origin_sick_ttl }}s);
+       {% endif %}{# rule.serve_stale|default({}) and rule.serve_stale.enable #}
+
       {% if only_some_domains %}
 	set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":{{ _caching_rule_hash_key(rule) }}";
       {% endif %}
-      {% if rule.serve_stale|default({}) and rule.serve_stale.enable %}
-	revvar.set_duration({{VAR_REQ}}, {{_var_idx("grace_req")}}, {{ rule.serve_stale.while_fetching_ttl }}s);
-      {% endif %}{# rule.serve_stale|default({}) and rule.serve_stale.enable #}
 
       {% if rule.cookies.override or rule.edge_caching.query_string_keep_or_remove_list|default([]) %}
 	# Should we remove ignored cookies from request/response ?
@@ -277,12 +278,12 @@
 
           {% endfor %}
       {% endif %}
+      {% if rule.serve_stale|default({}) and rule.serve_stale.enable %}
+        revvar.set_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}, {{ rule.serve_stale.origin_sick_ttl if rule.serve_stale.origin_sick_ttl > rule.serve_stale.while_fetching_ttl else rule.serve_stale.while_fetching_ttl }}s);
+      {% endif %}{# rule.serve_stale|default({}) and rule.serve_stale.enable #}
       }
       {% set first = global_var_set("FOR_EACH_RULE_FIRST_ITEM", False) %}
     {% endif %}{# override_origin or override_edge or origin_redirects.override#}
-    {% if rule.serve_stale|default({}) and rule.serve_stale.enable %}
-      revvar.set_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}, {{ rule.serve_stale.origin_sick_ttl if rule.serve_stale.origin_sick_ttl > rule.serve_stale.while_fetching_ttl else rule.serve_stale.while_fetching_ttl }}s);
-    {% endif %}{# rule.serve_stale|default({}) and rule.serve_stale.enable #}
   {% endcall %}{# _for_each_rule #}
   {% if site.DEBUG_MODE %}
     chromelogger.log("backend_response " + bereq.xid + ": new_ttl=" + revvar.get_duration({{VAR_BERESP}}, {{_var_idx("new_ttl_DEBUG")}}));
@@ -754,10 +755,10 @@ sub vcl_backend_response {
 if (beresp.status > 307) {
 set beresp.ttl = 0s;
 {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
-  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 307; don't cache; return DELIVER");
+  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 307; don't cache; return stale object if available and rety to get good object from the backend");
   call save_backend_chromelogger;
 {%- endcall %}
-return (deliver);
+return (retry);
 }
 
 # This can happen if a backend responds with a redirect and Content Encoding (which Varnish returns a 503 for)
