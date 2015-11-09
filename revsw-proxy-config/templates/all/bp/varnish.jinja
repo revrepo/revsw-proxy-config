@@ -765,7 +765,7 @@ return (deliver);
 if (beresp.status >= 500) {
 set beresp.ttl = 0s;
 {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
-  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 307; don't cache; return stale object if available and rety to get good object from the backend");
+  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
   call save_backend_chromelogger;
 {%- endcall %}
 return (retry);
