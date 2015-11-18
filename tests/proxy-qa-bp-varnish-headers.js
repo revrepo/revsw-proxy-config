@@ -22,49 +22,65 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
 
-
-/// REWRITE FUNCTION - THIS WILL treat the follwing casese
-// ADD
+////// treat the follwing cases
+//// ADD
 // test if header exists - if not exists fail
 // test if header has the provided value - if not correct value fail
-// REPLACE
+//// REPLACE
 // test if header exists - if not exists fail
 // test if header has the provided value - if not correct value fail
-// DELETE 
+//// DELETE 
 // test if header exists - if exists fail
-function second_test_batch(generic_object)
+//////
+function check_varnish_headers(generic_object)
 {
 	var operators = {
 		"<": function(a, b) { return a < b },
-		">=": function(a, b) { return a >= b }
+		">": function(a, b) { return a > b },
+		"<=": function(a, b) { return a <= b },
+		">=": function(a, b) { return a >= b },
+		"==": function(a, b) { return a == b },
+		"===": function(a, b) { return a === b }
 	};
-	var final_description = 'Header Test - BP header ' + generic_object['action'] + ' function works - ' + generic_object['description'];
+	var expected_header = generic_object["expected_header"];
+	var expected_header_value = generic_object["expected_header_value"];
+	var final_description = 'Varnish Header Test - Varnish header ' + generic_object['action'] + ' function works - ' + generic_object['expected_header'];
 
 	it(final_description, function(done) {
 		request(url)
 			.get(generic_object['get_obj'])
 			.set('Host', domain_header)
 			.expect('Content-Type', generic_object['content_type'])
-			.expect(generic_object['base_header_key'], generic_object['base_header_value'])
+			.expect(generic_object['base_header'], generic_object['base_header_value'])
 			.end(function(err, res) {
 				if (err) {
 					throw err;
 				}
 				res.should.have.status(200);
-				if (generic_object['action'] === "ADD") {
-					// nothing special needs to be done for add
-				} else if (generic_object['action'] === "REPLACE") {
-					// nothing special needs to be done for replace
+				var response_json = JSON.stringify(res.header);
+				var header_occurences = response_json.search(expected_header);
+				if (generic_object['action'] in [ "ADD", "REPLACE" ]) {
+					// check if header exists
+					// check if header has the expected value
+					console.log(res.header); /// print the format to be sure that the format is correct AND DELETE THIS LINE AFTER this is done
+					var header_found = operators["==="](header_occurences, 1);
+					if (header_found === false) {
+						throw new Error(generic_object['action'] + " test failed - expected header value was not found!");
+						done();
+					}
+					var match_header_value = response_json.search(expected_header_value); ///////////// RESEARCH THE HEADER FORMAT TO GET THE EXACT VALUE AND COMPARE IT
+					if (match_header_value === false) {
+						throw new Error(generic_object['action'] + " test failed - expected header value was found, but the content doesn't match the specified value!");
+					}
+
 				} else if (generic_object['action'] === "DELETE") {
-					// add here extra code
-					var response_json = JSON.stringify(res.header);
-					var i = response_json.search(generic_object['base_delete_header_value']);
-					var delete_problem = operators[generic_object["delete_op"]](i, 1);
-					if (delete_problem) {
-						throw new Error("Delete Broken");
+					// fail if header exists
+					var no_header_found = operators["==="](header_occurences, 0);
+					if (no_header_found === false) {
+						throw new Error(generic_object['action'] + " test failed - unexpected header value was found!");
 					}
 				} else {
-					throw new Error('Unknow type of check action for second test: [' + generic_object['action'] + ']');
+					throw new Error('Unknow type of check action provided for test: [' + generic_object['action'] + ']');
 				}
 				done();
 			});
@@ -82,80 +98,119 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 	var domain_header = 'test-proxy-headers.revsw.net';
 	var test_object_js_1 = '/test_object_purge_api01.js';
 
-	second_test_batch({
-		"get_obj": test_object_js_1,
-		"content_type": /javascript/,
+	// TEST ADD functionality
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
 		"action": "ADD",
-		"description": "This-Is-A-Test"
-		"base_header_key": "This-Is-A-Test",
-		"base_header_value": /Value-One/
+		"content_type": /text/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_text",
+		"expected_header_value": "ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_text"
 	});
-	second_test_batch({
-		"get_obj": test_object_js_1,
-		"content_type": /javascript/,
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
 		"action": "ADD",
-		"description": "This-Is-B-Test"
-		"base_header_key": "This-Is-B-Test",
-		"base_header_value": /Value-Two/
-	});
-	second_test_batch({
-		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_js",
+		"expected_header_value": "ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js"
+	});
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "ADD",
+		"content_type": /image/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_image",
+		"expected_header_value": "ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image"
+	});
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "ADD",
+		"content_type": /flash/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_flash",
+		"expected_header_value": "ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash"
+	});
+
+	// TEST REPLACE functionality
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
 		"action": "REPLACE",
-		"description": "X-Rev-obj-ttl: We-Are-Fast-As-A-Test"
-		"base_header_key": "X-Rev-obj-ttl",
-		"base_header_value": /We-Are-Fast-As-A-Test/
+		"content_type": /text/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_text",
+		"expected_header_value": "REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_text"
 	});
-	second_test_batch({
-		"get_obj": test_object_js_1,
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "REPLACE",
 		"content_type": /javascript/,
-		"action": "DELETE",
-		"description": "X-Rev-Host"
-		"base_header_key": "X-Rev-obj-ttl",
+		"base_header": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
-		"base_delete_header_value": "X-REV-HOST",
-		"delete_op": ">="
+		"expected_header": "REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_js",
+		"expected_header_value": "REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js"
 	});
-	second_test_batch({
-		"get_obj": test_object_js_1,
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "REPLACE",
+		"content_type": /image/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_image",
+		"expected_header_value": "REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image"
+	});
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "REPLACE",
+		"content_type": /flash/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_flash",
+		"expected_header_value": "REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash"
+	});
+
+	// TEST DELETE functionality
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "DELETE",
+		"content_type": /text/,
+		"base_header": "X-Rev-obj-ttl",
+		"base_header_value": /We-Are-Fast-As-A-Test/,
+		"expected_header": "DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_text",
+		"expected_header_value": "DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_text"
+	});
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
+		"action": "DELETE",
 		"content_type": /javascript/,
-		"action": "DELETE",
-		"description": "X-Rev-BE-1st-Byte-Time"
-		"base_header_key": "X-Rev-obj-ttl",
+		"base_header": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
-		"base_delete_header_value": "X-Rev-BE-1st-Byte-Time",
-		"delete_op": ">="
+		"expected_header": "DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_js",
+		"expected_header_value": "DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js"
 	});
-	second_test_batch({
-		"get_obj": test_object_js_1,
-		"content_type": /javascript/,
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
 		"action": "DELETE",
-		"description": "X-Rev-Cache-BE-1st-Byte-Time"
-		"base_header_key": "X-Rev-obj-ttl",
+		"content_type": /image/,
+		"base_header": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
-		"base_delete_header_value": "X-Rev-Cache-BE-1st-Byte-Time",
-		"delete_op": ">="
+		"expected_header": "DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_image",
+		"expected_header_value": "DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image"
 	});
-	second_test_batch({
-		"get_obj": envdump,
-		"content_type": /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
+	check_varnish_headers({
+		"get_obj": test_object_js_1, ///////////////// replace with good value
 		"action": "DELETE",
-		"description": "X-REV-OBJ-TTL"
-		"base_header_key": "X-Rev-obj-ttl",
+		"content_type": /flash/,
+		"base_header": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
-		"base_delete_header_value": "SuperFlyFast",
-		"delete_op": "<"
+		"expected_header": "DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_flash",
+		"expected_header_value": "DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash"
 	});
-	second_test_batch({
-		"get_obj": envdump,
-		"content_type": /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
-		"action": "DELETE",
-		"description": "X-REV-ID"
-		"base_header_key": "X-Rev-obj-ttl",
-		"base_header_value": /We-Are-Fast-As-A-Test/,
-		"base_delete_header_value": "X-REV-ID",
-		"delete_op": ">="
-	});
-	
+
 	// END END END
 });
