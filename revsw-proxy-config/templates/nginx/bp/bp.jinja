@@ -326,7 +326,10 @@
 
   {% if this.ENABLE_JS_SUBSTITUTE %}
     # Rev JS substitute and accompanying script
-    # TODO: RevJSSubstituteEnabled On
+    RevJSSubstituteEnabled on; # turn on for whole context
+    location /rev-js/ {
+	RevJSSubsistuteEnabled off;
+    }
     # TODO: Alias /rev-js /usr/share/revsw-libapache2-mod-rev-js-substitute
     # TODO: ProxyPass /rev-js !
     # TODO: <Directory /usr/share/revsw-libapache2-mod-rev-js-substitute>
