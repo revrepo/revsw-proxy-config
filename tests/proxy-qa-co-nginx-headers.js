@@ -31,7 +31,7 @@ var path = '/cgi-bin/envtest.cgi';
 function rev_test_header(desc, action, name, value)
 {
 	var action_list = ['expect', 'never'];
-	if (action_list.indexOf(action) > -1) {
+	if (action_list.indexOf(action) < 0) {
 		throw new Error('Unknow type of check action: [' + action + ']');
 		return;
 	} 
@@ -58,7 +58,7 @@ function rev_test_header(desc, action, name, value)
 function rev_test_text(desc, action, token)
 {
 	var action_list = ['expect', 'never'];
-	if (action_list.indexOf(action) > -1) {
+	if (action_list.indexOf(action) < 0) {
 		throw new Error('Unknow type of check action: [' + action + ']');
 		return;
 	} 
