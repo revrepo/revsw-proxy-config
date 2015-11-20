@@ -84,7 +84,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "ADD",
-		"description": "This-Is-A-Test"
+		"description": "This-Is-A-Test",
 		"base_header_key": "This-Is-A-Test",
 		"base_header_value": /Value-One/
 	});
@@ -92,7 +92,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "ADD",
-		"description": "This-Is-B-Test"
+		"description": "This-Is-B-Test",
 		"base_header_key": "This-Is-B-Test",
 		"base_header_value": /Value-Two/
 	});
@@ -100,7 +100,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "REPLACE",
-		"description": "X-Rev-obj-ttl: We-Are-Fast-As-A-Test"
+		"description": "X-Rev-obj-ttl: We-Are-Fast-As-A-Test",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/
 	});
@@ -108,7 +108,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "DELETE",
-		"description": "X-Rev-Host"
+		"description": "X-Rev-Host",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
 		"base_delete_header_value": "X-REV-HOST",
@@ -118,7 +118,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "DELETE",
-		"description": "X-Rev-BE-1st-Byte-Time"
+		"description": "X-Rev-BE-1st-Byte-Time",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
 		"base_delete_header_value": "X-Rev-BE-1st-Byte-Time",
@@ -128,7 +128,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": test_object_js_1,
 		"content_type": /javascript/,
 		"action": "DELETE",
-		"description": "X-Rev-Cache-BE-1st-Byte-Time"
+		"description": "X-Rev-Cache-BE-1st-Byte-Time",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
 		"base_delete_header_value": "X-Rev-Cache-BE-1st-Byte-Time",
@@ -138,7 +138,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": envdump,
 		"content_type": /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
 		"action": "DELETE",
-		"description": "X-REV-OBJ-TTL"
+		"description": "X-REV-OBJ-TTL",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
 		"base_delete_header_value": "SuperFlyFast",
@@ -148,7 +148,7 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 		"get_obj": envdump,
 		"content_type": /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
 		"action": "DELETE",
-		"description": "X-REV-ID"
+		"description": "X-REV-ID",
 		"base_header_key": "X-Rev-obj-ttl",
 		"base_header_value": /We-Are-Fast-As-A-Test/,
 		"base_delete_header_value": "X-REV-ID",
