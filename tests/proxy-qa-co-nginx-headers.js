@@ -41,15 +41,23 @@ function rev_test_header(desc, action, name, value)
 		.get(path)
 		.set('Host', domain)
 		.expect(200)
-		.expect(name, value)
 		.end(function(err, res) {
 			if (err) {
-				if (action == 'expect') {
-					throw err;
-				} else if (action == 'never') {
+				throw new Error('The request did not end with success!');
+				done();
+			}
+
+			var isHeaderPresent = res.header[name.toLowerCase()] !== undefined;
+			if (action == 'expect') {
+				isHeaderPresent.should.be.True();
+				if (res.header[name.toLowerCase()] !== value) {
+					throw new Error('Problem found! The specified value does not match the value from the specified header!');
+				}
+			} else if (action == 'never') {
+				if (isHeaderPresent === true) {
 					throw new Error('Boomerang was found where it should not have been found!');
 				}
-			} 
+			}
 			done();
 		});
 	});
@@ -72,9 +80,9 @@ function rev_test_text(desc, action, token)
 			if (err) {
 				throw err;
 			}
-			if (action == 'expect') {
+			if (action === 'expect') {
 				res.text.should.match(token);
-			} else if (action == 'never') {
+			} else if (action === 'never') {
 				res.text.should.not.match(token);
 			}
 			done();
@@ -106,26 +114,32 @@ function second_test_batch(generic_object)
 		'>=': function(a, b) { return a >= b }
 	};
 	var final_description = 'Header Test - BP header ' + generic_object['action'] + ' function works - ' + generic_object['description'];
+	var base_header_key = generic_object['header_base_key'].toLowerCase();
+	var base_header_value = generic_object['header_base_value'];
 
 	it(final_description, function(done) {
 		request(url)
 			.get(generic_object['get_obj'])
 			.set('Host', domain_header)
 			.expect('Content-Type', generic_object['content_type'])
-			.expect(generic_object['base_header_key'], generic_object['base_header_value'])
+			.expect(base_header_key, base_header_value)
 			.end(function(err, res) {
 				if (err) {
 					throw err;
 				}
 				res.should.have.status(200);
 				if (generic_object['action'] === 'ADD') {
-					// nothing special needs to be done for add
+					// add extra checks on add feature here
 				} else if (generic_object['action'] === 'REPLACE') {
-					// nothing special needs to be done for replace
+					// add extra checks on replace feature here
+					if (generic_object['content_replace_key']) {
+						res.text.should.match(generic_object['content_replace_key']);
+					 	res.text.should.match(generic_object['content_replace_value']);
+					}
 				} else if (generic_object['action'] === 'DELETE') {
-					// add here extra code
+					// add extra checks on delete feature here
 					var response_json = JSON.stringify(res.header);
-					var i = response_json.search(generic_object['base_delete_header_value']);
+					var i = response_json.search(generic_object['header_delete_key']);
 					var delete_problem = operators[generic_object['delete_op']](i, 1);
 					if (delete_problem) {
 						throw new Error('Delete Broken');
@@ -141,42 +155,52 @@ function second_test_batch(generic_object)
 
 describe('Headers Manipulation Tests Part Two', function() {
 	url = 'http://testsjc20-bp01.revsw.net';
-	envdump = '/cgi-bin/envtest.cgi';
 	domain_header = 'test-proxy-headers.revsw.net';
 	test_object_js_1 = '/test_object_purge_api01.js';
+	test_object_cgi_1 = '/cgi-bin/envtest.cgi';
 
 	second_test_batch({
 		'get_obj': test_object_js_1,
 		'content_type': /javascript/,
 		'action': 'ADD',
 		'description': 'This-Is-A-Test',
-		'base_header_key': 'This-Is-A-Test',
-		'base_header_value': /Value-One/
+		'header_base_key': 'This-Is-A-Test',
+		'header_base_value': /Value-One/
 	});
 	second_test_batch({
 		'get_obj': test_object_js_1,
 		'content_type': /javascript/,
 		'action': 'ADD',
 		'description': 'This-Is-B-Test',
-		'base_header_key': 'This-Is-B-Test',
-		'base_header_value': /Value-Two/
+		'header_base_key': 'This-Is-B-Test',
+		'header_base_value': /Value-Two/
 	});
 	second_test_batch({
 		'get_obj': test_object_js_1,
 		'content_type': /javascript/,
 		'action': 'REPLACE',
 		'description': 'X-Rev-obj-ttl: We-Are-Fast-As-A-Test',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/
+	});
+	second_test_batch({
+		'get_obj': test_object_cgi_1,
+		'content_type': /text/,
+		'action': 'REPLACE',
+		'description': 'X-REV-OBJ-TTL',
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/,
+		'content_replace_key': /HTTP_X_REV_OBJ_TTL/,
+		'content_replace_value': /SuperFlyFast/
 	});
 	second_test_batch({
 		'get_obj': test_object_js_1,
 		'content_type': /javascript/,
 		'action': 'DELETE',
 		'description': 'X-Rev-Host',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-REV-HOST',
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/,
+		'header_delete_value': 'X-REV-HOST',
 		'delete_op': '>='
 	});
 	second_test_batch({
@@ -184,9 +208,9 @@ describe('Headers Manipulation Tests Part Two', function() {
 		'content_type': /javascript/,
 		'action': 'DELETE',
 		'description': 'X-Rev-BE-1st-Byte-Time',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-Rev-BE-1st-Byte-Time',
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/,
+		'header_delete_value': 'X-Rev-BE-1st-Byte-Time',
 		'delete_op': '>='
 	});
 	second_test_batch({
@@ -194,29 +218,19 @@ describe('Headers Manipulation Tests Part Two', function() {
 		'content_type': /javascript/,
 		'action': 'DELETE',
 		'description': 'X-Rev-Cache-BE-1st-Byte-Time',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-Rev-Cache-BE-1st-Byte-Time',
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/,
+		'header_delete_key': 'X-Rev-Cache-BE-1st-Byte-Time',
 		'delete_op': '>='
 	});
 	second_test_batch({
-		'get_obj': envdump,
-		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
-		'action': 'DELETE',
-		'description': 'X-REV-OBJ-TTL',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'SuperFlyFast',
-		'delete_op': '<'
-	});
-	second_test_batch({
-		'get_obj': envdump,
-		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
+		'get_obj': test_object_cgi_1,
+		'content_type': /text/,
 		'action': 'DELETE',
 		'description': 'X-REV-ID',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-REV-ID',
+		'header_base_key': 'X-Rev-obj-ttl',
+		'header_base_value': /We-Are-Fast-As-A-Test/,
+		'header_delete_key': 'X-REV-ID',
 		'delete_op': '>='
 	});
 	

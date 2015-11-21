@@ -80,80 +80,80 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 	var domain_header = 'test-proxy-headers.revsw.net';
 	var test_object_js_1 = '/test_object_purge_api01.js';
 
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'ADD',
-		'description': 'This-Is-A-Test',
-		'base_header_key': 'This-Is-A-Test',
-		'base_header_value': /Value-One/
-	});
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'ADD',
-		'description': 'This-Is-B-Test',
-		'base_header_key': 'This-Is-B-Test',
-		'base_header_value': /Value-Two/
-	});
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'REPLACE',
-		'description': 'X-Rev-obj-ttl: We-Are-Fast-As-A-Test',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/
-	});
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'DELETE',
-		'description': 'X-Rev-Host',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-REV-HOST',
-		'delete_op': '>='
-	});
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'DELETE',
-		'description': 'X-Rev-BE-1st-Byte-Time',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-Rev-BE-1st-Byte-Time',
-		'delete_op': '>='
-	});
-	second_test_batch({
-		'get_obj': test_object_js_1,
-		'content_type': /javascript/,
-		'action': 'DELETE',
-		'description': 'X-Rev-Cache-BE-1st-Byte-Time',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-Rev-Cache-BE-1st-Byte-Time',
-		'delete_op': '>='
-	});
-	second_test_batch({
-		'get_obj': envdump,
-		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
-		'action': 'DELETE',
-		'description': 'X-REV-OBJ-TTL',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'SuperFlyFast',
-		'delete_op': '<'
-	});
-	second_test_batch({
-		'get_obj': envdump,
-		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
-		'action': 'DELETE',
-		'description': 'X-REV-ID',
-		'base_header_key': 'X-Rev-obj-ttl',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'base_delete_header_value': 'X-REV-ID',
-		'delete_op': '>='
-	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'ADD',
+///# 		'description': 'This-Is-A-Test',
+///# 		'base_header_key': 'This-Is-A-Test',
+///# 		'base_header_value': /Value-One/
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'ADD',
+///# 		'description': 'This-Is-B-Test',
+///# 		'base_header_key': 'This-Is-B-Test',
+///# 		'base_header_value': /Value-Two/
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'REPLACE',
+///# 		'description': 'X-Rev-obj-ttl: We-Are-Fast-As-A-Test',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'DELETE',
+///# 		'description': 'X-Rev-Host',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/,
+///# 		'base_delete_header_value': 'X-REV-HOST',
+///# 		'delete_op': '>='
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'DELETE',
+///# 		'description': 'X-Rev-BE-1st-Byte-Time',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/,
+///# 		'base_delete_header_value': 'X-Rev-BE-1st-Byte-Time',
+///# 		'delete_op': '>='
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': test_object_js_1,
+///# 		'content_type': /javascript/,
+///# 		'action': 'DELETE',
+///# 		'description': 'X-Rev-Cache-BE-1st-Byte-Time',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/,
+///# 		'base_delete_header_value': 'X-Rev-Cache-BE-1st-Byte-Time',
+///# 		'delete_op': '>='
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': envdump,
+///# 		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
+///# 		'action': 'DELETE',
+///# 		'description': 'X-REV-OBJ-TTL',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/,
+///# 		'base_delete_header_value': 'SuperFlyFast',
+///# 		'delete_op': '<'
+///# 	});
+///# 	second_test_batch({
+///# 		'get_obj': envdump,
+///# 		'content_type': /I DONT KNOW THIS TYPE PLEASE MAKE A TEST IN ORDER TO ADD IT/,
+///# 		'action': 'DELETE',
+///# 		'description': 'X-REV-ID',
+///# 		'base_header_key': 'X-Rev-obj-ttl',
+///# 		'base_header_value': /We-Are-Fast-As-A-Test/,
+///# 		'base_delete_header_value': 'X-REV-ID',
+///# 		'delete_op': '>='
+///# 	});
 	
 	// END END END
 });
