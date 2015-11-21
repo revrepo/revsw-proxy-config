@@ -117,7 +117,7 @@ describe('Basic tests - POST', function() {
   });
 
 
-  it('Simple HTTP  POST test  dynamic config', function(done) {
+  it('Simple HTTP  POST test dynamic config', function(done) {
     request(url)
       .post('/cgi-bin/test.cgi')
       .set('Host', domain_dsa)
