@@ -1373,14 +1373,23 @@ describe('Basic tests', function() {
       .end(function(err, res) {
         if (err) {
           throw err;
-        }
-        if (res.headers['x-rev-be-1st-byte-time'] != 0) {
-
-          throw new Error("There is a problem with the x-rev-be-1st-byte-time");
-        }
-        res.should.have.status(200);
-
-        done();
+        } 
+        request(url)
+          .get(test_object_js_1)
+          .set('Host', domain_rma)
+          .expect('Content-Type', /javascript/)
+          .expect('Cache-Control', 'public, max-age=360000')
+          .end(function(err, res) {
+            if (err) {
+              throw err;
+            }
+            res.should.have.status(200);
+            if (res.headers['x-rev-be-1st-byte-time'] != 0) {
+    
+              throw new Error("There is a problem with the x-rev-be-1st-byte-time");
+            }
+            done();
+        });
       });
   });
   it('Testing RMA config ojbect for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
