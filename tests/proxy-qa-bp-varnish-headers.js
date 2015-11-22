@@ -60,7 +60,6 @@ function check_varnish_headers(generic_object)
 			.expect('Content-Type', generic_object['content_type'])
 			.expect(base_header_1, base_header_value_1)
 			.end(function(err, res) {
-// console.log(res);
 				if (err) {
 					throw err;
 				}
@@ -75,13 +74,23 @@ function check_varnish_headers(generic_object)
 					}
 					// check if header has the expected value
 					var is_correct_header_value = res.header[expected_header.toLowerCase()] === expected_header_value;
-					if (is_correct_header_value === true) {
+					if (is_correct_header_value === false) {
 						throw new Error(generic_object['action'] + ' test failed - expected header value was found, but the content does not match the specified value!');
 					}
-
-				} else if (generic_object['action'] === 'DELETE') {
+				} else if (generic_object['action'] === 'REMOVE') {
 					// fail if header exists
 					if (is_header_present === true) {
+						throw new Error(generic_object['action'] + ' test failed - unexpected header value was found!');
+					}
+				} else if (['ORIGIN_ADD', 'ORIGIN_REPLACE'].indexOf(generic_object['action']) > -1) {
+					// check if header and header content exist in the body of the origin page
+					var search_value = new RegExp(expected_header + " = " + expected_header_value + "<br>", 'i');
+					if (res.text.search(search_value) < 0) {
+						throw new Error(generic_object['action'] + ' test failed - origin expected header value and header content: ' + search_value + '!');
+					}
+				} else if (generic_object['action'] === 'ORIGIN_REMOVE') {
+					var search_value = new RegExp(expected_header + " = " + expected_header_value, 'i');
+					if (res.text.search(search_value) > -1) {
 						throw new Error(generic_object['action'] + ' test failed - unexpected header value was found!');
 					}
 				} else {
@@ -95,8 +104,8 @@ function check_varnish_headers(generic_object)
 // add a new domain and continue
 
 describe('Headers Manipulation Test - Varnish specific resource - specific headers', function() {
-	var envdump = '/cgi-bin/envtest.cgi';
-	var base_path_txt = '/test_generic_txt.txt';
+	var base_path_cgi = '/cgi-bin/envtest.cgi';
+	var base_path_text = '/test_generic_txt.txt';
 	var base_path_css = '/test_generic_css.css';
 	var base_path_js = '/test_generic_js.js';
 	var base_path_html = '/test_generic_html.html';
@@ -104,137 +113,49 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 	var base_path_jpg = '/test_generic_jpg.jpg';
 
 	// TEST ADD functionality - end_user replacements
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_txt, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_text', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_text/ });
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_css', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_css/ });
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_js', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_js/ });
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_html', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_html/ });
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_swf', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_swf/ });
-	check_varnish_headers({ 'action': 'ADD', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_jpg', 'expected_header_value': /ADD_HEADER_VALUE_DONE_WITH_SUCCESS_jpg/ });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_cgi', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_cgi' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_text, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_text', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_text' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_css', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_css' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_js', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_js' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_html', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_html' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_swf', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_swf' });
+	check_varnish_headers({ 'action': 'ADD', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_jpg', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_jpg' });
 
 	// TEST REPLACE functionality - end_user replacements
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_txt, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_text', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_text/ });
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_css', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_css/ });
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_js', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_js/ });
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_html', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_html/ });
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_swf', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_swf/ });
-	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_jpg', 'expected_header_value': /REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_jpg/ });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_cgi', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_cgi' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_text, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_text', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_text' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_css', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_css' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_js', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_js' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_html', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_html' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_swf', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_swf' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_jpg', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_jpg' });
+
+	// TEST REPLACE functionality - replace content from origin_server
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_text, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
+	check_varnish_headers({ 'action': 'REPLACE', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'X-Test-Header-Replace', 'expected_header_value': 'replaced-in-varnish' });
 
 	// TEST DELETE functionality - end_user replacements
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /text/, 'get_obj': base_path_txt, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_text', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_text/ });
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_css', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_css/ });
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_js', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_js/ });
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_html', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_html/ });
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_swf', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_swf/ });
-	check_varnish_headers({ 'action': 'DELETE', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'DELETE_HEADER_DONE_WITH_SUCCESS_jpg', 'expected_header_value': /DELETE_HEADER_VALUE_DONE_WITH_SUCCESS_jpg/ });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /text/, 'get_obj': base_path_text, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /text/, 'get_obj': base_path_css, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /javascript/, 'get_obj': base_path_js, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /text/, 'get_obj': base_path_html, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /flash/, 'get_obj': base_path_swf, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
+	check_varnish_headers({ 'action': 'REMOVE', 'content_type': /image/, 'get_obj': base_path_jpg, 'expected_header': 'X-Test-Header-Remove', 'expected_header_value': null });
 
-/// addddddddddddddddddddddddd origin and end_user values inside header value and check
-/*
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'ADD',
-		'content_type': /javascript/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_js',
-		'expected_header_value': 'ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'ADD',
-		'content_type': /image/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_image',
-		'expected_header_value': 'ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'ADD',
-		'content_type': /flash/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'ADD_HEADER_WAS_DONE_WITH_SUCCESS_for_flash',
-		'expected_header_value': 'ADD_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash'
-	});
+	// TEST ADD,REPLACE,REMOVE BACKEND ORIGIN received headers
+	check_varnish_headers({ 'action': 'ORIGIN_ADD', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'ADD_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'ADD_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
+	check_varnish_headers({ 'action': 'ORIGIN_REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
+	check_varnish_headers({ 'action': 'ORIGIN_REMOVE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'User_Agent', 'expected_header_value': '' });
 
-	// TEST REPLACE functionality
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'REPLACE',
-		'content_type': /text/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_text',
-		'expected_header_value': 'REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_text'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'REPLACE',
-		'content_type': /javascript/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_js',
-		'expected_header_value': 'REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'REPLACE',
-		'content_type': /image/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_image',
-		'expected_header_value': 'REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'REPLACE',
-		'content_type': /flash/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'REPLACE_HEADER_WAS_DONE_WITH_SUCCESS_for_flash',
-		'expected_header_value': 'REPLACE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash'
-	});
-
-	// TEST DELETE functionality
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'DELETE',
-		'content_type': /text/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_text',
-		'expected_header_value': 'DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_text'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'DELETE',
-		'content_type': /javascript/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_js',
-		'expected_header_value': 'DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_js'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'DELETE',
-		'content_type': /image/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_image',
-		'expected_header_value': 'DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_image'
-	});
-	check_varnish_headers({
-		'get_obj': test_object_js_1, ///////////////// replace with good value
-		'action': 'DELETE',
-		'content_type': /flash/,
-		'base_header': 'x-rev-id',
-		'base_header_value': /We-Are-Fast-As-A-Test/,
-		'expected_header': 'DELETE_HEADER_WAS_DONE_WITH_SUCCESS_for_flash',
-		'expected_header_value': 'DELETE_HEADER_VALUE_WAS_DONE_WITH_SUCCESS_for_flash'
-	});
-
-
-*/
+	// TEST that fail because of bug in the vcl_recv
+	// check_varnish_headers({ 'action': 'ORIGIN_ADD', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'ADD_UNDERLINE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'ADD_UNDERLINE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
+	// check_varnish_headers({ 'action': 'ORIGIN_REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'REPLACE_UNDERLINE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'REPLACE_UNDERLINE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
 
 	// END END END
 });
