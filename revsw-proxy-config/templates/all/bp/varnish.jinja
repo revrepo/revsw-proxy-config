@@ -869,7 +869,7 @@ unset beresp.http.Expires;
   if (beresp.ttl <= 0s ||
   beresp.http.Vary == "*") {
   # Mark as "Hit-For-Pass" for the next 2 minutes
-  set beresp.ttl = 120 s;
+  set beresp.ttl = 0s;
   set beresp.http.X-Rev-Hit-For-Pass = "YES";
   {% if site.DEBUG_MODE %}
     if (beresp.ttl <= 0s) {
