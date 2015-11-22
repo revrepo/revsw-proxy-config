@@ -47,14 +47,14 @@ function rev_test_header(desc, action, name, value)
 				done();
 			}
 
-			var isHeaderPresent = res.header[name.toLowerCase()] !== undefined;
+			var is_header_present = res.header[name.toLowerCase()] !== undefined;
 			if (action == 'expect') {
-				isHeaderPresent.should.be.True();
+				is_header_present.should.be.True();
 				if (res.header[name.toLowerCase()] !== value) {
 					throw new Error('Problem found! The specified value does not match the value from the specified header!');
 				}
 			} else if (action == 'never') {
-				if (isHeaderPresent === true) {
+				if (is_header_present === true) {
 					throw new Error('Boomerang was found where it should not have been found!');
 				}
 			}
