@@ -55,7 +55,7 @@ describe('Nginx custom commands', function() {
     });
   });
 
-  it('should write back the basic configuration for domain ' + testDomain, function(done) {
+  xit('should write back the basic configuration for domain ' + testDomain, function(done) {
     this.timeout(600000);
     request(api_url).put(apiDomainURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
@@ -84,7 +84,7 @@ describe('Nginx custom commands', function() {
     });
   });
 
-  it('should write back the detailed configuration for domain ' + testDomain, function(done) {
+  xit('should write back the detailed configuration for domain ' + testDomain, function(done) {
     this.timeout(600000);
     request(api_url).put(apiDomainDetailsURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
