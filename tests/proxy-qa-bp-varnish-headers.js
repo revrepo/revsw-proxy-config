@@ -153,9 +153,5 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
 	check_varnish_headers({ 'action': 'ORIGIN_REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'REPLACE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'REPLACE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
 	check_varnish_headers({ 'action': 'ORIGIN_REMOVE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'User_Agent', 'expected_header_value': '' });
 
-	// TEST that fail because of bug in the vcl_recv
-	// check_varnish_headers({ 'action': 'ORIGIN_ADD', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'ADD_UNDERLINE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'ADD_UNDERLINE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
-	// check_varnish_headers({ 'action': 'ORIGIN_REPLACE', 'content_type': /text/, 'get_obj': base_path_cgi, 'expected_header': 'REPLACE_UNDERLINE_HEADER_DONE_WITH_SUCCESS_origin_cgi', 'expected_header_value': 'REPLACE_UNDERLINE_HEADER_VALUE_DONE_WITH_SUCCESS_origin_cgi' });
-
 	// END END END
 });
