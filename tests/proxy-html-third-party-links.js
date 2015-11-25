@@ -35,7 +35,7 @@ describe('HTML Third Party Links', function() {
   var api_url = 'https://TESTSJC20-API01.revsw.net';
   var api_checkstatus_url = '/v1/purge/';
   var api_user = 'purge_api_test@revsw.com';
-  var api_pass = '123456789123456789';
+  var api_pass = 'password1';
   var domain_cache = 'test-proxy-cache-config.revsw.net';
   var domain_cache_two = 'test-proxy-cache-config-02.revsw.net';
   var domain_dsa = 'test-proxy-dsa-config.revsw.net';

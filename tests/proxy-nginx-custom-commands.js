@@ -42,7 +42,7 @@ describe('Nginx custom commands', function() {
     var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com';
     var qaUserWithAdminPermPassword = 'password1';
 
-  it('should read basic configuration for domain ' + testDomain, function(done) {
+  xit('should read basic configuration for domain ' + testDomain, function(done) {
     this.timeout(600000);
     request(api_url).get(apiDomainURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword).expect(200).end(function(err, res) {
       if (err) {
@@ -71,7 +71,7 @@ describe('Nginx custom commands', function() {
     });
   });
 
-  it('should read detailed configuration for domain ' + testDomain, function(done) {
+  xit('should read detailed configuration for domain ' + testDomain, function(done) {
     this.timeout(600000);
     request(api_url).get(apiDomainDetailsURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword).expect(200).end(function(err, res) {
       if (err) {
