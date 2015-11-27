@@ -327,6 +327,7 @@
   {% if this.ENABLE_JS_SUBSTITUTE %}
     # Rev JS substitute and accompanying script
     RevJSSubstituteEnabled on; # turn on for whole context
+    RevJSDoNotCompress on;
     location /rev-js/ {
 	RevJSSubstituteEnabled off;
     }
