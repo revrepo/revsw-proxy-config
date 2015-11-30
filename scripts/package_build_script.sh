@@ -75,7 +75,7 @@ mkdir -p $FOLDERNAME/$DST/apache/generic-site
 mkdir -p $FOLDERNAME/$DST/varnish/sites
 mkdir -p $FOLDERNAME/$DST/templates/all/bp
 mkdir -p $FOLDERNAME/etc
-mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute
+mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
 # copy packaging files to the structured tree:
 
@@ -96,7 +96,7 @@ cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/b
 cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
 
 # js
-cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute
+cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
 cp -r $WORKSPACE/DEBIAN $FOLDERNAME/ || 1
 
