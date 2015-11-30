@@ -312,7 +312,7 @@
   location /rev-diablo {
   # TODO: RevProfilesMode Off
   {% if this.ENABLE_JS_SUBSTITUTE %}
-    RevJSSubstituteEnabled off
+    RevJSSubstituteEnabled off;
   {% endif %}
   proxy_pass http://rev-js-source.revdn.net;
   # location /rev-diablo
