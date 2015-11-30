@@ -312,7 +312,7 @@
   location /rev-diablo {
   # TODO: RevProfilesMode Off
   {% if this.ENABLE_JS_SUBSTITUTE %}
-    # TODO: RevJSSubstituteEnabled Off
+    RevJSSubstituteEnabled off
   {% endif %}
   proxy_pass http://rev-js-source.revdn.net;
   # location /rev-diablo
@@ -329,7 +329,8 @@
     RevJSSubstituteEnabled on; # turn on for whole context
     RevJSDoNotCompress on;
     location /rev-js/ {
-	RevJSSubstituteEnabled off;
+    	RevJSSubstituteEnabled off;
+      root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
     }
     # TODO: Alias /rev-js /usr/share/revsw-libapache2-mod-rev-js-substitute
     # TODO: ProxyPass /rev-js !
