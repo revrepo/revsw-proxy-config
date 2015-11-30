@@ -7,8 +7,8 @@ function handleRequest(request, response) {
 	var response_code = 200;
 	var response_header_list = {
 		"Content-Type": "text/html",
-		"FIRST_CUSTOM_HEADER_v1": "THIS IS HEADER",
-		"FIRST_CUSTOM_HEADER_v2": "THIS IS SECOND HEADER"
+		"NODEJS-CUSTOM-HEADER-v1": "v1 test data",
+		"NODEJS-CUSTOM-HEADER-v2": "v2 test data"
 	};
 
 	if (DEBUG === 1) {
@@ -16,10 +16,10 @@ function handleRequest(request, response) {
 	}
 
 	for (var header in request.headers) {
-		if (header.toUpperCase() === "CUSTOM_RESPONSE_CODE") {
+		if (header.toUpperCase() === "CUSTOM-RESPONSE-CODE") {
 			response_code = request.headers[header];
 		}
-		if (header.substring(0, 20).toUpperCase() === "ADD_RESPONSE_HEADER_") {
+		if (header.substring(0, 20).toUpperCase() === "ADD-RESPONSE-HEADER-") {
 			var tmp_resp_header_name = header.substring(20).toUpperCase();
 			var tmp_resp_header_value = request.headers[header];
 			response_header_list[tmp_resp_header_name] = tmp_resp_header_value;
