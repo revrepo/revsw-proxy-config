@@ -126,7 +126,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'debug': false, 
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -134,14 +134,15 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'X-Rev-Beresp-TTL', 'v': /3.000/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 	test_cache_time(0, {
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -150,17 +151,17 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': 5, 'max': 6
+			'min': 2, 'max': 3
 		} 
 	});
 	test_cache_time(1000, { 
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -169,18 +170,18 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': 4, 'max': 5
+			'min': 1, 'max': 2
 		}
 	});
 	
-	test_cache_time(5000, { 
+	test_cache_time(2000, { 
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -189,7 +190,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /3/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': -1, 'max': 0
@@ -200,7 +201,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -209,18 +210,18 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': 4, 'max': 5
+			'min': 1, 'max': 2
 		}
 	});
 	
-	test_cache_time(2000, { 
+	test_cache_time(1000, { 
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -229,18 +230,18 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': 2, 'max': 3
+			'min': 0, 'max': 1
 		}
 	});
 
-	test_cache_time(13000, { 
+	test_cache_time(16000, { 
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=6',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -248,7 +249,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=6/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 
@@ -264,7 +265,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'action': 'TTL', 
@@ -273,7 +274,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
 		]
 	});
 	test_cache_time(0, {
@@ -281,7 +282,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'action': 'TTL', 
@@ -290,7 +291,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
 		]
 	});
 	test_cache_time(2000, {
@@ -298,7 +299,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'action': 'TTL', 
@@ -307,7 +308,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
 		]
 	});
 });
@@ -367,7 +368,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'debug': false, 
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -375,14 +376,14 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 	test_cache_time(0, {
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -391,7 +392,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 2, 'max': 3
@@ -401,7 +402,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -410,7 +411,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 0, 'max': 1
@@ -421,7 +422,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -430,7 +431,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /3/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': -4, 'max': -3
@@ -441,7 +442,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
@@ -449,7 +450,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
  		]
  	});
  	test_cache_time(1000, { 
@@ -457,7 +458,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
@@ -465,7 +466,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		]
  	});
  	test_cache_time(1000, { 
@@ -473,7 +474,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
@@ -482,7 +483,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
  			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
@@ -493,7 +494,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -502,7 +503,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': -3, 'max': -2
@@ -513,7 +514,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
@@ -521,7 +522,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
  		]
  	});
  	test_cache_time(6000, { 
@@ -529,7 +530,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
@@ -537,7 +538,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
  		]
  	});
 	test_cache_time(0, {
@@ -545,7 +546,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -553,7 +554,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 	test_cache_time(1000, {
@@ -561,7 +562,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -570,7 +571,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
@@ -587,7 +588,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'debug': false, 
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -595,14 +596,14 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 	test_cache_time(0, {
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -611,7 +612,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 2, 'max': 3
@@ -621,7 +622,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -630,18 +631,18 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 0, 'max': 1
 		}
 	});
-	test_cache_time(4000, { 
-		'debug': true,
+	test_cache_time(1000, { 
+		'debug': false,
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '503',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -650,42 +651,47 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /3/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': -4, 'max': -3
+			'min': -1, 'max': 0
 		}
 	});
- 	test_cache_time(7000, { 
- 		'debug': true,
+ 	test_cache_time(4000, { 
+ 		'debug': false,
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '503',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
  		'desc': 'Test 5 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource was previously fetched from backend', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
- 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
- 		]
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /4/ },
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
+ 		],
+		'ttl_interval': {
+			'min': -5, 'max': -4
+		}
  	});
  	test_cache_time(1000, { 
  		'debug': false,
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
  		'desc': 'Test 6 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource could not be fetched previously because the backend was sick', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
- 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /5/ },
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		]
  	});
  	test_cache_time(1000, { 
@@ -693,7 +699,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
@@ -702,7 +708,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
  			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
@@ -713,7 +719,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
@@ -722,42 +728,78 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': -3, 'max': -2
 		}
 	});
- 	test_cache_time(7000, { 
+	test_cache_time(11000, { 
+		'debug': false,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'CUSTOM-RESPONSE-CODE': '500',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
+			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 200,
+		'desc': 'Test 9 - check that 200 response is returned and ttl and grace updates according to settings',
+		'response_headers': [
+			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /3/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
+		],
+		'ttl_interval': {
+			'min': -14, 'max': -13
+		}
+	});
+	test_cache_time(1000, { 
+		'debug': false,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'CUSTOM-RESPONSE-CODE': '500',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
+			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 200,
+		'desc': 'Test 10 - check that 200 response is returned and ttl and grace updates according to settings',
+		'response_headers': [
+			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /4/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
+		],
+		'ttl_interval': {
+			'min': -15, 'max': -14
+		}
+	});
+	test_cache_time(1000, { 
+		'debug': false,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'CUSTOM-RESPONSE-CODE': '500',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
+			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 503,
+		'desc': 'Test 11 - check that 503 response is returned when the ttl and grace values have expired',
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+ 	test_cache_time(4000, { 
  		'debug': false,
  		'obj': test_obj_1, 
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '500',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
- 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
- 		},
- 		'status_code': 200,
- 		'desc': 'Test 9 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource was previously fetched from backend', 
- 		'response_headers': [
- 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
- 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
- 		]
- 	});
- 	test_cache_time(6000, { 
- 		'debug': false,
- 		'obj': test_obj_1, 
- 		'request_headers': {
- 			'CUSTOM-RESPONSE-CODE': '500',
- 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 503,
- 		'desc': 'Test 10 - check that 503 response is returned when a request is made for a resource that has ttl < 0 and grace < 0 and the backend is sick', 
+ 		'desc': 'Test 12 - check that 503 response is returned when a request is made for a resource that has ttl < 0 and grace < 0 and the backend is sick after a while', 
  		'response_headers': [
- 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
- 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+ 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
  		]
  	});
 	test_cache_time(0, {
@@ -765,15 +807,15 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 11 - first test that the resource is cacheable if available', 
+		'desc': 'Test 13 - first test that the resource is cacheable if available', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		]
 	});
 	test_cache_time(1000, {
@@ -781,16 +823,16 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 		'obj': test_obj_1, 
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
-			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=3',
+			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 12 - second test that the resource is served from cache', 
+		'desc': 'Test 14 - second test that the resource is served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=3/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
