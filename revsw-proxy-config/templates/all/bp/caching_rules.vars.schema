@@ -56,8 +56,7 @@
                                 "pattern": "^(add|replace|remove)$"
                         },
                         "header_name": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9-]{1,64})$"
+                                "type": "string"
                         },
                         "header_value": {
                                 "type": "string",
@@ -80,8 +79,7 @@
                                 "pattern": "^(add|replace|remove)$"
                         },
                         "header_name": {
-                                "type": "string",
-                                "pattern": "^([a-zA-Z0-9-]{1,64})$"
+                                "type": "string"
                         },
                         "header_value": {
                                 "type": "string",
