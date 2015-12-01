@@ -117,7 +117,7 @@ describe('Basic tests - PUT', function() {
   });
 
 
-  it('Simple HTTP  PUT test  dynamic config', function(done) {
+  it('Simple HTTP  PUT test dynamic config', function(done) {
     request(url)
       .put('/cgi-bin/test.cgi')
       .set('Host', domain_dsa)
