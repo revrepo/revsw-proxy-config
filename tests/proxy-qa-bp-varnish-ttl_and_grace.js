@@ -146,7 +146,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - make first check for resource', 
+		'desc': 'Test 2 - check that the resource is served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -165,7 +165,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - make second check for resource', 
+		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -185,7 +185,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check negative ttl', 
+		'desc': 'Test 4 - check first request when TTL<0 & GRACE>0 - check if object is served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -205,7 +205,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 5 - check ttl is positive again', 
+		'desc': 'Test 5 - check that the object was fetched from the backend after the first request that had TTL<0 & GRACE>0', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -225,7 +225,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 6 - check ttl is positive again and in the expected interval', 
+		'desc': 'Test 6 - check TTL>0 and is in the expected range', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -245,7 +245,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 7 - check resource is not cached', 
+		'desc': 'Test 7 - check that the resource with TTL<0 & GRACE<0 is not served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
@@ -255,7 +255,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 
 });
 
-describe('Headers Manipulation Test - check specific timing related headers and the 404 backend flow', function() {
+describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 404 status codes', function() {
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
@@ -313,7 +313,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 	});
 });
 
-describe('Headers Manipulation Test - check specific timing related headers and the 500 backend flow', function() {
+describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 500 status codes', function() {
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
@@ -339,7 +339,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		},
 		'action': 'TTL', 
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 2 - check that resource is not in cache second time', 
+		'desc': 'Test 2 - check again that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -359,7 +359,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 	});
 });
 
-describe('Headers Manipulation Test - check specific timing related headers on the half 404 flow', function() {
+describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 404 status codes', function() {
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_normalflow=" + random_number.toString();
@@ -387,7 +387,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - make first check for resource', 
+		'desc': 'Test 2 - check that resource is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -406,7 +406,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check that first get before ttl < 0 returnes the resource from cache', 
+		'desc': 'Test 3 - check that resource is served from cache for the first request before TTL<0 & GRACE>0', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -426,7 +426,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check that 200 response is returned when first request is made for a resource that has ttl < 0 and grace > 0', 
+		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -446,7 +446,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 5 - check that 404 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 5 - check that 404 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
@@ -462,7 +462,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 6 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource could not be fetched previously because the backend was sick', 
+ 		'desc': 'Test 6 - check that 200 response is returned when object has TTL<0 & GRACE<0 and the resource could not be fetched previously because the backend was sick and now the backend works', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
@@ -478,7 +478,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 7 - check that 200 response is returned when a request is made for a resource that has ttl > 0', 
+ 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -498,7 +498,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 8 - check that 200 response is returned when first request is made for a resource that has ttl < 0 and grace > 0', 
+		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - this request triggers a backed refresh', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -518,7 +518,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 9 - check that 404 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 9 - check that 404 response is returned when object has TTL<0 & GRACE>0 - an object refresh was previously triggered', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
@@ -534,7 +534,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 10 - check that 404 response is returned when a request is made for a resource that has ttl < 0 and grace < 0', 
+ 		'desc': 'Test 10 - check that 404 response is returned when object is not in cache after a while', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
@@ -579,7 +579,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 	});
 });
 
-describe('Headers Manipulation Test - check specific timing related headers on the half 500 flow', function() {
+describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 500 status codes', function() {
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_normalflow=" + random_number.toString();
@@ -607,7 +607,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - make first check for resource', 
+		'desc': 'Test 2 - check that resource is served from cache', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -626,7 +626,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check that first get before ttl < 0 returnes the resource from cache', 
+		'desc': 'Test 3 - check that resource is served from cache for first request before TTL<0 & GRACE>0', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -646,7 +646,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check that 200 response is returned when first request is made for a resource that has ttl < 0 and grace > 0', 
+		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -666,7 +666,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 5 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 5 - check that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -686,7 +686,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 6 - check that 200 response is returned when a request is made for a resource that has ttl < 0 and grace > 0 and the resource could not be fetched previously because the backend was sick', 
+ 		'desc': 'Test 6 - check again that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -703,7 +703,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 7 - check that 200 response is returned when a request is made for a resource that has ttl > 0', 
+ 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0', 
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -723,7 +723,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 8 - check that 200 response is returned when first request is made for a resource that has ttl < 0 and grace > 0', 
+		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - check headers have the expected values', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -743,7 +743,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 9 - check that 200 response is returned and ttl and grace updates according to settings',
+		'desc': 'Test 9 - check that 200 response is returned and TTL and GRACE updates according to settings',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -763,7 +763,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 10 - check that 200 response is returned and ttl and grace updates according to settings',
+		'desc': 'Test 10 - check that 200 response is returned and TTL and GRACE updates according to settings - last response served from cache when TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
@@ -783,7 +783,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 503,
-		'desc': 'Test 11 - check that 503 response is returned when the ttl and grace values have expired',
+		'desc': 'Test 11 - check that 503 response is returned when object has TTL<0 & GRACE<0',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -797,7 +797,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 503,
- 		'desc': 'Test 12 - check that 503 response is returned when a request is made for a resource that has ttl < 0 and grace < 0 and the backend is sick after a while', 
+ 		'desc': 'Test 12 - check that 503 response is returned after a while when object has TTL<0 & GRACE<0 and the backend is still sick', 
  		'response_headers': [
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
  		]
@@ -811,7 +811,7 @@ describe('Headers Manipulation Test - check specific timing related headers on t
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 13 - first test that the resource is cacheable if available', 
+		'desc': 'Test 13 - first test that the resource is cacheable', 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
