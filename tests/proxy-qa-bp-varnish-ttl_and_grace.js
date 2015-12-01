@@ -25,12 +25,6 @@ var request = require('request');
 var proxy = 'http://testsjc20-bp01.revsw.net';
 var hostname = 'http://qa-api-test-proxy-bp-varnish-ttl-grace.revsw.net';
 
-/// REWRITE FUNCTION - THIS WILL treat the follwing casese
-
-
-//// TEST GRACE VALUE AND TTL VALUE
-//// TEST THE RESPONSE OF THE BACKEND SERVERS after the resource enters in grace period and exists from the grace period
-
 function custom_sleep(time) {
 	var stop = new Date().getTime();
 
