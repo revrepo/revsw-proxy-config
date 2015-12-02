@@ -889,7 +889,7 @@ unset beresp.http.Expires;
 {%- endcall %}{# _for_each_site("ENABLE_CACHE") #}
 
 set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
-set beresp.http.X-Rev-beresp-grace = beresp.grace;
+set beresp.http.X-Rev-beresp-grace = revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}};
 
 # Save original host and URL for smart ban.
 set beresp.http.X-Rev-Host = bereq.http.Host;
