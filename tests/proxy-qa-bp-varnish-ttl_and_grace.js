@@ -889,7 +889,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 	});
 });
 
-describe('Headers Manipulation Test - check grace value in normal values in normal circumstances for test resource', function() {
+describe('Headers Manipulation Test - check grace value in normal circumstances for test resource', function() {
 	var fr = '/fictive_resource_for_grace.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_grace_normal_flow=" + random_number.toString();
