@@ -273,7 +273,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing ojbect for cache MISS and max-age of 360000', function(done) {
+  it('Testing object for cache MISS and max-age of 360000', function(done) {
     this.timeout(900000);
     request(url)
       .get(test_object_js_1)
@@ -291,7 +291,7 @@ describe('Basic tests', function() {
   });
 
 
-  it('Testing ojbect for cache MISS and max-age of 290304000 on base config', function(done) {
+  it('Testing object for cache MISS and max-age of 290304000 on base config', function(done) {
     this.timeout(900000);
     request(url)
       .get(test_object_js_1)
@@ -1290,7 +1290,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing ojbect for X-Rev-Cache-BE-1st-Byte-Time is 0', function(done) {
+  it('Testing object for X-Rev-Cache-BE-1st-Byte-Time is 0', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1321,7 +1321,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing cache config ojbect for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
+  it('Testing cache config object for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1340,7 +1340,7 @@ describe('Basic tests', function() {
         done();
       });
   });
-  it('Testing cache config ojbect for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
+  it('Testing cache config object for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1364,7 +1364,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing RMA config ojbect for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
+  it('Testing RMA config object for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1392,7 +1392,7 @@ describe('Basic tests', function() {
         });
       });
   });
-  it('Testing RMA config ojbect for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
+  it('Testing RMA config object for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1417,7 +1417,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing cache config ojbect for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
+  it('Testing cache config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1437,7 +1437,7 @@ describe('Basic tests', function() {
         done();
       });
   });
-  it('Testing cache config ojbect for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
+  it('Testing cache config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1461,7 +1461,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing RMA config ojbect for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
+  it('Testing RMA config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1481,7 +1481,7 @@ describe('Basic tests', function() {
         done();
       });
   });
-  it('Testing RMA config ojbect for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
+  it('Testing RMA config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1502,7 +1502,7 @@ describe('Basic tests', function() {
       });
   });
 
-  it('Testing cache config ojbect X-Rev-beresp-ttl matches max-age HTTP', function(done) {
+  it('Testing cache config object X-Rev-beresp-ttl matches max-age HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1527,7 +1527,7 @@ describe('Basic tests', function() {
   });
 
 
-  it('Testing cache config ojbect X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
+  it('Testing cache config object X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1555,7 +1555,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing rma config ojbect X-Rev-beresp-ttl matches max-age HTTP', function(done) {
+  it('Testing rma config object X-Rev-beresp-ttl matches max-age HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1580,7 +1580,7 @@ describe('Basic tests', function() {
   });
 
 
-  it('Testing rma config ojbect X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
+  it('Testing rma config object X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1611,7 +1611,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing cache config ojbect x-rev-cache-hits HTTPS', function(done) {
+  it('Testing cache config object x-rev-cache-hits HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1646,7 +1646,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing cache config ojbect x-rev-cache-hits HTTP', function(done) {
+  it('Testing cache config object x-rev-cache-hits HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1678,7 +1678,7 @@ describe('Basic tests', function() {
           });
       });
   });
-  it('Testing rma config ojbect x-rev-cache-hits HTTPS', function(done) {
+  it('Testing rma config object x-rev-cache-hits HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1713,7 +1713,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing rma config ojbect x-rev-cache-hits HTTP', function(done) {
+  it('Testing rma config object x-rev-cache-hits HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1754,7 +1754,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing ojbect cache config X-Rev-beresp-grace is 10 HTTPS', function(done) {
+  it('Testing object cache config X-Rev-beresp-grace is 10 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1765,7 +1765,7 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 10) {
+        if (res.headers['x-rev-beresp-grace'] != 0) {
           throw new Error("There is a problem with the x-rev-beresp-grace");
         }
         res.should.have.status(200);
@@ -1776,7 +1776,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing ojbect cache config X-Rev-beresp-grace is 10 HTTP', function(done) {
+  it('Testing object cache config X-Rev-beresp-grace is 10 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1787,7 +1787,7 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 10) {
+        if (res.headers['x-rev-beresp-grace'] != 0) {
           throw new Error("There is a problem with the x-rev-beresp-grace");
         }
         res.should.have.status(200);
@@ -1796,7 +1796,7 @@ describe('Basic tests', function() {
   });
 
 
-  it('Testing ojbect rma config X-Rev-beresp-grace is 10 HTTPS', function(done) {
+  it('Testing object rma config X-Rev-beresp-grace is 10 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1818,7 +1818,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing ojbect rma config X-Rev-beresp-grace is 10 HTTP', function(done) {
+  it('Testing object rma config X-Rev-beresp-grace is 10 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
