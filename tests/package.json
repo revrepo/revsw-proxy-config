@@ -4,7 +4,7 @@
   "description": "",
   "main": "proxy-qa-robot.js",
   "scripts": {
-    "test": "mocha --reporter spec --timeout=20000 ."
+    "test": "mocha --reporter spec --timeout=30000 ."
   },
   "author": "",
   "license": "BSD-2-Clause",
