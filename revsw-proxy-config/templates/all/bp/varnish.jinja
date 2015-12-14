@@ -512,41 +512,54 @@ timers.unit("microseconds");
 }
 
 sub vcl_hash {
-{{ _for_each_site_custom_vcl("hash", "req") }}
 
-# Include User-Agent in hash if set
 
-{% call (site) _for_each_site("INCLUDE_USER_AGENT", "req") %}
-  hash_data(req.http.PS-CapabilityList);
-{%- endcall %}{# _for_each_site("INCLUDE_USER_AGENT") #}
+####
+#### check that a valid hash is generated. also add in the rest of VCL functions
+####
+# add support for the revsdk app
+if (req.http.host ~ "(?i)\.(revdn|revsdk)\.(net|com)$") {
+    hash_data(std.tolower(req.http.host));
+    hash_data(std.tolower(req.http.url));
+    hash_data(std.tolower(req.http.X-Rev-Host));
+} else {
 
-# Hash selected optimization profile
-hash_data(req.http.X-RevSw-Profile);
+    {{ _for_each_site_custom_vcl("hash", "req") }}
 
-# Hash per-domain caching rules
-hash_data(req.http.X-Rev-Rules-Hash);
-
-# Hash cookies if allowed.
-if (req.http.X-Rev-Cookie-Hash) {
-hash_data(req.http.X-Rev-Cookie-Hash);
+    # Include User-Agent in hash if set
+    
+    {% call (site) _for_each_site("INCLUDE_USER_AGENT", "req") %}
+      hash_data(req.http.PS-CapabilityList);
+    {%- endcall %}{# _for_each_site("INCLUDE_USER_AGENT") #}
+    
+    # Hash selected optimization profile
+    hash_data(req.http.X-RevSw-Profile);
+    
+    # Hash per-domain caching rules
+    hash_data(req.http.X-Rev-Rules-Hash);
+    
+    # Hash cookies if allowed.
+    if (req.http.X-Rev-Cookie-Hash) {
+    hash_data(req.http.X-Rev-Cookie-Hash);
+    }
+    
+    {% call (site) _for_each_site("DEBUG_MODE", "req") %}
+      chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
+    
+      # Log hash cookies (see above)
+      if (req.http.X-Rev-Cookie-Hash) {
+      chromelogger.log("hash " + req.xid + ": X-Rev-Cookie-Hash: " + req.http.X-Rev-Cookie-Hash);
+      }
+    
+      # Log default VCL hash strings
+      chromelogger.log("hash " + req.xid + ": req.url: " + req.url);
+      if (req.http.host) {
+      chromelogger.log("hash " + req.xid + ": req.http.host: " + req.http.host);
+      } else {
+      chromelogger.log("hash " + req.xid + ": server.ip: " + server.ip);
+      }
+    {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
 }
-
-{% call (site) _for_each_site("DEBUG_MODE", "req") %}
-  chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
-
-  # Log hash cookies (see above)
-  if (req.http.X-Rev-Cookie-Hash) {
-  chromelogger.log("hash " + req.xid + ": X-Rev-Cookie-Hash: " + req.http.X-Rev-Cookie-Hash);
-  }
-
-  # Log default VCL hash strings
-  chromelogger.log("hash " + req.xid + ": req.url: " + req.url);
-  if (req.http.host) {
-  chromelogger.log("hash " + req.xid + ": req.http.host: " + req.http.host);
-  } else {
-  chromelogger.log("hash " + req.xid + ": server.ip: " + server.ip);
-  }
-{%- endcall %}{# _for_each_site("DEBUG_MODE") #}
 }
 
 # Block 3a: Define ACL for purge requests
