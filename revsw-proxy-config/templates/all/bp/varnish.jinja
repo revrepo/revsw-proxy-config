@@ -946,7 +946,7 @@ unset beresp.http.Expires;
 
 # Add in vcl_backend_response support for *.revsdk.net
 # a problem will appear in case no domains are defined
-elseif (beresp.http.host ~ "(?i)\.revsdk\.net$") {
+elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
   revvar.set_duration(false, 18, 60s);
 
   if (beresp.status != 200) {
@@ -954,7 +954,7 @@ elseif (beresp.http.host ~ "(?i)\.revsdk\.net$") {
     return (deliver);
   }
 
-  set beresp.http.X-Rev-SDK = "true";
+  set beresp.http.X-Rev-SDK = "1";
 
 }
 
