@@ -25,7 +25,7 @@ var request = require('request');
 var proxy = 'http://testsjc20-bp01.revsw.net';
 
 var hostname_internal = '0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net';
-var x_rev_hostname_internal = 'qa-api-test-proxy-bp-varnish-ttl-grace.revsw.net';
+var x_rev_hostname_internal = 'test-proxy-nodejs-server-status-frontend-control.revsw.net';
 
 var hostname_external = '0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net';
 var x_rev_hostname_external = 'httpbin.org';
