@@ -273,7 +273,189 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 		'hostname': hostname_external,
 		'obj': test_obj_1, 
 		'request_headers': {
-			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Host': x_rev_hostname_external
+		},
+		'action': 'TTL', 
+		'status_code': 503, // default varnish response code
+		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+});
+
+describe('SDK internal test - basic header and ttl & grace', function() {
+ 	var fr = '/fictive_resource.html';
+ 	var random_number = Math.floor(Math.random() * 100000 + 1000);
+ 	var test_obj_1 = fr + "?rand_internal_version_basic=" + random_number.toString();
+
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
+ 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 200,
+		'desc': 'Test 1 - check that resource is not in cache', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /21.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=21/ },
+			{ 'k': 'ttl-grace', 'v': /working_add_header/ }
+		]
+	});
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
+ 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 200,
+		'desc': 'Test 2 - check that the resource is served from cache', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /21.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=21/ },
+			{ 'k': 'ttl-grace', 'v': /working_add_header/ }
+		],
+		'ttl_interval': {
+			'min': 20, 'max': 21
+		} 
+	});
+	test_cache_time(1000, { 
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+ 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
+ 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
+		},
+		'status_code': 200,
+		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /21.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
+			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
+			{ 'k': 'Cache-Control', 'v': /public, max-age=21/ },
+			{ 'k': 'ttl-grace', 'v': /working_add_header/ }
+		],
+		'ttl_interval': {
+			'min': 18, 'max': 19
+		}
+	});
+	
+});
+
+describe('SDK internal test - check headers for 404 status code for the revsdk component', function() {
+ 	var fr = '/fictive_resource.html';
+ 	var random_number = Math.floor(Math.random() * 100000 + 1000);
+	var test_obj_1 = fr + "?rand_internal_version_404flow=" + random_number.toString();
+
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+			'CUSTOM-RESPONSE-CODE': '404'
+		},
+		'action': 'TTL', 
+		'status_code': 404,
+		'desc': 'Test 1 - check that resource is not in cache', 
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+			'CUSTOM-RESPONSE-CODE': '404'
+		},
+		'action': 'TTL', 
+		'status_code': 404, 
+		'desc': 'Test 2 - check again that resource is not in cache',
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+	test_cache_time(3000, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+			'CUSTOM-RESPONSE-CODE': '404'
+		},
+		'action': 'TTL', 
+		'status_code': 404, 
+		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+});
+
+describe('SDK internal test - check headers for 500 status code for the revsdk component', function() {
+ 	var fr = '/fictive_resource.html';
+ 	var random_number = Math.floor(Math.random() * 100000 + 1000);
+	var test_obj_1 = fr + "?rand_internal_version_500flow=" + random_number.toString();
+
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+			'CUSTOM-RESPONSE-CODE': '500'
+		},
+		'action': 'TTL', 
+		'status_code': 503, // default varnish response code
+		'desc': 'Test 1 - check that resource is not in cache', 
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
+			'CUSTOM-RESPONSE-CODE': '500'
+		},
+		'action': 'TTL', 
+		'status_code': 503, // default varnish response code
+		'desc': 'Test 2 - check again that resource is not in cache',
+		'response_headers': [
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		]
+	});
+	test_cache_time(3000, {
+		'debug': false,
+		'hostname': hostname_internal,
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
 		'action': 'TTL', 
@@ -285,270 +467,3 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	});
 });
 
-//// describe('SDK basic header and ttl & grace tests', function() {
-//// 	var fr = '/fictive_resource.html';
-//// 	var random_number = Math.floor(Math.random() * 100000 + 1000);
-//// 	var test_obj_1 = fr + "?rand_version_basic=" + random_number.toString();
-//// 
-//// 	test_cache_time(0, {
-//// 		'debug': true, 
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 1 - check that resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		]
-//// 	});
-//// 	test_cache_time(0, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 2 - check that the resource is served from cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
-//// 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		],
-//// 		'ttl_interval': {
-//// 			'min': 2, 'max': 3
-//// 		} 
-//// 	});
-//// 	test_cache_time(1000, { 
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
-//// 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		],
-//// 		'ttl_interval': {
-//// 			'min': 1, 'max': 2
-//// 		}
-//// 	});
-//// 	
-//// 	test_cache_time(2000, { 
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 4 - check first request when TTL<0 & GRACE>0 - check if object is served from cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
-//// 			{ 'k': 'X-Rev-Cache-Hits', 'v': /3/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		],
-//// 		'ttl_interval': {
-//// 			'min': -1, 'max': 0
-//// 		}
-//// 	});
-//// 
-//// 	test_cache_time(1000, { 
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 5 - check that the object was fetched from the backend after the first request that had TTL<0 & GRACE>0', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
-//// 			{ 'k': 'X-Rev-Cache-Hits', 'v': /1/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		],
-//// 		'ttl_interval': {
-//// 			'min': 1, 'max': 2
-//// 		}
-//// 	});
-//// 	
-//// 	test_cache_time(1000, { 
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 6 - check TTL>0 and is in the expected range', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /HIT/ },
-//// 			{ 'k': 'X-Rev-Cache-Hits', 'v': /2/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		],
-//// 		'ttl_interval': {
-//// 			'min': 0, 'max': 1
-//// 		}
-//// 	});
-//// 
-//// 	test_cache_time(16000, { 
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'status_code': 200,
-//// 		'desc': 'Test 7 - check that the resource with TTL<0 & GRACE<0 is not served from cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
-//// 			{ 'k': 'x-rev-beresp-grace', 'v': /15.0001/ },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
-//// 		]
-//// 	});
-//// 
-//// });
-//// 
-//// describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 404 status codes', function() {
-//// 	var fr = '/fictive_resource.html';
-//// 	var random_number = Math.floor(Math.random() * 100000 + 1000);
-//// 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
-//// 
-//// 	test_cache_time(0, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '404',
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 404,
-//// 		'desc': 'Test 1 - check that resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=211/ }
-//// 		]
-//// 	});
-//// 	test_cache_time(0, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '404',
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 404,
-//// 		'desc': 'Test 2 - check again resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=211/ }
-//// 		]
-//// 	});
-//// 	test_cache_time(2000, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '404',
-//// 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
-//// 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 404,
-//// 		'desc': 'Test 3 - check with delay that resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-//// 			{ 'k': 'Cache-Control', 'v': /public, max-age=211/ }
-//// 		]
-//// 	});
-//// });
-//// 
-//// describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 500 status codes', function() {
-//// 	var fr = '/fictive_resource.html';
-//// 	var random_number = Math.floor(Math.random() * 100000 + 1000);
-//// 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
-//// 
-//// 	test_cache_time(0, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '500'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 503, // default varnish response code
-//// 		'desc': 'Test 1 - check that resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS111/ }
-//// 		]
-//// 	});
-//// 	test_cache_time(0, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '500'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 503, // default varnish response code
-//// 		'desc': 'Test 2 - check again that resource is not in cache',
-//// 		'response_headers': [
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS111/ }
-//// 		]
-//// 	});
-//// 	test_cache_time(3000, {
-//// 		'debug': false,
-//// 		'obj': test_obj_1, 
-//// 		'request_headers': {
-//// 			'X-Rev-Host': x_rev_hostname,
-//// 			'CUSTOM-RESPONSE-CODE': '500'
-//// 		},
-//// 		'action': 'TTL', 
-//// 		'status_code': 503, // default varnish response code
-//// 		'desc': 'Test 3 - check with delay that resource is not in cache', 
-//// 		'response_headers': [
-//// 			{ 'k': 'X-Rev-Cache', 'v': /MISS111/ }
-//// 		]
-//// 	});
-//// });
