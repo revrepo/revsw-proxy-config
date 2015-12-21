@@ -22,7 +22,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('request');
 
-var proxy = 'http://testsjc20-bp01.revsw.net';
+var proxy = 'testsjc20-bp01.revsw.net';
 
 var hostname_internal = '0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net';
 var x_rev_hostname_internal = 'test-proxy-nodejs-server-status-frontend-control.revsw.net';
@@ -41,6 +41,7 @@ function custom_sleep(time) {
 function test_cache_time(sleep_time, generic_object)
 {
 	var debug = generic_object['debug'];
+	var protocol = "http";
 	var operators = {
 		'<': function(a, b) { return a < b },
 		'>=': function(a, b) { return a >= b }
@@ -48,11 +49,17 @@ function test_cache_time(sleep_time, generic_object)
 	var final_description = 'Caching Time - ' + generic_object['desc'];
 	var req_head = generic_object['request_headers'];
 	var res_head = generic_object['response_headers'];
+	var res_body = generic_object['response_body'];
+	
+	if (generic_object['get_proto']) {
+		protocol = generic_object['get_proto'];
+	}
+
 
 	it(final_description, function(done) {
 		var options = {
 			url: "http://" + generic_object['hostname'] + generic_object['obj'],
-			proxy: proxy,
+			proxy: protocol + "://" + proxy,
 			headers: req_head
 		};
 
@@ -108,6 +115,18 @@ function test_cache_time(sleep_time, generic_object)
 				} else {
 					throw Error("No x-rev-obj-ttl header found!");
 					done();
+				}
+			}
+
+			// check content of body
+			if (res_body) {
+				for (var i in res_body) {
+					var val = res_body[i];
+
+					if (!res.body.match(val)) {
+						throw new Error("Error! Response body should match: " + val);
+						done();
+					}
 				}
 			}
 
@@ -284,6 +303,88 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	});
 });
 
+describe('SDK external test - check proto for https', function() {
+	var fr = '/get';
+	var random_number = Math.floor(Math.random() * 100000 + 1000);
+	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
+
+	test_cache_time(0, {
+		'debug': false, 
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "https"
+		},
+		'status_code': 200,
+		'desc': 'Test 1 - check that resource contains specified values in headers and body', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "https://httpbin.org/get'
+		]
+	});
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "https"
+		},
+		'status_code': 200,
+		'desc': 'Test 2 - check headers and body content again', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "https://httpbin.org/get'
+		]
+	});
+	test_cache_time(1000, { 
+		'debug': false,
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "https"
+		},
+		'status_code': 200,
+		'desc': 'Test 3 - check 1 second later the response headers and body', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "https://httpbin.org/get'
+		]
+	});
+	
+});
+
+// Internal tests
 describe('SDK internal test - basic header and ttl & grace', function() {
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
