@@ -303,7 +303,90 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	});
 });
 
-describe('SDK external test - check proto for https', function() {
+describe('SDK external test - check http proto over https', function() {
+	var fr = '/get';
+	var random_number = Math.floor(Math.random() * 100000 + 1000);
+	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
+
+	test_cache_time(0, {
+		'debug': false, 
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "http"
+		},
+		'status_code': 200,
+		'desc': 'Test 1 - check that resource contains specified values in headers and body', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "http://httpbin.org/get'
+		]
+	});
+	test_cache_time(0, {
+		'debug': false,
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "http"
+		},
+		'status_code': 200,
+		'desc': 'Test 2 - check headers and body content again', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "http://httpbin.org/get'
+		]
+	});
+	test_cache_time(1000, { 
+		'debug': false,
+		'hostname': hostname_external,
+		'get_proto': 'https',
+		'obj': test_obj_1, 
+		'request_headers': {
+			'X-Rev-Host': x_rev_hostname_external,
+			'X-Rev-Proto': "http"
+		},
+		'status_code': 200,
+		'desc': 'Test 3 - check 1 second later the response headers and body', 
+		'response_headers': [
+			{ 'k': 'x-rev-sdk', 'v': /1/ },
+			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
+			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
+		],
+		'response_body': [
+			'"Host": "httpbin.org",',
+			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
+			'"X-Rev-Host": "httpbin.org",',
+			'"url": "http://httpbin.org/get'
+		]
+	});
+	
+});
+
+describe('SDK external test - check https proto over https', function() {
 	var fr = '/get';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
@@ -322,9 +405,9 @@ describe('SDK external test - check proto for https', function() {
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
-			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
-			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
+			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
 			'"Host": "httpbin.org",',
@@ -347,6 +430,7 @@ describe('SDK external test - check proto for https', function() {
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
@@ -371,6 +455,7 @@ describe('SDK external test - check proto for https', function() {
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
+			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /0.000/ },
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
 		],
