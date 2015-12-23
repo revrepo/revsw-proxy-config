@@ -408,11 +408,54 @@
       {% endif %}
     {% endfor %}
   {% endif %}
-  # END: (BP-92)  
+  # END: (BP-92)
 
 {%- endmacro %}
 {# END: (BP-342) Common macros for headers #}
 
+{# BEGIN: (BP-342) Common macros for headers #}
+{% macro _common_co_headers(this, host_name) %}
+
+  # Don't propagate "Connection: close" from client
+  proxy_set_header Connection "";
+
+  proxy_set_header Host {{host_name}};
+
+  # BEGIN: (BP-92) Request headers
+  {% if this.ORIGIN_REQUEST_HEADERS %}
+    {% for key in this.ORIGIN_REQUEST_HEADERS %}
+      {% if key.operation == "add" %}
+	proxy_set_header {{ key.header_name }} "{{ key.header_value}}";
+      {% endif %}
+      {% if key.operation == "delete" %}
+	proxy_set_header {{ key.header_name }} "";
+      {% endif %}
+      {% if key.operation == "replace" %}
+	proxy_set_header {{ key.header_name }} "{{ key.header_value}}";
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  # END: (BP-92)
+
+{%- endmacro %}
+{# END: (BP-342) Common macros for headers #}
+
+{% macro _co_profile_factory(co_profiles_mod, co_profiles, index) -%}
+  {% if index == 0 -%}
+    {{ co_profiles_mod.profile0(co_profiles) }}
+  {% elif index == 1 -%}
+    {{ co_profiles_mod.profile1(co_profiles) }}
+  {% elif index == 2 -%}
+    {{ co_profiles_mod.profile2(co_profiles) }}
+  {% elif index == 3 -%}
+    {{ co_profiles_mod.profile3(co_profiles) }}
+  {% elif index == 4 -%}
+    {{ co_profiles_mod.profile4(co_profiles) }}
+  {% else %}
+    # PROFILE OUT OF RANGE - using profile #0
+    {{ co_profiles_mod.profile0(co_profiles) }}
+  {% endif %}
+{%- endmacro %}
 
 {% macro setup(this, co_profiles_mod, co_profiles) %}
 
@@ -555,4 +598,161 @@
 
 {% endif %}{# this.SECURITY_MODE != "block" #}
 
+  {% set is_https = False %}
+  {% set enable_pagespeed = this.ENABLE_OPTIMIZATION %}
+  {% for enable in (this.ENABLE_HTTP, this.ENABLE_HTTPS) %}
+    {% if enable %}
+      {% for p in range(this.REV_PROFILES_COUNT) %}
+	# Profile #{{p}}
+	{% set profile_port = (this.REV_PROFILES_BASE_PORT_HTTPS if is_https else this.REV_PROFILES_BASE_PORT_HTTP) + p %}
+	{% set proto = "https" if is_https else "http" %}
+	{{ balancer_mod.define_co_ows_balancer(this, is_https) }}
+	server {
+	listen {{profile_port}};
+	server_name {{this.SERVER_NAME}}{% for shard in range(this.DOMAIN_SHARDS_COUNT) %} s{{shard}}-{{this.SERVER_NAME}}{% endfor %};
+
+	{% if this.DEBUG_MODE %}
+	  # Per-vhost log while in debug mode
+	  error_log /var/log/nginx/{{this.SERVER_NAME}}.error debug;
+	{% endif %}
+
+	{{ loop_detect_mod.loop_detect(this) }}
+
+	# By default 1.0, not good for keepalives
+	proxy_http_version 1.1;
+	# Don't cut the cord to the backend every time a client disconnects
+	proxy_ignore_client_abort on;
+	{% if not this.ENABLE_PROXY_BUFFERING %}
+	  # We want to serve data to clients right away
+	  proxy_buffering off;
+	{% endif %}
+
+	# BEGIN: Setting up the default headers
+	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	# END: Setting up the default headers
+
+	# Optional customizations before generic options
+	{{ caller(True) }}
+	# End optional customizations before generic options
+
+	{% if is_https %}
+	  {{ ssl_mod.setup(this.ssl) }}
+	{% elif this.ORIGIN_SERVERS_HTTPS %}
+	  # Must enable SSL proxy support for HTTPS origin servers
+	  {{ ssl_mod.setup_proxy_only(this.ssl) }}
+	{% endif %}
+
+	{% if (this.ENABLE_DECOMPRESSION) %}
+	  # add compression if the enable_decompression flag is enabled
+	  # For RUM/Boomerang data and URL substitutions - the subs filter works on uncompressed data
+	  gzip_proxied any;
+	  gunzip on;
+	  gunzip_always on;
+	{% endif %}
+
+	{% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+	# Wait at most for this many seconds for reply from Origin, then return error message.
+	proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+
+	{% set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
+	{% set ows_proto = "https" if origins[0]|truncate(5, True, "") == "https" else "http" %}
+	location / {
+	# TODO: make 'lowercase_escapes' configurable - this is only useful for Metacafe now
+	proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes; # TODO: retry=0 {{proxy_params}}
+
+	# BEGIN: Setting up the default headers
+	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	# END: Setting up the default headers
+
+	}
+
+	# Make sure the origin sees the right Host header
+	proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
+	# proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
+
+	{% if enable_pagespeed %}
+	  # Enable PageSpeed module
+	  pagespeed on;
+
+	  # Ensure requests for pagespeed optimized resources go to the pagespeed handler
+	  # and no extraneous headers get set.
+	  location ~ "\.pagespeed\.([a-z]\.)?[a-z]{2}\.[^.]{10}\.[^.]+" {
+	  add_header "" "";
+	  }
+	  location ~ "^/pagespeed_static/" { }
+	  location ~ "^/ngx_pagespeed_beacon$" { }
+
+	  # Resources from these domains are candidates for optimization
+	  pagespeed Domain {{this.SERVER_NAME}};
+	  pagespeed MapOriginDomain {{proto}}://127.0.0.1:{{profile_port}} {{proto}}://{{this.SERVER_NAME}};
+	  {% for ows in origins %}
+	    {% set host = ows|replace("://","-")|replace(":","-")|replace("/","-") %}
+	    pagespeed MapProxyDomain {{proto}}://{{this.SERVER_NAME}}/rev-ps-{{host}} {{ows}};
+	  {% endfor %}
+
+	  # Faster locking means faster response time, see:
+	  # http://www.webperformance.com/load-testing/blog/2012/12/google-pagespeed-performance-with-memory-locking/
+	  pagespeed SharedMemoryLocks On;
+
+	  # Allow cacheable, but modified HTML to be cached by Varnish
+	  # See: https://developers.google.com/speed/pagespeed/module/downstream-caching
+	  pagespeed DownstreamCachePurgeLocationPrefix {{proto}}://{{this.SERVER_NAME}};
+	  pagespeed DownstreamCachePurgeMethod PURGE;
+	  pagespeed DownstreamCacheRewrittenPercentageThreshold 95;
+
+	  # Disable all filters and start from scratch
+	  pagespeed RewriteLevel PassThrough;
+
+	  {% if this.DOMAIN_SHARDS_COUNT %}
+	    # Apply domain mapping rules to all resources, even if not optimized by PS, to shard everything
+	    pagespeed EnableFilters rewrite_domains;
+	    pagespeed ShardDomain {{this.SERVER_NAME}} {% for shard in range(this.DOMAIN_SHARDS_COUNT) %}s{{shard}}-{{this.SERVER_NAME}},{% endfor %};
+	  {% endif %}
+
+	  {% if this.ENABLE_OPTIMIZATION %}
+	    # Allow optimization of JS-referenced resources
+	    pagespeed InPlaceResourceOptimization on;
+
+	    # Turn on browser-specific optimizations
+	    pagespeed EnableFilters in_place_optimize_for_browser;
+
+	    # Customer profile settings
+	    {{ _co_profile_factory(co_profiles_mod, co_profiles, p) }}
+	  {% endif %}
+	{% else %}{# enable_pagespeed #}
+	  # Disable pagespeed
+	  pagespeed off;
+	{% endif %}{# enable_pagespeed #}
+
+	# Optional customizations after generic options
+	{{ caller(False) }}
+	{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
+	# End optional customizations after generic options
+
+	{% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
+	  # Make sure absolute URLs pointing to the origin go through us instead
+	  {% if (this.ENABLE_HTTP and this.ENABLE_HTTPS) and not is_https %}{# both supported; must prevent conversion from secure to unsecure #}
+	    # HTTPS links are turned into absolute ones to our own server
+	    subs_filter ([\"'])https://{{this.ORIGIN_SERVER_NAME}} $1https://{{this.SERVER_NAME}} r;
+	    # HTTP links are turned into relative ones
+	    subs_filter ([\"'])(http:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
+	  {% else %}{# only HTTP or only HTTPS #}
+	    subs_filter ([\"'])(https?:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
+	  {% endif %}{# HTTP and/or HTTPS #}
+	{% endif %}{# this.SERVER_NAME != this.ORIGIN_SERVER_NAME #}
+
+	{{ third_party_mod.replace_urls(this, proto, this.ENABLE_OPTIMIZATION) }}
+
+	{% if this.REV_RUM_BEACON_URL %}
+	  {% set rum_beacon_url = this.REV_RUM_BEACON_URL if this.REV_RUM_BEACON_URL|truncate(4,True,"") == "http" else proto + "://" + this.REV_RUM_BEACON_URL %}
+	  # RUM beacon
+	  subs_filter </head> "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: '{{rum_beacon_url}}'}); BOOMR.addVar('user_ip', '$http_x_forwarded_for');</script></head>" r;
+
+	  pagespeed Disallow "{{proto}}://{{this.SERVER_NAME}}/rev-diablo/*";
+	{% endif %}
+	}
+      {% endfor %}
+    {% endif %}
+    {% set is_https = True %}
+  {% endfor %}
 {%- endmacro %}

@@ -830,8 +830,15 @@ class NginxConfig(WebServerConfig):
             with open("%s.vars.schema" % template_file_no_ext) as f:
                 schema = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
 
+            schema['properties']['bp']['additionalProperties'] = True
+            input_vars['bp']['ENABLE_OPTIMIZATION'] = False
+            input_vars['bp']['ENABLE_DECOMPRESSION'] = False
+            input_vars['bp']['ORIGIN_REQUEST_HEADERS'] = []
+            input_vars['bp']['REV_RUM_BEACON_URL'] = "http://rum-02-prod-sjc.revsw.net/service"
+
             _log.LOGD("Validating input vars from JSON")
             jsch.validate(input_vars, schema, format_checker=jsch.FormatChecker())
+
 
             env = ImmutableSandboxedEnvironment(
                 line_statement_prefix=None,
