@@ -1,0 +1,746 @@
+{% import "common/ssl.jinja" as ssl_mod %}
+{% import "common/third_party.jinja" as third_party_mod %}
+{% import "common/loop_detect.jinja" as loop_detect_mod %}
+{% import "common/balancer.jinja" as balancer_mod %}
+
+{% macro _common_upstream_block_co(this, balancer_name, routeid_suffix, profiles_base_port, is_https) %}
+  {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
+  {% if content_optimizers|list|length > 0 %}
+    # Content optimizer balancer.
+    # Balancer members are reused immediately even if they have errors (retry=0),
+    # to allow for DNS-based HA.
+    # We try to maintain a connection to them for as long as possible (keepalive=On).
+    {% set proto_prefix = "http://" if content_optimizers[0]|truncate(7, True, "") == "http://" else "https://" %}
+    # proto_prefix = {{proto_prefix}}
+    upstream {{ balancer_mod.balancer_name(this, is_https, balancer_name) }} {
+    # TODO: this is Nginx Plus-only, so we have to use ip_hash instead: sticky cookie routeid{{routeid_suffix}} expires=1h;
+    ip_hash;
+    dynamic_resolve fallback=stale fail_timeout=30s; # must be added AFTER ip_hash
+    {% for co in content_optimizers %}
+      server {{ co|replace(proto_prefix, "") + ":" + profiles_base_port|string }} max_fails=0 fail_timeout=0;
+    {% endfor %}
+    keepalive 32; # keep N connections alive
+    }
+  {% endif %}
+{%- endmacro %}{# _common_upstream_block_co #}
+
+
+{% macro _common_upstream_block_varnish(this, varnish_port, is_https) %}
+  upstream {{ balancer_mod.balancer_name(this, is_https, "varnish") }} {
+  keepalive 32; # keep N connections alive
+  server 127.0.0.1:{{ varnish_port}} max_fails=0 fail_timeout=0;
+  }
+{%- endmacro %}{# _common_upstream_block_varnish #}
+
+
+{% macro _common_profiles_and_security(this, co_profiles_mod, co_profiles) %}
+  # Start rules from scratch
+  # TODO: RevProfilesFlushSelectionRules
+
+  # Run customized profile selection algo
+  {{ co_profiles_mod.profile_selection(co_profiles) }}
+
+  # Security setup
+  {% if this.SECURITY_MODE == "on" %}
+    # TODO: SecRuleEngine On
+  {% elif this.SECURITY_MODE == "detect" %}
+    # TODO: SecRuleEngine DetectionOnly
+  {% else %}
+    # TODO: SecRuleEngine Off
+  {% endif %}
+  # TODO: SecAuditLogStorageDir /var/cache/modsecurity/audit/{{this.SERVER_NAME}}/
+  # TODO: SecAuditLog "/var/cache/modsecurity/audit/{{this.SERVER_NAME}}.index"
+  # TODO: SecAuditLogType Concurrent
+
+  {% set geoip_enabled = this.ENABLE_VARNISH_GEOIP_HEADERS %}
+  {% if this.acl.enabled %}
+    # Begin ACLs
+    {% if this.acl.acl_rules %}
+      {% set countries = this.acl.acl_rules|selectattr("country_code")|list %}
+      {% if countries|length %}{# use GeoIP #}
+	{% set geoip_enabled = True %}
+	if ($geoip_city_country_code ~ "^({{ countries|map(attribute="country_code")|join("|") }})") {
+	set $is_acl_country yes;
+	}
+      {% endif %}{# use GeoIP #}
+
+      {# # Do we need rDNS support ? #}
+      {% set use_rdns = global_var_set("USE_RDNS", False) %}
+      {% for rule in this.acl.acl_rules %}
+	{% if not rule.host_name|is_ipv4 %}
+	  {% set use_rdns = global_var_set("USE_RDNS", True) %}
+	{% endif %}
+      {% endfor %}{# rule in this.acl.acl_rules #}
+
+      {% if global_var_get("USE_RDNS") %}
+	rdns on;
+      {% endif %}{# use_rdns #}
+
+      {% if this.acl.action == "allow_except" %}
+	{% for rule in this.acl.acl_rules %}
+	  {% if rule.host_name|is_ipv4 %}
+	    if ($remote_addr =/ "{{rule.host_name}}{{ "/" + rule.subnet_mask|netmask_bits if rule.subnet_mask else "" }}") {
+	    return 403;
+	    }
+	  {% elif rule.host_name %}
+	    if ($rdns_hostname = {{ rule.host_name }}) {
+	    return 403;
+	    }
+	  {% endif %}
+	  {% if rule.header_name %}
+	    if ($http_{{ rule.header_name|lower|replace("-", "_") }} = "{{ rule.header_value }}") {
+	    return 403;
+	    }
+	  {% endif %}
+	{% endfor %}{# rule in this.acl.acl_rules #}
+	{% if countries|length %}{# use GeoIP #}
+	  if ($is_acl_country = yes) {
+	  return 403;
+	  }
+	{% endif %}
+      {% else %}{# this.acl.action == "deny_except" #}
+	{% set deny_cond = global_var_set("DENY_COND", "x") %}
+	set $deny_cond x;
+	{% for rule in this.acl.acl_rules %}
+	  {% if rule.host_name|is_ipv4 %}
+	    if ($remote_addr !=/ "{{rule.host_name}}{{ "/" + rule.subnet_mask|netmask_bits if rule.subnet_mask else "" }}") {
+	    {% set deny_cond = global_var_set("DENY_COND", deny_cond + 'x') %}
+	    set $deny_cond "${deny_cond}x";
+	    }
+	  {% elif rule.host_name %}
+	    if ($rdns_hostname != {{ rule.host_name }}) {
+	    {% set deny_cond = global_var_set("DENY_COND", deny_cond + 'x') %}
+	    set $deny_cond "${deny_cond}x";
+	    }
+	  {% endif %}
+	  {% if rule.header_name %}
+	    if ($http_{{ rule.header_name|lower|replace("-", "_") }} != "{{ rule.header_value }}") {
+	    {% set deny_cond = global_var_set("DENY_COND", deny_cond + 'x') %}
+	    set $deny_cond "${deny_cond}x";
+	    }
+	  {% endif %}
+	{% endfor %}{# rule in this.acl.acl_rules #}
+	{% if countries|length %}{# use GeoIP #}
+	  if ($is_acl_country != yes) {
+	  {% set deny_cond = global_var_set("DENY_COND", deny_cond + 'x') %}
+	  set $deny_cond "${deny_cond}x";
+	  }
+	{% endif %}
+	if ($deny_cond = {{ global_var_get("DENY_COND") }}) {
+	return 403;
+	}
+      {% endif %}{# this.acl.action == "allow/deny_except" #}
+    {% elif this.acl.action == "deny_except" %}{# not this.acl.acl_rules #}
+      deny all;
+    {% endif %}{# this.acl.acl_rules #}
+    # End ACLs
+  {% endif %}{# this.acl.enabled #}
+
+  {% if geoip_enabled %}
+    {% if this.ENABLE_VARNISH_GEOIP_HEADERS %}
+      proxy_set_header X-Rev-ContinentCode $geoip_city_continent_code;
+      proxy_set_header X-Rev-CountryCode $geoip_city_country_code;
+      proxy_set_header X-Rev-CountryName $geoip_city_country_name;
+      proxy_set_header X-Rev-RegionCode $geoip_region;
+      proxy_set_header X-Rev-CityName $geoip_city;
+      proxy_set_header X-Rev-MetroCode $geoip_dma_code;
+      proxy_set_header X-Rev-AreaCode $geoip_area_code;
+      proxy_set_header X-Rev-PostalCode $geoip_postal_code;
+      proxy_set_header X-Rev-Longitude $geoip_longitude;
+      proxy_set_header X-Rev-Latitude $geoip_latitude;
+      proxy_set_header X-Rev-Node "{{HOSTNAME_SHORT}}";
+    {% endif %}{# this.ENABLE_VARNISH_GEOIP_HEADERS #}
+    {% if this.DEBUG_MODE %}
+      add_header X-Rev-ContinentCode $geoip_city_continent_code;
+      add_header X-Rev-CountryCode $geoip_city_country_code;
+      add_header X-Rev-CountryName $geoip_city_country_name;
+      add_header X-Rev-RegionCode $geoip_region;
+      add_header X-Rev-CityName $geoip_city;
+      add_header X-Rev-MetroCode $geoip_dma_code;
+      add_header X-Rev-AreaCode $geoip_area_code;
+      add_header X-Rev-PostalCode $geoip_postal_code;
+      add_header X-Rev-Longitude $geoip_longitude;
+      add_header X-Rev-Latitude $geoip_latitude;
+      add_header X-Rev-Node "{{HOSTNAME_SHORT}}";
+    {% endif %}
+    # End GeoIP setup
+  {% endif %}{# geoip_enabled #}
+{%- endmacro %}
+
+{% macro _common_sharding(this) %}
+  {% for shard in range(this.DOMAIN_SHARDS_COUNT) %}
+    # Sharding alias
+    # TODO: ServerAlias s{{shard}}-{{this.SERVER_NAME}}
+  {% endfor %}
+{%- endmacro %}
+
+{% macro _common_static_servers(this, servers, extra_servers, proto) %}
+  {% for host in (servers|list + extra_servers|list)|flatten_to_set %}
+    {% set url = proto + "://" + host %}
+    {% set proxy_var = "$" + host|underscore_url %}
+    location /rev-third-party-{{proto}}/{{host}}/ {
+
+    # _common_static_servers
+    # proxy_set_header Host {{host}};
+    # _common_static_servers
+    # BEGIN: Setting up the default headers
+    {{ _common_headers(this, host) }}
+    # END: Setting up the default headers
+
+
+    # Don't propagate "Connection: close" from client
+    proxy_set_header Connection "";
+
+    proxy_pass {{url}}/;
+
+    # TODO: RevProfilesMode Off
+
+    {% if this.ENABLE_HTML_SUBSTITUTE %}
+      # Make sure absolute URLs pointing to the origin go through us instead
+      subs_filter ([\"'])(https?:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
+
+      {{ third_party_mod.replace_urls(this, proto, False)|indent }}
+    {% endif %}
+    }
+  {% endfor %}
+{%- endmacro %}{# _common_static_servers #}
+
+{% macro _common_co_location_params(this, balancer_name, profiles_base_port, is_https, rel_url) %}
+  {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
+  {% set proto_prefix = "http://" if content_optimizers[0]|truncate(7, True, "") == "http://" else "https://" %}
+  # proto_prefix = {{proto_prefix}}
+  {% set co_base_url = proto_prefix + balancer_mod.balancer_name(this, is_https, balancer_name) %}{# the balancer is defined in _common_upstream_block_co() #}
+  proxy_pass {{ co_base_url }}{{ rel_url }};
+
+  # Wait at most for configured seconds for a reply from CO, then return error message.
+  # This will make recovery from CO failure quicker.
+  # The DNS monitor will assign another CO to the same domain name.
+  proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+
+  # mod_rev_profile_selection
+  # TODO: ProxyConnPoolCount {{this.REV_PROFILES_COUNT}}
+  # TODO: RevProfilesBasePort {{profiles_base_port}}
+{%- endmacro %}{# _common_co_location_params #}
+
+{% macro _common_proxy_settings(this) %}
+  {% if this.DEBUG_MODE %}
+    # Per-vhost log while in debug mode
+    error_log /var/log/nginx/{{this.SERVER_NAME}}.error debug;
+  {% endif %}
+
+  # Default Host header is the same as our server name
+  # _common_proxy_settings
+  # proxy_set_header Host {{this.SERVER_NAME}};
+  # _common_proxy_settings
+  # BEGIN: Setting up the default headers
+  {{ _common_headers(this, this.SERVER_NAME) }}
+  # END: Setting up the default headers
+
+  # By default 1.0, not good for keepalives
+  proxy_http_version 1.1;
+  # Don't cut the cord to the backend every time a client disconnects
+  proxy_ignore_client_abort on;
+  {% if not this.ENABLE_PROXY_BUFFERING %}
+    # We want to serve data to clients right away
+    proxy_buffering off;
+  {% endif %}
+  # Don't propagate "Connection: close" from client
+  proxy_set_header Connection "";
+{%- endmacro %}
+
+{% macro _common_proxy_config_step1(this, co_profiles_mod, co_profiles, varnish_port, profiles_base_port, is_https) %}
+  server_name {{ this.SERVER_NAME }} {%- for alias in this.SERVER_ALIASES %} {{ alias }}{%- endfor -%};
+  {% if this.SERVER_REGEX_ALIAS %}
+    server_name "~{{ this.SERVER_REGEX_ALIAS }}";
+  {% endif %}
+  # Save original Host header for Varnish caching rules
+  proxy_set_header X-Orig-Host $host;
+  # Don't propagate "Connection: close" from client
+  proxy_set_header Connection "";
+
+  {{ _common_sharding(this) }}
+
+  {{ _common_proxy_settings(this) }}
+  {{ loop_detect_mod.loop_detect(this) }}
+
+  # Never disable the Varnish backend, even if it has temporary problems.
+  location / {
+  proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }}/;
+
+  # Wait at most for configured seconds for a reply from Varnish, then return error message.
+  proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+  }
+
+  # mod_rev_profile_selection
+  # TODO: RevProfilesMode varnish_step1
+
+  {{ _common_profiles_and_security(this, co_profiles_mod, co_profiles) }}
+
+  {% if this.BYPASS_VARNISH_LOCATIONS %}
+    # Bypass Varnish for certain URLs
+
+    # First set up CO balancer
+    {% for url in this.BYPASS_VARNISH_LOCATIONS %}
+      {% set rel_url = url if url[0] != "/" else url[1:] %}
+      location /{{rel_url}} {
+      {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+
+      # TODO: RevProfilesMode full
+      }
+    {% endfor %}
+    # End Varnish bypass
+  {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
+{% endmacro %}{# _common_proxy_config_step1 #}
+
+{% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) %}
+  server_name {{this.SERVER_NAME}};
+
+  {{ _common_proxy_settings(this) }}
+
+  {% if not this.ENABLE_VARNISH %}
+    {{ _common_sharding(this) }}
+    {{ loop_detect_mod.loop_detect(this) }}
+  {% endif %}
+
+  {% if this.BLOCK_CRAWLERS %}
+    # Don't allow creepy crawlers (Googlebot etc) on our site
+    location = /robots.txt {
+    alias /var/www/robots.txt;
+    }
+  {% endif %}
+
+  location /rev-diablo {
+  # TODO: RevProfilesMode Off
+  {% if this.ENABLE_JS_SUBSTITUTE %}
+    RevJSSubstituteEnabled off;
+  {% endif %}
+  proxy_pass http://rev-js-source.revdn.net;
+  # location /rev-diablo
+  proxy_set_header Host $proxy_host;
+  # location /rev-diablo
+  # Don't propagate "Connection: close" from client
+  proxy_set_header Connection "";
+
+
+  }
+
+  {% if this.ENABLE_JS_SUBSTITUTE %}
+    # Rev JS substitute and accompanying script
+    RevJSSubstituteEnabled on; # turn on for whole context
+    RevJSDoNotCompress on;
+    location /rev-js/ {
+    	RevJSSubstituteEnabled off;
+      root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
+    }
+    # TODO: Alias /rev-js /usr/share/revsw-libapache2-mod-rev-js-substitute
+    # TODO: ProxyPass /rev-js !
+    # TODO: <Directory /usr/share/revsw-libapache2-mod-rev-js-substitute>
+    # TODO: RevJSSubstituteEnabled Off
+    # TODO: Require all granted
+    # TODO: </Directory>
+  {% endif %}{# ENABLE_JS_SUBSTITUTE #}
+
+  location / {
+  {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
+  }
+
+  {% if this.BYPASS_CO_LOCATIONS %}{# the balancer is defined in balancer_mod.define_bp_ows_balancer() #}
+    {% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+    {% set ows_proto = "https://" if origins[0]|truncate(5, True, "") == "https" else "http://" %}
+    {% for url in this.BYPASS_CO_LOCATIONS %}
+      {% set rel_url = url if url[0] != "/" else url[1:] %}
+      location /{{rel_url}} {
+      proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}/{{ rel_url }};
+      # TODO: RevProfilesMode off
+      # Make sure the origin sees the right Host header
+      proxy_ssl_server_name on;
+      proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
+      # if this.BYPASS_CO_LOCATIONS
+      proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
+      # if this.BYPASS_CO_LOCATIONS
+      # Don't propagate "Connection: close" from client
+      proxy_set_header Connection "";
+      }
+    {% endfor %}{# url in this.BYPASS_CO_LOCATIONS #}
+    # End CO bypass
+  {% endif %}{# this.BYPASS_CO_LOCATIONS #}
+
+  {% if this.ENABLE_VARNISH %}
+    # TODO: RevProfilesMode varnish_step2
+  {% else %}
+    # TODO: RevProfilesMode full
+
+    {{ _common_profiles_and_security(this, co_profiles_mod, co_profiles) }}
+  {% endif %}
+{%- endmacro %}{# _common_proxy_config_step2 #}
+
+{% macro _common_frontend(this) %}
+  # Save client address
+  proxy_set_header X-Forwarded-for $remote_addr;
+
+  # Optional user customizations in BP frontend
+  {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
+  # End optional user customizations in BP frontend
+{%- endmacro %}{# _common_frontend #}
+
+{# BEGIN: (BP-342) Common macros for headers #}
+{% macro _common_headers(this, host_name) %}
+
+  # Don't propagate "Connection: close" from client
+  proxy_set_header Connection "";
+
+  # _common_headers for {{host_name}}
+  proxy_set_header Host {{host_name}};
+  # _common_headers
+
+  # BEGIN: (BP-92) Response headers
+  {% if this.END_USER_RESPONSE_HEADERS %}
+    {% for key in this.END_USER_RESPONSE_HEADERS %}
+      {% if key.operation == "add" %}
+ 	more_set_headers {{ key.header_name }}:{{ key.header_value}};
+      {% endif %}
+      {% if key.operation == "delete" %}
+ 	more_clear_headers {{ key.header_name }};
+      {% endif %}
+      {% if key.operation == "replace" %}
+	more_clear_headers {{ key.header_name }};
+ 	more_set_headers {{ key.header_name }}:{{ key.header_value}};
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  # END: (BP-92)
+
+{%- endmacro %}
+{# END: (BP-342) Common macros for headers #}
+
+
+{% macro setup(this, co_profiles_mod, co_profiles) %}
+
+  {% if this.SECURITY_MODE != "block" %}{# "block" means "block site", so we simply remove the site from Apache #}
+
+    {% if this.ENABLE_HTTP %}
+      {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", this.REV_PROFILES_BASE_PORT_HTTP, false) }}{# same balancer name as _common_co_location_params #}
+      {{ _common_upstream_block_co(this, "bp_cos", "", this.REV_PROFILES_BASE_PORT_HTTP, false) }}{# same balancer name as _common_co_location_params #}
+      {% if this.ENABLE_VARNISH %}
+	{{ _common_upstream_block_varnish(this, 8080, false) }}
+      {% endif %}
+      {{ balancer_mod.define_bp_ows_balancer(this, false) }}
+      server {
+      listen 80;
+
+      {% if this.ENABLE_VARNISH %}
+	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
+	{{ _common_frontend(this) }}
+	}
+	server {
+	listen 127.0.0.1:9080;
+
+	# Don't log accesses on this vhost; they all come from localhost
+	access_log off;
+
+	# Make sure the connections between Varnish and BP are kept alive for 10 minutes
+	keepalive_timeout 600s;
+
+{% else %}{# not this.ENABLE_VARNISH #}
+  {{ _common_frontend(this) }}
+{% endif %}{# this.ENABLE_VARNISH #}
+
+{% if this.DOMAINS_TO_PROXY_HTTPS %}
+  # Must enable SSL proxy support for HTTPS static content servers
+  {{ ssl_mod.setup_proxy_only(this.ssl) }}
+{% endif %}
+
+# Optional customizations before generic BP config
+{{ caller(True) }}
+# End optional customizations before generic BP config
+
+{% set extra_domains_http = this.DOMAINS_TO_OPTIMIZE_HTTP if this.ENABLE_JS_SUBSTITUTE else [] %}
+{% set extra_domains_https = this.DOMAINS_TO_OPTIMIZE_HTTPS if this.ENABLE_JS_SUBSTITUTE else [] %}
+
+# HTTP static content servers
+{{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTP, extra_domains_http, "http") }}
+
+{% if not this.ENABLE_HTTPS %}
+  # HTTPS static content servers
+  {{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTPS, extra_domains_https, "https") }}
+{% endif %}
+
+{{ _common_proxy_config_step2(this, co_profiles_mod, co_profiles, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
+
+# Optional customizations after generic BP config
+{{ caller(False) }}
+{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
+# End optional customizations after generic BP config
+}
+{% endif %}{# this.ENABLE_HTTP #}
+
+{% if this.ENABLE_HTTPS %}
+  {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", this.REV_PROFILES_BASE_PORT_HTTPS, true) }}{# same balancer name as _common_co_location_params #}
+  {{ _common_upstream_block_co(this, "bp_cos", "", this.REV_PROFILES_BASE_PORT_HTTPS, true) }}{# same balancer name as _common_co_location_params #}
+  {% if this.ENABLE_VARNISH %}
+    {{ _common_upstream_block_varnish(this, 8443, true) }}
+  {% endif %}
+  {{ balancer_mod.define_bp_ows_balancer(this, true) }}
+  server {
+  # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
+  listen 443 ssl http2;
+
+  {% if this.ENABLE_VARNISH and not this.BYPASS_VARNISH_LOCATIONS %}
+    {{ ssl_mod.setup_no_proxy(this.ssl) }}
+  {% else %}{# If this.BYPASS_VARNISH_LOCATIONS is true, we need SSL proxy support for direct connections to CO #}
+    {{ ssl_mod.setup(this.ssl) }}
+  {% endif %}
+
+  # OCSP stapling is only enabled on the BP
+  # TODO: SSLUseStapling on
+  # TODO: SSLStaplingResponderTimeout 5
+  # TODO: SSLStaplingReturnResponderErrors off
+
+  {% if this.ENABLE_VARNISH %}
+    {{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8443, this.REV_PROFILES_BASE_PORT_HTTPS, true) }}
+    {{ _common_frontend(this) }}
+    }
+
+    server {
+    listen 127.0.0.1:9443;
+    {{ ssl_mod.setup_proxy_only(this.ssl) }}
+
+    # Don't log accesses on this vhost; they all come from localhost
+    access_log off;
+
+    # Make sure the connections between Varnish and BP are kept alive for 10 minutes
+    keepalive_timeout 600s;
+  {% else %}{# not this.ENABLE_VARNISH #}
+    {{ _common_frontend(this) }}
+  {% endif %}{# this.ENABLE_VARNISH #}
+  # Optional customizations before generic BP config
+  {{ caller(True) }}
+  # End optional customizations before generic BP config
+
+  {% set extra_domains_http = this.DOMAINS_TO_OPTIMIZE_HTTP if this.ENABLE_JS_SUBSTITUTE else [] %}
+  {% set extra_domains_https = this.DOMAINS_TO_OPTIMIZE_HTTPS if this.ENABLE_JS_SUBSTITUTE else [] %}
+
+  # HTTP static content servers
+  {{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTP, extra_domains_http, "http") }}
+
+  # HTTPS static content servers
+  {{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTPS, extra_domains_https, "https") }}
+
+  {{ _common_proxy_config_step2(this, co_profiles_mod, co_profiles, this.REV_PROFILES_BASE_PORT_HTTPS, true) }}
+
+  # mod_pagespeed in CO looks at this header when optimizing for SPDY
+  # TODO: RequestHeader add X-PSA-Optimize-For-SPDY On
+
+  # Optional customizations after generic BP config
+  {{ caller(False) }}
+  {{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
+  # End optional customizations after generic BP config
+  }
+{% endif %}{# this.ENABLE_HTTPS #}
+
+{% else %}{# this.SECURITY_MODE == "block", which means "block access for everybody" #}
+
+  {% if this.ENABLE_HTTP %}
+    server {
+    listen 80;
+    deny all;
+    }
+  {% endif %}{# this.ENABLE_HTTP #}
+  {% if this.ENABLE_HTTPS %}
+    server {
+    listen 443;
+    deny all;
+    }
+  {% endif %}{# this.ENABLE_HTTPS #}
+
+{% endif %}{# this.SECURITY_MODE != "block" #}
+
+{%- endmacro %}
+
+
+{% macro _co_profile_factory(co_profiles_mod, co_profiles, index) -%}
+  {% if index == 0 -%}
+    {{ co_profiles_mod.profile0(co_profiles) }}
+  {% elif index == 1 -%}
+    {{ co_profiles_mod.profile1(co_profiles) }}
+  {% elif index == 2 -%}
+    {{ co_profiles_mod.profile2(co_profiles) }}
+  {% elif index == 3 -%}
+    {{ co_profiles_mod.profile3(co_profiles) }}
+  {% elif index == 4 -%}
+    {{ co_profiles_mod.profile4(co_profiles) }}
+  {% else %}
+    # PROFILE OUT OF RANGE - using profile #0
+    {{ co_profiles_mod.profile0(co_profiles) }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro setup(this, co_profiles_mod, co_profiles) -%}
+  {% set is_https = False %}
+  {% set enable_pagespeed = this.ENABLE_OPTIMIZATION and co_profiles.REV_OPTIMIZATION_LEVEL|default("none") != "none" %}
+  {% for enable in (this.ENABLE_HTTP, this.ENABLE_HTTPS) %}
+    {% if enable %}
+      {% for p in range(this.REV_PROFILES_COUNT) %}
+	# Profile #{{p}}
+	{% set profile_port = (this.REV_PROFILES_BASE_PORT_HTTPS if is_https else this.REV_PROFILES_BASE_PORT_HTTP) + p %}
+	{% set proto = "https" if is_https else "http" %}
+	{{ balancer_mod.define_co_ows_balancer(this, is_https) }}
+	server {
+	listen {{profile_port}};
+	server_name {{this.SERVER_NAME}}{% for shard in range(this.DOMAIN_SHARDS_COUNT) %} s{{shard}}-{{this.SERVER_NAME}}{% endfor %};
+
+	{% if this.DEBUG_MODE %}
+	  # Per-vhost log while in debug mode
+	  error_log /var/log/nginx/{{this.SERVER_NAME}}.error debug;
+	{% endif %}
+
+	{{ loop_detect_mod.loop_detect(this) }}
+
+	# By default 1.0, not good for keepalives
+	proxy_http_version 1.1;
+	# Don't cut the cord to the backend every time a client disconnects
+	proxy_ignore_client_abort on;
+	{% if not this.ENABLE_PROXY_BUFFERING %}
+	  # We want to serve data to clients right away
+	  proxy_buffering off;
+	{% endif %}
+
+	# BEGIN: Setting up the default headers
+	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	# END: Setting up the default headers
+
+	# Optional customizations before generic options
+	{{ caller(True, is_https) }}
+	# End optional customizations before generic options
+
+	{% if is_https %}
+	  {{ ssl_mod.setup_bp_co(this.ssl) }}
+	{% elif this.ORIGIN_SERVERS_HTTPS %}
+	  # Must enable SSL proxy support for HTTPS origin servers
+	  {{ ssl_mod.setup_proxy_only(this.ssl) }}
+	{% endif %}
+
+	{% if (this.ENABLE_DECOMPRESSION) %}
+	  # add compression if the enable_decompression flag is enabled
+	  # For RUM/Boomerang data and URL substitutions - the subs filter works on uncompressed data
+	  gzip_proxied any;
+	  gunzip on;
+	  gunzip_always on;
+	{% endif %}
+
+# TODO: Need to figure out how to use ENABLE_DECOMPRESSION and enable_pagespeed together
+#	{% if ((this.ENABLE_DECOMPRESSION) or (not enable_pagespeed)) %}
+#	  # add compression if the enable_decompression flag is enabled
+#	  # For RUM/Boomerang data and URL substitutions - the subs filter works on uncompressed data
+#	  gzip_proxied any;
+#	  gunzip on;
+#	  gunzip_always on;
+#	{% endif %}
+
+
+	{% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+	# Wait at most for this many seconds for reply from Origin, then return error message.
+	proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+
+	{% set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
+	{% set ows_proto = "https" if origins[0]|truncate(5, True, "") == "https" else "http" %}
+	location / {
+	# TODO: make 'lowercase_escapes' configurable - this is only useful for Metacafe now
+	proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes; # TODO: retry=0 {{proxy_params}}
+
+	# BEGIN: Setting up the default headers
+	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	# END: Setting up the default headers
+
+	}
+
+	# Make sure the origin sees the right Host header
+	proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
+	# proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
+
+	{% if enable_pagespeed %}
+	  # Enable PageSpeed module
+	  pagespeed on;
+
+	  # Ensure requests for pagespeed optimized resources go to the pagespeed handler
+	  # and no extraneous headers get set.
+	  location ~ "\.pagespeed\.([a-z]\.)?[a-z]{2}\.[^.]{10}\.[^.]+" {
+	  add_header "" "";
+	  }
+	  location ~ "^/pagespeed_static/" { }
+	  location ~ "^/ngx_pagespeed_beacon$" { }
+
+	  # Resources from these domains are candidates for optimization
+	  pagespeed Domain {{this.SERVER_NAME}};
+	  pagespeed MapOriginDomain {{proto}}://127.0.0.1:{{profile_port}} {{proto}}://{{this.SERVER_NAME}};
+	  {% for ows in origins %}
+	    {% set host = ows|replace("://","-")|replace(":","-")|replace("/","-") %}
+	    pagespeed MapProxyDomain {{proto}}://{{this.SERVER_NAME}}/rev-ps-{{host}} {{ows}};
+	  {% endfor %}
+
+	  # Faster locking means faster response time, see:
+	  # http://www.webperformance.com/load-testing/blog/2012/12/google-pagespeed-performance-with-memory-locking/
+	  pagespeed SharedMemoryLocks On;
+
+	  # Allow cacheable, but modified HTML to be cached by Varnish
+	  # See: https://developers.google.com/speed/pagespeed/module/downstream-caching
+	  pagespeed DownstreamCachePurgeLocationPrefix {{proto}}://{{this.SERVER_NAME}};
+	  pagespeed DownstreamCachePurgeMethod PURGE;
+	  pagespeed DownstreamCacheRewrittenPercentageThreshold 95;
+
+	  # Disable all filters and start from scratch
+	  pagespeed RewriteLevel PassThrough;
+
+	  {% if this.DOMAIN_SHARDS_COUNT %}
+	    # Apply domain mapping rules to all resources, even if not optimized by PS, to shard everything
+	    pagespeed EnableFilters rewrite_domains;
+	    pagespeed ShardDomain {{this.SERVER_NAME}} {% for shard in range(this.DOMAIN_SHARDS_COUNT) %}s{{shard}}-{{this.SERVER_NAME}},{% endfor %};
+	  {% endif %}
+
+	  {% if this.ENABLE_OPTIMIZATION %}
+	    # Allow optimization of JS-referenced resources
+	    pagespeed InPlaceResourceOptimization on;
+
+	    # Turn on browser-specific optimizations
+	    pagespeed EnableFilters in_place_optimize_for_browser;
+
+	    # Customer profile settings
+	    {{ _co_profile_factory(co_profiles_mod, co_profiles, p) }}
+	  {% endif %}
+	{% else %}{# enable_pagespeed #}
+	  # Disable pagespeed
+	  pagespeed off;
+	{% endif %}{# enable_pagespeed #}
+
+	# Optional customizations after generic options
+	{{ caller(False, is_https) }}
+	{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
+	# End optional customizations after generic options
+
+	{% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
+	  # Make sure absolute URLs pointing to the origin go through us instead
+	  {% if (this.ENABLE_HTTP and this.ENABLE_HTTPS) and not is_https %}{# both supported; must prevent conversion from secure to unsecure #}
+	    # HTTPS links are turned into absolute ones to our own server
+	    subs_filter ([\"'])https://{{this.ORIGIN_SERVER_NAME}} $1https://{{this.SERVER_NAME}} r;
+	    # HTTP links are turned into relative ones
+	    subs_filter ([\"'])(http:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
+	  {% else %}{# only HTTP or only HTTPS #}
+	    subs_filter ([\"'])(https?:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
+	  {% endif %}{# HTTP and/or HTTPS #}
+	{% endif %}{# this.SERVER_NAME != this.ORIGIN_SERVER_NAME #}
+
+	{{ third_party_mod.replace_urls(this, proto, this.ENABLE_OPTIMIZATION) }}
+
+	{% if this.REV_RUM_BEACON_URL %}
+	  {% set rum_beacon_url = this.REV_RUM_BEACON_URL if this.REV_RUM_BEACON_URL|truncate(4,True,"") == "http" else proto + "://" + this.REV_RUM_BEACON_URL %}
+	  # RUM beacon
+	  subs_filter </head> "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: '{{rum_beacon_url}}'}); BOOMR.addVar('user_ip', '$http_x_forwarded_for');</script></head>" r;
+
+	  pagespeed Disallow "{{proto}}://{{this.SERVER_NAME}}/rev-diablo/*";
+	{% endif %}
+	}
+      {% endfor %}
+    {% endif %}
+    {% set is_https = True %}
+  {% endfor %}
+{%- endmacro %}

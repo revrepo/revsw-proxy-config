@@ -1,0 +1,263 @@
+{
+    "title": "Proxy config",
+    "type": "object",
+    "properties": {
+        "VERSION": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1
+        },
+        "ssl": {% include "common/ssl" %},
+        "acl": {% include "bp/acl" %},
+        "SERVER_NAME": {
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+        },
+        "SERVER_ALIASES": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+            }
+        },
+        "SERVER_REGEX_ALIAS": {
+            "type": "string"
+        },
+        "ORIGIN_SERVER_NAME": {
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+        },
+        "ENABLE_VARNISH": {
+            "type": "boolean"
+        },
+        "REV_PROFILES_COUNT": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+        },
+        "ENABLE_HTTP": {
+            "type": "boolean"
+        },
+        "ENABLE_HTTPS": {
+            "type": "boolean"
+        },
+        "ENABLE_SPDY": {
+            "type": "boolean"
+        },
+        "ENABLE_HTTP2": {
+            "type": "boolean"
+        },
+        "REV_PROFILES_BASE_PORT_HTTP": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65000
+        },
+        "REV_PROFILES_BASE_PORT_HTTPS": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65000
+        },
+        "CONTENT_OPTIMIZERS_HTTP": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "CONTENT_OPTIMIZERS_HTTPS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "DOMAINS_TO_PROXY_HTTP": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "DOMAINS_TO_PROXY_HTTPS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "DOMAINS_TO_OPTIMIZE_HTTP": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "DOMAINS_TO_OPTIMIZE_HTTPS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "SECURITY_MODE": {
+            "type": "string",
+            "pattern": "off|on|block|detect"
+        },
+        "DOMAIN_SHARDS_COUNT": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "CUSTOM_WEBSERVER_CODE_BEFORE": {
+            "type": "string"
+        },
+        "CUSTOM_WEBSERVER_CODE_AFTER": {
+            "type": "string"
+        },
+        "BLOCK_CRAWLERS": {
+            "type": "boolean"
+        },
+        "ENABLE_JS_SUBSTITUTE": {
+            "type": "boolean"
+        },
+        "ENABLE_HTML_SUBSTITUTE": {
+            "type": "boolean"
+        },
+        "DEBUG_MODE": {
+        	"type": "boolean"
+        },
+        "BYPASS_VARNISH_LOCATIONS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "BYPASS_CO_LOCATIONS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "PROXY_TIMEOUT": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "ORIGIN_SERVERS_HTTP": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "ORIGIN_SERVERS_HTTPS": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "ORIGIN_IDLE_TIMEOUT": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "ORIGIN_REUSE_CONNS": {
+            "type": "boolean"
+        },
+        "ENABLE_VARNISH_GEOIP_HEADERS": {
+            "type": "boolean"
+        },
+       "ENABLE_PROXY_BUFFERING": {
+            "type": "boolean"
+        },
+       "END_USER_RESPONSE_HEADERS": {
+            "type": "array",
+            "items": {
+		"type": "object",
+		"properties":
+		{
+		    "operation": {"type": "string"},
+		    "header_name": {"type": "string"},
+		    "header_value": {"type": "string"}
+		}
+            }
+        },
+        "LISTEN_REV_PROFILES_BASE_PORT_HTTP": {
+            "type": "boolean"
+        },
+        "LISTEN_REV_PROFILES_BASE_PORT_HTTPS": {
+            "type": "boolean"
+        },
+        "REV_RUM_BEACON_URL": {
+            "type": "string",
+            "anyOf": [
+                { "format": "uri" },
+                { "pattern": "" }
+            ]
+        },
+        "ENABLE_OPTIMIZATION": {
+            "type": "boolean"
+        },
+        "ENABLE_DECOMPRESSION": {
+            "type": "boolean"
+        },
+        "ORIGIN_REQUEST_HEADERS": {
+            "type": "array",
+            "items": {
+		"type": "object",
+		"properties":
+		{
+		    "operation": {"type": "string"},
+		    "header_name": {"type": "string"},
+		    "header_value": {"type": "string"}
+		}
+            }
+        }
+    },
+    "required": [
+        "VERSION",
+        "ssl",
+        "acl",
+        "SERVER_NAME",
+        "SERVER_ALIASES",
+        "SERVER_REGEX_ALIAS",
+        "ORIGIN_SERVER_NAME",
+        "ENABLE_VARNISH",
+        "REV_PROFILES_COUNT",
+        "ENABLE_HTTP",
+        "ENABLE_HTTPS",
+        "ENABLE_SPDY",
+        "REV_PROFILES_BASE_PORT_HTTP",
+        "REV_PROFILES_BASE_PORT_HTTPS",
+        "CONTENT_OPTIMIZERS_HTTP",
+        "CONTENT_OPTIMIZERS_HTTPS",
+        "CONTENT_OPTIMIZERS_HTTPS",
+        "DOMAINS_TO_PROXY_HTTP",
+        "DOMAINS_TO_PROXY_HTTPS",
+        "DOMAIN_SHARDS_COUNT",
+        "CUSTOM_WEBSERVER_CODE_BEFORE",
+        "CUSTOM_WEBSERVER_CODE_AFTER",
+        "BLOCK_CRAWLERS",
+        "ENABLE_JS_SUBSTITUTE",
+        "ENABLE_HTML_SUBSTITUTE",
+        "DEBUG_MODE",
+        "DOMAINS_TO_OPTIMIZE_HTTP",
+        "DOMAINS_TO_OPTIMIZE_HTTPS",
+        "BYPASS_VARNISH_LOCATIONS",
+        "PROXY_TIMEOUT",
+        "BYPASS_CO_LOCATIONS",
+        "ORIGIN_SERVERS_HTTP",
+        "ORIGIN_SERVERS_HTTPS",
+        "ORIGIN_IDLE_TIMEOUT",
+        "ORIGIN_REUSE_CONNS",
+        "ENABLE_VARNISH_GEOIP_HEADERS",
+        "ENABLE_PROXY_BUFFERING",
+        "END_USER_RESPONSE_HEADERS",
+        "LISTEN_REV_PROFILES_BASE_PORT_HTTP",
+        "LISTEN_REV_PROFILES_BASE_PORT_HTTPS",
+        "REV_RUM_BEACON_URL",
+        "ENABLE_OPTIMIZATION",
+	    "ORIGIN_REQUEST_HEADERS"
+    ],
+   "additionalProperties": false
+}
