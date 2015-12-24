@@ -692,6 +692,7 @@ def generate_bp_domain_json(domain):
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "CUSTOM_WEBSERVER_CODE_BEFORE": "",
         "CUSTOM_WEBSERVER_CODE_AFTER": "",
+        "CUSTOM_WEBSERVER_CO_CODE_AFTER": "",
         "BLOCK_CRAWLERS": True,
         "ENABLE_PROXY_BUFFERING": False,
         "ENABLE_JS_SUBSTITUTE": domain["enable_js_subst"],
