@@ -165,16 +165,7 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
-
-#        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", enable_opt)
-#        self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", enable_decompression)
-
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-#        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
-
-#        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
-#        self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
-
         self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
         self._patch_if_changed_co_webserver("REV_PROFILES_COUNT", profiles_count, True)
 
@@ -384,7 +375,12 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
-        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url", []))
+        rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
+        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", rum_beacon)
+
+        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_opt", True))
+        self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
+
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
