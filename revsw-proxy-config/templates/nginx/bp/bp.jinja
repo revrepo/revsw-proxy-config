@@ -377,6 +377,9 @@
 {% macro _common_frontend(this) %}
   # Save client address
   proxy_set_header X-Forwarded-for $remote_addr;
+  if ($http_x_rev_transport ~ 'quic') {
+    proxy_set_header X-Forwarded-for $http_x_forwarded_for;
+  }
 
   # Optional user customizations in BP frontend
   {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
