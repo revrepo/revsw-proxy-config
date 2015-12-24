@@ -590,7 +590,7 @@ def fixup_domain(domain):
         with open(domain["bp_template"], "w") as f:
             f.write("""
 {%% import "%s" as co_profiles_mod %%}
-{%% import "proxy.jinja" as proxy_mod %%}
+{%% import "bp/proxy.jinja" as proxy_mod %%}
 
 {%% call(before) proxy_mod.setup(proxy, co_profiles_mod, co_profiles) %%}
 {%% endcall %%}
@@ -603,7 +603,7 @@ def fixup_domain(domain):
     "title": "Main web server config",
     "type": "object",
     "properties": {
-        "proxy": {%% include "proxy" %%},
+        "proxy": {%% include "bp/proxy" %%},
         "co_profiles": {%% include "%s" %%}
     },
     "required": ["proxy", "co_profiles"],
