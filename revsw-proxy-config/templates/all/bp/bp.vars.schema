@@ -181,6 +181,31 @@
 		    "header_value": {"type": "string"}
 		}	    
             }
+        },
+       "REV_RUM_BEACON_URL": {
+            "type": "string",
+            "anyOf": [
+                { "format": "uri" },
+                { "pattern": "" }
+            ]
+        },
+       "ENABLE_OPTIMIZATION": {
+            "type": "boolean"
+        },
+        "ENABLE_DECOMPRESSION": {
+            "type": "boolean"
+        },
+       "ORIGIN_REQUEST_HEADERS": {
+            "type": "array",
+            "items": {
+		"type": "object",
+		"properties":
+		{
+		    "operation": {"type": "string"},
+		    "header_name": {"type": "string"},
+		    "header_value": {"type": "string"}
+		}
+            }
         }
     },
     "required": [
@@ -220,7 +245,11 @@
         "ORIGIN_REUSE_CONNS",
         "ENABLE_VARNISH_GEOIP_HEADERS",
         "ENABLE_PROXY_BUFFERING",
-        "END_USER_RESPONSE_HEADERS"
+        "END_USER_RESPONSE_HEADERS",
+        "ENABLE_OPTIMIZATION",
+        "ENABLE_DECOMPRESSION",
+        "ORIGIN_REQUEST_HEADERS",
+        "REV_RUM_BEACON_URL"
     ],
    "additionalProperties": false
 }

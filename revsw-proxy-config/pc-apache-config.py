@@ -636,7 +636,9 @@ def _gen_initial_domain_config(domain_name, ui_config):
     ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
 
     # Let's see if we are a BP or a CO by looking at which package is installed
-    role = _get_server_role()
+    print ui_config
+    #role = _get_server_role()
+    role = "bp"
 
     # Let's see if we have a custom config for this domain
     config_str = ""
@@ -718,15 +720,10 @@ def add_or_update_domain(domain_name, ui_config):
     # log.LOGI(u"Input JSON is: ", webserver_config_vars)
 
 
-    if "bp" in webserver_config_vars:
-        varnish_config_vars = {}
-        # noinspection PyBroadException
-        try:
-            varnish_config_vars = VarnishConfig(site_name).load_site_config()
-        except:
-            log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
-    else:
-        varnish_config_vars = None
+    try:
+        varnish_config_vars = VarnishConfig(site_name).load_site_config()
+    except:
+        log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
 
     cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
     cfg_common.patch_config()

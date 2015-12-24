@@ -755,4 +755,23 @@
     {% endif %}
     {% set is_https = True %}
   {% endfor %}
+
+    keepalive_requests 500;
+    resolver 127.0.0.1 8.8.8.8 ipv6=off;
+    variables_hash_bucket_size 256;
+    # GeoIP setup
+    geoip_city /opt/revsw-config/apache/GeoLite2-City.dat;
+    # Custom vhost for Varnish requests generated as the result of origin redirects
+    server {
+        listen 127.0.0.1:9081;
+        allow all;
+        access_log off;
+        location / {
+            proxy_pass http://$host$uri$is_args$args;
+            # Disable buffering so nginx will not try to write the data to a temporary local file - provides traffic back-pressure feature
+            proxy_buffering on;
+            proxy_limit_rate 150k;
+            proxy_max_temp_file_size 0;
+        }
+    }
 {%- endmacro %}

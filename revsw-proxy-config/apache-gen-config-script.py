@@ -529,9 +529,6 @@ def fixup_domain(domain):
     if not domain["bp_template"]:
         domain["bp_template"] = "bp-%s.jinja" % _(domain["name"])
         create_bp_templ = True
-    if not domain["co_template"]:
-        domain["co_template"] = "co-%s.jinja" % _(domain["name"])
-        create_co_templ = True
 
     if domain["profiles_disabled"]:
         domain["profile_template"] = "co/standard_profiles/no_customer_profiles.jinja"
@@ -615,32 +612,6 @@ def fixup_domain(domain):
 }
 """ % profile_basename)
 
-    if create_co_templ:
-        vars_templ = vars_schema_name(domain["co_template"])
-
-        with open(domain["co_template"], "w") as f:
-            f.write("""
-{%% import "%s" as co_profiles_mod %%}
-{%% import "co/co.jinja" as co_mod %%}
-
-{%% call(before, is_https) co_mod.setup(co, co_profiles_mod, co_profiles) %%}
-{%% endcall %%}
-""" % domain["profile_template"])
-
-        with open(vars_templ, "w") as f:
-            f.write("""
-{
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Main web server config",
-    "type": "object",
-    "properties": {
-        "co": {%% include "co/co" %%},
-        "co_profiles": {%% include "%s" %%}
-    },
-    "required": ["co", "co_profiles"],
-    "additionalProperties": false
-}
-""" % profile_basename)
 
 
 def parse_profile_template_get_count(fname):
@@ -736,7 +707,12 @@ def generate_bp_domain_json(domain):
         "ORIGIN_IDLE_TIMEOUT": 80,
         "ORIGIN_REUSE_CONNS": True,
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
-        "END_USER_RESPONSE_HEADERS": [] # (BP-92)
+        "END_USER_RESPONSE_HEADERS": [], # (BP-92)
+
+        "REV_RUM_BEACON_URL": RUM_BEACON_URL,
+        "ENABLE_OPTIMIZATION": domain["enable_opt"],
+        "ENABLE_DECOMPRESSION": domain["enable_decompression"],
+        "ORIGIN_REQUEST_HEADERS": [] # (BP-92)
     }
 
     f = StringIO()
