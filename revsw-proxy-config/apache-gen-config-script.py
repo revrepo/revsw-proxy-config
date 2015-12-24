@@ -526,7 +526,7 @@ def fixup_domain(domain):
     create_proxy_templ = False
 
     if not domain["bp_template"]:
-        domain["bp_template"] = "proxy_config-%s.jinja" % _(domain["name"])
+        domain["bp_template"] = "proxy-%s.jinja" % _(domain["name"])
         create_proxy_templ = True
 
     if domain["profiles_disabled"]:
@@ -585,14 +585,14 @@ def fixup_domain(domain):
         domain["caching_rules"] = caching_rules
 
     if create_proxy_templ:
-        vars_templ = vars_schema_name("proxy_config")
+        vars_templ = vars_schema_name("proxy")
 
         with open(domain["bp_template"], "w") as f:
             f.write("""
 {%% import "%s" as co_profiles_mod %%}
-{%% import "proxy_config.jinja" as proxy_config_mod %%}
+{%% import "proxy.jinja" as proxy_mod %%}
 
-{%% call(before) proxy_config_mod.setup(proxy_config, co_profiles_mod, co_profiles) %%}
+{%% call(before) proxy_mod.setup(proxy, co_profiles_mod, co_profiles) %%}
 {%% endcall %%}
 """ % domain["profile_template"])
 
@@ -603,10 +603,10 @@ def fixup_domain(domain):
     "title": "Main web server config",
     "type": "object",
     "properties": {
-        "proxy_config": {%% include "proxy_config" %%},
+        "proxy": {%% include "proxy" %%},
         "co_profiles": {%% include "%s" %%}
     },
-    "required": ["proxy_config", "co_profiles"],
+    "required": ["proxy", "co_profiles"],
     "additionalProperties": false
 }
 """ % profile_basename)
