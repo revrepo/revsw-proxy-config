@@ -470,16 +470,18 @@
       {{ balancer_mod.define_bp_ows_balancer(this, false) }}
       server {
       listen 80;
-
+      pagespeed off;
       {% if this.ENABLE_VARNISH %}
 	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
 	{{ _common_frontend(this) }}
 	}
 	server {
 	listen 127.0.0.1:9080;
-
+    pagespeed off;
 	# Don't log accesses on this vhost; they all come from localhost
 	access_log off;
+
+
 
 	# Make sure the connections between Varnish and BP are kept alive for 10 minutes
 	keepalive_timeout 600s;
@@ -527,6 +529,7 @@
   server {
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
   listen 443 ssl http2;
+  pagespeed off;
 
   {% if this.ENABLE_VARNISH and not this.BYPASS_VARNISH_LOCATIONS %}
     {{ ssl_mod.setup_no_proxy(this.ssl) }}
@@ -547,6 +550,7 @@
     server {
     listen 127.0.0.1:9443;
     {{ ssl_mod.setup_proxy_only(this.ssl) }}
+    pagespeed off;
 
     # Don't log accesses on this vhost; they all come from localhost
     access_log off;
@@ -586,12 +590,14 @@
   {% if this.ENABLE_HTTP %}
     server {
     listen 80;
+    pagespeed off;
     deny all;
     }
   {% endif %}{# this.ENABLE_HTTP #}
   {% if this.ENABLE_HTTPS %}
     server {
     listen 443;
+    pagespeed off;
     deny all;
     }
   {% endif %}{# this.ENABLE_HTTPS #}
