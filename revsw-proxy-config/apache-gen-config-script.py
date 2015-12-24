@@ -525,8 +525,8 @@ def varnish_vars_name(domain):
 def fixup_domain(domain):
     create_proxy_templ = False
 
-    if not domain["config_template"]:
-        domain["config_template"] = "proxy_config-%s.jinja" % _(domain["name"])
+    if not domain["bp_template"]:
+        domain["bp_template"] = "proxy_config-%s.jinja" % _(domain["name"])
         create_proxy_templ = True
 
     if domain["profiles_disabled"]:
@@ -587,7 +587,7 @@ def fixup_domain(domain):
     if create_proxy_templ:
         vars_templ = vars_schema_name("proxy_config")
 
-        with open(domain["config_template"], "w") as f:
+        with open(domain["bp_template"], "w") as f:
             f.write("""
 {%% import "%s" as co_profiles_mod %%}
 {%% import "proxy_config.jinja" as proxy_config_mod %%}
