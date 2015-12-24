@@ -378,7 +378,7 @@ class ConfigCommon:
         rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
         self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", rum_beacon)
 
-        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_opt", True))
+        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
 
 
