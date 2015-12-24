@@ -661,6 +661,8 @@
 	{% if enable_pagespeed %}
 	  # Enable PageSpeed module
 	  pagespeed on;
+	  pagespeed FileCachePath /var/run/ngx_pagespeed_cache;
+	  pagespeed FetchWithGzip on;
 
 	  # Ensure requests for pagespeed optimized resources go to the pagespeed handler
 	  # and no extraneous headers get set.

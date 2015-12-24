@@ -82,10 +82,6 @@ class ConfigCommon:
                 self.cmd_opts["html_subst"] = True
             elif opt == "include-user-agent":
                 self.cmd_opts["include_user_agent"] = True
-            elif opt == "no-bp":
-                self.cmd_opts["config_bp"] = True
-            elif opt == "no-co":
-                self.cmd_opts["config_co"] = True
             elif opt == "debug":
                 self.cmd_opts["debug"] = True
             elif opt.startswith("shards-count="):
@@ -105,7 +101,7 @@ class ConfigCommon:
         self.ban_urls.update(ban_urls)
 
     def _patch_if_changed_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("proxy", "config", option, val, ban_html_if_changed)
+        self._patch_if_changed_webserver_internal("proxy_config", "config", option, val, ban_html_if_changed)
 
     def _patch_if_changed_varnish(self, option, val, ban_html_if_changed=False):
         if self.varnish_config_vars.get(option) != val:
@@ -328,7 +324,7 @@ class ConfigCommon:
         self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
         self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr, True)
 
-        main_domain_name = self.webserver_config_vars["proxy"]["SERVER_NAME"]
+        main_domain_name = self.webserver_config_vars["proxy_config"]["SERVER_NAME"]
         ows_domain, ows_server = _get_ows_domain_and_server(main_domain_name, self.ui_config)
         self._patch_if_changed_webserver("ORIGIN_SERVER_NAME", ows_domain)
 
@@ -606,7 +602,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     config_str = ""
 
     try:
-        with open("/opt/revsw-config/apache/custom-sites/%s/proxy.json" % domain_name) as j:
+        with open("/opt/revsw-config/apache/custom-sites/%s/proxy_config.json" % domain_name) as j:
             config_str = j.read()
     except IOError as e:  # file doesn't exist
         if e.errno != errno.ENOENT:
@@ -615,7 +611,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open("/opt/revsw-config/apache/generic-site/proxy.json") as j:
+        with open("/opt/revsw-config/apache/generic-site/proxy_config.json") as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -634,8 +630,8 @@ def _gen_initial_domain_config(domain_name, ui_config):
                 cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = cos
                 cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = cos
             if "config_vars" in cmd:
-                cmd["config_vars"]["proxy"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in cos]
-                cmd["config_vars"]["proxy"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in cos]
+                cmd["config_vars"]["proxy_config"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in cos]
+                cmd["config_vars"]["proxy_config"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in cos]
 
     return config
 
@@ -763,6 +759,16 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
     """
     Upgrade Apache config vars up to the version(s) of the structures in 'new_vars_for_version'
     """
+
+    if "proxy_config" in vars_:
+        proxy_config = vars_["proxy_config"]
+        ver = proxy_config.setdefault("VERSION", 1)
+
+        new_ver = new_vars_for_version["proxy_config"].get("VERSION", 1)
+        if new_ver > _PROXY_CONFIG_VERSION:
+            raise AttributeError("'proxy_config' structure version is %d, which is newer than what pc-apache-config.py "
+                                 "supports (%d). Upgrade your server packages." %
+                                 (new_ver, _PROXY_CONFIG_VERSION))
 
     if "co_profiles" in vars_:
         co_profiles = vars_["co_profiles"]

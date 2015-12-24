@@ -424,26 +424,17 @@ class PlatformWebServer:
             raise RuntimeError("Neither Nginx nor Apache are installed; please check your configuration")
         self._name = _g_webserver_name
 
-    def _is_apache(self):
-        return self._name == "APACHE"
-
-    def _is_nginx(self):
-        return self._name == "NGINX"
-
     def name(self):
         return self._name
 
     def service_name(self):
-        return "revsw-apache2" if self._is_apache() else "revsw-nginx"
+        return "revsw-nginx"
 
     def etc_dir(self):
-        return "/etc/apache2" if self._is_apache() else "/etc/nginx"
+        return "/etc/nginx"
 
     def config_class(self):
-        return ApacheConfig if self._is_apache() else NginxConfig
-
-    def mlogc_config_class(self):
-        return MlogcConfig if self._is_apache() else NoMlogcConfig
+        return NginxConfig
 
 
 class ConfigException(Exception):
@@ -649,158 +640,6 @@ class WebServerConfig:
         return m.group(4)
 
 
-class ApacheConfig(WebServerConfig):
-    @_webserver_write_command
-    def disable_all_sites(self):
-        self.transaction.run(lambda: run_cmd("rm -f /etc/apache2/sites-enabled/*", _log, "Disabling all sites"))
-        self.transaction.run(lambda: run_cmd("a2ensite 000-catch-all || true", _log, "Enabling catch-all error site"))
-
-    @_webserver_write_command
-    def remove_site(self):
-        self.transaction.run(lambda: run_cmd("a2dissite %s || true" % self.site_name, _log,
-                                             "Disabling site '%s' if it exists" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -f /etc/apache2/sites-available/%s.conf" % self.site_name, _log,
-                                             "Removing site '%s' if it exists" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -Rf %s" % jinja_config_webserver_dir(self.site_name), _log,
-                                             "Removing site '%s' templates, if they exist" % self.site_name))
-
-    @_webserver_write_command
-    def configure_site(self, input_vars):
-        def do_write():
-            search_dirs = [jinja_config_webserver_dir(self.site_name)]
-            template_file_no_ext = self._template_file_no_ext()
-
-            _log.LOGD("Loading template")
-            with open("%s.jinja" % template_file_no_ext) as f:
-                template_str = f.read()
-
-            _log.LOGD("Loading vars schema")
-            with open("%s.vars.schema" % template_file_no_ext) as f:
-                schema = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
-
-            _log.LOGD("Validating input vars from JSON")
-            jsch.validate(input_vars, schema, format_checker=jsch.FormatChecker())
-
-            env = ImmutableSandboxedEnvironment(
-                line_statement_prefix=None,
-                trim_blocks=True,
-                lstrip_blocks=True,
-                loader=jinja2.FileSystemLoader(search_dirs),
-                undefined=StrictUndefined
-            )
-
-            (hostname_short, hostname_full) = _get_hostname_short_and_full()
-
-            env.filters["flatten_to_set"] = flatten_to_set
-            env.filters["parse_url"] = parse_url
-            env.filters["dns_query"] = dns_query
-            env.filters["underscore_url"] = underscore_url
-            env.filters["is_ipv4"] = is_ipv4
-            env.filters["wildcard_to_regex"] = wildcard_to_regex
-            env.filters["extract_custom_webserver_code"] = extract_custom_webserver_code
-            env.filters["netmask_bits"] = netmask_bits
-            env.globals["global_var_get"] = global_var_get
-            env.globals["global_var_set"] = global_var_set
-            env.globals["GLOBAL_SITE_NAME"] = self.site_name
-            env.globals["HOSTNAME_FULL"] = hostname_full
-            env.globals["HOSTNAME_SHORT"] = hostname_short
-            env.globals["DNS_SERVERS"] = dns_servers()
-
-            template = env.from_string(template_str)
-            cfg = template.render(input_vars)
-
-            with open("/etc/apache2/sites-available/%s.conf" % self.site_name, "w") as f:
-                f.write(cfg)
-            _log.LOGD("Generated Apache config file")
-
-            # Make sure the site has at least the default certs
-            self._fixup_certs()
-
-            run_cmd("a2ensite 000-catch-all || true", _log, "Enabling catch-all site if necessary")
-            run_cmd("a2ensite %s" % self.site_name, _log, "Enabling site '%s' if necessary" % self.site_name)
-
-            _log.LOGD("Saving input vars")
-            with open("%s.json" % template_file_no_ext, "w") as f:
-                json.dump(input_vars, f, indent=2)
-
-        self.transaction.run(do_write)
-
-    @staticmethod
-    def get_error_domains(stderr):
-        err_domains = set()
-        line_domain_re = re.compile(r"Syntax error on line (\d+) of ([^:]+):")
-        server_name_re = re.compile("^\s*ServerName\s+((?!-)[A-Z\d-]{1,63}(?<!-)(\.(?!-)[A-Z\d-]{1,63}(?<!-))*)\s*$",
-                                    re.IGNORECASE)
-
-        for l in stderr.split("\n"):
-            m = line_domain_re.search(l)
-            if m:
-                # Find domain name by looking at the ServerName directive
-                with open(m.group(2)) as f:
-                    for line in f:
-                        m = server_name_re.match(line)
-                        if m:
-                            err_domains.add(m.group(1))
-                            break
-        return err_domains
-
-    @staticmethod
-    def get_all_active_domains():
-        domains = []
-        # base_dir = "/etc/apache2/sites-enabled"
-        # server_name_re = re.compile("^\s*ServerName\s+((?!-)[A-Z\d-]{1,63}(?<!-)(\.(?!-)[A-Z\d-]{1,63}(?<!-))*)\s*$",
-        #                             re.IGNORECASE)
-
-        # if os.path.exists(base_dir):
-        #     paths = os.listdir(base_dir)
-        # else:
-        #     # The upgrade script will create this file before uninstalling Apache.
-        #     try:
-        #         paths = [name.strip() for name in open("/tmp/apache-active-sites").read().split("\n")]
-        #     except OSError:
-        #         paths = []
-
-        # for name in paths:
-        #     if name.startswith("000-") or not name.endswith(".conf"):
-        #         continue
-
-        #     acfg = ApacheConfig(WebServerConfig._site_name_from_config_file(name))
-        #     if not acfg.exists():
-        #         continue
-
-        #     # Find domain name by looking at the ServerName directive
-        #     with open(os.path.join(base_dir, name)) as f:
-        #         for line in f:
-        #             m = server_name_re.match(line)
-        #             if m:
-        #                 domains.append(m.group(1))
-        #                 break
-
-        return domains
-
-    @staticmethod
-    def reload_or_start():
-        reload_cmd = "reload"
-        try:
-            run_cmd("service revsw-apache2 status", _log, "Checking if Apache is running", True)
-        except OSError:
-            reload_cmd = "start"
-
-        # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
-        # failures.
-        child = subprocess.Popen("service revsw-apache2 %s" % reload_cmd,
-                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (stdout, stderr) = child.communicate()
-
-        _log.LOGI("%sing Apache" % reload_cmd.capitalize())
-        if child.returncode != 0:
-            for line in stderr.split("\n"):
-                _log.LOGE(line)
-            raise ConfigException("Apache %s failed" % reload_cmd,
-                                  ApacheConfig.get_error_domains(stderr))
-
-
-
 class NginxConfig(WebServerConfig):
     @_webserver_write_command
     def disable_all_sites(self):
@@ -919,7 +758,7 @@ class NginxConfig(WebServerConfig):
 
         # This can happen while migrating from Apache to Nginx, when the sites are all in Apache format.
         if not paths:
-            return ApacheConfig.get_all_active_domains()
+            return []
 
         for name in paths:
             if name.startswith("000-") or not name.endswith(".conf"):
@@ -1152,95 +991,6 @@ class VarnishConfig:
         return err_domains
 
 
-class MlogcConfig:
-    def __init__(self, site_name=None, transaction=None):
-        self.search_path = []
-        self.site_name = site_name
-        self.transaction = transaction
-
-    def _lazy_load_template(self, search_path):
-        if not search_path:
-            search_path = [jinja_config_webserver_base_dir()]
-
-        if self.search_path == search_path:
-            return
-
-        self.env = ImmutableSandboxedEnvironment(
-            line_statement_prefix=None,
-            trim_blocks=True,
-            lstrip_blocks=True,
-            loader=jinja2.FileSystemLoader(search_path),
-            undefined=StrictUndefined
-        )
-        self.mlogc_template = self.env.get_template("mlogc.jinja")
-        _log.LOGD("Loaded mlogc template:", self.mlogc_template.filename)
-
-        self.input_vars_schema = json.loads(_generate_schema("mlogc", search_path))
-
-    def gather_template_files(self, search_path=None):
-        self._lazy_load_template(search_path)
-        files = {
-            "mlogc.jinja": self.env.loader.get_source(self.env, "mlogc.jinja")[0],
-            "mlogc.vars.schema": json.dumps(self.input_vars_schema, indent=2)
-        }
-        return files
-
-    @_webserver_write_command
-    def write_config_file(self, input_vars, search_path=None):
-        self._lazy_load_template(search_path)
-        jsch.validate(input_vars, self.input_vars_schema, format_checker=jsch.FormatChecker())
-
-        cfg = self.mlogc_template.render(input_vars)
-
-        def do_write():
-            run_cmd("mkdir -p %s" % os.path.dirname(self.config_path()), _log,
-                    "Creating mlogc config dir if it doesn't exist")
-            with open(self.config_path(), "w") as f:
-                f.write(cfg)
-            _log.LOGD("Generated mlogc config file")
-
-        self.transaction.run(do_write)
-
-    @_webserver_write_command
-    def write_template_files(self, files):
-        self.transaction.run(lambda: _write_template_files(files, jinja_config_webserver_base_dir()))
-
-    def config_path(self):
-        base_dir = "/etc/modsecurity/mlogc"
-        if not self.site_name:
-            return base_dir
-        return os.path.join(base_dir, "%s.mlogc.conf" % self.site_name)
-
-    @_webserver_write_command
-    def remove_site(self):
-        self.transaction.run(lambda: run_cmd("rm -f %s" % self.config_path(), _log,
-                                             "Removing site '%s'" % self.site_name))
-
-
-class NoMlogcConfig:
-    def __init__(self, site_name=None, transaction=None):
-        self.site_name = site_name
-        self.transaction = transaction
-
-    def gather_template_files(self, search_path=None):
-        return {}
-
-    @_webserver_write_command
-    def write_config_file(self, input_vars, search_path=None):
-        pass
-
-    @_webserver_write_command
-    def write_template_files(self, files):
-        pass
-
-    def config_path(self):
-        return "/tmp/dummy-mlogc.conf"
-
-    @_webserver_write_command
-    def remove_site(self):
-        pass
-
-
 def _check_and_get_attr(command, attr):
     val = command.get(attr, None)
     if not val:
@@ -1269,56 +1019,41 @@ def configure_all(config):
             if not site:
                 raise AttributeError("Site not specified; ignoring")
 
-        acfg = PlatformWebServer().config_class()(site, transaction)
+        ncfg = NginxConfig(site, transaction)
         vcfg = VarnishConfig(site, transaction)
-        mcfg = PlatformWebServer().mlogc_config_class()(site, transaction)
 
         _log.LOGI("Got request for site '%s', action '%s'" % (site, action))
 
         if action == "flush":
             _log.LOGD("Removing all sites")
-            acfg.disable_all_sites()
+            ncfg.disable_all_sites()
 
             # If site == '*', remove_site() will remove all sites
             vcfg.remove_site()
-            mcfg.remove_site()
 
         elif action == "varnish_template":
             _log.LOGD("Writing Varnish template")
             vcfg.write_template_files(_check_and_get_attr(command, "templates"))
 
-        elif action == "mlogc_template":
-            _log.LOGD("Writing mlogc template")
-            mcfg.write_template_files(_check_and_get_attr(command, "templates"))
-
         elif action == "delete":
             _log.LOGD("Removing site '%s'" % site)
-            acfg.remove_site()
+            ncfg.remove_site()
             vcfg.remove_site()
-            mcfg.remove_site()
 
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)
 
             templates = command.get("templates")
             if templates:
-                if PlatformWebServer()._is_nginx():
-                    if not "nginx" in templates:
-                        raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
-                    real_templates = templates["nginx"]
-                else:   # Apache
-                    # Old config contains only Apache templates
-                    real_templates = templates.get("apache", templates)
+                if not "nginx" in templates:
+                    raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
+                real_templates = templates["nginx"]
 
                 _log.LOGD("Writing Jinja templates")
-                acfg.write_template_files(real_templates)
+                ncfg.write_template_files(real_templates)
 
             cfg_vars = _check_and_get_attr(command, "config_vars")
-            acfg.configure_site(cfg_vars)
-
-            # mod_security is only installed on the BP
-            if "bp" in cfg_vars:
-                mcfg.write_config_file(cfg_vars)
+            ncfg.configure_site(cfg_vars)
 
             varnish_config_vars = command.get("varnish_config_vars")
             if varnish_config_vars:
@@ -1329,7 +1064,7 @@ def configure_all(config):
         elif action == "certs":
             _log.LOGD("Configuring site '%s' certificates" % site)
             certs = _check_and_get_attr(command, "certs")
-            acfg.write_certs(certs["crt"], certs["key"], certs["ca-bundle"])
+            ncfg.write_certs(certs["crt"], certs["key"], certs["ca-bundle"])
 
         else:
             raise AttributeError("Invalid action '%s'" % action)

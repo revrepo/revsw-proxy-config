@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
-from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, MlogcConfig, \
-    PlatformWebServer, WebServerConfig, NginxConfig, ApacheConfig
+from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, PlatformWebServer, \
+    WebServerConfig, NginxConfig
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     copy.add_argument("copy_file_name", help="File to copy to")
 
     args = parser.parse_args()
-    #print json.dumps(vars(args))
+    # print json.dumps(vars(args))
 
     global log
 
@@ -170,42 +170,27 @@ if __name__ == "__main__":
                 "templates": VarnishConfig().gather_template_files(search_dirs)
             }
 
-        elif action == Actions.MLOGC_TEMPL:
-            log.LOGD("Saving mlogc config template")
-
-            search_dirs = ["."] + \
-                          global_cfg["include_dir"] + \
-                          [os.path.join(os.path.dirname(__file__), "templates"),
-                           os.path.join(os.path.dirname(__file__), "templates/bp"),
-                           "/opt/revsw-config/templates",
-                           "/opt/revsw-config/templates/bp"]
-            config = {
-                "type": "mlogc_template",
-                "templates": MlogcConfig().gather_template_files(search_dirs)
-            }
-
-        elif action == Actions.CONFIG:    # also add
+        elif action == Actions.CONFIG:  # also add
             log.LOGD("Regenerate web server config for site '%s'" % args.site_name_config)
 
             search_dirs_base = ["."] + \
-                                global_cfg["include_dir"] + \
-                                args.include_dir + \
-                                [os.path.join(os.path.dirname(__file__), "templates"),
+                               global_cfg["include_dir"] + \
+                               args.include_dir + \
+                               [os.path.join(os.path.dirname(__file__), "templates"),
                                 "/opt/revsw-config/templates"]
 
             templates = {}
-            for ws, config_class in (("apache", ApacheConfig), ("nginx", NginxConfig)):
-                subdirs = ("all", ws)
-                search_dirs = [os.path.join(base, subdir) for (base, subdir) in
-                               itertools.product(search_dirs_base, subdirs)]
+            subdirs = ("all", "nginx")
+            search_dirs = [os.path.join(base, subdir) for (base, subdir) in
+                           itertools.product(search_dirs_base, subdirs)]
 
-                log.LOGD("Search dirs:", search_dirs)
+            log.LOGD("Search dirs:", search_dirs)
 
-                with open(args.vars_file) as f:
-                    vars = json.load(f)
+            with open(args.vars_file) as f:
+                vars = json.load(f)
 
-                cfg = config_class(args.site_name_config)
-                templates[ws] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
+            cfg = NginxConfig(args.site_name_config)
+            templates["nginx"] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
 
             config = {
                 "type": "config",
@@ -252,6 +237,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         log.LOGE(e)
         sys.exit(1)
