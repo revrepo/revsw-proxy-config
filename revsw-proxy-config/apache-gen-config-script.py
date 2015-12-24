@@ -1001,60 +1001,60 @@ def generate_config_sh():
     THIS_DIR=`readlink -f .`
     """)
 
-    if not args.no_bp:
-        for addr, domains in _bps.iteritems():
+    # if not args.no_bp:
+    for addr, domains in _bps.iteritems():
+        print_configure_sh("""
+BP=%s
+echo "Configuring BP '$BP'"
+apache-config.py start -I $THIS_DIR $BP || EXIT=$?
+""" % addr)
+        if args.upload_varnish_mlogc:
             print_configure_sh("""
-    BP=%s
-    echo "Configuring BP '$BP'"
-    apache-config.py start -I $THIS_DIR $BP || EXIT=$?
-    """ % addr)
-            if args.upload_varnish_mlogc:
-                print_configure_sh("""
-    echo "    -> uploading Varnish config template"
-    apache-config.py varnish-template || EXIT=$?
-    echo "    -> uploading Mlogc config template"
-    apache-config.py mlogc-template || EXIT=$?
-    """)
-            if args.flush:
-                print_configure_sh("""
-    echo "    -> removing all sites on server"
-    apache-config.py flush-sites || EXIT=$?
-    """)
-            for domain in domains:
-                generate_bp(domain)
-            if not args.no_send:
-                print_configure_sh("""
-    echo "    -> sending configuration"
-    apache-config.py send || EXIT=$?
-    """)
-            if args.copy_to:
-                print_configure_sh("""
-    echo "    -> copying configuration to '%s'"
-    apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to))
+echo "    -> uploading Varnish config template"
+apache-config.py varnish-template || EXIT=$?
+echo "    -> uploading Mlogc config template"
+apache-config.py mlogc-template || EXIT=$?
+""")
+        if args.flush:
+            print_configure_sh("""
+echo "    -> removing all sites on server"
+apache-config.py flush-sites || EXIT=$?
+""")
+        for domain in domains:
+            generate_bp(domain)
+        if not args.no_send:
+            print_configure_sh("""
+echo "    -> sending configuration"
+apache-config.py send || EXIT=$?
+""")
+        if args.copy_to:
+            print_configure_sh("""
+echo "    -> copying configuration to '%s'"
+apache-config.py copy %s || EXIT=$?
+""" % (args.copy_to, args.copy_to))
 
-    if not args.no_co:
-        for addr, domains in _cos.iteritems():
-            print_configure_sh("""
-    CO=%s
-    echo "Configuring CO '$CO'"
-    apache-config.py start -I $THIS_DIR $CO || EXIT=$?""" % addr)
-            if args.flush:
-                print_configure_sh("""echo "    -> removing all sites on server"
-    apache-config.py flush-sites || EXIT=$?
-    """)
-            for domain in domains:
-                generate_co(domain)
-            if not args.no_send:
-                print_configure_sh("""
-    echo "    -> sending configuration"
-    apache-config.py send || EXIT=$?
-    """)
-            if args.copy_to:
-                print_configure_sh("""
-    echo "    -> copying configuration to '%s'"
-    apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to))
+    # if not args.no_co:
+    #     for addr, domains in _cos.iteritems():
+    #         print_configure_sh("""
+    # CO=%s
+    # echo "Configuring CO '$CO'"
+    # apache-config.py start -I $THIS_DIR $CO || EXIT=$?""" % addr)
+    #         if args.flush:
+    #             print_configure_sh("""echo "    -> removing all sites on server"
+    # apache-config.py flush-sites || EXIT=$?
+    # """)
+    #         for domain in domains:
+    #             generate_co(domain)
+    #         if not args.no_send:
+    #             print_configure_sh("""
+    # echo "    -> sending configuration"
+    # apache-config.py send || EXIT=$?
+    # """)
+    #         if args.copy_to:
+    #             print_configure_sh("""
+    # echo "    -> copying configuration to '%s'"
+    # apache-config.py copy %s || EXIT=$?
+    # """ % (args.copy_to, args.copy_to))
 
     print_configure_sh("exit $EXIT")
 
