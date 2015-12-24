@@ -614,7 +614,7 @@
 	{% set proto = "https" if is_https else "http" %}
 	{{ balancer_mod.define_co_ows_balancer(this, is_https) }}
 	server {
-	listen {{profile_port}};
+	listen {{profile_port}}{% if is_https %} ssl http2{% endif %};
 	server_name {{this.SERVER_NAME}}{% for shard in range(this.DOMAIN_SHARDS_COUNT) %} s{{shard}}-{{this.SERVER_NAME}}{% endfor %};
 
 	{% if this.DEBUG_MODE %}
