@@ -11,7 +11,7 @@ ldconfig
 # BEGIN: proxy config part
 
 echo "START: Updating all domains"
-/opt/revsw-config/bin/pc-apache-config.py -U
+#/opt/revsw-config/bin/pc-apache-config.py -U
 echo "DONE: Updating all domains"
 
 # END: proxy config part
