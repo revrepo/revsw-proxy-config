@@ -139,7 +139,7 @@ class ConfigCommon:
             return val
 
         enable_opt = content["enable_optimization"]
-        # enable_decompression = content["enable_decompression"]
+        enable_decompression = content["enable_decompression"]
         profiles_count = 1
 
         if not enable_opt:
@@ -165,8 +165,14 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
+
+        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", enable_opt)
+        self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", enable_decompression)
+
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-        #self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
+        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
+
+        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
         self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
 
         self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
@@ -336,6 +342,7 @@ class ConfigCommon:
             return False, False
 
         misc = self.ui_config["rev_component_bp"]
+        co = self.ui_config["rev_component_co"]
 
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))

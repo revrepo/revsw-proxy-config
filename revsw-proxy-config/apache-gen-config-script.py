@@ -662,7 +662,6 @@ def generate_bp_domain_json(domain):
     # At least one is always True
     http = "http" if domain["ows_http"] else "https"
     https = "https" if domain["ows_https"] else "http"
-
     bp = {
         "VERSION": _BP_CONFIG_VERSION,
         "ssl": {},
@@ -709,7 +708,7 @@ def generate_bp_domain_json(domain):
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
         "END_USER_RESPONSE_HEADERS": [], # (BP-92)
 
-        "REV_RUM_BEACON_URL": domain["rev_component_co"]["rum_beacon_url"],
+        "REV_RUM_BEACON_URL": RUM_BEACON_URL,
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "ORIGIN_REQUEST_HEADERS": [] # (BP-92)
@@ -930,7 +929,18 @@ def generate_bp_ui_config_json(domain):
             "acl_rules": []
         },
         "rev_custom_json": {},
-        "end_user_response_headers": []
+        "end_user_response_headers": [],
+
+        "co_apache_custom_config": "",
+        "enable_rum": True,
+        "rum_beacon_url": RUM_BEACON_URL,
+        "enable_optimization": domain["enable_opt"],
+        "enable_decompression": domain["enable_decompression"],
+        "mode": "custom",
+        "img_choice": "medium",
+        "js_choice": "medium",
+        "css_choice": "medium",
+        "rev_custom_json": {}
     }
 
 
