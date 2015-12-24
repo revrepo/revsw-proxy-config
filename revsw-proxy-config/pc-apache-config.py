@@ -3,7 +3,6 @@ import argparse
 import copy
 import json
 import os
-import subprocess
 import sys
 import errno
 import re
@@ -20,8 +19,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 23
-_CO_CONFIG_VERSION = 15
+_PROXY_CONFIG_VERSION = 1
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
 
@@ -32,6 +30,7 @@ class ConfigCommon:
         self.varnish_config_vars = varnish_config_vars
         self.ui_config = ui_config
         self.ban_urls = set()
+
         # Private members
         self._must_ban_html = False
         self._config_changed = False
@@ -39,13 +38,12 @@ class ConfigCommon:
         self._parse_config_command_options()
 
     def _patch_if_changed_webserver_internal(self, webserver_cfg_field, enable_switch, option, val, ban_html_if_changed):
-        # Patch the BP/CO/etc if present and allowed
         if not webserver_cfg_field in self.webserver_config_vars or (enable_switch and not self.cmd_opts[enable_switch]):
             return
         if self.webserver_config_vars[webserver_cfg_field].get(option) != val:
             self.webserver_config_vars[webserver_cfg_field][option] = val
             self._config_changed = True
-            if ban_html_if_changed and self.can_config_bp():
+            if ban_html_if_changed:
                 self._must_ban_html = True
 
     def _parse_config_command_options(self):
@@ -56,8 +54,7 @@ class ConfigCommon:
             "https": True,
             "spdy": True,
             "shards_count": 0,
-            "config_bp": True,
-            "config_co": True,
+            "config": True,
             "js_subst": False,
             "html_subst": False,
             "include_user_agent": False,
@@ -79,10 +76,6 @@ class ConfigCommon:
                 self.cmd_opts["http"] = False
             elif opt == "disable-spdy":
                 self.cmd_opts["spdy"] = False
-            elif opt == "no-bp":
-                self.cmd_opts["config_bp"] = False
-            elif opt == "no-co":
-                self.cmd_opts["config_co"] = False
             elif opt == "enable-js-substitute":
                 self.cmd_opts["js_subst"] = True
             elif opt == "enable-html-substitute":
@@ -107,12 +100,10 @@ class ConfigCommon:
     def _add_ban_urls(self, ban_urls):
         self.ban_urls.update(ban_urls)
 
-    def _patch_if_changed_bp_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("bp", "config_bp", option, val, ban_html_if_changed)
+    def _patch_if_changed_webserver(self, option, val, ban_html_if_changed=False):
+        self._patch_if_changed_webserver_internal("proxy", "config", option, val, ban_html_if_changed)
 
-    def _patch_if_changed_bp_varnish(self, option, val, ban_html_if_changed=False):
-        if not self.can_config_bp():
-            return
+    def _patch_if_changed_varnish(self, option, val, ban_html_if_changed=False):
         if self.varnish_config_vars.get(option) != val:
             log.LOGI("Detected change for Varnish '%s'" % option)
             self.varnish_config_vars[option] = val
@@ -120,11 +111,8 @@ class ConfigCommon:
             if ban_html_if_changed:
                 self._must_ban_html = True
 
-    def _patch_if_changed_co_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("co", "config_co", option, val, ban_html_if_changed)
-
     def _patch_if_changed_co_profiles_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("co_profiles", "config_co", option, val, ban_html_if_changed)
+        self._patch_if_changed_webserver_internal("co_profiles", "config", option, val, ban_html_if_changed)
 
     def _patch_content_vars(self):
         content = self.ui_config["rev_component_co"]
@@ -165,34 +153,30 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
-        self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-        #self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
-        self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
+        self._patch_if_changed_webserver("ENABLE_OPTIMIZATION", enable_opt)
+        #self._patch_if_changed_webserver("ENABLE_DECOMPRESSION", enable_decompression)
+        self._patch_if_changed_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
 
-        self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
-        self._patch_if_changed_co_webserver("REV_PROFILES_COUNT", profiles_count, True)
+        self._patch_if_changed_webserver("REV_PROFILES_COUNT", profiles_count, True)
 
     def _patch_cache_vars(self):
-        if not self.can_config_bp():
-            return
-
         cache = self.ui_config["rev_component_bp"]
 
-        self._patch_if_changed_bp_varnish("ENABLE_CACHE", cache["enable_cache"])
-        self._patch_if_changed_bp_webserver("ENABLE_VARNISH", cache["enable_cache"])
-        self._patch_if_changed_bp_varnish("INCLUDE_USER_AGENT", self.cmd_opts["include_user_agent"])
-        self._patch_if_changed_bp_varnish("CACHE_PS_HTML", self.cmd_opts["cache_ps_html"])
-        self._patch_if_changed_bp_varnish("CACHE_IGNORE_AUTH", self.cmd_opts["cache_ignore_auth"])
-        self._patch_if_changed_bp_webserver("BYPASS_VARNISH_LOCATIONS", cache.get("cache_bypass_locations", []))
+        self._patch_if_changed_varnish("ENABLE_CACHE", cache["enable_cache"])
+        self._patch_if_changed_webserver("ENABLE_VARNISH", cache["enable_cache"])
+        self._patch_if_changed_varnish("INCLUDE_USER_AGENT", self.cmd_opts["include_user_agent"])
+        self._patch_if_changed_varnish("CACHE_PS_HTML", self.cmd_opts["cache_ps_html"])
+        self._patch_if_changed_varnish("CACHE_IGNORE_AUTH", self.cmd_opts["cache_ignore_auth"])
+        self._patch_if_changed_webserver("BYPASS_VARNISH_LOCATIONS", cache.get("cache_bypass_locations", []))
 
         # Check for caching rules mode (best or first)
-        self._patch_if_changed_bp_varnish("CACHING_RULES_MODE", cache.get("caching_rules_mode", "best"))
+        self._patch_if_changed_varnish("CACHING_RULES_MODE", cache.get("caching_rules_mode", "best"))
 
         if "caching_rules" in cache:
             bans = _compute_ban_urls_from_caching_rules(self.varnish_config_vars.get("CACHING_RULES", {}),
                                                         cache["caching_rules"])
             self._add_ban_urls(bans)
-            self._patch_if_changed_bp_varnish("CACHING_RULES", cache["caching_rules"])
+            self._patch_if_changed_varnish("CACHING_RULES", cache["caching_rules"])
 
         custom_vcl = {
             "backends": [],
@@ -215,14 +199,14 @@ class ConfigCommon:
             _merge_dicts(custom_vcl, cache["custom_vcl"])
             del custom_vcl["enabled"]
 
-        self._patch_if_changed_bp_varnish("CUSTOM_VCL_ENABLED", custom_vcl_enabled)
-        self._patch_if_changed_bp_varnish("CUSTOM_VCL", custom_vcl)
+        self._patch_if_changed_varnish("CUSTOM_VCL_ENABLED", custom_vcl_enabled)
+        self._patch_if_changed_varnish("CUSTOM_VCL", custom_vcl)
 
         geoip_headers = cache.get("enable_vcl_geoip_headers", False)
-        self._patch_if_changed_bp_webserver("ENABLE_VARNISH_GEOIP_HEADERS", geoip_headers)
-        self._patch_if_changed_bp_varnish("ENABLE_GEOIP_HEADERS", geoip_headers)
+        self._patch_if_changed_webserver("ENABLE_VARNISH_GEOIP_HEADERS", geoip_headers)
+        self._patch_if_changed_varnish("ENABLE_GEOIP_HEADERS", geoip_headers)
 
-        self._patch_if_changed_bp_varnish("CLIENT_RESPONSE_TIMEOUT",
+        self._patch_if_changed_varnish("CLIENT_RESPONSE_TIMEOUT",
                                           cache.get("client_response_timeout",
                                                     self.cmd_opts["client_response_timeout"]))
 
@@ -246,14 +230,11 @@ class ConfigCommon:
             # health_probe["PROBE_INTERVAL"] = config_health_probe["interval"]
             # health_probe["PROBE_TIMEOUT"] = config_health_probe["timeout"]
 
-        self._patch_if_changed_bp_varnish("ENABLE_ORIGIN_HEALTH_PROBE", enable_origin_health_probe)
-        self._patch_if_changed_bp_varnish("ORIGIN_HEALTH_PROBE", health_probe)
+        self._patch_if_changed_varnish("ENABLE_ORIGIN_HEALTH_PROBE", enable_origin_health_probe)
+        self._patch_if_changed_varnish("ORIGIN_HEALTH_PROBE", health_probe)
         # END (BP-255)
 
     def _patch_security_vars(self):
-        if not self.can_config_bp():
-            return False
-
         security = self.ui_config["rev_component_bp"]
 
         if not security["enable_security"]:
@@ -268,10 +249,10 @@ class ConfigCommon:
             else:
                 mode = "off"
 
-        self._patch_if_changed_bp_webserver("SECURITY_MODE", mode)
-        self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
+        self._patch_if_changed_webserver("SECURITY_MODE", mode)
+        self._patch_if_changed_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
 
-        self._patch_if_changed_bp_webserver("acl", security.get("acl", {
+        self._patch_if_changed_webserver("acl", security.get("acl", {
             "enabled": False,
             "action": "allow_except",
             "acl_rules": []
@@ -331,136 +312,118 @@ class ConfigCommon:
             enable_rewr
         )
 
-    def _patch_misc_vars_bp(self):
-        if not self.can_config_bp():
-            return False, False
+    def _patch_misc_vars(self):
 
         misc = self.ui_config["rev_component_bp"]
 
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
 
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr, True)
+        self._patch_if_changed_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
+        self._patch_if_changed_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers, True)
+        self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
+        self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr, True)
 
-        main_domain_name = self.webserver_config_vars["bp"]["SERVER_NAME"]
+        main_domain_name = self.webserver_config_vars["proxy"]["SERVER_NAME"]
         ows_domain, ows_server = _get_ows_domain_and_server(main_domain_name, self.ui_config)
-        self._patch_if_changed_bp_webserver("ORIGIN_SERVER_NAME", ows_domain)
+        self._patch_if_changed_webserver("ORIGIN_SERVER_NAME", ows_domain)
 
         domain_wc_alias = self.ui_config.get("domain_wildcard_alias", "")
         domain_regex_alias = wildcard_to_regex(domain_wc_alias) if domain_wc_alias else ""
-        self._patch_if_changed_bp_webserver("SERVER_REGEX_ALIAS", domain_regex_alias)
-        self._patch_if_changed_bp_webserver("SERVER_ALIASES", self.ui_config.get("domain_aliases", []))
+        self._patch_if_changed_webserver("SERVER_REGEX_ALIAS", domain_regex_alias)
+        self._patch_if_changed_webserver("SERVER_ALIASES", self.ui_config.get("domain_aliases", []))
 
-        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_BEFORE", misc.get("bp_apache_fe_custom_config", ""))
-        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("bp_apache_custom_config", ""))
+        self._patch_if_changed_webserver("CUSTOM_WEBSERVER_CODE_BEFORE", misc.get("bp_apache_fe_custom_config", ""))
+        self._patch_if_changed_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("bp_apache_custom_config", ""))
 
-        self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
-        self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
-        self._patch_if_changed_bp_webserver("ENABLE_SPDY", self.cmd_opts["spdy"])
-        self._patch_if_changed_bp_webserver("ENABLE_HTTP2", misc.get("enable_http2", True))
-        self._patch_if_changed_bp_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
+        self._patch_if_changed_webserver("ENABLE_HTTP", self.cmd_opts["http"])
+        self._patch_if_changed_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
+        self._patch_if_changed_webserver("ENABLE_SPDY", self.cmd_opts["spdy"])
+        self._patch_if_changed_webserver("ENABLE_HTTP2", misc.get("enable_http2", True))
+        self._patch_if_changed_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
 
-        self._patch_if_changed_bp_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
-        self._patch_if_changed_bp_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
+        self._patch_if_changed_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
+        self._patch_if_changed_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
 
-        self._patch_if_changed_bp_webserver("DEBUG_MODE", self.cmd_opts["debug"])
-        self._patch_if_changed_bp_varnish("DEBUG_MODE", self.cmd_opts["debug"])
+        self._patch_if_changed_webserver("DEBUG_MODE", self.cmd_opts["debug"])
+        self._patch_if_changed_varnish("DEBUG_MODE", self.cmd_opts["debug"])
 
-        self._patch_if_changed_bp_webserver("PROXY_TIMEOUT",
+        self._patch_if_changed_webserver("PROXY_TIMEOUT",
                                             self.ui_config.get("proxy_timeout", self.cmd_opts["proxy_timeout"]))
-        self._patch_if_changed_bp_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
-        self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
-        self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
-        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
+        self._patch_if_changed_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
+        self._patch_if_changed_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
+        self._patch_if_changed_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
+        self._patch_if_changed_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
-        bp_cos = _get_content_optimizers(self.ui_config)
-        if bp_cos:
-            self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
-                                                else ["http://%s" % co for co in bp_cos])
-            self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
-                                                else ["https://%s" % co for co in bp_cos])
-            self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
-                                              else bp_cos)
-            self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
-                                              else bp_cos)
+        cos = _get_content_optimizers(self.ui_config)
+        if cos:
+            self._patch_if_changed_webserver("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
+                                                else ["http://%s" % co for co in cos])
+            self._patch_if_changed_webserver("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
+                                                else ["https://%s" % co for co in cos])
+            self._patch_if_changed_varnish("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
+                                              else cos)
+            self._patch_if_changed_varnish("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
+                                              else cos)
 
         co_bypass_urls = misc.get("co_bypass_locations", [])
-        self._patch_if_changed_bp_webserver("BYPASS_CO_LOCATIONS", co_bypass_urls)
-        self._patch_if_changed_bp_varnish("BYPASS_CO_LOCATIONS", co_bypass_urls)
+        self._patch_if_changed_webserver("BYPASS_CO_LOCATIONS", co_bypass_urls)
+        self._patch_if_changed_varnish("BYPASS_CO_LOCATIONS", co_bypass_urls)
 
         http = "http" if self.cmd_opts["ows_http"] else "https"
         https = "https" if self.cmd_opts["ows_https"] else "http"
 
         _check_valid_domains([ows_server], "Origin server")
 
-        self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
+        self._patch_if_changed_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
                                             else ["%s://%s" % (http, ows_server)])
-        self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
+        self._patch_if_changed_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
                                             else ["%s://%s" % (https, ows_server)])
 
-    def _patch_misc_vars_co(self):
-        if not self.can_config_co():
-            return False
-
+        bp = misc
         misc = self.ui_config["rev_component_co"]
-        bp = self.ui_config["rev_component_bp"]
+        domain_name = main_domain_name
 
-        domain_name = self.webserver_config_vars["co"]["SERVER_NAME"]
         ows_domain, ows_server = _get_ows_domain_and_server(domain_name, self.ui_config)
 
-        self._patch_if_changed_co_webserver("ORIGIN_SERVER_NAME", ows_domain)
-        self._patch_if_changed_co_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("co_apache_custom_config", ""))
+        self._patch_if_changed_webserver("ORIGIN_SERVER_NAME", ows_domain)
+        self._patch_if_changed_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("co_apache_custom_config", ""))
 
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(bp))
 
-        self._patch_if_changed_co_webserver("DOMAINS_TO_PROXY_HTTP", http_servers)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr)
+        self._patch_if_changed_webserver("DOMAINS_TO_PROXY_HTTP", http_servers)
+        self._patch_if_changed_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers)
+        self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr)
+        self._patch_if_changed_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr)
 
-        self._patch_if_changed_co_webserver("ENABLE_HTTP", self.cmd_opts["http"])
-        self._patch_if_changed_co_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
-        self._patch_if_changed_co_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
+        self._patch_if_changed_webserver("ENABLE_HTTP", self.cmd_opts["http"])
+        self._patch_if_changed_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
+        self._patch_if_changed_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
 
-        self._patch_if_changed_co_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
-        self._patch_if_changed_co_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
+        self._patch_if_changed_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
+        self._patch_if_changed_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
 
-        self._patch_if_changed_co_webserver("DEBUG_MODE", self.cmd_opts["debug"])
+        self._patch_if_changed_webserver("DEBUG_MODE", self.cmd_opts["debug"])
 
-        self._patch_if_changed_co_webserver("PROXY_TIMEOUT",
+        self._patch_if_changed_webserver("PROXY_TIMEOUT",
                                             self.ui_config.get("proxy_timeout", self.cmd_opts["proxy_timeout"]))
 
-        self._patch_if_changed_co_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
-        self._patch_if_changed_co_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
-        self._patch_if_changed_co_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
-        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", misc.get("enable_decompression", True))
+        self._patch_if_changed_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
+        self._patch_if_changed_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
+        self._patch_if_changed_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
+        self._patch_if_changed_webserver("ENABLE_DECOMPRESSION", misc.get("enable_decompression", True))
 
         http = "http" if self.cmd_opts["ows_http"] else "https"
         https = "https" if self.cmd_opts["ows_https"] else "http"
 
         _check_valid_domains([ows_server], "Origin server")
 
-        self._patch_if_changed_co_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
+        self._patch_if_changed_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
                                             else ["%s://%s" % (http, ows_server)])
-        self._patch_if_changed_co_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
+        self._patch_if_changed_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
                                             else ["%s://%s" % (https, ows_server)])
-        self._patch_if_changed_co_webserver("ORIGIN_REQUEST_HEADERS", misc.get("origin_request_headers", [])) # (BP-92) CO
-
-    def _patch_misc_vars(self):
-        if "bp" in self.webserver_config_vars:
-            self._patch_misc_vars_bp()
-        elif "co" in self.webserver_config_vars:
-            self._patch_misc_vars_co()
-
-    def can_config_bp(self):
-        return "bp" in self.webserver_config_vars and self.cmd_opts["config_bp"]
-
-    def can_config_co(self):
-        return "co" in self.webserver_config_vars and self.cmd_opts["config_co"]
+        self._patch_if_changed_webserver("ORIGIN_REQUEST_HEADERS", misc.get("origin_request_headers", [])) # (BP-92) CO
 
     def config_changed(self):
         return self._config_changed
@@ -509,24 +472,24 @@ def _compare_versions(ver_a, ver_b):
         raise AttributeError("Invalid version string '%s' or '%s'" % (ver_a, ver_b))
 
 
-def _get_server_role():
-    try:
-        child = subprocess.Popen("dpkg -l", shell=True, stdout=subprocess.PIPE)
-        (stdout, stderr) = child.communicate()
-        for line in stdout.split("\n"):
-            # if line.find("revsw-browser-proxy") >= 0:
-            #     return "bp"
-            # elif line.find("revsw-content-optimizer") >= 0:
-            #     return "co"
-            if line.find("revsw-libvarnish4api") >= 0:
-                return "bp"
-            elif line.find("revsw-nginx-full") >= 0:
-                return "co"
-    except OSError as e:
-        log.LOGE("Execution of 'dpkg -l' failed:", e)
-        raise
-    raise EnvironmentError("Neither 'revsw-varnish4' nor 'revsw-nginx-full' packages are installed; "
-                           "can't configure new site")
+# def _get_server_role():
+#     try:
+#         child = subprocess.Popen("dpkg -l", shell=True, stdout=subprocess.PIPE)
+#         (stdout, stderr) = child.communicate()
+#         for line in stdout.split("\n"):
+#             # if line.find("revsw-browser-proxy") >= 0:
+#             #     return "bp"
+#             # elif line.find("revsw-content-optimizer") >= 0:
+#             #     return "co"
+#             if line.find("revsw-libvarnish4api") >= 0:
+#                 return "bp"
+#             elif line.find("revsw-nginx-full") >= 0:
+#                 return "co"
+#     except OSError as e:
+#         log.LOGE("Execution of 'dpkg -l' failed:", e)
+#         raise
+#     raise EnvironmentError("Neither 'revsw-varnish4' nor 'revsw-nginx-full' packages are installed; "
+#                            "can't configure new site")
 
 
 def _check_proto_and_hostname(arg):
@@ -591,8 +554,8 @@ def _compute_ban_urls_from_caching_rules(old, new):
     return bans
 
 
-def _get_cdn_overlay_urls(bp):
-    return bp["cdn_overlay_urls"] if bp.get("cache_opt_choice") != "Rev CDN" else []
+def _get_cdn_overlay_urls(proxy):
+    return proxy["cdn_overlay_urls"] if proxy.get("cache_opt_choice") != "Rev CDN" else []
 
 
 def _get_content_optimizers(ui_config):
@@ -635,14 +598,11 @@ def _gen_initial_domain_config(domain_name, ui_config):
     mapping = _get_domain_mapping(domain_name)
     ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
 
-    # Let's see if we are a BP or a CO by looking at which package is installed
-    role = _get_server_role()
-
     # Let's see if we have a custom config for this domain
     config_str = ""
 
     try:
-        with open("/opt/revsw-config/apache/custom-sites/%s/%s.json" % (domain_name, role)) as j:
+        with open("/opt/revsw-config/apache/custom-sites/%s/proxy.json" % domain_name) as j:
             config_str = j.read()
     except IOError as e:  # file doesn't exist
         if e.errno != errno.ENOENT:
@@ -651,7 +611,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open("/opt/revsw-config/apache/generic-site/%s.json" % role) as j:
+        with open("/opt/revsw-config/apache/generic-site/proxy.json") as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -661,18 +621,17 @@ def _gen_initial_domain_config(domain_name, ui_config):
 
     config = json.loads(config_str)
 
-    if role == "bp":
-        bp_cos = _get_content_optimizers(ui_config)
-        if not bp_cos:
-            bp_cos = mapping.get("optimizers")
-        if bp_cos:
-            for cmd in config["commands"]:
-                if "varnish_config_vars" in cmd:
-                    cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = bp_cos
-                    cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = bp_cos
-                if "config_vars" in cmd and "bp" in cmd["config_vars"]:
-                    cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in bp_cos]
-                    cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in bp_cos]
+    cos = _get_content_optimizers(ui_config)
+    if not cos:
+        cos = mapping.get("optimizers")
+    if cos:
+        for cmd in config["commands"]:
+            if "varnish_config_vars" in cmd:
+                cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = cos
+                cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = cos
+            if "config_vars" in cmd:
+                cmd["config_vars"]["proxy"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in cos]
+                cmd["config_vars"]["proxy"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in cos]
 
     return config
 
@@ -691,11 +650,9 @@ def delete_domain(domain_name):
     })
     
     # Let's see if we are a BP or a CO by looking at which package is installed
-    server_role = _get_server_role()
 
-    if server_role == "bp":
-        # Ban the whole domain from Varnish
-        VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
+    # Ban the whole domain from Varnish
+    VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
     
     log.LOGI("Deleted domain '%s'" % domain_name)
 
@@ -717,16 +674,12 @@ def add_or_update_domain(domain_name, ui_config):
     webserver_config_vars = acfg.load_input_vars()
     # log.LOGI(u"Input JSON is: ", webserver_config_vars)
 
-
-    if "bp" in webserver_config_vars:
-        varnish_config_vars = {}
-        # noinspection PyBroadException
-        try:
-            varnish_config_vars = VarnishConfig(site_name).load_site_config()
-        except:
-            log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
-    else:
-        varnish_config_vars = None
+    varnish_config_vars = {}
+    # noinspection PyBroadException
+    try:
+        varnish_config_vars = VarnishConfig(site_name).load_site_config()
+    except:
+        log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
 
     cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
     cfg_common.patch_config()
@@ -806,159 +759,16 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
     """
     Upgrade Apache config vars up to the version(s) of the structures in 'new_vars_for_version'
     """
-    if "bp" in vars_:
-        bp = vars_["bp"]
-        ver = bp.get("VERSION", 0)
 
-        new_ver = new_vars_for_version["bp"].get("VERSION", 1)
-        if new_ver > _BP_CONFIG_VERSION:
-            raise AttributeError("'bp' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, _BP_CONFIG_VERSION))
+    if "proxy" in vars_:
+        proxy_config = vars_["proxy"]
+        ver = proxy_config.setdefault("VERSION", 1)
 
-        if ver <= 3 < new_ver:
-            if "nss" in bp:
-                del bp["nss"]
-
-        if ver <= 4 < new_ver:
-            bp["BLOCK_CRAWLERS"] = True
-
-        if ver <= 5 < new_ver:
-            bp["ENABLE_JS_SUBSTITUTE"] = False
-
-        if ver <= 6 < new_ver:
-            bp["DEBUG_MODE"] = False
-
-        if ver <= 7 < new_ver:
-            bp["ENABLE_HTML_SUBSTITUTE"] = False
-            bp["DOMAINS_TO_OPTIMIZE_HTTP"] = bp["STATIC_CONTENT_SERVERS_HTTP"]
-            bp["DOMAINS_TO_OPTIMIZE_HTTPS"] = bp["STATIC_CONTENT_SERVERS_HTTPS"]
-
-        if ver <= 8 < new_ver:
-            bp["BYPASS_VARNISH_LOCATIONS"] = []
-
-        if ver <= 9 < new_ver:
-            bp["CUSTOM_APACHE_CODE_BEFORE"] = ""
-
-        if ver <= 10 < new_ver:
-            bp["acl"] = {
-                "enabled": False,
-                "allow_all": False,
-                "acl_rules": []
-            }
-
-        if ver <= 11 < new_ver:
-            bp["acl"]["action"] = "allow_except" if bp["acl"]["allow_all"] else "deny_except"
-            del bp["acl"]["allow_all"]
-
-        if ver <= 12 < new_ver:
-            bp["DOMAINS_TO_PROXY_HTTP"] = bp["STATIC_CONTENT_SERVERS_HTTP"]
-            bp["DOMAINS_TO_PROXY_HTTPS"] = bp["STATIC_CONTENT_SERVERS_HTTPS"]
-            del bp["STATIC_CONTENT_SERVERS_HTTP"]
-            del bp["STATIC_CONTENT_SERVERS_HTTPS"]
-
-        if ver <= 13 < new_ver:
-            bp["PROXY_TIMEOUT"] = 5
-            bp["ENABLE_SPDY"] = True
-
-        if ver <= 14 < new_ver:
-            bp["CONTENT_OPTIMIZER_SEND_RECV_TIMEOUT"] = 80
-
-        if ver <= 15 < new_ver:
-            del bp["CONTENT_OPTIMIZER_SEND_RECV_TIMEOUT"]
-
-        if ver <= 16 < new_ver:
-            bp["BYPASS_CO_LOCATIONS"] = []
-            bp["ORIGIN_SERVERS_HTTP"] = []
-            bp["ORIGIN_SERVERS_HTTPS"] = []
-            bp["ORIGIN_IDLE_TIMEOUT"] = 80
-            bp["ORIGIN_REUSE_CONNS"] = True
-
-        if ver <= 17 < new_ver:
-            bp["ENABLE_VARNISH_GEOIP_HEADERS"] = False
-
-        if ver <= 18 < new_ver:
-            bp["CUSTOM_WEBSERVER_CODE_BEFORE"] = bp["CUSTOM_APACHE_CODE_BEFORE"]
-            bp["CUSTOM_WEBSERVER_CODE_AFTER"] = bp["CUSTOM_APACHE_CODE_AFTER"]
-            del bp["CUSTOM_APACHE_CODE_BEFORE"]
-            del bp["CUSTOM_APACHE_CODE_AFTER"]
-
-        if ver <= 19 < new_ver:
-            bp["ENABLE_PROXY_BUFFERING"] = False
-
-        if ver <= 20 < new_ver:
-            bp["SERVER_REGEX_ALIAS"] = ""
-
-        if ver <= 21 < new_ver:
-            bp["SERVER_ALIASES"] = []
-
-        # (BP-92) BP
-        if ver <= 22 < new_ver:
-            bp["END_USER_RESPONSE_HEADERS"] = []
-
-        if ver <= 24 < new_ver:
-            bp["ENABLE_HTTP2"] = True
-
-        bp["VERSION"] = new_ver
-
-    if "co" in vars_:
-        co = vars_["co"]
-        ver = co.get("VERSION", 0)
-
-        new_ver = new_vars_for_version["co"].get("VERSION", 1)
-        if new_ver > _CO_CONFIG_VERSION:
-            raise AttributeError("'co' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, _CO_CONFIG_VERSION))
-
-        if ver < 1:
-            co["STATIC_CONTENT_SERVERS_HTTPS"] = []
-
-        if ver <= 3 < new_ver:
-            if "nss" in co:
-                del co["nss"]
-
-        if ver <= 4 < new_ver:
-            co["ENABLE_JS_SUBSTITUTE"] = False
-
-        if ver <= 5 < new_ver:
-            co["DEBUG_MODE"] = False
-
-        if ver <= 6 < new_ver:
-            co["ENABLE_HTML_SUBSTITUTE"] = False
-            co["DOMAINS_TO_OPTIMIZE_HTTP"] = co["STATIC_CONTENT_SERVERS_HTTP"]
-            co["DOMAINS_TO_OPTIMIZE_HTTPS"] = co["STATIC_CONTENT_SERVERS_HTTPS"]
-
-        if ver <= 7 < new_ver:
-            co["DOMAINS_TO_PROXY_HTTP"] = co["STATIC_CONTENT_SERVERS_HTTP"]
-            co["DOMAINS_TO_PROXY_HTTPS"] = co["STATIC_CONTENT_SERVERS_HTTPS"]
-            del co["STATIC_CONTENT_SERVERS_HTTP"]
-            del co["STATIC_CONTENT_SERVERS_HTTPS"]
-
-        if ver <= 8 < new_ver:
-            co["PROXY_TIMEOUT"] = 5
-
-        if ver <= 9 < new_ver:
-            co["ORIGIN_SEND_RECV_TIMEOUT"] = 80
-
-        if ver <= 10 < new_ver:
-            co["ORIGIN_IDLE_TIMEOUT"] = co["ORIGIN_SEND_RECV_TIMEOUT"]
-            del co["ORIGIN_SEND_RECV_TIMEOUT"]
-            co["ORIGIN_REUSE_CONNS"] = True
-
-        if ver <= 11 < new_ver:
-            co["CUSTOM_WEBSERVER_CODE_AFTER"] = co["CUSTOM_APACHE_CODE_AFTER"]
-            del co["CUSTOM_APACHE_CODE_AFTER"]
-
-        if ver <= 12 < new_ver:
-            co["ENABLE_PROXY_BUFFERING"] = False
-
-        # (BP-92) CO
-        if ver <= 14 < new_ver:
-            co["ORIGIN_REQUEST_HEADERS"] = []
-
-        if ver <= 15 < new_ver:
-            co["ENABLE_DECOMPRESSION"] = False
-
-        co["VERSION"] = new_ver
+        new_ver = new_vars_for_version["proxy"].get("VERSION", 1)
+        if new_ver > _PROXY_CONFIG_VERSION:
+            raise AttributeError("'proxy' structure version is %d, which is newer than what pc-apache-config.py "
+                                 "supports (%d). Upgrade your server packages." %
+                                 (new_ver, _PROXY_CONFIG_VERSION))
 
     if "co_profiles" in vars_:
         co_profiles = vars_["co_profiles"]
