@@ -383,6 +383,8 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
+        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url", []))
+
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
             self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
