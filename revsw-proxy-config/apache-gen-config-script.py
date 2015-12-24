@@ -709,7 +709,7 @@ def generate_bp_domain_json(domain):
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
         "END_USER_RESPONSE_HEADERS": [], # (BP-92)
 
-        "REV_RUM_BEACON_URL": RUM_BEACON_URL,
+        "REV_RUM_BEACON_URL": domain["rev_component_co"]["rum_beacon_url"],
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "ORIGIN_REQUEST_HEADERS": [] # (BP-92)
