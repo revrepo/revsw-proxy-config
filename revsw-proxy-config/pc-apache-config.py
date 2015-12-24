@@ -363,6 +363,7 @@ class ConfigCommon:
 
         self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_BEFORE", misc.get("bp_apache_fe_custom_config", ""))
         self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("bp_apache_custom_config", ""))
+        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CO_CODE_AFTER", co.get("co_apache_custom_config", ""))
 
         self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
         self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
@@ -645,7 +646,6 @@ def _gen_initial_domain_config(domain_name, ui_config):
     ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
 
     # Let's see if we are a BP or a CO by looking at which package is installed
-    print ui_config
     #role = _get_server_role()
     role = "bp"
 

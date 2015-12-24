@@ -726,7 +726,7 @@
 
 	# Optional customizations after generic options
 	{{ caller(False) }}
-	{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
+	{{ this.CUSTOM_WEBSERVER_CO_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
 	# End optional customizations after generic options
 
 	{% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
