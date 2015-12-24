@@ -621,6 +621,7 @@
 	  # Per-vhost log while in debug mode
 	  error_log /var/log/nginx/{{this.SERVER_NAME}}.error debug;
 	{% endif %}
+	access_log /var/log/nginx/revsw_nginx_access_json_co.log logstash_json_co flush=10s buffer=256k;
 
 	{{ loop_detect_mod.loop_detect(this) }}
 
