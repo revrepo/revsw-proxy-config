@@ -375,6 +375,8 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
+        self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
+
         #rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
         self._patch_if_changed_bp_webserver("ENABLE_RUM", co.get("enable_rum"))
         self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url"))
@@ -901,6 +903,7 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 23 < new_ver:
             bp["ENABLE_HTTP2"] = True
             bp["ENABLE_RUM"] = False
+            bp["ORIGIN_REQUEST_HEADERS"] = []
 
         bp["VERSION"] = new_ver
 

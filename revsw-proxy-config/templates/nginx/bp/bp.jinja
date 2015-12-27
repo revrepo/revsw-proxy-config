@@ -635,7 +635,7 @@
 	{% endif %}
 
 	# BEGIN: Setting up the default headers
-	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	{{ _common_co_headers(this, this.ORIGIN_SERVER_NAME) }}
 	# END: Setting up the default headers
 
 	# Optional customizations before generic options
@@ -668,7 +668,7 @@
 	proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes; # TODO: retry=0 {{proxy_params}}
 
 	# BEGIN: Setting up the default headers
-	{{ _common_headers(this, this.ORIGIN_SERVER_NAME) }}
+	{{ _common_co_headers(this, this.ORIGIN_SERVER_NAME) }}
 	# END: Setting up the default headers
 
 	}
