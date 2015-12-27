@@ -257,6 +257,10 @@
   proxy_set_header X-Orig-Host $host;
   # Don't propagate "Connection: close" from client
   proxy_set_header Connection "";
+  # Save X-Forwarded-For from QUIC proxy
+  if ($http_x_rev_transport ~ 'QUIC') {
+    proxy_set_header X-Forwarded-for $http_x_forwarded_for;
+  }
 
   {{ _common_sharding(this) }}
 
@@ -377,7 +381,7 @@
 {% macro _common_frontend(this) %}
   # Save client address
   proxy_set_header X-Forwarded-for $remote_addr;
-  if ($http_x_rev_transport ~ 'quic') {
+  if ($http_x_rev_transport ~ 'QUIC') {
     proxy_set_header X-Forwarded-for $http_x_forwarded_for;
   }
 
