@@ -153,7 +153,7 @@ _ignore_cookies_default = [
     r"\.(jpg|jpeg|png|gif|webp|js|css|woff)(\?.*)?$"
 ]
 
-_BP_CONFIG_VERSION = 23
+_BP_CONFIG_VERSION = 24
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -700,6 +700,8 @@ def generate_bp_domain_json(domain):
         "DEBUG_MODE": False,
         "BYPASS_VARNISH_LOCATIONS": [],
         "ENABLE_SPDY": True,
+        "ENABLE_HTTP2": True,
+        "ENABLE_RUM": False,
         "PROXY_TIMEOUT": 5,
         "BYPASS_CO_LOCATIONS": [],
         "ORIGIN_SERVERS_HTTP": [] if not domain["http"] else ["%s://%s" % (http, domain["ows"])],

@@ -4,8 +4,8 @@
     "properties": {
         "VERSION": {
             "type": "integer",
-            "minimum": 23,
-            "maximum": 23
+            "minimum": 24,
+            "maximum": 24
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -185,6 +185,9 @@
 		}	    
             }
         },
+       "ENABLE_RUM": {
+            "type": "boolean"
+       },
        "REV_RUM_BEACON_URL": {
             "type": "string",
             "anyOf": [
@@ -252,6 +255,8 @@
         "ENABLE_OPTIMIZATION",
         "ENABLE_DECOMPRESSION",
         "ORIGIN_REQUEST_HEADERS",
+        "ENABLE_HTTP2",
+        "ENABLE_RUM",
         "REV_RUM_BEACON_URL",
         "CUSTOM_WEBSERVER_CO_CODE_AFTER"
     ],

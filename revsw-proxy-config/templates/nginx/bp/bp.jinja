@@ -751,7 +751,7 @@
 
 	{{ third_party_mod.replace_urls(this, proto, this.ENABLE_OPTIMIZATION) }}
 
-	{% if this.REV_RUM_BEACON_URL %}
+	{% if this.ENABLE_RUM %}
 	  {% set rum_beacon_url = this.REV_RUM_BEACON_URL if this.REV_RUM_BEACON_URL|truncate(4,True,"") == "http" else proto + "://" + this.REV_RUM_BEACON_URL %}
 	  # RUM beacon
 	  subs_filter </head> "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: '{{rum_beacon_url}}'}); BOOMR.addVar('user_ip', '$http_x_forwarded_for');</script></head>" r;
