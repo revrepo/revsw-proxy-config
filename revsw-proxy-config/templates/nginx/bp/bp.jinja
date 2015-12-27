@@ -258,8 +258,10 @@
   # Don't propagate "Connection: close" from client
   proxy_set_header Connection "";
   # Save X-Forwarded-For from QUIC proxy
+  set $clientip $remote_addr;
   if ($http_x_rev_transport ~ 'QUIC') {
     proxy_set_header X-Forwarded-for $http_x_forwarded_for;
+    set $clientip $http_x_forwarded_for;
   }
 
   {{ _common_sharding(this) }}
@@ -383,6 +385,7 @@
   proxy_set_header X-Forwarded-for $remote_addr;
   if ($http_x_rev_transport ~ 'QUIC') {
     proxy_set_header X-Forwarded-for $http_x_forwarded_for;
+    set $clientip $http_x_forwarded_for;
   }
 
   # Optional user customizations in BP frontend
