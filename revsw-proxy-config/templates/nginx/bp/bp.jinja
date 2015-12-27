@@ -184,7 +184,7 @@
     # proxy_set_header Host {{host}};
     # _common_static_servers
     # BEGIN: Setting up the default headers
-    {{ _common_headers(this, host) }}
+    {{ _common_bp_headers(this, host) }}
     # END: Setting up the default headers
 
 
@@ -233,7 +233,7 @@
   # proxy_set_header Host {{this.SERVER_NAME}};
   # _common_proxy_settings
   # BEGIN: Setting up the default headers
-  {{ _common_headers(this, this.SERVER_NAME) }}
+  {{ _common_bp_headers(this, this.SERVER_NAME) }}
   # END: Setting up the default headers
 
   # By default 1.0, not good for keepalives
@@ -384,14 +384,14 @@
 {%- endmacro %}{# _common_frontend #}
 
 {# BEGIN: (BP-342) Common macros for headers #}
-{% macro _common_headers(this, host_name) %}
+{% macro _common_bp_headers(this, host_name) %}
 
   # Don't propagate "Connection: close" from client
   proxy_set_header Connection "";
 
-  # _common_headers for {{host_name}}
+  # _common_bp_headers for {{host_name}}
   proxy_set_header Host {{host_name}};
-  # _common_headers
+  # _common_bp_headers
 
   # BEGIN: (BP-92) Response headers
   {% if this.END_USER_RESPONSE_HEADERS %}
