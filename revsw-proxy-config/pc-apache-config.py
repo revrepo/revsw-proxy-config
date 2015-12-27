@@ -20,7 +20,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 23
+_BP_CONFIG_VERSION = 24
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -375,8 +375,11 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
-        rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
-        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", rum_beacon)
+        self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
+
+        #rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
+        self._patch_if_changed_bp_webserver("ENABLE_RUM", co.get("enable_rum"))
+        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url"))
 
         self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
@@ -897,8 +900,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 22 < new_ver:
             bp["END_USER_RESPONSE_HEADERS"] = []
 
-        if ver <= 24 < new_ver:
+        if ver <= 23 < new_ver:
             bp["ENABLE_HTTP2"] = True
+            bp["ENABLE_RUM"] = False
+            bp["ORIGIN_REQUEST_HEADERS"] = []
 
         bp["VERSION"] = new_ver
 
