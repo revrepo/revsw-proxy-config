@@ -1,8 +1,3 @@
-#################################################\####################\\
-##############################ADD CPOY right header here 
-##########################################################
-
-
 upstream https_varnish_local {
         keepalive 32; # keep N connections alive
         server 127.0.0.1:8443 max_fails=0 fail_timeout=0;
@@ -34,11 +29,9 @@ server {
     proxy_ignore_client_abort on;
     proxy_buffering off;
 
-    ##################
-    # figure all the cases where a redirect loop can occur and treat them here
-    ##################
-    if ($http_x_rev_nodes ~ TESTSJC20-BP05) {
-    return 508 "A redirection loop was detected on 'TESTSJC20-BP05'. Please review the server configuration.";
+    # if x_rev_nodes matches pattern a redirect loop has been detected
+    if ($http_x_rev_nodes ~* /[A-Z]+[0-9]+-BP[0-9]+/) {
+    	return 508 "A redirection loop was detected on '$http_x_rev_nodes'. Please review the server configuration.";
     }
 
     location / {
