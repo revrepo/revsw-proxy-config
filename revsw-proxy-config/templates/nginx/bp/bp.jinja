@@ -261,7 +261,7 @@
   {{ _common_sharding(this) }}
 
   {{ _common_proxy_settings(this) }}
-  {{ loop_detect_mod.loop_detect(this) }}
+  {{ loop_detect_mod.loop_detect_bp(this) }}
 
   # Never disable the Varnish backend, even if it has temporary problems.
   location / {
@@ -299,7 +299,7 @@
 
   {% if not this.ENABLE_VARNISH %}
     {{ _common_sharding(this) }}
-    {{ loop_detect_mod.loop_detect(this) }}
+    {{ loop_detect_mod.loop_detect_bp(this) }}
   {% endif %}
 
   {% if this.BLOCK_CRAWLERS %}
@@ -623,7 +623,7 @@
 	{% endif %}
 	access_log /var/log/nginx/revsw_nginx_access_json_co.log logstash_json_co flush=10s buffer=256k;
 
-	{{ loop_detect_mod.loop_detect(this) }}
+	{{ loop_detect_mod.loop_detect_co(this) }}
 
 	# By default 1.0, not good for keepalives
 	proxy_http_version 1.1;
