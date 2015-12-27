@@ -677,7 +677,6 @@
 	proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
 	# proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
 
-   # {% set enable_pagespeed = False %} # TODO: memory leaks pagespeed
 	{% if enable_pagespeed %}
 	  # Enable PageSpeed module
 	  pagespeed on;
