@@ -5,7 +5,6 @@ import shutil
 import subprocess
 import sys
 
-import jinja2
 from jinja2.runtime import StrictUndefined
 from jinja2.sandbox import ImmutableSandboxedEnvironment
 
@@ -47,6 +46,7 @@ class NginxConfigSDK:
 
     def _error_process(self, message):
         self._generic_log("ERROR info", message)
+        exit(1)
 
     def _generic_log(self, type_info, message):
         if self.debug == 1:
@@ -117,7 +117,15 @@ class NginxConfigSDK:
     def _load_new_configuration(self):
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
 
-        # nginx reload configuration to see if there are errors
+        # check if configuration is correct
+        p = subprocess.Popen('/etc/init.d/revsw-nginx configtest', shell=True)
+        p.communicate()
+
+        if p.returncode != 0:
+            self._error_process("Nginx configuration has a problem!")
+            return p.returncode
+
+        # nginx reload configuration if there are no errors
         p = subprocess.Popen('/etc/init.d/revsw-nginx reload', shell=True)
         p.communicate()
 
@@ -127,10 +135,14 @@ class NginxConfigSDK:
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
 
         # backup current configuration
-        self._backup_active_sdk_nginx_config()
-        
         self._read_jinja_template()
         self._read_sdk_config_files()
+
+        if self.config_vars["operation"] != "app-update":
+            self._debug_process("Unknown operation was provided! Exiting gracefully")
+            exit(0)
+
+        self._backup_active_sdk_nginx_config()
         self._generate_final_nginx_config()
         
         result = self._load_new_configuration()
