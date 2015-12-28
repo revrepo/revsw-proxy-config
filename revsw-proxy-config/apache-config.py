@@ -13,7 +13,7 @@ from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
 from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, MlogcConfig, \
-    PlatformWebServer, WebServerConfig, NginxConfig, ApacheConfig
+    PlatformWebServer, WebServerConfig, NginxConfig
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
@@ -194,18 +194,18 @@ if __name__ == "__main__":
                                 "/opt/revsw-config/templates"]
 
             templates = {}
-            for ws, config_class in (("apache", ApacheConfig), ("nginx", NginxConfig)):
-                subdirs = ("all", ws)
-                search_dirs = [os.path.join(base, subdir) for (base, subdir) in
+
+            subdirs = ("all", "nginx")
+            search_dirs = [os.path.join(base, subdir) for (base, subdir) in
                                itertools.product(search_dirs_base, subdirs)]
 
-                log.LOGD("Search dirs:", search_dirs)
+            log.LOGD("Search dirs:", search_dirs)
 
-                with open(args.vars_file) as f:
-                    vars = json.load(f)
+            with open(args.vars_file) as f:
+                vars = json.load(f)
 
-                cfg = config_class(args.site_name_config)
-                templates[ws] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
+            cfg = NginxConfig(args.site_name_config)
+            templates["nginx"] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
 
             config = {
                 "type": "config",
