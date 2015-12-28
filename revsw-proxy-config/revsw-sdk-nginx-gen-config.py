@@ -1,11 +1,13 @@
-import jinja2
-from jinja2.runtime import StrictUndefined
-from jinja2.sandbox import ImmutableSandboxedEnvironment
 import json
 import optparse
 import os
 import shutil
+import subprocess
 import sys
+
+import jinja2
+from jinja2.runtime import StrictUndefined
+from jinja2.sandbox import ImmutableSandboxedEnvironment
 
 # Defines config structure version
 SDK_VERSION = 1
@@ -31,7 +33,7 @@ class NginxConfigSDK:
         self.nginx_conf["jinja_conf_vars"] = "/opt/revsw-config/policy/apps.json"
 
         self.nginx_conf["conf_name"] = "revsw-apps.conf"
-        self.nginx_conf["tmp_conf"] = "/tmp/temp_local_revsw-apps.conf"
+        self.nginx_conf["tmp_location"] = "/tmp/"
         self.nginx_conf["final_location"] = "/etc/nginx/conf.d/"
         self.nginx_conf["backup_location"] = "/etc/nginx/backup/"
 
@@ -41,8 +43,14 @@ class NginxConfigSDK:
             self.nginx_conf[item] = args[item]
 
     def _debug_process(self, message):
+        self._generic_log("DEBUG info", message)
+
+    def _error_process(self, message):
+        self._generic_log("ERROR info", message)
+
+    def _generic_log(self, type_info, message):
         if self.debug == 1:
-            print(message)
+            print type_info, message
         return 0
 
     def _read_jinja_template(self):
@@ -75,53 +83,59 @@ class NginxConfigSDK:
         template = self.env.from_string(self.string_template)
         final_nginx_config = template.render(configs=key_list)
         
-        with open(self.nginx_conf["tmp_conf"], 'w+') as f:
+        final_file = self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"]
+        with open(final_file, 'w+') as f:
             f.write(final_nginx_config)
-            return 0
-        
-        return 1
+
+        shutil.copy2(self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"],
+            self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
 
     def _backup_active_sdk_nginx_config(self):
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
         # make backup for this file
+
         try:
             if not os.path.exists(self.nginx_conf["backup_location"]):
                 os.makedirs(self.nginx_conf["backup_location"])
             shutil.copy2(self.nginx_conf["final_location"] + self.nginx_conf["conf_name"], 
                 self.nginx_conf["backup_location"] + self.nginx_conf["conf_name"])
         except:
-            self._debug_process("An error appeared while trying to backup the original file! Stop processing")
+            self._error_process("An error appeared while trying to backup the original file! Stop processing")
             raise
 
     def _restore_sdk_nginx_from_backup(self):
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
+
         # restore file from tmp backup location
         try:
             shutil.copy2(self.nginx_conf["backup_location"] + self.nginx_conf["conf_name"], 
                 self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
         except:
-            self._debug_process("An error appeared while trying to get backup file! Stop processing")
+            self._error_process("An error appeared while trying to get backup file! Stop processing")
             raise
 
     def _load_new_configuration(self):
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
+
         # nginx reload configuration to see if there are errors
-        
-        return 1 # this is an error
+        p = subprocess.Popen('/etc/init.d/revsw-nginx reload', shell=True)
+        p.communicate()
+
+        return p.returncode
 
     def refresh_configuration(self):
         self._debug_process("Starting processing " + sys._getframe().f_code.co_name)
+
+        # backup current configuration
+        self._backup_active_sdk_nginx_config()
         
         self._read_jinja_template()
         self._read_sdk_config_files()
-        
         self._generate_final_nginx_config()
         
-        # start replacing the new file
-        self._backup_active_sdk_nginx_config()
         result = self._load_new_configuration()
         if result != 0:
-            self._debug_process("Problem loading new configuration - restoring original file")
+            self._error_process("Problem loading new configuration - restoring original file")
             self._restore_sdk_nginx_from_backup()
 
 if __name__ == "__main__":

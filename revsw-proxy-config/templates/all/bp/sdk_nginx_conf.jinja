@@ -16,11 +16,13 @@ server {
 
     {% for conf in configs %}
     server_name {{conf.sdk_domain_name}};
-    if ($http_host == "{{conf.sdk_domain_name}}") {
-        proxy_set_header X-Rev-SDK-ClientID {{conf.customer_id}}
+    if ($http_host = "{{conf.sdk_domain_name}}") {
+	set $sdk_customerid {{conf.customer_id}};
     } 
 
     {% endfor %}
+
+    proxy_set_header X-Rev-SDK-ClientID $sdk_customerid;
 
     proxy_set_header X-Orig-Host $host;
     proxy_set_header Connection "";
