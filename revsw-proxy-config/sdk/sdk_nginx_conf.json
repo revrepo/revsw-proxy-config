@@ -1,0 +1,46 @@
+{
+	"operation": "app-update",
+	"configs": [ 
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb3696a",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net",
+			"customer_id": 121
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",
+			"customer_id": 122
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36961",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36961.revsdk.net",
+			"customer_id": 1
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36962",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36962.revsdk.net",
+			"customer_id": 2
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36963",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36963.revsdk.net",
+			"customer_id": 3
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36964",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36964.revsdk.net",
+			"customer_id": 4
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36965",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36965.revsdk.net",
+			"customer_id": 5
+		},
+		{
+			"sdk_key" : "0efbbd35-a131-4419-b330-00de5eb36966",
+			"sdk_domain_name" : "0efbbd35-a131-4419-b330-00de5eb36966.revsdk.net",
+			"customer_id": 6
+		}
+	]
+}
+
