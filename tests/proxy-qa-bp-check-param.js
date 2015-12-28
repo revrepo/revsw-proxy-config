@@ -11,24 +11,24 @@ var sleep = require('sleep');
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://testsjc20-api01.revsw.net:443';
 
 var qaUserWithAdminPerm = 'api_qa_user_with_admin_perm@revsw.com',
-    qaUserWithResellerPermPassword = 'password1',
+    qaUserWithAdminPermPassword = 'password1',
     originHostHeader = 'httpbin.org',
     originServer = 'httpbin.org',
-    url = 'http://testsjc20-bp03.revsw.net',
+    url = 'http://testsjc20-bp03.revsw.net:18000',
     newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
     testGroup = '55a56fa6476c10c329a90741',
-    UserId = '',
+    AccountId = '',
     domainConfig = '',
     domainConfigId = '';
 
-describe('Rev API Admin User', function () {
+describe('Checking enable_rum parameter', function () {
 
     this.timeout(60000);
 
-    it('should return UserId', function (done) {
+    it('should return AccountId', function (done) {
         request(testAPIUrl)
             .get('/v1/users/myself')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -38,16 +38,16 @@ describe('Rev API Admin User', function () {
                 response_json.companyId[0].should.be.a.String();
                 response_json.role.should.be.equal('admin');
                 //console.log(response_json);
-                UserId = res.body.companyId[0];
+                AccountId = res.body.companyId[0];
                 done();
             });
     });
 
     it('should create new configuration for domain ' + newDomainName, function (done) {
-        //console.log(UserId);
+        //console.log(AccountId);
         var createDomainConfigJSON = {
             'domain_name': newDomainName,
-            'account_id': UserId,
+            'account_id': AccountId,
             'origin_host_header': originHostHeader,
             'origin_server': originServer,
             'origin_server_location_id': testGroup,
@@ -55,7 +55,7 @@ describe('Rev API Admin User', function () {
         };
         request(testAPIUrl)
             .post('/v1/domain_configs')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .send(createDomainConfigJSON)
             .expect(200)
             .end(function (err, res) {
@@ -69,7 +69,7 @@ describe('Rev API Admin User', function () {
                 response_json.message.should.be.equal('Successfully created new domain configuration');
                 //console.log(response_json);
                 domainConfigId = res.body.object_id;
-                console.log(domainConfigId)
+                console.log(domainConfigId);
                 done();
             });
     });
@@ -77,7 +77,7 @@ describe('Rev API Admin User', function () {
     it('should get domain config', function (done) {
         request(testAPIUrl)
             .get('/v1/domain_configs/' + domainConfigId)
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -95,12 +95,13 @@ describe('Rev API Admin User', function () {
 
     it('should validate a domain config', function (done) {
         domainConfig.rev_component_co.enable_rum = true;
+        domainConfig.rev_component_bp.enable_cache = false;
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         //console.log(updatedConfigJson);
         request(testAPIUrl)
             .put('/v1/domain_configs/' + domainConfigId + '?options=verify_only')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .send(domainConfig)
             .expect(200)
             .end(function (err, res) {
@@ -120,7 +121,7 @@ describe('Rev API Admin User', function () {
         //console.log('Config to send: ', JSON.stringify(domainConfig));
         request(testAPIUrl)
             .put('/v1/domain_configs/' + domainConfigId + '?options=publish')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .send(domainConfig)
             .expect(200)
             .end(function (err, res) {
@@ -161,7 +162,7 @@ describe('Rev API Admin User', function () {
         //console.log(updatedConfigJson);
         request(testAPIUrl)
             .put('/v1/domain_configs/' + domainConfigId + '?options=verify_only')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .send(domainConfig)
             .expect(200)
             .end(function (err, res) {
@@ -181,7 +182,7 @@ describe('Rev API Admin User', function () {
         //console.log('Config to send: ', JSON.stringify(domainConfig));
         request(testAPIUrl)
             .put('/v1/domain_configs/' + domainConfigId + '?options=publish')
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .send(domainConfig)
             .expect(200)
             .end(function (err, res) {
@@ -202,6 +203,7 @@ describe('Rev API Admin User', function () {
             .expect(200)
             .end(function (err, res) {
                 if (err) {
+                    console.log(res);
                     throw err;
                 }
                 response_header = res.header;
@@ -218,7 +220,7 @@ describe('Rev API Admin User', function () {
     it('should delete the domain config', function (done) {
         request(testAPIUrl)
             .del('/v1/domain_configs/' + domainConfigId)
-            .auth(qaUserWithAdminPerm, qaUserWithResellerPermPassword)
+            .auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
             .expect(200)
             .end(function (err, res) {
                 if (err) {
