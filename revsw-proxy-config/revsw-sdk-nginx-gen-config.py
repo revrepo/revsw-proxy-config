@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import json
 import optparse
 import os
@@ -97,10 +98,14 @@ class NginxConfigSDK:
         try:
             if not os.path.exists(self.nginx_conf["backup_location"]):
                 os.makedirs(self.nginx_conf["backup_location"])
-            shutil.copy2(self.nginx_conf["final_location"] + self.nginx_conf["conf_name"], 
+
+            if os.path.exists(self.nginx_conf["final_location"] + self.nginx_conf["conf_name"]):
+                shutil.copy2(self.nginx_conf["final_location"] + self.nginx_conf["conf_name"], 
                 self.nginx_conf["backup_location"] + self.nginx_conf["conf_name"])
         except:
-            self._error_process("An error appeared while trying to backup the original file! Stop processing")
+            self._error_process("An error appeared while trying to backup the original file " +
+              self.nginx_conf["final_location"] + self.nginx_conf["conf_name"] + " to directory " +
+              self.nginx_conf["backup_location"] + "! Stop processing.")
             raise
 
     def _restore_sdk_nginx_from_backup(self):

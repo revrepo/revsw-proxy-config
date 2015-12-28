@@ -1754,7 +1754,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing object cache config X-Rev-beresp-grace is 10 HTTPS', function(done) {
+  it('Testing object cache config X-Rev-beresp-grace is 0 - HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1765,7 +1765,7 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 0) {
+        if (res.headers['x-rev-beresp-grace'] != '0.000' ) {
           throw new Error("There is a problem with the x-rev-beresp-grace");
         }
         res.should.have.status(200);
@@ -1776,7 +1776,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing object cache config X-Rev-beresp-grace is 10 HTTP', function(done) {
+  it('Testing object cache config X-Rev-beresp-grace is 0 - HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1787,7 +1787,7 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 0) {
+        if (res.headers['x-rev-beresp-grace'] != '0.000') {
           throw new Error("There is a problem with the x-rev-beresp-grace");
         }
         res.should.have.status(200);
@@ -1796,7 +1796,7 @@ describe('Basic tests', function() {
   });
 
 
-  it('Testing object rma config X-Rev-beresp-grace is 10 HTTPS', function(done) {
+  it('Testing object rma config X-Rev-beresp-grace is 0 - HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1807,8 +1807,8 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 10) {
-          throw new Error("There is a problem with the x-rev-beresp-grace");
+        if (res.headers['x-rev-beresp-grace'] != '0.000') {
+          throw new Error("There is a problem with the x-rev-beresp-grace; the reported x-rev-beresp-grace value is " + res.headers['x-rev-beresp-grace']);
         }
         res.should.have.status(200);
         done();
@@ -1818,7 +1818,7 @@ describe('Basic tests', function() {
 
 
 
-  it('Testing object rma config X-Rev-beresp-grace is 10 HTTP', function(done) {
+  it('Testing object rma config X-Rev-beresp-grace is 0 - HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_rma)
@@ -1829,7 +1829,7 @@ describe('Basic tests', function() {
         if (err) {
           throw err;
         }
-        if (res.headers['x-rev-beresp-grace'] != 10) {
+        if (res.headers['x-rev-beresp-grace'] != '0.000') {
           throw new Error("There is a problem with the x-rev-beresp-grace");
         }
         res.should.have.status(200);

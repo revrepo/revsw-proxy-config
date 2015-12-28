@@ -20,7 +20,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 23
+_BP_CONFIG_VERSION = 24
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -139,7 +139,7 @@ class ConfigCommon:
             return val
 
         enable_opt = content["enable_optimization"]
-        # enable_decompression = content["enable_decompression"]
+#        enable_decompression = content["enable_decompression"]
         profiles_count = 1
 
         if not enable_opt:
@@ -166,9 +166,6 @@ class ConfigCommon:
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-        #self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", enable_decompression)
-        self._patch_if_changed_co_webserver("REV_RUM_BEACON_URL", rum_beacon, True)
-
         self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
         self._patch_if_changed_co_webserver("REV_PROFILES_COUNT", profiles_count, True)
 
@@ -336,6 +333,7 @@ class ConfigCommon:
             return False, False
 
         misc = self.ui_config["rev_component_bp"]
+        co = self.ui_config["rev_component_co"]
 
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
@@ -356,6 +354,7 @@ class ConfigCommon:
 
         self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_BEFORE", misc.get("bp_apache_fe_custom_config", ""))
         self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("bp_apache_custom_config", ""))
+        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CO_CODE_AFTER", co.get("co_apache_custom_config", ""))
 
         self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
         self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
@@ -375,6 +374,16 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
+
+        self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
+
+        #rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
+        self._patch_if_changed_bp_webserver("ENABLE_RUM", co.get("enable_rum"))
+        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url"))
+
+        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
+        self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
+
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
@@ -636,7 +645,8 @@ def _gen_initial_domain_config(domain_name, ui_config):
     ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
 
     # Let's see if we are a BP or a CO by looking at which package is installed
-    role = _get_server_role()
+    #role = _get_server_role()
+    role = "bp"
 
     # Let's see if we have a custom config for this domain
     config_str = ""
@@ -718,15 +728,10 @@ def add_or_update_domain(domain_name, ui_config):
     # log.LOGI(u"Input JSON is: ", webserver_config_vars)
 
 
-    if "bp" in webserver_config_vars:
-        varnish_config_vars = {}
-        # noinspection PyBroadException
-        try:
-            varnish_config_vars = VarnishConfig(site_name).load_site_config()
-        except:
-            log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
-    else:
-        varnish_config_vars = None
+    try:
+        varnish_config_vars = VarnishConfig(site_name).load_site_config()
+    except:
+        log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
 
     cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
     cfg_common.patch_config()
@@ -895,8 +900,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 22 < new_ver:
             bp["END_USER_RESPONSE_HEADERS"] = []
 
-        if ver <= 24 < new_ver:
+        if ver <= 23 < new_ver:
             bp["ENABLE_HTTP2"] = True
+            bp["ENABLE_RUM"] = False
+            bp["ORIGIN_REQUEST_HEADERS"] = []
 
         bp["VERSION"] = new_ver
 

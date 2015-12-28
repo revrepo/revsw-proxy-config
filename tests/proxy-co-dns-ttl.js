@@ -48,7 +48,7 @@ describe('DNS TTL Test', function() {
 
 
 
-  var JSON55 = {
+  var JSON50 = {
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -61,7 +61,7 @@ describe('DNS TTL Test', function() {
     "filters": [],
     "answers": [{
       "answer": [
-        "192.168.4.55"
+        "192.168.4.50"
       ],
       "id": "55d4ee039f782d44f4d2feba"
     }],
@@ -72,7 +72,7 @@ describe('DNS TTL Test', function() {
   }
 
 
-  var JSON56 = {
+  var JSON51 = {
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -85,7 +85,7 @@ describe('DNS TTL Test', function() {
     "filters": [],
     "answers": [{
       "answer": [
-        "192.168.4.56"
+        "192.168.4.51"
       ],
       "id": "55d4ee039f782d44f4d2feba"
     }],
@@ -97,7 +97,7 @@ describe('DNS TTL Test', function() {
 
 
 
-  var JSON552 = {
+  var JSON502 = {
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -110,7 +110,7 @@ describe('DNS TTL Test', function() {
     "filters": [],
     "answers": [{
       "answer": [
-        "192.168.4.55"
+        "192.168.4.50"
       ],
       "id": "55d4ee039f782d44f4d2feba"
     }],
@@ -121,7 +121,7 @@ describe('DNS TTL Test', function() {
   }
 
 
-  var JSON562 = {
+  var JSON512 = {
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -134,7 +134,7 @@ describe('DNS TTL Test', function() {
     "filters": [],
     "answers": [{
       "answer": [
-        "192.168.4.56"
+        "192.168.4.51"
       ],
       "id": "55d4ee039f782d44f4d2feba"
     }],
@@ -146,12 +146,12 @@ describe('DNS TTL Test', function() {
 
 
 
-  it('Testing DNS failover - 192.168.4.55 - 5 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.50 - 5 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON55)
+      .send(JSON50)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -163,7 +163,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.55");
+            var i = response_json.search("192.168.4.50");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -177,12 +177,12 @@ describe('DNS TTL Test', function() {
   });
 
 
-  it('Testing DNS failover - 192.168.4.56 - 5 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.51 - 5 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON56)
+      .send(JSON51)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -194,7 +194,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.56");
+            var i = response_json.search("192.168.4.51");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -210,12 +210,12 @@ describe('DNS TTL Test', function() {
 
 
 
-  it('Testing DNS failover - 192.168.4.55 - 5 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.50 - 5 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON55)
+      .send(JSON50)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -227,7 +227,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.55");
+            var i = response_json.search("192.168.4.50");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -242,12 +242,12 @@ describe('DNS TTL Test', function() {
 
 
 
-  it('Testing DNS failover - 192.168.4.56 - 2 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.51 - 2 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON562)
+      .send(JSON512)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -259,7 +259,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.56");
+            var i = response_json.search("192.168.4.51");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -276,12 +276,12 @@ describe('DNS TTL Test', function() {
 
 
 
-  it('Testing DNS failover - 192.168.4.55 - 2 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.50 - 2 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON552)
+      .send(JSON502)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -293,7 +293,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.55");
+            var i = response_json.search("192.168.4.50");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -306,12 +306,12 @@ describe('DNS TTL Test', function() {
   });
 
 
-  it('Testing DNS failover - 192.168.4.56 - 2 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.51 - 2 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON562)
+      .send(JSON512)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -323,7 +323,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.56");
+            var i = response_json.search("192.168.4.51");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
@@ -337,12 +337,12 @@ describe('DNS TTL Test', function() {
 
 
 
-  it('Testing DNS failover - 192.168.4.55 - 2 seconds', function(done) {
+  it('Testing DNS failover - 192.168.4.50 - 2 seconds', function(done) {
     this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
-      .send(JSON552)
+      .send(JSON502)
       .end(function(err, res) {
         if (err) {
           throw err;
@@ -354,7 +354,7 @@ describe('DNS TTL Test', function() {
           .end(function(err, res) {
             res.should.have.status(200);
             var response_json = JSON.stringify(res.text);
-            var i = response_json.search("192.168.4.55");
+            var i = response_json.search("192.168.4.50");
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
