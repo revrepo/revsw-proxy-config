@@ -2,6 +2,7 @@ import json
 import optparse
 import os
 import shutil
+import socket
 import subprocess
 import sys
 
@@ -46,7 +47,6 @@ class NginxConfigSDK:
 
     def _error_process(self, message):
         self._generic_log("ERROR info", message)
-        exit(1)
 
     def _generic_log(self, type_info, message):
         if self.debug == 1:
@@ -81,7 +81,7 @@ class NginxConfigSDK:
         
         key_list = self.config_vars["configs"]
         template = self.env.from_string(self.string_template)
-        final_nginx_config = template.render(configs=key_list)
+        final_nginx_config = template.render(configs=key_list, bpname=socket.gethostname().split('.')[0])
         
         final_file = self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"]
         with open(final_file, 'w+') as f:

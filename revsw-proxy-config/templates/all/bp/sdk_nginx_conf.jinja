@@ -31,9 +31,11 @@ server {
     proxy_ignore_client_abort on;
     proxy_buffering off;
 
+    proxy_set_header X-Rev-BP-Nodes "${http_x_rev_bp_nodes} {{bpname}}";
+
     # if x_rev_nodes matches pattern a redirect loop has been detected
-    if ($http_x_rev_nodes ~* /[A-Z]+[0-9]+-BP[0-9]+/) {
-    	return 508 "A redirection loop was detected on '$http_x_rev_nodes'. Please review the server configuration.";
+    if ($http_x_rev_nodes ~* /{{bpname}}/) {
+    	return 508 "A redirection loop was detected on '{{bpname}}' Please review the server configuration.";
     }
 
     location / {
