@@ -7,7 +7,7 @@ module.exports = {
 // domain_configs
 
     // Get a list of domains registered for a customer
-    get_domain_configs: function (url, login, password) {
+    getDomainConfigs: function (url, login, password) {
         if (!url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -26,7 +26,7 @@ module.exports = {
     },
 
     // Create a new domain configuration
-    post_domain_configs: function (body, url, login, password) {
+    postDomainConfigs: function (body, url, login, password) {
         if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -44,7 +44,7 @@ module.exports = {
         });
     },
 
-    get_domain_configs_by_id: function (domain_id, url, login, password) {
+    getDomainConfigsById: function (domain_id, url, login, password) {
         if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -63,7 +63,7 @@ module.exports = {
     },
 
     // Update detailed domain configuration ( options mast be set with ?options, example '?options=verify_only'
-    put_domain_configs_by_id: function (domain_id, options, body, url, login, password) {
+    putDomainConfigsById: function (domain_id, options, body, url, login, password) {
         if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -83,7 +83,7 @@ module.exports = {
     },
 
     // Delete a domain
-    delete_domain_configs_by_id: function (domain_id, url, login, password) {
+    deleteDomainConfigsById: function (domain_id, url, login, password) {
         if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -102,7 +102,7 @@ module.exports = {
     },
 
     // Get the publishing status of a domain configuration
-    get_domain_configs_by_id_status: function (domain_id, url, login, password) {
+    getDomainConfigsByIdStatus: function (domain_id, url, login, password) {
         if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -121,7 +121,7 @@ module.exports = {
     },
 
     // Get a list of domain configuration versions
-    get_domain_configs_by_id_versions: function (domain_id, url, login, password) {
+    getDomainConfigsByIdVersions: function (domain_id, url, login, password) {
         if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
@@ -142,7 +142,7 @@ module.exports = {
 // users
 
     // Get your user profile
-    get_users_myself: function (url, login, password) {
+    getUsersMyself: function (url, login, password) {
         if (!url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
