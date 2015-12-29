@@ -12,6 +12,9 @@ echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-bp.conf
 rm -f /etc/nginx/conf.d/revsw-bp.conf
 echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/000-catch-all-bp_nginx.conf..."
 rm -f /etc/nginx/conf.d/000-catch-all-bp_nginx.conf 
+echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-cache.conf..."
+rm -f /etc/nginx/conf.d/revsw-cache.conf
+
 echo "postinst procedures: end"
 echo "#"
 echo "# Please manually run '/opt/revsw-config/bin/pc-apache-config.py -U' if there was a change in proxy template files or schema"
