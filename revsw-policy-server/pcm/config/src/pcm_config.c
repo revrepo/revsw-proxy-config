@@ -44,10 +44,14 @@ pcm_config_process_data (struct libwebsocket        *wsi,
                          pcm_config_process_data_s *userdata)
 {
     char          *dn = NULL;
+    char          *sdk_operation = NULL;
+    char          *configuration_type = NULL;
     const nx_json *json;
     const char    *status = "success";
+    const char    *tmp_file_location="/tmp/local-json-configuration.json";
     char           reply_buf[PCM_CONFIG_JSON_BUFLEN];
     char           file_path[PCM_CONFIG_FILE_BUFLEN];
+    char           base_command[PCM_CONFIG_CMD_BUFLEN];
     char           command[PCM_CONFIG_CMD_BUFLEN];
     struct timeval tv1, tv2;
     time_t         ts1 = pcm_util_get_current_time ();
@@ -96,8 +100,7 @@ pcm_config_process_data (struct libwebsocket        *wsi,
                        (int)userdata->json_in_len);
 
         /* Write request to a temp file */
-        pcm_rc = pcm_util_write_json_to_file (userdata->json_in,
-                                              "/tmp/ui-config.json");
+        pcm_rc = pcm_util_write_json_to_file (userdata->json_in, tmp_file_location);
         if (pcm_rc != PCM_RC_OK) {
             pcm_rc = PCM_RC_FILE_WRITE_FAILED;
             status = "file-error";
@@ -112,17 +115,40 @@ pcm_config_process_data (struct libwebsocket        *wsi,
             goto send_reply;
         }
 
-        dn = (char *)(nx_json_get (json, "domain_name")->text_value);
-        if (!dn) {
-            pcm_rc = PCM_RC_INVALID_DOMAIN_NAME;
+        configuration_type = (char *)(nx_json_get (json, "configuration_type")->text_value);
+        if (strcmp(configuration_type, "sdk_apps_config") == 0) {
+            sdk_operation = (char *)(nx_json_get (json, "operation")->text_value);
+
+            if (!sdk_operation) {
+                pcm_rc = PCM_RC_INVALID_SDK_OPERATION;
+                status = "input-error";
+                goto send_reply;
+            }
+
+            sprintf (base_command, "%s", PCM_CONFIG_SDK_SCRIPT_NAME);
+            sprintf (file_path, "%s/apps.json", PCM_CONFIG_JSON_PATH);
+
+            PCMC_LOG_DEBUG ("%s: processing config for sdk apps", func_name);
+
+        } else if (strcmp(configuration_type, "domain_config") == 0) {
+            dn = (char *)(nx_json_get (json, "domain_name")->text_value);
+
+            if (!dn) {
+                pcm_rc = PCM_RC_INVALID_DOMAIN_NAME;
+                status = "input-error";
+                goto send_reply;
+            }
+
+            sprintf (base_command, "%s", PCM_CONFIG_DOMAIN_SCRIPT_NAME);
+            sprintf (file_path, "%s/ui-config-%s.json", PCM_CONFIG_JSON_PATH, dn);
+
+            PCMC_LOG_DEBUG ("%s: processing config req for domain %s", func_name, dn);
+
+        } else {
+            pcm_rc = PCM_RC_INVALID_CONFIGURATION_TYPE;
             status = "input-error";
             goto send_reply;
         }
-
-        PCMC_LOG_DEBUG ("%s: processing config req for domain %s",
-                        func_name, dn);
-
-        sprintf (file_path, "%s/ui-config-%s.json", PCM_CONFIG_JSON_PATH, dn);
 
         /* check if Apache running */
         if (1 == system ("pidof -x apache2 > /dev/null")) {
@@ -131,7 +157,7 @@ pcm_config_process_data (struct libwebsocket        *wsi,
             goto send_reply;
         }
 
-        sprintf (command, "mv /tmp/ui-config.json %s", file_path);
+        sprintf (command, "mv %s %s", tmp_file_location, file_path);
 
         rc = system (command);
         if (rc != 0) {
@@ -140,7 +166,7 @@ pcm_config_process_data (struct libwebsocket        *wsi,
             goto send_reply;
         }
 
-        sprintf (command, "%s -f %s", PCM_CONFIG_SCRIPT_NAME, file_path);
+        sprintf (command, "%s -f %s", base_command, file_path);
 
         rc = system (command);
         if (rc != 0) {
