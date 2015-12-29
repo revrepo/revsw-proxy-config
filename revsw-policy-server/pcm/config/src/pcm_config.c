@@ -116,21 +116,27 @@ pcm_config_process_data (struct libwebsocket        *wsi,
         }
 
         configuration_type = (char *)(nx_json_get (json, "configuration_type")->text_value);
-        if (strcmp(configuration_type, "sdk_apps_config") == 0) {
-            sdk_operation = (char *)(nx_json_get (json, "operation")->text_value);
+        if (configuration_type) {
+            if (strcmp(configuration_type, "sdk_apps_config") == 0) {
+                sdk_operation = (char *)(nx_json_get (json, "operation")->text_value);
 
-            if (!sdk_operation) {
-                pcm_rc = PCM_RC_INVALID_SDK_OPERATION;
+                if (!sdk_operation) {
+                    pcm_rc = PCM_RC_INVALID_SDK_OPERATION;
+                    status = "input-error";
+                    goto send_reply;
+                }
+
+                sprintf (base_command, "%s", PCM_CONFIG_SDK_SCRIPT_NAME);
+                sprintf (file_path, "%s/apps.json", PCM_CONFIG_JSON_PATH);
+
+                PCMC_LOG_DEBUG ("%s: processing config for sdk apps", func_name);
+            } else {
+                pcm_rc = PCM_RC_INVALID_CONFIGURATION_TYPE;
                 status = "input-error";
                 goto send_reply;
             }
 
-            sprintf (base_command, "%s", PCM_CONFIG_SDK_SCRIPT_NAME);
-            sprintf (file_path, "%s/apps.json", PCM_CONFIG_JSON_PATH);
-
-            PCMC_LOG_DEBUG ("%s: processing config for sdk apps", func_name);
-
-        } else if (strcmp(configuration_type, "domain_config") == 0) {
+        } else {
             dn = (char *)(nx_json_get (json, "domain_name")->text_value);
 
             if (!dn) {
@@ -144,10 +150,6 @@ pcm_config_process_data (struct libwebsocket        *wsi,
 
             PCMC_LOG_DEBUG ("%s: processing config req for domain %s", func_name, dn);
 
-        } else {
-            pcm_rc = PCM_RC_INVALID_CONFIGURATION_TYPE;
-            status = "input-error";
-            goto send_reply;
         }
 
         /* check if Apache running */
