@@ -1,0 +1,7 @@
+
+{
+  "test_proxy_http": "http://testsjc20-bp01.revsw.net",
+  "test_proxy_https": "https://testsjc20-bp01.revsw.net",
+
+  "not_existing_domain": "thisdomainshouldnotexistinproxyconfiguration.com"
+}
