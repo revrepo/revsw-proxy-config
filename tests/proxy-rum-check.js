@@ -2,17 +2,11 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var request = require('supertest');
 var should = require('should-http');
-//var should = require('should');
-var fs = require('fs');
-var vm = require('vm');
+var async = require('async');
+var https = require('https');
 
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
-
-var express = require('express');
-var async = require('async');
-var https = require('https');
-var sleep = require('sleep');
 
 var testAPIUrl = ( process.env.API_QA_URL ) ? process.env.API_QA_URL : 'https://testsjc20-api01.revsw.net:443';
 
