@@ -32,7 +32,10 @@ describe('API external test - check enable_rum parameter', function () {
     this.timeout(240000);
 
     it('should return AccountId', function (done) {
-        api.getUsersMyself(testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+        api.getUsersMyself(testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+            if (rej) {
+                throw rej;
+            }
             AccountId = res.body.companyId[0];
             done();
         });
@@ -58,14 +61,17 @@ describe('API external test - check enable_rum parameter', function () {
     });
 
     it('should get domain config and enable_rum must be false', function (done) {
-        api.getDomainConfigsById(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
-                response_json = JSON.parse(res.text);
-                response_json.rev_component_co.enable_rum.should.be.false;
-                domainConfig = response_json;
-                delete domainConfig.cname;
-                delete domainConfig.domain_name;
-                done();
-            });
+        api.getDomainConfigsById(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+            if (rej) {
+                throw rej;
+            }
+            response_json = JSON.parse(res.text);
+            response_json.rev_component_co.enable_rum.should.be.false;
+            domainConfig = response_json;
+            delete domainConfig.cname;
+            delete domainConfig.domain_name;
+            done();
+        });
     });
 
     it('should wait max 3 minutes till the global and staging config statuses are "Published" ( after create )', function (done) {
@@ -77,7 +83,10 @@ describe('API external test - check enable_rum parameter', function () {
 
         async.eachSeries(a, function (n, callback) {
             setTimeout(function () {
-                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+                    if (rej) {
+                        throw rej;
+                    }
                     response_json = res.body;
                     //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
                     if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
@@ -98,7 +107,10 @@ describe('API external test - check enable_rum parameter', function () {
     });
 
     it('should not get rum code ( after create )', function (done) {
-        tools.getHostRequest(url,'/html', newDomainName).then(function(res){
+        tools.getHostRequest(url,'/html', newDomainName).then(function(res, rej){
+            if (rej) {
+                throw rej;
+            }
             res.text.should.not.containEql('/rev-diablo/js/boomerang-rev.min.js');
             done();
         });
@@ -107,7 +119,10 @@ describe('API external test - check enable_rum parameter', function () {
     it('should change domain config and set enable_rum to true', function (done) {
         domainConfig.rev_component_co.enable_rum = true;
         domainConfig.rev_component_bp.enable_cache = false;
-        api.getDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+        api.getDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+            if (rej) {
+                throw rej;
+            }
             done();
         });
     });
@@ -121,7 +136,10 @@ describe('API external test - check enable_rum parameter', function () {
 
         async.eachSeries(a, function (n, callback) {
             setTimeout(function () {
-                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+                    if (rej) {
+                        throw rej;
+                    }
                     response_json = res.body;
                     //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
                     if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
@@ -142,7 +160,10 @@ describe('API external test - check enable_rum parameter', function () {
     });
 
     it('should get rum code ( after set enable_rum to true )', function (done) {
-        tools.getHostRequest(url,'/html', newDomainName).then(function(res){
+        tools.getHostRequest(url,'/html', newDomainName).then(function(res, rej){
+            if (rej) {
+                throw rej;
+            }
             res.text.should.containEql('/rev-diablo/js/boomerang-rev.min.js');
             done();
         });
@@ -151,7 +172,10 @@ describe('API external test - check enable_rum parameter', function () {
     it('should change domain config and set enable_rum to false', function (done) {
         domainConfig.rev_component_co.enable_rum = false;
         domainConfig.rev_component_bp.enable_cache = false;
-        api.getDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+        api.getDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+            if (rej) {
+                throw rej;
+            }
             done();
         });
     });
@@ -165,7 +189,10 @@ describe('API external test - check enable_rum parameter', function () {
 
         async.eachSeries(a, function (n, callback) {
             setTimeout(function () {
-                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+                api.getDomainConfigsByIdStatus(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+                    if (rej) {
+                        throw rej;
+                    }
                     response_json = res.body;
                     //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
                     if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
@@ -186,14 +213,20 @@ describe('API external test - check enable_rum parameter', function () {
     });
 
     it('should not get rum code ( after set enable_rum to false )', function (done) {
-        tools.getHostRequest(url,'/html', newDomainName).then(function(res){
+        tools.getHostRequest(url,'/html', newDomainName).then(function(res, rej){
+            if (rej) {
+                throw rej;
+            }
             res.text.should.not.containEql('/rev-diablo/js/boomerang-rev.min.js');
             done();
         });
     });
 
     it('should delete the domain config', function (done) {
-        api.deleteDomainConfigsById(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res) {
+        api.deleteDomainConfigsById(domainConfigId, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+            if (rej) {
+                throw rej;
+            }
             response_json = JSON.parse(res.text);
             //console.log(response_json);
             response_json.statusCode.should.be.equal(202);
