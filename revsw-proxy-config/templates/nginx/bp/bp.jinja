@@ -381,9 +381,12 @@
   # X-Forwarded-For header for real end user IP address. 
   # Nginx log should use $clientip variable to report "clientip" attribute
   set $clientip $remote_addr;
-#  if ($http_x_rev_transport = "QUIC") {
-#    set $clientip $http_x_forwarded_for;
-#  }
+  if ($http_x_rev_transport = "QUIC") {
+    set $clientip $http_x_forwarded_for;
+  }
+  if ($clientip = "") {
+    set  $clientip $remote_addr;
+  }
   proxy_set_header X-Forwarded-for $clientip;
 
   # Optional user customizations in BP frontend
