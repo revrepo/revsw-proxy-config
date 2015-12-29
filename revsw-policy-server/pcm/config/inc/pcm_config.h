@@ -19,7 +19,8 @@
 #define PCM_CONFIG_LWS_SSL_KEY  "/opt/revsw-config/policy/websock.key"
 #define PCM_CONFIG_JSON_PATH    "/opt/revsw-config/policy"
 
-#define PCM_CONFIG_SCRIPT_NAME  "python /opt/revsw-config/bin/pc-apache-config.py"
+#define PCM_CONFIG_DOMAIN_SCRIPT_NAME "python /opt/revsw-config/bin/pc-apache-config.py"
+#define PCM_CONFIG_SDK_SCRIPT_NAME    "python /opt/revsw-config/bin/revsw-sdk-nginx-gen-config.py"
 
 #define PCM_CONFIG_CMD_BUFLEN    256
 #define PCM_CONFIG_FILE_BUFLEN   256

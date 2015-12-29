@@ -39,6 +39,12 @@ pcm_rc_str (pcm_rc_t pcm_rc)
     case PCM_RC_INVALID_DOMAIN_NAME:
         return ("domain name is null");
 
+    case PCM_RC_INVALID_SDK_OPERATION:
+        return ("sdk operation is null");
+
+    case PCM_RC_INVALID_CONFIGURATION_TYPE:
+        return ("sdk invalid configuration type");
+
     case PCM_RC_MKDIR_CMD_FAILED:
         return ("mkdir failed");
 
