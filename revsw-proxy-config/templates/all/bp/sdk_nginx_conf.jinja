@@ -40,7 +40,7 @@ server {
     }
 
     location / {
-        proxy_pass https://https_varnish_local/;
+        proxy_pass http://https_varnish_local/;
         # Wait at most for configured seconds for a reply from Varnish, then return error message.
         proxy_read_timeout 20s;
     }
