@@ -57,14 +57,12 @@
 
 
 {% macro _for_each_site(cond_var, req_obj) -%}
-  {% set first=True %}
   {% for site in sites %}
     {% if site[cond_var] %}
       # BEGIN SITE '{{site.SERVER_NAME}}'
-      {{ "if" if first else "elsif" }} ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
+      elsif ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
       {{ caller(site) }}
       }
-      {% set first=False %}
       # END SITE '{{site.SERVER_NAME}}'
     {% endif %}{# site[cond_var] #}
   {% endfor %}
@@ -679,6 +677,8 @@ cookie.parse(req.http.Cookie);
 
 # Save the ROUTEID cookie; we need it for CO load balancing
 revvar.set_string_allow_null({{VAR_REQ}}, {{_var_idx("RROUTEID")}}, cookie.get("ROUTEID"));
+
+if(req.http.host == ""){}
 
 # Domain-specific configuration
 {% call (site) _for_each_site("ENABLE_CACHE", "req") %}
