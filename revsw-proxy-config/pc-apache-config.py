@@ -1222,7 +1222,8 @@ def upgrade_all_domains():
         # Apply patched config
         configure_all({
             "version": API_VERSION,
-            "commands": cmds
+            "commands": cmds,
+            "varnish_changed": True
         })
     except ConfigException as ce:
         fail_domains = ce.error_domains
