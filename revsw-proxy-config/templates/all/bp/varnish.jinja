@@ -109,7 +109,6 @@
 
 {% set enabled_sites_count = sites|selectattr("ENABLE_CACHE")|list|length %}
 # Number of cached sites: {{ enabled_sites_count }}
-# List {{ sites|selectattr("ENABLE_CACHE")|list }}
 
 {% macro _site_cookies_querystr_and_per_domain_rules_hash_recv(site) %}
   #################### Cookies and query string plus per-domain rules hash handling ####################
