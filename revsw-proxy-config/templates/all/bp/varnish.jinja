@@ -55,7 +55,6 @@
   {% endfor %}
 {%- endmacro %}{# _for_each_rule(site) #}
 
-
 {% macro _for_each_site(cond_var, req_obj) -%}
   {% set first=True %}
   {% for site in sites %}
@@ -747,7 +746,7 @@ revvar.set_string_allow_null({{VAR_REQ}}, {{_var_idx("RROUTEID")}}, cookie.get("
 
 # Add in vcl_recv support for *.revsdk.net
 # a problem will appear in case no domains are defined
-elseif (req.http.host ~ "(?i)\.revsdk\.net$") {
+{{ "elsif" if enabled_sites_count > 0 else "if" }} (req.http.host ~ "(?i)\.revsdk\.net$") {
   if (std.port(server.ip) == 8080) {
     set req.backend_hint = behttp_all_revsdk_net;
   } else {
