@@ -1161,12 +1161,15 @@ def configure_all(config):
             acfg.configure_site(cfg_vars)
 
             mcfg.write_config_file(cfg_vars)
-
+            varnish_changed_vars = command.get("varnish_changed")
             varnish_config_vars = command.get("varnish_config_vars")
-            if varnish_config_vars:
-                vcfg.config_site(varnish_config_vars)
-            else:   # Varnish not needed for site, remove if present
-                vcfg.remove_site()
+            if varnish_changed_vars:
+                if varnish_config_vars:
+                    vcfg.config_site(varnish_config_vars)
+                else:   # Varnish not needed for site, remove if present
+                    vcfg.remove_site()
+            else:
+                _log.LOGD("Varnish don't changed")
 
         elif action == "certs":
             _log.LOGD("Configuring site '%s' certificates" % site)

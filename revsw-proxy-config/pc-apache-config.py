@@ -35,6 +35,7 @@ class ConfigCommon:
         # Private members
         self._must_ban_html = False
         self._config_changed = False
+        self._varnish_changed = False
 
         self._parse_config_command_options()
 
@@ -117,6 +118,7 @@ class ConfigCommon:
             log.LOGI("Detected change for Varnish '%s'" % option)
             self.varnish_config_vars[option] = val
             self._config_changed = True
+            self._varnish_changed = True
             if ban_html_if_changed:
                 self._must_ban_html = True
 
@@ -735,14 +737,15 @@ def add_or_update_domain(domain_name, ui_config):
 
     cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
     cfg_common.patch_config()
-
+    #print json.dumps(varnish_config_vars)
     if cfg_common.config_changed():
         config = {
             "version": API_VERSION,
             "type": "config",
             "site_name": site_name,
             "config_vars": webserver_config_vars,
-            "varnish_config_vars": varnish_config_vars
+            "varnish_config_vars": varnish_config_vars,
+            "varnish_changed": cfg_common._varnish_changed
         }
 
         # Apply patched config
