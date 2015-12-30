@@ -44,13 +44,13 @@ module.exports = {
         });
     },
 
-    getDomainConfigsById: function (domain_id, url, login, password) {
-        if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    getDomainConfigsById: function (domainID, url, login, password) {
+        if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
         return new Promise(function (resolve, reject) {
             return request(url)
-                .get('/v1/domain_configs/' + domain_id)
+                .get('/v1/domain_configs/' + domainID)
                 .auth(login, password)
                 .expect(200)
                 .end(function (err, res) {
@@ -63,13 +63,13 @@ module.exports = {
     },
 
     // Update detailed domain configuration ( options mast be set with ?options, example '?options=verify_only'
-    putDomainConfigsById: function (domain_id, options, body, url, login, password) {
-        if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    putDomainConfigsById: function (domainID, options, body, url, login, password) {
+        if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
         return new Promise(function (resolve, reject) {
             return request(url)
-                .put('/v1/domain_configs/' + domain_id + options)
+                .put('/v1/domain_configs/' + domainID + options)
                 .auth(login, password)
                 .send(body)
                 .expect(200)
@@ -83,13 +83,13 @@ module.exports = {
     },
 
     // Delete a domain
-    deleteDomainConfigsById: function (domain_id, url, login, password) {
-        if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    deleteDomainConfigsById: function (domainID, url, login, password) {
+        if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
         return new Promise(function (resolve, reject) {
             return request(url)
-                .del('/v1/domain_configs/' + domain_id)
+                .del('/v1/domain_configs/' + domainID)
                 .auth(login, password)
                 .expect(200)
                 .end(function (err, res) {
@@ -102,13 +102,13 @@ module.exports = {
     },
 
     // Get the publishing status of a domain configuration
-    getDomainConfigsByIdStatus: function (domain_id, url, login, password) {
-        if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    getDomainConfigsByIdStatus: function (domainID, url, login, password) {
+        if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
         return new Promise(function (resolve, reject) {
             return request(url)
-                .get('/v1/domain_configs/' + domain_id + '/config_status')
+                .get('/v1/domain_configs/' + domainID + '/config_status')
                 .auth(login, password)
                 .expect(200)
                 .end(function (err, res) {
@@ -121,13 +121,13 @@ module.exports = {
     },
 
     // Get a list of domain configuration versions
-    getDomainConfigsByIdVersions: function (domain_id, url, login, password) {
-        if (!domain_id || domain_id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    getDomainConfigsByIdVersions: function (domainID, url, login, password) {
+        if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
             return;
         }
         return new Promise(function (resolve, reject) {
             return request(url)
-                .get('/v1/domain_configs/' + domain_id + '/versions')
+                .get('/v1/domain_configs/' + domainID + '/versions')
                 .auth(login, password)
                 .expect(200)
                 .end(function (err, res) {

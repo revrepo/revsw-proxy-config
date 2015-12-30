@@ -60,19 +60,19 @@ describe('API external test - check enable_rum parameter', function () {
             if (rej) {
                 throw rej;
             }
-            response_json = JSON.parse(res.text);
-            response_json.rev_component_co.enable_rum.should.be.false;
-            domainConfig = response_json;
+            var responseJson = JSON.parse(res.text);
+            responseJson.rev_component_co.enable_rum.should.be.false;
+            var domainConfig = responseJson;
             delete domainConfig.cname;
             delete domainConfig.domain_name;
             done();
         });
     });
 
-    it('should wait max 3 minutes till the global and staging config statuses are "Published" ( after create )', function (done) {
+    it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         var a = [],
             publishFlag = false,
-            response_json;
+            responseJson;
 
         for (var i = 0; i < 18; i++) { a.push(i); }
 
@@ -82,9 +82,9 @@ describe('API external test - check enable_rum parameter', function () {
                     if (rej) {
                         throw rej;
                     }
-                    response_json = res.body;
-                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
-                    if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
+                    responseJson = res.body;
+                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+                    if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
                         publishFlag = true;
                         callback(true);
                     } else {
@@ -94,7 +94,7 @@ describe('API external test - check enable_rum parameter', function () {
             }, 10000);
         }, function (err) {
             if (publishFlag === false) {
-                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(response_json);
+                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson);
             } else {
                 done();
             }
@@ -113,7 +113,8 @@ describe('API external test - check enable_rum parameter', function () {
 
     it('should change domain config and set enable_rum to true', function (done) {
         domainConfig.rev_component_co.enable_rum = true;
-        api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+        api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+            testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -124,7 +125,7 @@ describe('API external test - check enable_rum parameter', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" (after update )', function (done) {
         var a = [],
             publishFlag = false,
-            response_json;
+            responseJson;
 
         for (var i = 0; i < 12; i++) { a.push(i); }
 
@@ -134,9 +135,9 @@ describe('API external test - check enable_rum parameter', function () {
                     if (rej) {
                         throw rej;
                     }
-                    response_json = res.body;
-                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
-                    if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
+                    responseJson = res.body;
+                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+                    if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
                         publishFlag = true;
                         callback(true);
                     } else {
@@ -146,7 +147,7 @@ describe('API external test - check enable_rum parameter', function () {
             }, 10000);
         }, function (err) {
             if (publishFlag === false) {
-                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(response_json);
+                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson);
             } else {
                 done();
             }
@@ -166,7 +167,8 @@ describe('API external test - check enable_rum parameter', function () {
 
     it('should change domain config and set enable_rum to false', function (done) {
         domainConfig.rev_component_co.enable_rum = false;
-        api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig, testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
+        api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+            testAPIUrl, qaUserWithAdminPerm, qaUserWithAdminPermPassword).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -177,7 +179,7 @@ describe('API external test - check enable_rum parameter', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" ( final update )', function (done) {
         var a = [],
             publishFlag = false,
-            response_json;
+            responseJson;
 
         for (var i = 0; i < 12; i++) { a.push(i); }
 
@@ -187,9 +189,9 @@ describe('API external test - check enable_rum parameter', function () {
                     if (rej) {
                         throw rej;
                     }
-                    response_json = res.body;
-                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(response_json));
-                    if (response_json.staging_status === 'Published' && response_json.global_status === 'Published') {
+                    responseJson = res.body;
+                    //console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+                    if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
                         publishFlag = true;
                         callback(true);
                     } else {
@@ -199,7 +201,7 @@ describe('API external test - check enable_rum parameter', function () {
             }, 10000);
         }, function (err) {
             if (publishFlag === false) {
-                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(response_json);
+                throw 'The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson);
             } else {
                 done();
             }
@@ -221,10 +223,10 @@ describe('API external test - check enable_rum parameter', function () {
             if (rej) {
                 throw rej;
             }
-            response_json = JSON.parse(res.text);
+            var responseJson = JSON.parse(res.text);
             //console.log(response_json);
-            response_json.statusCode.should.be.equal(202);
-            response_json.message.should.be.equal('The domain has been scheduled for removal');
+            responseJson.statusCode.should.be.equal(202);
+            responseJson.message.should.be.equal('The domain has been scheduled for removal');
             done();
         });
     });
