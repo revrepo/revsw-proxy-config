@@ -375,8 +375,19 @@
 {%- endmacro %}{# _common_proxy_config_step2 #}
 
 {% macro _common_frontend(this) %}
-  # Save client address
-  proxy_set_header X-Forwarded-for $remote_addr;
+  #
+  # Save client address:
+  # local QUIC proxy requests come from $remote_addr 127.0.0.1 but the QUIC proxy always sets 
+  # X-Forwarded-For header for real end user IP address. 
+  # Nginx log should use $clientip variable to report "clientip" attribute
+  set $clientip $remote_addr;
+  if ($http_x_rev_transport = "QUIC") {
+    set $clientip $http_x_forwarded_for;
+  }
+  if ($clientip = "") {
+    set  $clientip $remote_addr;
+  }
+  proxy_set_header X-Forwarded-for $clientip;
 
   # Optional user customizations in BP frontend
   {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
