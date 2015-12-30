@@ -161,7 +161,7 @@ describe('Proxy RUM control enable_rum', function() {
     });
   });
 
-  it('should get rum code ( after set enable_rum to true )', function(done) {
+  it('should get rum code (after set enable_rum to true)', function(done) {
     tools.getHostRequest(url, '/html', newDomainName).then(function(res, rej) {
       if (rej) {
         throw rej;
