@@ -55,14 +55,16 @@
   {% endfor %}
 {%- endmacro %}{# _for_each_rule(site) #}
 
-
+{% set isCacheSite = False %}
 {% macro _for_each_site(cond_var, req_obj) -%}
+  {% set first=True %}
   {% for site in sites %}
     {% if site[cond_var] %}
       # BEGIN SITE '{{site.SERVER_NAME}}'
-      elsif ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
+      {{ "if" if first else "elsif" }} ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
       {{ caller(site) }}
       }
+      {% set first=False %}
       # END SITE '{{site.SERVER_NAME}}'
     {% endif %}{# site[cond_var] #}
   {% endfor %}
@@ -107,6 +109,7 @@
 
 {% set enabled_sites_count = sites|selectattr("ENABLE_CACHE")|list|length %}
 # Number of cached sites: {{ enabled_sites_count }}
+# List {{ sites|selectattr("ENABLE_CACHE")|list }}
 
 {% macro _site_cookies_querystr_and_per_domain_rules_hash_recv(site) %}
   #################### Cookies and query string plus per-domain rules hash handling ####################
@@ -678,8 +681,6 @@ cookie.parse(req.http.Cookie);
 # Save the ROUTEID cookie; we need it for CO load balancing
 revvar.set_string_allow_null({{VAR_REQ}}, {{_var_idx("RROUTEID")}}, cookie.get("ROUTEID"));
 
-if(req.http.host == ""){}
-
 # Domain-specific configuration
 {% call (site) _for_each_site("ENABLE_CACHE", "req") %}
   {% if site.DEBUG_MODE %}
@@ -747,7 +748,7 @@ if(req.http.host == ""){}
 
 # Add in vcl_recv support for *.revsdk.net
 # a problem will appear in case no domains are defined
-elseif (req.http.host ~ "(?i)\.revsdk\.net$") {
+{{ "elsif" if enabled_sites_count > 0 else "if" }} (req.http.host ~ "(?i)\.revsdk\.net$") {
   if (std.port(server.ip) == 8080) {
     set req.backend_hint = behttp_all_revsdk_net;
   } else {
