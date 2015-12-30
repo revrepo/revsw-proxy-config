@@ -55,7 +55,6 @@
   {% endfor %}
 {%- endmacro %}{# _for_each_rule(site) #}
 
-{% set isCacheSite = False %}
 {% macro _for_each_site(cond_var, req_obj) -%}
   {% set first=True %}
   {% for site in sites %}
