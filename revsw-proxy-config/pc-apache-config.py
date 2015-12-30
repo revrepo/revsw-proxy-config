@@ -721,6 +721,7 @@ def add_or_update_domain(domain_name, ui_config):
         log.LOGI("Adding domain '%s'" % domain_name)
         # Initial, default config
         config = _gen_initial_domain_config(domain_name, ui_config)
+        config.update(dict(varnish_changed=True))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -745,13 +746,13 @@ def add_or_update_domain(domain_name, ui_config):
             "site_name": site_name,
             "config_vars": webserver_config_vars,
             "varnish_config_vars": varnish_config_vars,
-            "varnish_changed": cfg_common._varnish_changed
         }
 
         # Apply patched config
         configure_all({
             "version": API_VERSION,
-            "commands": [config]
+            "commands": [config],
+            "varnish_changed": cfg_common._varnish_changed
         })
 
         # Ban Varnish URLs that match changed caching rules
