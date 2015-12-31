@@ -55,4 +55,6 @@ obj
 
 # REVSW specific directories
 package_build_dir/
+generic-site/
+revsw-proxy-config/generic-site/
 # .
