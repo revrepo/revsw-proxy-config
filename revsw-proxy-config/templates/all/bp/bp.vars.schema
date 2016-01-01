@@ -212,6 +212,9 @@
 		    "header_value": {"type": "string"}
 		}
             }
+        },
+        "ENABLE_QUIC": {
+            "type": "boolean"
         }
     },
     "required": [
@@ -258,7 +261,8 @@
         "ENABLE_HTTP2",
         "ENABLE_RUM",
         "REV_RUM_BEACON_URL",
-        "CUSTOM_WEBSERVER_CO_CODE_AFTER"
+        "CUSTOM_WEBSERVER_CO_CODE_AFTER",
+        "ENABLE_QUIC"
     ],
    "additionalProperties": false
 }

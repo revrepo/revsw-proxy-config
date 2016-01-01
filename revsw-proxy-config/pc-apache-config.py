@@ -161,8 +161,6 @@ class ConfigCommon:
             js_level = convert_choice(content["js_choice"])
             css_level = convert_choice(content["css_choice"])
 
-        rum_beacon = str(content["rum_beacon_url"]) if content.get("enable_rum", True) else ""
-
         self._patch_if_changed_co_profiles_webserver("REV_OPTIMIZATION_LEVEL", opt_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
@@ -234,7 +232,7 @@ class ConfigCommon:
         }
         enable_origin_health_probe = self.ui_config.get("enable_origin_health_probe", False)
         config_health_probe = self.ui_config.get("origin_health_probe", {"enable": False})
-        log.LOGI("(BP-255) enable_origin_health_probe: %s" % enable_origin_health_probe)
+        log.LOGD("(BP-255) enable_origin_health_probe: %s" % enable_origin_health_probe)
         if enable_origin_health_probe:
             log.LOGI("(BP-255) config_health_probe:\t%s" % config_health_probe)
             health_probe = config_health_probe
@@ -319,10 +317,10 @@ class ConfigCommon:
         proxied_http_servers, proxied_https_servers = _convert_static_servers(proxied_domains)
         optimized_http_servers, optimized_https_servers = _convert_static_servers(optimized_domains)
 
-        _check_valid_domains(proxied_http_servers, "Proxied HTTP domain")
-        _check_valid_domains(proxied_https_servers, "Proxied HTTPS domain")
-        _check_valid_domains(optimized_http_servers, "Rewritten HTTP domain")
-        _check_valid_domains(optimized_https_servers, "Rewritten HTTPS domain")
+        #_check_valid_domains(proxied_http_servers, "Proxied HTTP domain")
+        #_check_valid_domains(proxied_https_servers, "Proxied HTTPS domain")
+        #_check_valid_domains(optimized_http_servers, "Rewritten HTTP domain")
+        #_check_valid_domains(optimized_https_servers, "Rewritten HTTPS domain")
 
         return (
             (proxied_http_servers, proxied_https_servers),
@@ -330,16 +328,18 @@ class ConfigCommon:
             enable_rewr
         )
 
-    def _patch_misc_vars_bp(self):
+    def _patch_misc_vars(self):
         if not self.can_config_bp():
             return False, False
 
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
 
+        log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
-
+        log.LOGD("Finished domain checking")
+        log.LOGD("Start vars update in misc")
         self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
         self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers, True)
         self._patch_if_changed_bp_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
@@ -378,14 +378,13 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
         self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
+        self._patch_if_changed_bp_webserver("ENABLE_QUIC", misc.get("enable_quic", False))
 
-        #rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
         self._patch_if_changed_bp_webserver("ENABLE_RUM", co.get("enable_rum"))
         self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url"))
 
         self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
-
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
@@ -411,61 +410,8 @@ class ConfigCommon:
                                             else ["%s://%s" % (http, ows_server)])
         self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
                                             else ["%s://%s" % (https, ows_server)])
+        log.LOGD("Finished vars update in misc")
 
-    def _patch_misc_vars_co(self):
-        if not self.can_config_co():
-            return False
-
-        misc = self.ui_config["rev_component_co"]
-        bp = self.ui_config["rev_component_bp"]
-
-        domain_name = self.webserver_config_vars["co"]["SERVER_NAME"]
-        ows_domain, ows_server = _get_ows_domain_and_server(domain_name, self.ui_config)
-
-        self._patch_if_changed_co_webserver("ORIGIN_SERVER_NAME", ows_domain)
-        self._patch_if_changed_co_webserver("CUSTOM_WEBSERVER_CODE_AFTER", misc.get("co_apache_custom_config", ""))
-
-        ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
-            self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(bp))
-
-        self._patch_if_changed_co_webserver("DOMAINS_TO_PROXY_HTTP", http_servers)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr)
-        self._patch_if_changed_co_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr)
-
-        self._patch_if_changed_co_webserver("ENABLE_HTTP", self.cmd_opts["http"])
-        self._patch_if_changed_co_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
-        self._patch_if_changed_co_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
-
-        self._patch_if_changed_co_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
-        self._patch_if_changed_co_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
-
-        self._patch_if_changed_co_webserver("DEBUG_MODE", self.cmd_opts["debug"])
-
-        self._patch_if_changed_co_webserver("PROXY_TIMEOUT",
-                                            self.ui_config.get("proxy_timeout", self.cmd_opts["proxy_timeout"]))
-
-        self._patch_if_changed_co_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
-        self._patch_if_changed_co_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
-        self._patch_if_changed_co_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
-        self._patch_if_changed_co_webserver("ENABLE_DECOMPRESSION", misc.get("enable_decompression", True))
-
-        http = "http" if self.cmd_opts["ows_http"] else "https"
-        https = "https" if self.cmd_opts["ows_https"] else "http"
-
-        _check_valid_domains([ows_server], "Origin server")
-
-        self._patch_if_changed_co_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
-                                            else ["%s://%s" % (http, ows_server)])
-        self._patch_if_changed_co_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
-                                            else ["%s://%s" % (https, ows_server)])
-        self._patch_if_changed_co_webserver("ORIGIN_REQUEST_HEADERS", misc.get("origin_request_headers", [])) # (BP-92) CO
-
-    def _patch_misc_vars(self):
-        if "bp" in self.webserver_config_vars:
-            self._patch_misc_vars_bp()
-        elif "co" in self.webserver_config_vars:
-            self._patch_misc_vars_co()
 
     def can_config_bp(self):
         return "bp" in self.webserver_config_vars and self.cmd_opts["config_bp"]
@@ -480,9 +426,13 @@ class ConfigCommon:
         return self._must_ban_html
 
     def patch_config(self):
+        log.LOGD("Run patch content vars")
         self._patch_content_vars()
+        log.LOGD("Run patch cache vars")
         self._patch_cache_vars()
+        log.LOGD("Run patch security vars")
         self._patch_security_vars()
+        log.LOGD("Run patch misc vars")
         self._patch_misc_vars()
 
 
@@ -728,16 +678,23 @@ def add_or_update_domain(domain_name, ui_config):
     log.LOGI("Updating domain '%s'" % domain_name)
 
     webserver_config_vars = acfg.load_input_vars()
-    # log.LOGI(u"Input JSON is: ", webserver_config_vars)
+    #log.LOGI(u"Input JSON is: ", webserver_config_vars)
 
 
     try:
+        log.LOGD(u"Start read Varnish Config")
         varnish_config_vars = VarnishConfig(site_name).load_site_config()
+        log.LOGD(u"Finish read Varnish Config")
     except:
         log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
 
+    log.LOGD(u"Start read Main Config")
     cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
+    log.LOGD(u"Finish read Main Config")
+
+    log.LOGD(u"Start config patch")
     cfg_common.patch_config()
+    log.LOGD(u"End config patch")
     #print json.dumps(varnish_config_vars)
     if cfg_common.config_changed():
         config = {
@@ -907,7 +864,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 23 < new_ver:
             bp["ENABLE_HTTP2"] = True
             bp["ENABLE_RUM"] = False
-            bp["ORIGIN_REQUEST_HEADERS"] = []
+            bp["ORIGIN_REQUEST_HEADERS"] = [],
+            bp["ENABLE_QUIC"] = False
 
         bp["VERSION"] = new_ver
 
