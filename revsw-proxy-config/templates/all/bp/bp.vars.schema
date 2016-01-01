@@ -198,6 +198,9 @@
        "ENABLE_OPTIMIZATION": {
             "type": "boolean"
         },
+        "ENABLE_DECOMPRESSION": {
+            "type": "boolean"
+        },
        "ORIGIN_REQUEST_HEADERS": {
             "type": "array",
             "items": {
@@ -209,6 +212,9 @@
 		    "header_value": {"type": "string"}
 		}
             }
+        },
+        "ENABLE_QUIC": {
+            "type": "boolean"
         }
     },
     "required": [
@@ -250,11 +256,13 @@
         "ENABLE_PROXY_BUFFERING",
         "END_USER_RESPONSE_HEADERS",
         "ENABLE_OPTIMIZATION",
+        "ENABLE_DECOMPRESSION",
         "ORIGIN_REQUEST_HEADERS",
         "ENABLE_HTTP2",
         "ENABLE_RUM",
         "REV_RUM_BEACON_URL",
-        "CUSTOM_WEBSERVER_CO_CODE_AFTER"
+        "CUSTOM_WEBSERVER_CO_CODE_AFTER",
+        "ENABLE_QUIC"
     ],
    "additionalProperties": false
 }

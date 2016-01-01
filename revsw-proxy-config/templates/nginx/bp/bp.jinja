@@ -13,7 +13,7 @@
     {% set proto_prefix = "http://" if content_optimizers[0]|truncate(7, True, "") == "http://" else "https://" %}
     # proto_prefix = {{proto_prefix}}
     upstream {{ balancer_mod.balancer_name(this, is_https, balancer_name) }} {
-    # TODO: this is Nginx Plus-only, so we have to use ip_hash instead: sticky cookie routeid{{routeid_suffix}} expires=1h;
+    # TODO: this is Nginx Plus-only, so we have to use ip_hash instead: sticky cookie routeid{{routeid_suffix|trim}} expires=1h;
     ip_hash;
     dynamic_resolve fallback=stale fail_timeout=30s; # must be added AFTER ip_hash
     {% for co in content_optimizers %}
@@ -481,6 +481,12 @@
       {{ balancer_mod.define_bp_ows_balancer(this, false) }}
       server {
       listen 80;
+
+        {% if this.ENABLE_QUIC %}
+            more_set_headers Alt-Svc:'quic=\":443\"\; p=\"1\"\; ma=604800';
+            more_set_headers Alternate-Protocol:443:quic,p=1;
+        {% endif %}
+
       {% if this.ENABLE_VARNISH %}
 	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
 	{{ _common_frontend(this) }}
@@ -491,7 +497,6 @@
 	access_log off;
 	# Make sure the connections between Varnish and BP are kept alive for 10 minutes
 	keepalive_timeout 600s;
-
 {% else %}{# not this.ENABLE_VARNISH #}
   {{ _common_frontend(this) }}
 {% endif %}{# this.ENABLE_VARNISH #}
@@ -535,6 +540,11 @@
   server {
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
   listen 443 ssl http2;
+
+    {% if this.ENABLE_QUIC %}
+        more_set_headers Alt-Svc:'quic=\":443\"\; p=\"1\"\; ma=604800';
+        more_set_headers Alternate-Protocol:443:quic,p=1;
+    {% endif %}
 
   {% if this.ENABLE_VARNISH and not this.BYPASS_VARNISH_LOCATIONS %}
     {{ ssl_mod.setup_no_proxy(this.ssl) }}

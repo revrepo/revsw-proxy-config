@@ -714,7 +714,8 @@ def generate_bp_domain_json(domain):
         "REV_RUM_BEACON_URL": RUM_BEACON_URL,
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
-        "ORIGIN_REQUEST_HEADERS": [] # (BP-92)
+        "ORIGIN_REQUEST_HEADERS": [], # (BP-92)
+        "ENABLE_QUIC": False
     }
 
     f = StringIO()

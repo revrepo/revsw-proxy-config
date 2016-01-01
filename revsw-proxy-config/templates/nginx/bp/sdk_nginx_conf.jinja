@@ -17,9 +17,6 @@ server {
     ssl_session_cache shared:SSL:10m;
     ssl_certificate /opt/revsw-config/apache/generic-site/certs/server-chained.crt;
     ssl_certificate_key /opt/revsw-config/apache/generic-site/certs/server.key;
-
-    pagespeed off;
-    
     # display all the keys
 
     {% for conf in configs %}
@@ -49,9 +46,7 @@ server {
 
 server {
     listen 127.0.0.1:9443;
-    access_log off; 
-    pagespeed off;
-
+    access_log off;
     # display all the keys
     {% for conf in configs %}
     server_name {{conf.sdk_domain_name}};

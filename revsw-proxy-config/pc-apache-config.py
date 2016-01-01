@@ -161,8 +161,6 @@ class ConfigCommon:
             js_level = convert_choice(content["js_choice"])
             css_level = convert_choice(content["css_choice"])
 
-        rum_beacon = str(content["rum_beacon_url"]) if content.get("enable_rum", True) else ""
-
         self._patch_if_changed_co_profiles_webserver("REV_OPTIMIZATION_LEVEL", opt_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
         self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
@@ -337,10 +335,10 @@ class ConfigCommon:
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
 
-        log.LOGD("Start domain chacking")
+        log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
-        log.LOGD("Finished domain chacking")
+        log.LOGD("Finished domain checking")
         log.LOGD("Start vars update in misc")
         self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
         self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers, True)
@@ -380,14 +378,13 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
         self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
+        self._patch_if_changed_bp_webserver("ENABLE_QUIC", misc.get("enable_quic", False))
 
-        #rum_beacon = str(co.get("rum_beacon_url", "")) if co.get("enable_rum", True) else ""
         self._patch_if_changed_bp_webserver("ENABLE_RUM", co.get("enable_rum"))
         self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", co.get("rum_beacon_url"))
 
         self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
-
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
@@ -867,7 +864,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 23 < new_ver:
             bp["ENABLE_HTTP2"] = True
             bp["ENABLE_RUM"] = False
-            bp["ORIGIN_REQUEST_HEADERS"] = []
+            bp["ORIGIN_REQUEST_HEADERS"] = [],
+            bp["ENABLE_QUIC"] = False
 
         bp["VERSION"] = new_ver
 
