@@ -34,7 +34,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             done();
         });
     });
-/*
+
     it('should create new configuration for domain ' + newDomainName, function (done) {
         var createDomainConfigJSON = {
             'domain_name': newDomainName,
@@ -206,5 +206,5 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             done();
         });
     });
-*/
+
 });
