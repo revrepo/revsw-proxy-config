@@ -479,13 +479,13 @@
 	{{ _common_upstream_block_varnish(this, 8080, false) }}
       {% endif %}
       {{ balancer_mod.define_bp_ows_balancer(this, false) }}
-      server {
+server {
       listen 80;
 
-        {% if this.ENABLE_QUIC %}
-            more_set_headers Alt-Svc:'quic=\":443\"\; p=\"1\"\; ma=604800';
-            more_set_headers Alternate-Protocol:443:quic,p=1;
-        {% endif %}
+    {% if this.ENABLE_QUIC %}
+        add_header Alt-Svc 'quic=":443"; p="1"; ma=120';
+        more_set_headers Alternate-Protocol:443:quic,p=1;
+    {% endif %}
 
       {% if this.ENABLE_VARNISH %}
 	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
@@ -537,12 +537,12 @@
     {{ _common_upstream_block_varnish(this, 8443, true) }}
   {% endif %}
   {{ balancer_mod.define_bp_ows_balancer(this, true) }}
-  server {
+server {
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
   listen 443 ssl http2;
 
     {% if this.ENABLE_QUIC %}
-        more_set_headers Alt-Svc:'quic=\":443\"\; p=\"1\"\; ma=604800';
+        add_header Alt-Svc 'quic=":443"; p="1"; ma=120';
         more_set_headers Alternate-Protocol:443:quic,p=1;
     {% endif %}
 
