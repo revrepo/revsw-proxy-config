@@ -19,10 +19,9 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
     AccountId = '',
     domainConfig = '',
     domainConfigId = '',
-    headerAltSvc = 'quic=":443"; p="1"; ma=',
-    headerAlternateProtocol = '443:quic,p=1';
+    regexPagespeed = /[0-9]{1,10}\.[0-9]{1,10}\.[0-9]{1,10}\.[0-9-]{1,10}/m;
 
-describe('Proxy QUIC control enable_quic', function () {
+describe('Proxy Pagespeed control enable_optimization', function () {
 
     this.timeout(240000);
 
@@ -56,14 +55,14 @@ describe('Proxy QUIC control enable_quic', function () {
         });
     });
 
-    it('should get domain config and enable_quic must be false', function (done) {
+    it('should get domain config and enable_optimization must be false', function (done) {
         api.getDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword)
             .then(function (res, rej) {
                 if (rej) {
                     throw rej;
                 }
                 var responseJson = JSON.parse(res.text);
-                responseJson.rev_component_bp.enable_quic.should.be.false;
+                responseJson.rev_component_co.enable_optimization.should.be.false;
                 domainConfig = responseJson;
                 delete domainConfig.cname;
                 delete domainConfig.domain_name;
@@ -74,37 +73,37 @@ describe('Proxy QUIC control enable_quic', function () {
     it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 18, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
         });
     });
 
-    it('should not get quic header in http request (after create)', function (done) {
+    it('should not get Pagespeed header in http request (after create)', function (done) {
         tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
+            res.header.should.not.have.property(['x-page-speed']);
             done();
         });
     });
 
-    it('should not get quic header in https request (after create)', function (done) {
+    it('should not get Pagespeed header in https request (after create)', function (done) {
         tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
+            res.header.should.not.have.property(['x-page-speed']);
             done();
         });
     });
 
-    it('should change domain config and set enable_quic to true', function (done) {
-        domainConfig.rev_component_bp.enable_quic = true;
+    it('should change domain config and set enable_optimization to true', function (done) {
+        domainConfig.rev_component_co.enable_optimization = true;
         api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
             testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
             if (rej) {
@@ -117,49 +116,43 @@ describe('Proxy QUIC control enable_quic', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
         });
     });
 
-    it('should get quic headers in http request (after config update)', function (done) {
+    it('should get Pagespeed headers in http request (after config update)', function (done) {
         tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.have.properties(['alternate-protocol', 'alt-svc']);
-            if (res.header['alternate-protocol']) {
-                res.header['alternate-protocol'].should.equal(headerAlternateProtocol);
-            }
-            if (res.header['alt-svc']) {
-                res.header['alt-svc'].should.startWith(headerAltSvc);
+            res.header.should.have.property(['x-page-speed']);
+            if (res.header['x-page-speed']) {
+                res.header['x-page-speed'].should.match(regexPagespeed);
             }
             done();
         });
     });
 
-    it('should get quic headers in https request (after config update)', function (done) {
+    it('should get Pagespeed headers in https request (after config update)', function (done) {
         tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.have.properties(['alternate-protocol', 'alt-svc']);
-            if (res.header['alternate-protocol']) {
-                res.header['alternate-protocol'].should.equal(headerAlternateProtocol);
-            }
-            if (res.header['alt-svc']) {
-                res.header['alt-svc'].should.startWith(headerAltSvc);
+            res.header.should.have.property(['x-page-speed']);
+            if (res.header['x-page-speed']) {
+                res.header['x-page-speed'].should.match(regexPagespeed);
             }
             done();
         });
     });
 
-    it('should change domain config and set enable_quic to false', function (done) {
-        domainConfig.rev_component_bp.enable_quic = false;
+    it('should change domain config and set enable_optimization to false', function (done) {
+        domainConfig.rev_component_co.enable_optimization = false;
         api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
             testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
             if (rej) {
@@ -172,31 +165,31 @@ describe('Proxy QUIC control enable_quic', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
         });
     });
 
-    it('should not get quic header in http request (after set enable_quic to false)', function (done) {
+    it('should not get Pagespeed header in http request (after set enable_optimization to false)', function (done) {
         tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
+            res.header.should.not.have.property(['x-page-speed']);
             done();
         });
     });
 
-    it('should not get quic header in https request (after set enable_quic to false)', function (done) {
+    it('should not get Pagespeed header in https request (after set enable_optimization to false)', function (done) {
         tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
-            res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
+            res.header.should.not.have.property(['x-page-speed']);
             done();
         });
     });
