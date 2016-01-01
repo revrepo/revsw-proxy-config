@@ -198,9 +198,6 @@
        "ENABLE_OPTIMIZATION": {
             "type": "boolean"
         },
-        "ENABLE_DECOMPRESSION": {
-            "type": "boolean"
-        },
        "ORIGIN_REQUEST_HEADERS": {
             "type": "array",
             "items": {
@@ -253,7 +250,6 @@
         "ENABLE_PROXY_BUFFERING",
         "END_USER_RESPONSE_HEADERS",
         "ENABLE_OPTIMIZATION",
-        "ENABLE_DECOMPRESSION",
         "ORIGIN_REQUEST_HEADERS",
         "ENABLE_HTTP2",
         "ENABLE_RUM",
