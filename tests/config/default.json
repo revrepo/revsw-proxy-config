@@ -2,6 +2,8 @@
 {
   "test_proxy_http": "http://testsjc20-bp01.revsw.net",
   "test_proxy_https": "https://testsjc20-bp01.revsw.net",
-
-  "not_existing_domain": "thisdomainshouldnotexistinproxyconfiguration.com"
+  "test_group": "55a56fa6476c10c329a90741",
+  "not_existing_domain": "thisdomainshouldnotexistinproxyconfiguration.com",
+  "qaUserWithAdminPerm": "api_qa_user_with_admin_perm@revsw.com",
+  "qaUserWithAdminPermPassword": "password1"
 }
