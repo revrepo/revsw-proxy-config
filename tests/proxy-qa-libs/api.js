@@ -88,16 +88,18 @@ module.exports = {
             return;
         }
         return new Promise(function (resolve, reject) {
-            return request(url)
-                .del('/v1/domain_configs/' + domainID)
-                .auth(login, password)
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(res);
-                });
+            setTimeout(function () {
+                return request(url)
+                    .del('/v1/domain_configs/' + domainID)
+                    .auth(login, password)
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (err) {
+                            return reject(err);
+                        }
+                        return resolve(res);
+                    });
+            },20000);
         });
     },
 

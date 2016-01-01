@@ -11,9 +11,9 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
     apiPassword = config.get('qaUserWithAdminPermPassword'),
     originHostHeader = 'httpbin.org',
     originServer = 'httpbin.org',
-    httpUrl = config.get('test_proxy_http'),
-    httpsUrl = config.get('test_proxy_https'),
-    newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
+    testHTTPUrl = config.get('test_proxy_http'),
+    testHTTPSUrl = config.get('test_proxy_https'),
+    newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
     testAPIUrl = config.get('testAPIUrl'),
     testGroup = config.get('test_group'),
     AccountId = '',
@@ -34,7 +34,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             done();
         });
     });
-
+/*
     it('should create new configuration for domain ' + newDomainName, function (done) {
         var createDomainConfigJSON = {
             'domain_name': newDomainName,
@@ -73,7 +73,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 18, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
@@ -81,7 +81,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     });
 
     it('should not get Pagespeed header in http request (after create)', function (done) {
-        tools.getHostRequest(httpUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -92,7 +92,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     });
 
     it('should not get Pagespeed header in https request (after create)', function (done) {
-        tools.getHostRequest(httpsUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -116,7 +116,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
@@ -124,25 +124,29 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     });
 
     it('should get Pagespeed headers in http request (after config update)', function (done) {
-        tools.getHostRequest(httpUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
             res.header.should.have.property(['x-page-speed']);
-            if (res.header['x-page-speed']) { res.header['x-page-speed'].should.match(regexPagespeed); }
+            if (res.header['x-page-speed']) {
+                res.header['x-page-speed'].should.match(regexPagespeed);
+            }
             done();
         });
     });
 
     it('should get Pagespeed headers in https request (after config update)', function (done) {
-        tools.getHostRequest(httpsUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
             //console.log(res.header);
             res.header.should.have.property(['x-page-speed']);
-            if (res.header['x-page-speed']) { res.header['x-page-speed'].should.match(regexPagespeed); }
+            if (res.header['x-page-speed']) {
+                res.header['x-page-speed'].should.match(regexPagespeed);
+            }
             done();
         });
     });
@@ -161,7 +165,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
         tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
             if (rej) {
-                    throw rej;
+                throw rej;
             }
             res.should.be.ok;
             done();
@@ -169,7 +173,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     });
 
     it('should not get Pagespeed header in http request (after set enable_optimization to false)', function (done) {
-        tools.getHostRequest(httpUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -180,7 +184,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
     });
 
     it('should not get Pagespeed header in https request (after set enable_optimization to false)', function (done) {
-        tools.getHostRequest(httpsUrl, '/html', newDomainName).then(function (res, rej) {
+        tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
             if (rej) {
                 throw rej;
             }
@@ -202,5 +206,5 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             done();
         });
     });
-
+*/
 });
