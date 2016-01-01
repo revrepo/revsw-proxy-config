@@ -7,8 +7,6 @@ var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
 
-var testAPIUrl = (process.env.API_QA_URL) ? process.env.API_QA_URL : 'https://testsjc20-api01.revsw.net:443';
-
 var apiLogin = config.get('qaUserWithAdminPerm'),
     apiPassword = config.get('qaUserWithAdminPermPassword'),
     originHostHeader = 'httpbin.org',
@@ -16,6 +14,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
     httpUrl = config.get('test_proxy_http'),
     httpsUrl = config.get('test_proxy_https'),
     newDomainName = 'delete-me-API-QA-name-' + Date.now() + '.revsw.net',
+    testAPIUrl = config.get('testAPIUrl'),
     testGroup = config.get('test_group'),
     AccountId = '',
     domainConfig = '',
