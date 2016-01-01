@@ -41,7 +41,7 @@ function custom_sleep(time) {
 function test_cache_time(sleep_time, generic_object)
 {
 	var debug = generic_object['debug'];
-	var protocol = "http";
+	var protocol = "https";
 	var operators = {
 		'<': function(a, b) { return a < b },
 		'>=': function(a, b) { return a >= b }

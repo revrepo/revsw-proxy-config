@@ -89,6 +89,7 @@ cp -r $WORKSPACE/revsw-proxy-config/revsw $FOLDERNAME/$DST/bin
 cp -r $WORKSPACE/generic-site $FOLDERNAME/$DST/apache
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/varnish/
 cp -r $WORKSPACE/revsw-proxy-config/templates/all/bp/* $FOLDERNAME/$DST/templates/all/bp
+cp -r $WORKSPACE/revsw-proxy-config/templates/nginx/bp/sdk_nginx_conf.jinja $FOLDERNAME/$DST/templates/all/bp/
 
 # pol
 cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $FOLDERNAME/etc/

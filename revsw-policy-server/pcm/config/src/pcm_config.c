@@ -116,6 +116,7 @@ pcm_config_process_data (struct libwebsocket        *wsi,
         }
 
         configuration_type = (char *)(nx_json_get (json, "configuration_type")->text_value);
+        PCMC_LOG_DEBUG ("%s: value of configuration_type field: %s", func_name, configuration_type);
         if (configuration_type) {
             if (strcmp(configuration_type, "sdk_apps_config") == 0) {
                 sdk_operation = (char *)(nx_json_get (json, "operation")->text_value);
