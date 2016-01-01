@@ -20,7 +20,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
     AccountId = '',
     domainConfig = '',
     domainConfigId = '',
-    headerAltSvc = 'quic=":443"; p="1"; ma=120',
+    headerAltSvc = 'quic=":443"; p="1"; ma=',
     headerAlternateProtocol = '443:quic,p=1';
 
 describe('Proxy QUIC control enable_quic', function () {
@@ -180,8 +180,8 @@ describe('Proxy QUIC control enable_quic', function () {
             }
             //console.log(res.header);
             res.header.should.have.properties(['alternate-protocol','alt-svc']);
-            if (res.header['alternate-protocol']) { res.header['alternate-protocol'].should.equal('443:quic,p=1'); }
-            if (res.header['alt-svc']) { res.header['alt-svc'].should.startWith('quic=":443"; p="1"; ma='); }
+            if (res.header['alternate-protocol']) { res.header['alternate-protocol'].should.equal(headerAlternateProtocol); }
+            if (res.header['alt-svc']) { res.header['alt-svc'].should.startWith(headerAltSvc); }
             done();
         });
     });
@@ -193,8 +193,8 @@ describe('Proxy QUIC control enable_quic', function () {
             }
             //console.log(res.header);
             res.header.should.have.properties(['alternate-protocol','alt-svc']);
-            if (res.header['alternate-protocol']) { res.header['alternate-protocol'].should.equal('443:quic,p=1'); }
-            if (res.header['alt-svc']) { res.header['alt-svc'].should.startWith('quic=":443"; p="1"; ma='); }
+            if (res.header['alternate-protocol']) { res.header['alternate-protocol'].should.equal(headerAlternateProtocol); }
+            if (res.header['alt-svc']) { res.header['alt-svc'].should.startWith(headerAltSvc); }
             done();
         });
     });
