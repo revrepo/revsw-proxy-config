@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
-from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, MlogcConfig, \
+from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, \
     PlatformWebServer, WebServerConfig, NginxConfig
 
 if __name__ == "__main__":
@@ -54,8 +54,6 @@ if __name__ == "__main__":
 
     actions.add_parser("varnish-template", help="Upload Varnish configuration template")
 
-    actions.add_parser("mlogc-template", help="Upload mlogc configuration template")
-
     actions.add_parser("send", help="Send the generated configuration to the server")
 
     copy = actions.add_parser("copy", help="Copy the generated configuration to the specified file")
@@ -76,7 +74,6 @@ if __name__ == "__main__":
             VARNISH_TEMPL = 6
             SEND = 7
             COPY = 8
-            MLOGC_TEMPL = 9
 
         if args.command == "start":
             action = Actions.START
@@ -90,8 +87,6 @@ if __name__ == "__main__":
             action = Actions.CONFIG
         elif args.command == "varnish-template":
             action = Actions.VARNISH_TEMPL
-        elif args.command == "mlogc-template":
-            action = Actions.MLOGC_TEMPL
         elif args.command == "send":
             action = Actions.SEND
         elif args.command == "copy":
@@ -168,20 +163,6 @@ if __name__ == "__main__":
             config = {
                 "type": "varnish_template",
                 "templates": VarnishConfig().gather_template_files(search_dirs)
-            }
-
-        elif action == Actions.MLOGC_TEMPL:
-            log.LOGD("Saving mlogc config template")
-
-            search_dirs = ["."] + \
-                          global_cfg["include_dir"] + \
-                          [os.path.join(os.path.dirname(__file__), "templates"),
-                           os.path.join(os.path.dirname(__file__), "templates/bp"),
-                           "/opt/revsw-config/templates",
-                           "/opt/revsw-config/templates/bp"]
-            config = {
-                "type": "mlogc_template",
-                "templates": MlogcConfig().gather_template_files(search_dirs)
             }
 
         elif action == Actions.CONFIG:    # also add
