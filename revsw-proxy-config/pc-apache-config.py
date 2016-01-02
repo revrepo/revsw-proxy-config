@@ -671,6 +671,7 @@ def add_or_update_domain(domain_name, ui_config):
         # Initial, default config
         config = _gen_initial_domain_config(domain_name, ui_config)
         config.update(dict(varnish_changed=False))
+        config.update(dict(config_changed=False))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -707,7 +708,8 @@ def add_or_update_domain(domain_name, ui_config):
         configure_all({
             "version": API_VERSION,
             "commands": [config],
-            "varnish_changed": cfg_common._varnish_changed
+            "varnish_changed": cfg_common._varnish_changed,
+            "config_changed": True
         })
 
         # Ban Varnish URLs that match changed caching rules
@@ -1179,7 +1181,8 @@ def upgrade_all_domains():
         configure_all({
             "version": API_VERSION,
             "commands": cmds,
-            "varnish_changed": True
+            "varnish_changed": True,
+            "config_changed": True
         })
     except ConfigException as ce:
         fail_domains = ce.error_domains
@@ -1232,7 +1235,7 @@ def _main():
             # Interpret content
             domain_name = _ui_config["domain_name"]
 
-            if _ui_config["operation"] in ("add", "update", "edit"):
+            if _ui_config["operation"] == "update":
                 add_or_update_domain(domain_name, _ui_config)
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
