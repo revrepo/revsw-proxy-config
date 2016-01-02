@@ -1029,13 +1029,6 @@ def generate_config_sh():
     echo "Configuring BP '$BP'"
     apache-config.py start -I $THIS_DIR $BP || EXIT=$?
     """ % addr)
-            if args.upload_varnish_mlogc:
-                print_configure_sh("""
-    echo "    -> uploading Varnish config template"
-    apache-config.py varnish-template || EXIT=$?
-    echo "    -> uploading Mlogc config template"
-    apache-config.py mlogc-template || EXIT=$?
-    """)
             if args.flush:
                 print_configure_sh("""
     echo "    -> removing all sites on server"
@@ -1128,8 +1121,6 @@ parser.add_argument("--no-co", help="Don't generate CO configuration commands",
 parser.add_argument("--no-flush", help="Don't generate flush commands (obsolete, unused)",
                     action="store_true")
 parser.add_argument("--flush", help="Flush existing sites before configuring",
-                    action="store_true")
-parser.add_argument("--upload-varnish-mlogc", help="Also upload Varnish and Mlogc templates to server",
                     action="store_true")
 parser.add_argument("--no-send", help="Don't send configuration",
                     action="store_true")
