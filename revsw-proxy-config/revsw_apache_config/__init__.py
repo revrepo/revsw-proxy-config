@@ -1083,5 +1083,4 @@ def configure_all(config):
             raise AttributeError("Invalid action '%s'" % action)
 
     # Reload the configs and save the old config
-    print transaction.varnish_reload_cmd, transaction.webserver_reload
     transaction.finalize()
