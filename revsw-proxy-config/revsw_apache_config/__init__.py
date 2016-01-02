@@ -441,10 +441,6 @@ class PlatformWebServer:
     def config_class(self):
         return NginxConfig
 
-    def mlogc_config_class(self):
-        return MlogcConfig if self._is_apache() else NoMlogcConfig
-
-
 class ConfigException(Exception):
     def __init__(self, message, error_domains):
         super(ConfigException, self).__init__(message)
@@ -994,96 +990,6 @@ class VarnishConfig:
                     err_domains.add(domain)
         return err_domains
 
-
-class MlogcConfig:
-    def __init__(self, site_name=None, transaction=None):
-        self.search_path = []
-        self.site_name = site_name
-        self.transaction = transaction
-
-    def _lazy_load_template(self, search_path):
-        if not search_path:
-            search_path = [jinja_config_webserver_base_dir()]
-
-        if self.search_path == search_path:
-            return
-
-        self.env = ImmutableSandboxedEnvironment(
-            line_statement_prefix=None,
-            trim_blocks=True,
-            lstrip_blocks=True,
-            loader=jinja2.FileSystemLoader(search_path),
-            undefined=StrictUndefined
-        )
-        self.mlogc_template = self.env.get_template("mlogc.jinja")
-        _log.LOGD("Loaded mlogc template:", self.mlogc_template.filename)
-
-        self.input_vars_schema = json.loads(_generate_schema("mlogc", search_path))
-
-    def gather_template_files(self, search_path=None):
-        self._lazy_load_template(search_path)
-        files = {
-            "mlogc.jinja": self.env.loader.get_source(self.env, "mlogc.jinja")[0],
-            "mlogc.vars.schema": json.dumps(self.input_vars_schema, indent=2)
-        }
-        return files
-
-    @_webserver_write_command
-    def write_config_file(self, input_vars, search_path=None):
-        self._lazy_load_template(search_path)
-        jsch.validate(input_vars, self.input_vars_schema, format_checker=jsch.FormatChecker())
-
-        cfg = self.mlogc_template.render(input_vars)
-
-        def do_write():
-            run_cmd("mkdir -p %s" % os.path.dirname(self.config_path()), _log,
-                    "Creating mlogc config dir if it doesn't exist")
-            with open(self.config_path(), "w") as f:
-                f.write(cfg)
-            _log.LOGD("Generated mlogc config file")
-
-        self.transaction.run(do_write)
-
-    @_webserver_write_command
-    def write_template_files(self, files):
-        self.transaction.run(lambda: _write_template_files(files, jinja_config_webserver_base_dir()))
-
-    def config_path(self):
-        base_dir = "/etc/modsecurity/mlogc"
-        if not self.site_name:
-            return base_dir
-        return os.path.join(base_dir, "%s.mlogc.conf" % self.site_name)
-
-    @_webserver_write_command
-    def remove_site(self):
-        self.transaction.run(lambda: run_cmd("rm -f %s" % self.config_path(), _log,
-                                             "Removing site '%s'" % self.site_name))
-
-
-class NoMlogcConfig:
-    def __init__(self, site_name=None, transaction=None):
-        self.site_name = site_name
-        self.transaction = transaction
-
-    def gather_template_files(self, search_path=None):
-        return {}
-
-    @_webserver_write_command
-    def write_config_file(self, input_vars, search_path=None):
-        pass
-
-    @_webserver_write_command
-    def write_template_files(self, files):
-        pass
-
-    def config_path(self):
-        return "/tmp/dummy-mlogc.conf"
-
-    @_webserver_write_command
-    def remove_site(self):
-        pass
-
-
 def _check_and_get_attr(command, attr):
     val = command.get(attr, None)
     if not val:
@@ -1114,7 +1020,6 @@ def configure_all(config):
 
         acfg = NginxConfig(site, transaction)
         vcfg = VarnishConfig(site, transaction)
-        mcfg = PlatformWebServer().mlogc_config_class()(site, transaction)
 
         _log.LOGI("Got request for site '%s', action '%s'" % (site, action))
 
@@ -1124,43 +1029,31 @@ def configure_all(config):
 
             # If site == '*', remove_site() will remove all sites
             vcfg.remove_site()
-            mcfg.remove_site()
 
         elif action == "varnish_template":
             _log.LOGD("Writing Varnish template")
             vcfg.write_template_files(_check_and_get_attr(command, "templates"))
 
-        elif action == "mlogc_template":
-            _log.LOGD("Writing mlogc template")
-            mcfg.write_template_files(_check_and_get_attr(command, "templates"))
-
         elif action == "delete":
             _log.LOGD("Removing site '%s'" % site)
             acfg.remove_site()
             vcfg.remove_site()
-            mcfg.remove_site()
 
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)
 
             templates = command.get("templates")
-            #print templates
-            if templates:
-                if PlatformWebServer()._is_nginx():
-                    if not "nginx" in templates:
-                        raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
-                    real_templates = templates["nginx"]
-                else:   # Apache
-                    # Old config contains only Apache templates
-                    real_templates = templates.get("apache", templates)
 
+            if templates:
+                if not "nginx" in templates:
+                    raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
+                real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
                 acfg.write_template_files(real_templates)
 
             cfg_vars = _check_and_get_attr(command, "config_vars")
             acfg.configure_site(cfg_vars)
 
-            mcfg.write_config_file(cfg_vars)
             varnish_changed_vars = config["varnish_changed"]
             varnish_config_vars = command.get("varnish_config_vars")
             if varnish_changed_vars:
@@ -1169,6 +1062,11 @@ def configure_all(config):
                 else:   # Varnish not needed for site, remove if present
                     vcfg.remove_site()
             else:
+                if varnish_config_vars:
+                    vcfg.config_site(varnish_config_vars)
+                    transaction.varnish_reload_cmd = None
+                    transaction.webserver_reload = False
+
                 _log.LOGD("Varnish don't changed")
 
         elif action == "certs":

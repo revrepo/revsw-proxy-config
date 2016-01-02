@@ -12,7 +12,7 @@ import traceback
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 
 from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_dir, jinja_config_webserver_dir, \
-    ConfigTransaction, dns_query, is_ipv4, ConfigException, PlatformWebServer
+    ConfigTransaction, dns_query, is_ipv4, ConfigException, PlatformWebServer, NginxConfig
 from revsw_apache_config.varnishadmin import VarnishAdmin
 
 from revsw.logger import RevSysLogger
@@ -664,14 +664,13 @@ def delete_domain(domain_name):
 
 def add_or_update_domain(domain_name, ui_config):
     site_name = _(domain_name)
-
-    acfg = PlatformWebServer().config_class()(site_name)
+    acfg = NginxConfig(site_name)
 
     if not acfg.exists():
         log.LOGI("Adding domain '%s'" % domain_name)
         # Initial, default config
         config = _gen_initial_domain_config(domain_name, ui_config)
-        config.update(dict(varnish_changed=True))
+        config.update(dict(varnish_changed=False))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -679,7 +678,6 @@ def add_or_update_domain(domain_name, ui_config):
 
     webserver_config_vars = acfg.load_input_vars()
     #log.LOGI(u"Input JSON is: ", webserver_config_vars)
-
 
     try:
         log.LOGD(u"Start read Varnish Config")
