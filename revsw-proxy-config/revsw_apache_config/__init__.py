@@ -1065,7 +1065,7 @@ def configure_all(config):
                 if varnish_config_vars:
                     vcfg.config_site(varnish_config_vars)
                     transaction.varnish_reload_cmd = None
-                    _log.LOGD("Varnish don't changed")
+                    _log.LOGD("No changes in Varnish configuration")
 
             config_changed_vars = config["config_changed"]
             if config_changed_vars:
