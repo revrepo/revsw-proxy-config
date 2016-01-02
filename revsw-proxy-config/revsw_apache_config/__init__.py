@@ -1056,7 +1056,6 @@ def configure_all(config):
 
             varnish_changed_vars = config["varnish_changed"]
             varnish_config_vars = command.get("varnish_config_vars")
-            print varnish_config_vars
             if varnish_changed_vars:
                 if varnish_config_vars:
                     vcfg.config_site(varnish_config_vars)
