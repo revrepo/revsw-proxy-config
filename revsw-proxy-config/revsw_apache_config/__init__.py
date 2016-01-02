@@ -1065,9 +1065,14 @@ def configure_all(config):
                 if varnish_config_vars:
                     vcfg.config_site(varnish_config_vars)
                     transaction.varnish_reload_cmd = None
-                    transaction.webserver_reload = False
+                    _log.LOGD("Varnish don't changed")
 
-                _log.LOGD("Varnish don't changed")
+            config_changed_vars = config["config_changed"]
+            if config_changed_vars:
+                transaction.webserver_reload = True
+            else:
+                transaction.webserver_reload = False
+            _log.LOGD("Config changed: ", transaction.webserver_reload)
 
         elif action == "certs":
             _log.LOGD("Configuring site '%s' certificates" % site)
@@ -1078,4 +1083,5 @@ def configure_all(config):
             raise AttributeError("Invalid action '%s'" % action)
 
     # Reload the configs and save the old config
+    print transaction.varnish_reload_cmd, transaction.webserver_reload
     transaction.finalize()
