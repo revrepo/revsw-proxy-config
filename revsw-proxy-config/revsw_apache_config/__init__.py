@@ -1037,6 +1037,7 @@ def configure_all(config):
             _log.LOGD("Removing site '%s'" % site)
             acfg.remove_site()
             vcfg.remove_site()
+            transaction.varnish_reload_cmd = None
 
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)
@@ -1082,4 +1083,6 @@ def configure_all(config):
             raise AttributeError("Invalid action '%s'" % action)
 
     # Reload the configs and save the old config
+    _log.LOGD("Webserver reload status: '%s'" % transaction.webserver_reload)
+    _log.LOGD("Varnish reload status: '%s'" % transaction.varnish_reload_cmd)
     transaction.finalize()

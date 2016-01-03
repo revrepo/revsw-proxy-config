@@ -656,13 +656,7 @@ def delete_domain(domain_name):
         ]
     })
     
-    # Let's see if we are a BP or a CO by looking at which package is installed
-    server_role = _get_server_role()
-
-    if server_role == "bp":
-        # Ban the whole domain from Varnish
-        VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
-    
+    VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
