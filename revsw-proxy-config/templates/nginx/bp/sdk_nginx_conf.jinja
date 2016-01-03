@@ -35,10 +35,6 @@ server {
        set  $clientip $remote_addr;
     }
 
-    location / {
-       return 503;
-    }
-
     proxy_set_header X-Orig-Host $host;
     proxy_set_header Connection "";
     proxy_set_header Host $http_host;
