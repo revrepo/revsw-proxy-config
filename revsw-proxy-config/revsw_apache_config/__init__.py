@@ -657,6 +657,8 @@ class NginxConfig(WebServerConfig):
                                              "Removing site '%s' if it exists" % self.site_name))
         self.transaction.run(lambda: run_cmd("rm -Rf %s" % jinja_config_webserver_dir(self.site_name), _log,
                                              "Removing site '%s' templates, if they exist" % self.site_name))
+        self.transaction.run(lambda: run_cmd("rm -f /opt/revsw-config/policy/ui-config-%s.json" % self.site_name, _log,
+                                             "Removing policy '%s' if it exists" % self.site_name))
 
     @_webserver_write_command
     def configure_site(self, input_vars):
