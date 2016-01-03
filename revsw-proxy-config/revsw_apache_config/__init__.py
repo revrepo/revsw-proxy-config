@@ -921,7 +921,6 @@ class VarnishConfig:
     @_varnish_write_command
     def remove_site(self):
         self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
-        self.transaction.schedule_varnish_reload()
 
     @_varnish_write_command
     def config_site(self, config):

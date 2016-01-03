@@ -150,7 +150,7 @@ _https_profiles_base = 19000
 _https_profiles_base_max = 19999
 
 _ignore_cookies_default = [
-    r"\.(jpg|jpeg|png|gif|webp|js|css|woff)(\?.*)?$"
+    r"**"
 ]
 
 _BP_CONFIG_VERSION = 24
@@ -556,17 +556,15 @@ def fixup_domain(domain):
         caching_rules = []
         for ign_cookie in domain["ignore_cookies"]:
             remove_cookies_rule = {
-                "version": 2,
+                "version": 1,
                 "url": {
-                    "is_wildcard": False,
+                    "is_wildcard": True,
                     "value": ign_cookie
                 },
                 "edge_caching": {
                     "override_origin": False,
                     "override_no_cc": False,
-                    "new_ttl": 0,
-                    "query_string_keep_or_remove_list": [],
-                    "query_string_list_is_keep": False
+                    "new_ttl": 0
                 },
                 "browser_caching": {
                     "override_edge": False,
@@ -574,12 +572,12 @@ def fixup_domain(domain):
                     "force_revalidate": False
                 },
                 "cookies": {
-                    "override": True,
-                    "ignore_all": True,
+                    "override": False,
+                    "ignore_all": False,
                     "keep_or_ignore_list": [],
                     "list_is_keep": False,
-                    "remove_ignored_from_request": True,
-                    "remove_ignored_from_response": True
+                    "remove_ignored_from_request": False,
+                    "remove_ignored_from_response": False
                 }
             }
             caching_rules.append(remove_cookies_rule)
