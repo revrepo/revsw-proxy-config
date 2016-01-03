@@ -918,7 +918,6 @@ class VarnishConfig:
             raise AssertionError("'site_config_path' requires the site name but the object is global")
         return "/opt/revsw-config/varnish/sites/%s.json" % self.site_name
 
-    @_varnish_write_command
     def remove_site(self):
         self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
 
@@ -1037,7 +1036,6 @@ def configure_all(config):
             _log.LOGD("Removing site '%s'" % site)
             acfg.remove_site()
             vcfg.remove_site()
-            transaction.varnish_reload_cmd = None
 
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)
