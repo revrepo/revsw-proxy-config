@@ -98,7 +98,7 @@ cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/b
 cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
 
 # Nginx configuration
-cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/000-revsw-proxy.conf $FOLDERNAME/etc/nginx/conf.d/
+cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var/www/
 
 # js
