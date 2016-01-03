@@ -918,10 +918,8 @@ class VarnishConfig:
             raise AssertionError("'site_config_path' requires the site name but the object is global")
         return "/opt/revsw-config/varnish/sites/%s.json" % self.site_name
 
-    @_varnish_write_command
     def remove_site(self):
         self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
-        self.transaction.schedule_varnish_reload()
 
     @_varnish_write_command
     def config_site(self, config):
@@ -1065,7 +1063,7 @@ def configure_all(config):
                 if varnish_config_vars:
                     vcfg.config_site(varnish_config_vars)
                     transaction.varnish_reload_cmd = None
-                    _log.LOGD("Varnish don't changed")
+                    _log.LOGD("No changes in Varnish configuration")
 
             config_changed_vars = config["config_changed"]
             if config_changed_vars:
@@ -1083,4 +1081,6 @@ def configure_all(config):
             raise AttributeError("Invalid action '%s'" % action)
 
     # Reload the configs and save the old config
+    _log.LOGD("Webserver reload status: '%s'" % transaction.webserver_reload)
+    _log.LOGD("Varnish reload status: '%s'" % transaction.varnish_reload_cmd)
     transaction.finalize()

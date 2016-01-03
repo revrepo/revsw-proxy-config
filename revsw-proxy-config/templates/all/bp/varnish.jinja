@@ -364,6 +364,16 @@ backend behttps_all_revsdk_net {
 	.port = "9443";
 }
 
+# all domains support
+backend behttp_all {
+	.host = "127.0.0.1";
+	.port = "9080";
+}
+backend behttps_all {
+	.host = "127.0.0.1";
+	.port = "9443";
+}
+
 # Begin custom VCL backends
 {% for site in sites %}
   {% if site.CUSTOM_VCL_ENABLED and site.CUSTOM_VCL.backends %}
@@ -605,6 +615,16 @@ acl purgehttps_all_revsdk_net {
 	"127.0.0.1";
 }
 
+# Implement local purging support for *.revsw.net
+acl purgehttp_all {
+	"localhost";
+	"127.0.0.1";
+}
+acl purgehttps_all {
+	"localhost";
+	"127.0.0.1";
+}
+
 # Block 3b: Issue purge when there is a cache hit for the purge request.
 sub vcl_hit {
 {{ _for_each_site_custom_vcl("hit", "req") }}
@@ -756,6 +776,28 @@ revvar.set_string_allow_null({{VAR_REQ}}, {{_var_idx("RROUTEID")}}, cookie.get("
   if (req.method == "PURGE") {
     if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all_revsdk_net) ||
   (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all_revsdk_net)) {
+      return (synth(405, "Not allowed."));
+    }
+    return (purge);
+  }
+
+  if (req.method != "GET" && req.method != "HEAD") {
+    # We only deal with GET and HEAD by default
+    return (pass);
+  }
+}
+
+# Add in vcl_recv support for *.revsw.net
+else {
+  if (std.port(server.ip) == 8080) {
+    set req.backend_hint = behttp_all;
+  } else {
+    set req.backend_hint = behttps_all;
+  }
+
+  if (req.method == "PURGE") {
+    if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all) ||
+  (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all)) {
       return (synth(405, "Not allowed."));
     }
     return (purge);
@@ -955,6 +997,16 @@ elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
 
   set beresp.http.X-Rev-SDK = "1";
 
+}
+else {
+  revvar.set_duration(false, 18, 60s);
+
+  if (beresp.status != 200) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  set beresp.http.X-Rev-SDK = "1";
 }
 
 set beresp.http.X-Rev-beresp-ttl = beresp.ttl;

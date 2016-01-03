@@ -116,6 +116,7 @@ class ConfigCommon:
             return
         if self.varnish_config_vars.get(option) != val:
             log.LOGI("Detected change for Varnish '%s'" % option)
+            log.LOGD("From: ", json.dumps(self.varnish_config_vars.get(option)), "\r\nTo: ", json.dumps(val))
             self.varnish_config_vars[option] = val
             self._config_changed = True
             self._varnish_changed = True
@@ -422,6 +423,9 @@ class ConfigCommon:
     def config_changed(self):
         return self._config_changed
 
+    def varnish_changed(self):
+        return self._varnish_changed
+
     def must_ban_html(self):
         return self._must_ban_html
 
@@ -652,13 +656,7 @@ def delete_domain(domain_name):
         ]
     })
     
-    # Let's see if we are a BP or a CO by looking at which package is installed
-    server_role = _get_server_role()
-
-    if server_role == "bp":
-        # Ban the whole domain from Varnish
-        VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
-    
+    VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
@@ -695,7 +693,7 @@ def add_or_update_domain(domain_name, ui_config):
     cfg_common.patch_config()
     log.LOGD(u"End config patch")
     #print json.dumps(varnish_config_vars)
-    if cfg_common.config_changed():
+    if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": API_VERSION,
             "type": "config",
@@ -708,8 +706,8 @@ def add_or_update_domain(domain_name, ui_config):
         configure_all({
             "version": API_VERSION,
             "commands": [config],
-            "varnish_changed": cfg_common._varnish_changed,
-            "config_changed": True
+            "varnish_changed": cfg_common.varnish_changed(),
+            "config_changed": cfg_common.config_changed()
         })
 
         # Ban Varnish URLs that match changed caching rules
