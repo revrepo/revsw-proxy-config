@@ -19,6 +19,9 @@ rm -f /etc/nginx/conf.d/revsw-nginx-status-page.conf
 echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-json-access-log-nginx.conf ..."
 rm -f /etc/nginx/conf.d/revsw-json-access-log-nginx.conf 
 
+echo "Moving new /etc/nginx/nginx.conf.revsw to /etc/nginx/nginx.conf..."
+mv /etc/nginx/nginx.conf.revsw /etc/nginx/nginx.conf
+
 echo "postinst procedures: end"
 echo "#"
 echo "# Please manually run '/opt/revsw-config/bin/pc-apache-config.py -U' if there was a change in proxy template files or schema"

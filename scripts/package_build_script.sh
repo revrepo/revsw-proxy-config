@@ -99,7 +99,7 @@ cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
 
 # Nginx configuration
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
-cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/nginx.conf $FOLDERNAME/etc/nginx/
+cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/nginx.conf $FOLDERNAME/etc/nginx/nginx.conf.revsw
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var/www/
 
 # js
