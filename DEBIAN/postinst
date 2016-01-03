@@ -16,6 +16,8 @@ echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-cache.c
 rm -f /etc/nginx/conf.d/revsw-cache.conf
 echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-nginx-status-page.conf..."
 rm -f /etc/nginx/conf.d/revsw-nginx-status-page.conf
+echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-json-access-log-nginx.conf ..."
+rm -f /etc/nginx/conf.d/revsw-json-access-log-nginx.conf 
 
 echo "postinst procedures: end"
 echo "#"
