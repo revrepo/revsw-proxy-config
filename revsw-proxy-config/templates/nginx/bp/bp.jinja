@@ -387,7 +387,7 @@
   if ($clientip = "") {
     set  $clientip $remote_addr;
   }
-  proxy_set_header X-Forwarded-for $clientip;
+  proxy_set_header X-Forwarded-For $clientip;
 
   # Optional user customizations in BP frontend
   {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
@@ -488,8 +488,8 @@ server {
     {% endif %}
 
       {% if this.ENABLE_VARNISH %}
-	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
 	{{ _common_frontend(this) }}
+	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
 	}
 	server {
 	listen 127.0.0.1:9080;
@@ -558,8 +558,8 @@ server {
   # TODO: SSLStaplingReturnResponderErrors off
 
   {% if this.ENABLE_VARNISH %}
-    {{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8443, this.REV_PROFILES_BASE_PORT_HTTPS, true) }}
     {{ _common_frontend(this) }}
+    {{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8443, this.REV_PROFILES_BASE_PORT_HTTPS, true) }}
     }
 
     server {
