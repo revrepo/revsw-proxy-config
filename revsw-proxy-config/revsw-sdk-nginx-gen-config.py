@@ -170,7 +170,7 @@ class NginxConfigSDK:
         if file_read_status != 0:
             self._remove_active_sdk_nginx_config()
             result = self._load_new_configuration()
-            exit(1)
+            exit(0)
 
         flags_problem = 0
         try:
