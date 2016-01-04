@@ -999,14 +999,23 @@ elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
 
 }
 else {
-  revvar.set_duration(false, 18, 60s);
-
   if (beresp.status != 200) {
     set beresp.ttl = 0s;
     return (deliver);
   }
 
-  set beresp.http.X-Rev-SDK = "1";
+  if (bereq.method != "GET" && bereq.method != "HEAD") {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  if (beresp.http.Set-Cookie) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  revvar.set_duration(false, 18, 60s);
+  set beresp.http.X-Rev-Default = "1";
 }
 
 set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
