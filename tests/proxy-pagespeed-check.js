@@ -62,7 +62,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
                     throw rej;
                 }
                 var responseJson = JSON.parse(res.text);
-                responseJson.rev_component_co.enable_optimization.should.be.false;
+                responseJson.rev_component_co.enable_optimization.should.be.equal(false);
                 domainConfig = responseJson;
                 delete domainConfig.cname;
                 delete domainConfig.domain_name;
@@ -75,7 +75,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             if (rej) {
                 throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });
@@ -118,7 +118,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             if (rej) {
                 throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });
@@ -167,7 +167,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
             if (rej) {
                 throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });

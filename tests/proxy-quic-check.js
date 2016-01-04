@@ -63,7 +63,7 @@ describe('Proxy QUIC control enable_quic', function () {
                     throw rej;
                 }
                 var responseJson = JSON.parse(res.text);
-                responseJson.rev_component_bp.enable_quic.should.be.false;
+                responseJson.rev_component_bp.enable_quic.should.be.equal(false);
                 domainConfig = responseJson;
                 delete domainConfig.cname;
                 delete domainConfig.domain_name;
@@ -76,7 +76,7 @@ describe('Proxy QUIC control enable_quic', function () {
             if (rej) {
                     throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });
@@ -119,7 +119,7 @@ describe('Proxy QUIC control enable_quic', function () {
             if (rej) {
                     throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });
@@ -174,7 +174,7 @@ describe('Proxy QUIC control enable_quic', function () {
             if (rej) {
                     throw rej;
             }
-            res.should.be.ok;
+            res.should.be.equal(true);
             done();
         });
     });
