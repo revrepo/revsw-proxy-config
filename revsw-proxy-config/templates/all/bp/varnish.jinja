@@ -1006,6 +1006,11 @@ else {
     return (deliver);
   }
 
+  if (bereq.method != "GET") {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
   if (beresp.http.Set-Cookie) {
     set beresp.ttl = 0s;
     return (deliver);
