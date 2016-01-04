@@ -52,6 +52,7 @@ obj
 # pyCharm workspaces
 .idea
 *~
+.editorconfig
 
 # REVSW specific directories
 package_build_dir/

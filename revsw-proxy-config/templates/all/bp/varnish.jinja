@@ -1006,7 +1006,12 @@ else {
     return (deliver);
   }
 
-  set beresp.http.X-Rev-SDK = "1";
+  if (beresp.http.Set-Cookie) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  set beresp.http.X-Rev-Default = "1";
 }
 
 set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
