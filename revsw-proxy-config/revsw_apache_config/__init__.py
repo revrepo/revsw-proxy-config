@@ -453,7 +453,7 @@ class ConfigTransaction:
     If there's an error, it executes the rollback commands in reverse order.
     """
 
-    backup_file = "/var/cache/revsw-apache-old-config.tar.bz2"
+    backup_file = "/var/cache/revsw-apache-old-config.tar"
     file_idx = 0
 
     def __init__(self):
@@ -532,8 +532,8 @@ class ConfigTransaction:
                 _log.LOGI("Varnish is not installed; not %sing it" % self.varnish_reload_cmd)
 
         # Finally, save the previous config for reference
-        run_cmd("pbzip2 -f /tmp/revsw-apache-config.%d.tar && mv -f /tmp/revsw-apache-config.%d.tar.bz2 %s" %
-                (self.curr_idx, self.curr_idx, ConfigTransaction.backup_file), _log,
+        run_cmd("mv -f /tmp/revsw-apache-config.%d.tar %s" %
+                (self.curr_idx, ConfigTransaction.backup_file), _log,
                 "Compressing (multithread) and saving previous config to '%s'" % ConfigTransaction.backup_file)
 
 
