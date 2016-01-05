@@ -17,7 +17,7 @@ API_VERSION = 5
 
 _log = None
 _jinja2_globals = {}
-
+_domain_name = ""
 
 # Must be called by importing module !
 def set_log(alog):
@@ -657,8 +657,6 @@ class NginxConfig(WebServerConfig):
                                              "Removing site '%s' if it exists" % self.site_name))
         self.transaction.run(lambda: run_cmd("rm -Rf %s" % jinja_config_webserver_dir(self.site_name), _log,
                                              "Removing site '%s' templates, if they exist" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -f /opt/revsw-config/policy/ui-config-%s.json" % self.site_name, _log,
-                                             "Removing policy '%s' if it exists" % self.site_name))
 
     @_webserver_write_command
     def configure_site(self, input_vars):
@@ -1035,7 +1033,10 @@ def configure_all(config):
             vcfg.write_template_files(_check_and_get_attr(command, "templates"))
 
         elif action == "delete":
-            _log.LOGD("Removing site '%s'" % site)
+            _domain_name = _check_and_get_attr(command, "domain_name")
+            transaction.run(lambda: run_cmd("rm -f /opt/revsw-config/policy/ui-config-%s.json" % _domain_name, _log,
+                                            "Removing policy '%s' if it exists" % _domain_name))
+            _log.LOGD("Removing site '%s'" % _domain_name)
             acfg.remove_site()
             vcfg.remove_site()
 

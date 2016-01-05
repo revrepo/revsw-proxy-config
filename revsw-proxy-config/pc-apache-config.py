@@ -651,7 +651,8 @@ def delete_domain(domain_name):
         "commands": [
             {
                 "type": "delete",
-                "site_name": _(domain_name)
+                "site_name": _(domain_name),
+                "domain_name": domain_name
             }
         ]
     })
