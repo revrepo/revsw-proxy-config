@@ -71,6 +71,7 @@ mkdir -p $FOLDERNAME/$DST/bin
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/log
+mkdir -p $FOLDERNAME/$DST/maxmind
 mkdir -p $FOLDERNAME/$DST/apache/generic-site
 mkdir -p $FOLDERNAME/$DST/varnish/sites
 mkdir -p $FOLDERNAME/$DST/templates/all/bp
