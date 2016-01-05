@@ -21,3 +21,7 @@ echo "postinst procedures: end"
 echo "#"
 echo "# Please manually run '/opt/revsw-config/bin/pc-apache-config.py -U' if there was a change in proxy template files or schema"
 echo "#"
+
+echo "Move maxmind files in new directory"
+mv /opt/revsw-config/apache/GeoLite2-City.dat /opt/revsw-config/maxmind
+mv /opt/revsw-config/apache/GeoLite2-City.mmdb /opt/revsw-config/maxmind
