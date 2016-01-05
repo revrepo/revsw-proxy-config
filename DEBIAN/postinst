@@ -17,11 +17,19 @@ rm -f /etc/nginx/conf.d/revsw-cache.conf
 echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-nginx-status-page.conf..."
 rm -f /etc/nginx/conf.d/revsw-nginx-status-page.conf
 
+if [ -f /opt/revsw-config/apache/GeoLite2-City.dat ]; then
+    echo "Move GeoLite2-City.dat in new directory"
+    mv /opt/revsw-config/apache/GeoLite2-City.dat /opt/revsw-config/maxmind
+fi
+
+if [ -f /opt/revsw-config/apache/GeoLite2-City.mmdb ]; then
+    echo "Move GeoLite2-City.mmdb in new directory"
+    mv /opt/revsw-config/apache/GeoLite2-City.mmdb /opt/revsw-config/maxmind
+fi
+
 echo "postinst procedures: end"
 echo "#"
 echo "# Please manually run '/opt/revsw-config/bin/pc-apache-config.py -U' if there was a change in proxy template files or schema"
 echo "#"
 
-echo "Move maxmind files in new directory"
-mv /opt/revsw-config/apache/GeoLite2-City.dat /opt/revsw-config/maxmind
-mv /opt/revsw-config/apache/GeoLite2-City.mmdb /opt/revsw-config/maxmind
+
