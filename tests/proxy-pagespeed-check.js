@@ -9,8 +9,8 @@ var tools = require('./proxy-qa-libs/tools.js');
 
 var apiLogin = config.get('qaUserWithAdminPerm'),
   apiPassword = config.get('qaUserWithAdminPermPassword'),
-  originHostHeader = 'httpbin.org',
-  originServer = 'httpbin.org',
+  originHostHeader = 'httpbin_org.revsw.net',
+  originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
