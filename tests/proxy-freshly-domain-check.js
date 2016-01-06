@@ -62,7 +62,7 @@ describe('Proxy freshly domain control', function () {
         if (rej) {
           throw rej;
         }
-        var domainConfig = JSON.parse(res.text);
+        domainConfig = JSON.parse(res.text);
 
         var testJson = {
           "rev_component_bp": {
@@ -361,6 +361,48 @@ describe('Proxy freshly domain control', function () {
         res.header['x-rev-cache'].should.equal('MISS');
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
+      done();
+    });
+  });
+
+  it('should get origin robots.txt', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/robots.txt', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.text.should.not.be.equal('User-agent: *\nDisallow: /\n');
+      done();
+    });
+  });
+
+  it('should change domain config and set block_crawlers to true', function (done) {
+    domainConfig.rev_component_bp.block_crawlers = true;
+    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    });
+  });
+
+  it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 18, 10000).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    });
+  });
+
+  it('should get system robots.txt', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/robots.txt', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.text);
+      res.text.should.be.equal('User-agent: *\nDisallow: /\n');
       done();
     });
   });
