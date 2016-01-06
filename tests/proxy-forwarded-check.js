@@ -125,7 +125,7 @@ describe('Proxy X-Forwarded-For check', function () {
         if (rej) {
           throw rej;
         }
-        console.log(res.body);
+        console.log(res.text);
         var responseJson = JSON.parse(res.text);
         responseJson.statusCode.should.be.equal(200);
         responseJson.message.should.be.equal('The application record has been successfully created');
@@ -152,7 +152,7 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      console.log(res.body)
+      console.log(res.text)
       //res.text.should.containEql(AccountIP);
       done();
     });
@@ -163,8 +163,8 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      console.log(res.body);
-      var responseJson = JSON.parse(res.body);
+      console.log(res.text);
+      var responseJson = JSON.parse(res.text);
       responseJson.statusCode.should.be.equal(200);
       responseJson.message.should.be.equal('The application has been successfully deleted');
       done();
