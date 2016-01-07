@@ -7,9 +7,58 @@ var async = require('async');
 
 module.exports = {
 
+  getRequest: function (url, get, expect) {
+    expect = expect || 200;
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get(get)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  getSDKRequest: function (url, get, host, revhost, revproto, expect) {
+    expect = expect || 200;
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get(get)
+        .set('Host', host)
+        .set('X-Rev-Host', revhost)
+        .set('X-Rev-Proto', revproto)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  getSetRequest: function (url, get, set, expect) {
+    expect = expect || 200;
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get(get)
+        .set(set)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
   // Get content by url and get request with special Host
   getHostRequest: function (url, get, set, expect) {
-    expect = expect || 200
+    expect = expect || 200;
     return new Promise(function (resolve, reject) {
       return request(url)
         .get(get)
@@ -25,7 +74,7 @@ module.exports = {
   },
 
   patchHostRequest: function (url, post, body, set, expect) {
-    expect = expect || 200
+    expect = expect || 200;
     return new Promise(function (resolve, reject) {
       return request(url)
         .patch(post)
@@ -42,7 +91,7 @@ module.exports = {
   },
 
   postHostRequest: function (url, post, body, set, expect) {
-    expect = expect || 200
+    expect = expect || 200;
     return new Promise(function (resolve, reject) {
       return request(url)
         .post(post)
@@ -59,7 +108,7 @@ module.exports = {
   },
 
   putHostRequest: function (url, put, body, set, expect) {
-    expect = expect || 200
+    expect = expect || 200;
     return new Promise(function (resolve, reject) {
       return request(url)
         .put(put)
@@ -76,7 +125,7 @@ module.exports = {
   },
 
   delHostRequest: function (url, del, set, expect) {
-    expect = expect || 200
+    expect = expect || 200;
     return new Promise(function (resolve, reject) {
       return request(url)
         .del(del)
@@ -125,5 +174,42 @@ module.exports = {
         }
       });
     });
+  },
+
+  waitAppPublishStatus: function (key, url, login, password, loops, timeout) {
+    return new Promise(function (resolve, reject) {
+      var a = [],
+        publishFlag = false,
+        responseJson;
+
+      for (var i = 0; i < loops; i++) {
+        a.push(i);
+      }
+
+      async.eachSeries(a, function (n, callback) {
+        setTimeout(function () {
+          api.getAppConfigsStatus(key, url, login, password).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            responseJson = res.body;
+            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
+              publishFlag = true;
+              callback(true);
+            } else {
+              callback(false);
+            }
+          });
+        }, timeout);
+      }, function (err) {
+        if (publishFlag === false) {
+          return reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+        } else {
+          return resolve(true);
+        }
+      });
+    });
   }
+
 }

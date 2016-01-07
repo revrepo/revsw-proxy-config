@@ -81,6 +81,8 @@ mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
 # copy packaging files to the structured tree:
 
+cp $WORKSPACE/maxmind/GeoLite2-City.dat $FOLDERNAME/$DST/maxmind
+
 # conf
 cp $WORKSPACE/certs/conf-tools/*.pem $FOLDERNAME/$DST
 cp -r $WORKSPACE/revsw-proxy-config/*.py $FOLDERNAME/$DST/bin

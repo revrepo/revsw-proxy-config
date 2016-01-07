@@ -23,13 +23,13 @@ echo "Moving new /etc/nginx/nginx.conf.revsw to /etc/nginx/nginx.conf..."
 mv /etc/nginx/nginx.conf.revsw /etc/nginx/nginx.conf
 
 if [ -f /opt/revsw-config/apache/GeoLite2-City.dat ]; then
-    echo "Move GeoLite2-City.dat in new directory"
-    mv /opt/revsw-config/apache/GeoLite2-City.dat /opt/revsw-config/maxmind
+    echo "Remove old GeoLite2-City.dat"
+    rm /opt/revsw-config/apache/GeoLite2-City.dat
 fi
 
 if [ -f /opt/revsw-config/apache/GeoLite2-City.mmdb ]; then
-    echo "Move GeoLite2-City.mmdb in new directory"
-    mv /opt/revsw-config/apache/GeoLite2-City.mmdb /opt/revsw-config/maxmind
+    echo "Remove old GeoLite2-City.mmdb"
+    rm /opt/revsw-config/apache/GeoLite2-City.mmdb
 fi
 
 echo "postinst procedures: end"

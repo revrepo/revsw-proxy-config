@@ -141,6 +141,144 @@ module.exports = {
     });
   },
 
+// apps
+
+  // Get a list of currently registered mobile applications
+  getAppConfigs: function (url, login, password) {
+    if (!url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get('/v1/apps')
+        .auth(login, password)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Get the publishing status of a domain configuration
+  getAppConfigsStatus: function (key, url, login, password) {
+    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get('/v1/apps/' + key + '/config_status')
+        .auth(login, password)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Get a list of domain configuration versions
+  getAppConfigsVersions: function (key, url, login, password) {
+    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get('/v1/apps/' + key + '/versions')
+        .auth(login, password)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Register a new mobile application configuration
+  postAppConfigs: function (body, url, login, password) {
+    if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .post('/v1/apps')
+        .auth(login, password)
+        .send(JSON.parse(body))
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Get current configuration of a mobile application
+  getAppById: function (key, url, login, password) {
+    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get('/v1/apps/' + key)
+        .auth(login, password)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Update the current configuration of a mobile application ( options mast be set with ?options, example '?options=verify_only'
+  putAppById: function (key, options, body, url, login, password) {
+    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .put('/v1/apps/' + key + options)
+        .auth(login, password)
+        .send(body)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Delete a mobile application configuration
+  deleteAppById: function (key, url, login, password) {
+    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
+        return request(url)
+          .del('/v1/apps/' + key)
+          .auth(login, password)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(res);
+          });
+      }, 20000);
+    });
+  },
+
 // users
 
   // Get your user profile
