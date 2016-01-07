@@ -81,13 +81,7 @@ mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
 # copy packaging files to the structured tree:
 
-if [ ! -f $FOLDERNAME/$DST/maxmind/GeoLite2-City.dat ]; then
-    cp $WORKSPACE/maxmind/GeoLite2-City.dat $FOLDERNAME/$DST/maxmind
-fi
-
-if [ ! -f $FOLDERNAME/$DST/maxmind/GeoLite2-City.mmdb ]; then
-    cp $WORKSPACE/maxmind/GeoLite2-City.mmdb $FOLDERNAME/$DST/maxmind
-fi
+cp $WORKSPACE/maxmind/GeoLite2-City.dat $FOLDERNAME/$DST/maxmind
 
 # conf
 cp $WORKSPACE/certs/conf-tools/*.pem $FOLDERNAME/$DST
