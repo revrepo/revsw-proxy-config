@@ -130,6 +130,30 @@ describe('Proxy X-Forwarded-For check', function () {
     });
   });
 
+  it('should send HTTP request with set QUIC and check that proxy ignores it', function (done) {
+    setHeaders = { 'Host': newDomainName, 'X-Rev-Transport': 'QUIC'};
+    tools.getSetRequest(testHTTPUrl, '/ip', setHeaders).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
+      done();
+    });
+  });
+
+  it('should send HTTPS request with set QUIC and check that proxy ignores it', function (done) {
+    setHeaders = { 'Host': newDomainName, 'X-Rev-Transport': 'QUIC'};
+    tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
+      done();
+    });
+  });
+
   it('should send HTTP request with set XFF, QUIC and check that returned setted IPs', function (done) {
     setHeaders = { 'Host': newDomainName, 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
     tools.getSetRequest(testHTTPUrl, '/ip', setHeaders).then(function (res, rej) {
@@ -212,8 +236,32 @@ describe('Proxy X-Forwarded-For check', function () {
     });
   });
 
-  it('should make request with set XFF, QUIC and check that returned setted IPs', function (done) {
+  it('should make request with set QUIC and check that proxy ignores it', function (done) {
+    setHeaders = { 'Host': appSdkDomain, 'X-Rev-Host': originHostHeader, 'X-Rev-Proto': 'http', 'X-Rev-Transport': 'QUIC'};
+    tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
+      done();
+    });
+  });
+
+  it('should make HTTP request with set XFF, QUIC and check that returned setted IPs', function (done) {
     setHeaders = { 'Host': appSdkDomain, 'X-Rev-Host': originHostHeader, 'X-Rev-Proto': 'http', 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
+    tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
+      done();
+    });
+  });
+
+  it('should make HTTPS request with set XFF, QUIC and check that returned setted IPs', function (done) {
+    setHeaders = { 'Host': appSdkDomain, 'X-Rev-Host': originHostHeader, 'X-Rev-Proto': 'https', 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
     tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -229,7 +277,6 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
       var responseJson = JSON.parse(res.text);
       responseJson.statusCode.should.be.equal(200);
       responseJson.message.should.be.equal('The application has been successfully deleted');
