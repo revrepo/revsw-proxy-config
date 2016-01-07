@@ -22,6 +22,40 @@ module.exports = {
     });
   },
 
+  getSDKRequest: function (url, get, host, revhost, revproto, expect) {
+    expect = expect || 200;
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get(get)
+        .set('Host', host)
+        .set('X-Rev-Host', revhost)
+        .set('X-Rev-Proto', revproto)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  getSetRequest: function (url, get, set, expect) {
+    expect = expect || 200;
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get(get)
+        .set(set)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
   // Get content by url and get request with special Host
   getHostRequest: function (url, get, set, expect) {
     expect = expect || 200;
@@ -159,7 +193,7 @@ module.exports = {
               throw rej;
             }
             responseJson = res.body;
-            console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
             if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
               publishFlag = true;
               callback(true);
