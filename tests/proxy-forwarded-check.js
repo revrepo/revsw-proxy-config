@@ -24,7 +24,9 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
   appSdkKey = '',
   appSdkDomain = '',
   forwardedIP = '1.2.3.4',
-  cookie = '';
+  testProxyIp = config.get('test_proxy_ip'),
+  cookie = '',
+  ipCheckString = '';
 
 describe('Proxy X-Forwarded-For check', function () {
 
@@ -37,6 +39,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       var response_json = JSON.parse(res.text);
       AccountIP = response_json.origin;
+      ipCheckString = AccountIP + ', ' + testProxyIp;
       done();
     });
   })
@@ -86,7 +89,8 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      res.text.should.containEql(AccountIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
       done();
     });
   });
@@ -96,55 +100,56 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      res.text.should.containEql(AccountIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
       done();
     });
   });
 
-  it('should make HTTP request and get X-Forwarded-For IPs', function (done) {
+  it('should send HTTP request with set XFF and check that proxy ignores it', function (done) {
     setHeaders = { 'Host': newDomainName, 'X-Forwarded-For': forwardedIP};
     tools.getSetRequest(testHTTPUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(AccountIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
       done();
     });
   });
 
-  it('should make HTTPS request and get X-Forwarded-For IPs', function (done) {
+  it('should send HTTPS request with set XFF and check that proxy ignores it', function (done) {
     setHeaders = { 'Host': newDomainName, 'X-Forwarded-For': forwardedIP};
     tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(AccountIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
       done();
     });
   });
 
-  it('should make HTTP request with QUIC and get X-Forwarded-For IPs', function (done) {
+  it('should send HTTP request with set XFF, QUIC and check that returned setted IPs', function (done) {
     setHeaders = { 'Host': newDomainName, 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
     tools.getSetRequest(testHTTPUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(forwardedIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
     });
   });
 
-  it('should make HTTPS request with QUIC and get X-Forwarded-For IPs', function (done) {
+  it('should send HTTPS request with set XFF, QUIC and check that returned setted IPs', function (done) {
     setHeaders = { 'Host': newDomainName, 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
     tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(forwardedIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
     });
   });
@@ -195,26 +200,26 @@ describe('Proxy X-Forwarded-For check', function () {
     });
   });
 
-  it('should make request and get client IPs', function (done) {
+  it('should make request with set XFF and check that proxy ignores it', function (done) {
     setHeaders = { 'Host': appSdkDomain, 'X-Rev-Host': originHostHeader, 'X-Rev-Proto': 'http', 'X-Forwarded-For': forwardedIP };
     tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(AccountIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(ipCheckString);
       done();
     });
   });
 
-  it('should make request and get X-Forwarded-For IPs', function (done) {
+  it('should make request with set XFF, QUIC and check that returned setted IPs', function (done) {
     setHeaders = { 'Host': appSdkDomain, 'X-Rev-Host': originHostHeader, 'X-Rev-Proto': 'http', 'X-Forwarded-For': forwardedIP, 'X-Rev-Transport': 'QUIC'};
     tools.getSetRequest(testHTTPSUrl, '/ip', setHeaders).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.text);
-      res.text.should.containEql(forwardedIP);
+      var response_json = JSON.parse(res.text);
+      response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
     });
   });
