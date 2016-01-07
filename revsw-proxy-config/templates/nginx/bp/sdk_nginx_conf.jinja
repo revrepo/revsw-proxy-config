@@ -88,7 +88,8 @@ server {
     }
 
     location / {
-        proxy_pass $origin_proto://$http_x_rev_host$uri$is_args$args;
+        proxy_pass $origin_proto://$http_x_rev_host$request_uri;
+        #proxy_pass $origin_proto://$http_x_rev_host$uri$is_args$args;
         # proxy_pass $origin_proto://revsw_up$uri$is_args$args;
         proxy_set_header Host $http_x_rev_host;
         proxy_set_header Connection "";
