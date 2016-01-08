@@ -42,7 +42,7 @@ describe('Proxy X-Forwarded-For check', function () {
       ipCheckString = AccountIP + ', ' + testProxyIp;
       done();
     });
-  })
+  });
 
   it('(smoke) should return AccountId', function (done) {
     api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
