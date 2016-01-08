@@ -170,6 +170,9 @@ class NginxConfigSDK:
         if file_read_status != 0:
             self._remove_active_sdk_nginx_config()
             result = self._load_new_configuration()
+            if result != 0:
+                exit(1)
+
             exit(0)
 
         flags_problem = 0
@@ -227,6 +230,7 @@ class NginxConfigSDK:
         if (result != 0) and (config_problem == 0):
             self.log.LOGE("Problem loading new configuration - restoring original file")
             self._restore_sdk_nginx_from_backup()
+            sys.exit(1)
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
