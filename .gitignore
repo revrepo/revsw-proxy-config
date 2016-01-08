@@ -57,4 +57,5 @@ obj
 package_build_dir/
 generic-site/
 revsw-proxy-config/generic-site/
+revsw-policy-server/pcm/install/
 # .
