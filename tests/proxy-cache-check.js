@@ -591,6 +591,92 @@ describe('Proxy cache check ', function () {
     });
   });
 
+    it('should get by HTTP and generate object for cache and check ETag', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      var firstetag = res.header.etag;
+      tools.getHostRequest(testHTTPUrl, '/static/cgi-bin/etag.cgi', newDomainName).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        tools.mySleep(3000);
+
+        tools.getHostRequest(testHTTPUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          firstetag.should.be.equal(res.header.etag);
+          //console.log(res.header);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should get by HTTPS and generate object for cache and check ETag', function (done) {
+    tools.getHostRequest(testHTTPSUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      var firstetag = res.header.etag;
+      tools.getHostRequest(testHTTPSUrl, '/static/cgi-bin/etag.cgi', newDomainName).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        tools.mySleep(3000);
+
+        tools.getHostRequest(testHTTPSUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          firstetag.should.be.equal(res.header.etag);
+          //console.log(res.header);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should get by HTTP and generate object for cache and check ETag consistency checking', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      var firstetag = res.header.etag;
+      tools.getHostRequest(testHTTPUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        firstetag.should.be.equal(res.header.etag);
+        //console.log(res.header);
+        done();
+      });
+    });
+  });
+
+  it('should get by HTTPS and generate object for cache and check ETag consistency checking', function (done) {
+    tools.getHostRequest(testHTTPSUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      var firstetag = res.header.etag;
+      tools.getHostRequest(testHTTPSUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        firstetag.should.be.equal(res.header.etag);
+        //console.log(res.header);
+        done();
+      });
+    });
+  });
+
   it('should delete the domain config', function (done) {
     api.deleteDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
