@@ -279,6 +279,49 @@ module.exports = {
     });
   },
 
+// purge
+
+  // Purge objects cached on Rev edge servers
+  postPurge: function (body, url, login, password, expect) {
+    if (!expect || expect === ''){ expect = 200; }
+    if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .post('/v1/purge')
+        .auth(login, password)
+        .send(body)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
+  // Get the status of a previously submitted purge request
+  getPurgeStatus: function (id ,url, login, password, expect) {
+    if (!expect || expect === ''){ expect = 200; }
+    if (!id || id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+      return;
+    }
+    return new Promise(function (resolve, reject) {
+      return request(url)
+        .get('/v1/purge/'+ id)
+        .auth(login, password)
+        .expect(expect)
+        .end(function (err, res) {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(res);
+        });
+    });
+  },
+
 // users
 
   // Get your user profile
