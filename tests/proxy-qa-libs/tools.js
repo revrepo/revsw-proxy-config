@@ -212,6 +212,42 @@ module.exports = {
     });
   },
 
+  waitPurgeStatus: function (key, url, login, password, loops, timeout) {
+    return new Promise(function (resolve, reject) {
+      var a = [],
+        publishFlag = false,
+        responseJson;
+
+      for (var i = 0; i < loops; i++) {
+        a.push(i);
+      }
+
+      async.eachSeries(a, function (n, callback) {
+        setTimeout(function () {
+          api.getPurgeStatus(key, url, login, password).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            responseJson = res.body;
+            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            if (responseJson.message === 'Success') {
+              publishFlag = true;
+              callback(true);
+            } else {
+              callback(false);
+            }
+          });
+        }, timeout);
+      }, function (err) {
+        if (publishFlag === false) {
+          return reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
+        } else {
+          return resolve(true);
+        }
+      });
+    });
+  },
+
   mySleep:function (milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
