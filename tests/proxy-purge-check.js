@@ -22,7 +22,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
   domainConfigId = '',
   requestID = '';
 
-describe('Proxy cache check ', function () {
+describe('Proxy PURGE check ', function () {
 
   this.timeout(60000);
 
