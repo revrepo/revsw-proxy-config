@@ -15,7 +15,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -33,7 +33,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -49,7 +49,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -66,7 +66,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -83,7 +83,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -100,7 +100,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -117,7 +117,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -133,7 +133,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -168,7 +168,7 @@ module.exports = {
         }, timeout);
       }, function (err) {
         if (publishFlag === false) {
-          return reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+          throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           return resolve(true);
         }
@@ -204,7 +204,7 @@ module.exports = {
         }, timeout);
       }, function (err) {
         if (publishFlag === false) {
-          return reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+          throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           return resolve(true);
         }
@@ -240,7 +240,7 @@ module.exports = {
         }, timeout);
       }, function (err) {
         if (publishFlag === false) {
-          return reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
+          throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
         } else {
           return resolve(true);
         }

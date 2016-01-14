@@ -18,7 +18,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -37,7 +37,7 @@ module.exports = {
         .send(JSON.parse(body))
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -55,7 +55,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -75,7 +75,8 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            console.log(res.error);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -95,7 +96,7 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
-              return reject(err);
+              throw reject(err);
             }
             return resolve(res);
           });
@@ -115,7 +116,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -134,7 +135,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -155,7 +156,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -174,7 +175,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -193,7 +194,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -212,7 +213,7 @@ module.exports = {
         .send(JSON.parse(body))
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -231,7 +232,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -251,7 +252,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -271,7 +272,7 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
-              return reject(err);
+              throw reject(err);
             }
             return resolve(res);
           });
@@ -295,7 +296,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -315,7 +316,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
@@ -336,7 +337,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            return reject(err);
+            throw reject(err);
           }
           return resolve(res);
         });
