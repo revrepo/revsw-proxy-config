@@ -59,8 +59,8 @@ server {
 
 upstream revsw_up {
     server 127.0.0.1; # one server is required or config will not be accepted.
-#    revsw_upstream; # upstream type
-    zone rev 64k; # keep it.
+    revsw_upstream; # upstream type
+    zone rev 256k; # keep it.
 }
  
 
@@ -88,9 +88,9 @@ server {
     }
 
     location / {
-        proxy_pass $origin_proto://$http_x_rev_host$request_uri;
-        #proxy_pass $origin_proto://$http_x_rev_host$uri$is_args$args;
-        # proxy_pass $origin_proto://revsw_up$uri$is_args$args;
+        # proxy_pass $origin_proto://$http_x_rev_host$request_uri;
+        # proxy_pass $origin_proto://$http_x_rev_host$uri$is_args$args;
+        proxy_pass $origin_proto://revsw_up$request_uri;
         proxy_set_header Host $http_x_rev_host;
         proxy_set_header Connection "";
         proxy_http_version 1.1;
