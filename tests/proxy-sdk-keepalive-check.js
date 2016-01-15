@@ -48,18 +48,20 @@ describe('Proxy X-Forwarded-For check', function () {
         if (rej) {
           throw rej;
         }
-        //console.log(res.text);
+        console.log(res.text);
         var responseJson = JSON.parse(res.text);
         responseJson.statusCode.should.be.equal(200);
         responseJson.message.should.be.equal('The application record has been successfully created');
         appKeyID = responseJson.id;
         appSdkKey = responseJson.sdk_key;
         appSdkDomain = responseJson.sdk_key + '.revsdk.net';
+        console.log(appSdkDomain);
         done();
       });
   });
 
-  it('should wait max 30 seconds till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait max 30 seconds till the global and staging config statuses are "Published"', function (done) {
+    console.log(appKeyID);
     tools.waitAppPublishStatus(appKeyID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -67,10 +69,12 @@ describe('Proxy X-Forwarded-For check', function () {
       res.should.be.equal(true);
       done();
     });
+    tools.mySleep(2000);
   });
 
 // 1
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+    console.log(appSdkDomain);
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -86,7 +90,7 @@ describe('Proxy X-Forwarded-For check', function () {
     });
   });
 
-  it('should make simple HTTP request and resive keep alive value step 2', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 2', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -103,7 +107,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 2
-  it('should make simple HTTPS request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTPS request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -119,7 +123,7 @@ describe('Proxy X-Forwarded-For check', function () {
     });
   });
 
-  it('should make simple HTTPS request and resive keep alive value step 2', function (done) {
+  it('should make simple HTTPS request and receive keep alive value step 2', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -136,7 +140,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 3
-  it('should make simple HTTP request and resive keep alive with missing x-rev-host', function (done) {
+  it('should make simple HTTP request and receive keep alive with missing x-rev-host', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Proto': 'http'
@@ -152,7 +156,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 4
-  it('should make simple HTTP request and resive keep alive with missing x-rev-proto', function (done) {
+  it('should make simple HTTP request and receive keep alive with missing x-rev-proto', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -168,7 +172,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 5
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -185,7 +189,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 6
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain + '1',
       'X-Rev-Host': originHostHeader,
@@ -202,7 +206,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 7
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -219,7 +223,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 8
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -236,7 +240,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 9
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':8888',
       'X-Rev-Host': originHostHeader,
@@ -253,7 +257,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 10
-  it('should make simple HTTPS request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTPS request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':8889',
       'X-Rev-Host': originHostHeader,
@@ -270,7 +274,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 11
-  it('should make simple HTTP request on HTTPS port and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request on HTTPS port and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':443',
       'X-Rev-Host': originHostHeader,
@@ -287,7 +291,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 12
-  it('should make simple HTTPS request on HTTP port and resive keep alive value step 1', function (done) {
+  it('should make simple HTTPS request on HTTP port and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':80',
       'X-Rev-Host': originHostHeader,
@@ -304,7 +308,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 13
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -321,7 +325,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
 // 14
-  it('should make simple HTTP request and resive keep alive value step 1', function (done) {
+  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,

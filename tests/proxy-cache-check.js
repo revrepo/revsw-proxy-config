@@ -22,8 +22,9 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
   domainConfigId = '',
   requestID = '',
   cacheAge = '',
-  totalTime = '',
-  rumBeaconString = /<script\ src='\/rev\-diablo\/js\/boomerang\-rev\.min\.js'><\/script><script>BOOMR\.init\(\{RT:\{cookie:'REV\-RT'\,\ strict_referrer:\ false\}\,\ beacon_url:\ 'https:\/\/testsjc20\-rum01\.revsw\.net\/service'\}\);\ BOOMR\.addVar\('user_ip'\,\ '.*?'\);<\/script>/m;
+  totalTime = '';
+
+tools.debugMode(false);
 
 describe('Proxy cache check ', function () {
 
@@ -73,8 +74,47 @@ describe('Proxy cache check ', function () {
       });
   });
 
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+//1
+  it('should set url parameter with wildcard and edge_caching', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": true,
+          "value": "/st**css"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 120,
+          "override_no_cc": false
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        }
+      }
+    ];
+    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    });
+  });
+
+  it('should wait max 1 minute till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 6, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -83,120 +123,292 @@ describe('Proxy cache check ', function () {
     });
   });
 
-  it('should send purge request', function (done) {
-    var jsonPurge = {
-      "domainName": newDomainName,
-      "purges": [{
+  it('should check url parameter with wildcard and edge_caching', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/file.css', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //res.header['x-rev-cache'].should.equal('HIT');
+      res.header['content-type'].should.equal('text/css');
+      res.header['cache-control'].should.equal('public, max-age=120');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    });
+  });
+//2
+  it('should added browser_caching rules for css files and cookies for txt', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
         "url": {
           "is_wildcard": true,
-          "expression": "/**/*"
+          "value": "/st**css"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 120,
+          "override_no_cc": false
+        },
+        "browser_caching": {
+          "override_edge": true,
+          "new_ttl": 240,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
         }
-      }]
-    };
-
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
-      .then(function (res, rej) {
-        if (rej) {
-          throw rej;
-        }
-        var responseJson = JSON.parse(res.text);
-        responseJson.statusCode.should.be.equal(200);
-        responseJson.message.should.be.equal('The purge request has been successfully queued');
-        responseJson.request_id.should.be.type('string');
-        requestID = responseJson.request_id;
-        done();
-      });
-  });
-
-  it('should send purge status request', function (done) {
-    api.getPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword)
-      .then(function (res, rej) {
-        if (rej) {
-          throw rej;
-        }
-        var responseJson = JSON.parse(res.text);
-        responseJson.statusCode.should.be.equal(200);
-        responseJson.message.should.be.equal('Success');
-        done();
-      });
-  });
-
-  it('should send false purge request', function (done) {
-    var jsonPurge = {
-      "domainName": newDomainName + 'false',
-      "purges": [{
+      },{
+        "version": 1,
         "url": {
           "is_wildcard": true,
-          "expression": "/**/*"
+          "value": "/st**txt"
+        },
+        "edge_caching": {
+          "override_origin": false,
+          "new_ttl": 0,
+          "override_no_cc": false
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
         }
-      }]
+      }
+    ];
+    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    });
+  });
+
+  it('should wait max 1 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 6, 10000).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    });
+  });
+
+  it('should check request to css file', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/file.css', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //res.header['x-rev-cache'].should.equal('HIT');
+      res.header['content-type'].should.equal('text/css');
+      res.header['cache-control'].should.equal('public, max-age=240');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    });
+  });
+
+  it('should check repeated request to css file', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/file.css', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //res.header['x-rev-cache'].should.equal('HIT');
+      res.header['content-type'].should.equal('text/css');
+      res.header['cache-control'].should.equal('public, max-age=240');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    });
+  });
+
+
+  it('should check request to txt file', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/static/stale/stalecontent.txt', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //res.header['x-rev-cache'].should.equal('HIT');
+      //res.header['content-type'].should.equal('text/css');
+      //res.header['cache-control'].should.equal('public, max-age=240');
+      //res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      //res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    });
+  });
+
+  it('should check repeated request to css file', function (done) {
+    var setValues = {
+      'Host': newDomainName,
+      'Cookie': ['myApp-token=12345679']
+    };
+    tools.getSetRequest(testHTTPUrl, '/static/stale/stalecontent.txt', setValues).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      //res.header['x-rev-cache'].should.equal('HIT');
+      //res.header['content-type'].should.equal('text/css');
+      //res.header['cache-control'].should.equal('public, max-age=240');
+      //res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      //res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    });
+  });
+
+//3
+  it('should set rules for cookies checking', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": true,
+          "value": "**"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 120,
+          "override_no_cc": false
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        }
+      }
+    ];
+    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    });
+  });
+
+  it('should wait max 1 minute till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 6, 10000).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    });
+  });
+
+  it('should check GET request to url and receiving cookies', function (done) {
+    var setValues = {
+      'Host': newDomainName,
+      'Cookie': ['myApp-token=12345679']
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword, 400)
-      .then(function (res, rej) {
-        if (rej) {
-          throw rej;
+    tools.getSetRequest(testHTTPUrl, '/cookies', setValues).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.header['x-rev-cache'].should.equal('MISS');
+      json_text = JSON.parse(res.text);
+      json_text.cookies['myApp-token'].should.be.equal(json_text.cookies['myApp-token']);
+      done();
+    });
+
+  });
+
+  it('should check repeated GET request to url and receiving cookies', function (done) {
+    var setValues = {
+      'Host': newDomainName,
+      'Cookie': ['myApp-token=12345679']
+    };
+    tools.getSetRequest(testHTTPUrl, '/cookies', setValues).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.header['x-rev-cache'].should.equal('MISS');
+      json_text = JSON.parse(res.text);
+      json_text.cookies['myApp-token'].should.be.equal(json_text.cookies['myApp-token']);
+      done();
+    });
+  });
+
+  it('should set js and css cache settings', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": false,
+          "value": "\\.(js|css)(\\?.*)?$"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 720000,
+          "override_no_cc": true
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
         }
-        res.body.statusCode.should.be.equal(400);
-        res.body.error.should.be.equal('Bad Request');
-        res.body.message.should.be.equal('Domain not found');
-        done();
-      });
-  });
-
-  it('should get by HTTP object for cache and resive MISS and max-age of 360000', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/response-headers?Cache-Control=public%2C%20max-age%3D360000', newDomainName).then(function (res, rej) {
+      }
+    ];
+    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
+      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['content-type'].should.equal('application/json');
-      res.header['cache-control'].should.equal('public, max-age=360000');
       done();
     });
   });
 
-  it('should get by HTTPS object for cache and resive MISS and max-age of 36000', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/response-headers?Cache-Control=public%2C%20max-age%3D36000', newDomainName).then(function (res, rej) {
+  it('should wait max 1 minute till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 6, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['content-type'].should.equal('application/json');
-      res.header['cache-control'].should.equal('public, max-age=36000');
+      res.should.be.equal(true);
       done();
     });
   });
 
-  it('should get by HTTP object for cache and resive MISS and max-age of 290304000', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/response-headers?Cache-Control=public%2C%20max-age%3D290304000', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['content-type'].should.equal('application/json');
-      res.header['cache-control'].should.equal('public, max-age=290304000');
-      done();
-    });
-  });
 
-  it('should get by HTTPS object for cache and resive MISS and max-age of 29030400', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/response-headers?Cache-Control=public%2C%20max-age%3D29030400', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['content-type'].should.equal('application/json');
-      res.header['cache-control'].should.equal('public, max-age=29030400');
-      done();
-    });
-  });
-
-  it('should get by HTTP static css file and resive MISS and max-age of 720000', function (done) {
+  it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
     tools.getHostRequest(testHTTPUrl, '/static/file.css', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -204,12 +416,12 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('MISS');
       res.header['content-type'].should.equal('text/css');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       done();
     });
   });
 
-  it('should get by HTTPS static css file and resive HIT and max-age of 720000', function (done) {
+  it('should get by HTTPS static css file and receive HIT and max-age of 720000', function (done) {
     tools.getHostRequest(testHTTPSUrl, '/static/file.css', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -217,12 +429,12 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('text/css');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       done();
     });
   });
 
-  it('should get by HTTP static js file and resive MISS and max-age of 720000', function (done) {
+  it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
     tools.getHostRequest(testHTTPUrl, '/static/file.js', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -230,12 +442,12 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('MISS');
       res.header['content-type'].should.equal('application/x-javascript');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       done();
     });
   });
 
-  it('should get by HTTPS static js file and resive HIT and max-age of 720000', function (done) {
+  it('should get by HTTPS static js file and receive HIT and max-age of 720000', function (done) {
     tools.getHostRequest(testHTTPSUrl, '/static/file.js', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -243,12 +455,12 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('application/x-javascript');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       done();
     });
   });
 
-  it('should get by HTTP static js file and resive MISS and max-age of 7200', function (done) {
+  it('should get by HTTP static js file and receive MISS and max-age of 7200', function (done) {
     tools.getHostRequest(testHTTPUrl, '/static/file.jpg', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -261,7 +473,7 @@ describe('Proxy cache check ', function () {
     });
   });
 
-  it('should get by HTTPS static js file and resive HIT and max-age of 7200', function (done) {
+  it('should get by HTTPS static js file and receive HIT and max-age of 7200', function (done) {
     tools.getHostRequest(testHTTPSUrl, '/static/file.jpg', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -274,161 +486,6 @@ describe('Proxy cache check ', function () {
     });
   });
 
-  it('should get by HTTP origin robots.txt', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/robots.txt', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.not.be.equal('User-agent: *\nDisallow: /\n');
-      done();
-    });
-  });
-
-  it('should get by HTTPS origin robots.txt', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/robots.txt', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.not.be.equal('User-agent: *\nDisallow: /\n');
-      done();
-    });
-  });
-
-  it('should change domain config and set block_crawlers to true', function (done) {
-    domainConfig.rev_component_bp.block_crawlers = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      done();
-    });
-  });
-
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.should.be.equal(true);
-      done();
-    });
-  });
-
-  it('should get by HTTP system robots.txt', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/robots.txt', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.text);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.be.equal('User-agent: *\nDisallow: /\n');
-      done();
-    });
-  });
-
-  it('should get by HTTPS system robots.txt', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/robots.txt', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.text);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.be.equal('User-agent: *\nDisallow: /\n');
-      done();
-    });
-  });
-
-  it('should change domain config and set enable_rum to true', function (done) {
-    domainConfig.rev_component_co.enable_rum = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      done();
-    });
-  });
-
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.should.be.equal(true);
-      done();
-    });
-  });
-
-  it('should find RUM code after HTTP request', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.text);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.match(rumBeaconString);
-      done();
-    });
-  });
-
-  it('should find RUM code after HTTPS request', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.text);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.match(rumBeaconString);
-      done();
-    });
-  });
-
-  it('should change domain config and set enable_rum to false', function (done) {
-    domainConfig.rev_component_co.enable_rum = false;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      done();
-    });
-  });
-
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.should.be.equal(true);
-      done();
-    });
-  });
-
-  it('should not find RUM code after HTTP request', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/html', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.not.match(rumBeaconString);
-      done();
-    });
-  });
-
-  it('should not find RUM code after HTTPS request', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/html', newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.text.should.not.match(rumBeaconString);
-      done();
-    });
-  });
-
   it('should get by HTTP static js file and check cache age and that X-Rev-Cache-BE-1st-Byte-Time is not 0', function (done) {
     tools.getHostRequest(testHTTPUrl, '/static/file2.js', newDomainName).then(function (res, rej) {
       if (rej) {
@@ -437,7 +494,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('MISS');
       res.header['content-type'].should.equal('application/x-javascript');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       res.header['x-rev-be-1st-byte-time'].should.not.equal('0');
       done();
       cacheAge = res.header.age;
@@ -453,7 +510,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('application/x-javascript');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       res.header['x-rev-be-1st-byte-time'].should.equal('0');
       res.header.age.should.match(function(n) { return n > cacheAge; });
       cacheAge = res.header.age;
@@ -470,7 +527,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('application/x-javascript');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       res.header['x-rev-be-1st-byte-time'].should.equal('0');
       res.header.age.should.match(function(n) { return n > cacheAge; });
       done();
@@ -486,7 +543,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('MISS');
       res.header['content-type'].should.equal('text/css');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
       var beresp = res.header['x-rev-beresp-ttl'].split(".");
       var ccheader = res.header['cache-control'].split("=");
       beresp[0].should.equal(ccheader[1]);
@@ -506,7 +563,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('text/css');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
 
       var tt = res.header['x-rev-cache-total-time'];
       parseInt(totalTime).should.be.above(parseInt(tt));
@@ -531,7 +588,7 @@ describe('Proxy cache check ', function () {
       //console.log(res.header);
       res.header['x-rev-cache'].should.equal('HIT');
       res.header['content-type'].should.equal('text/css');
-      res.header['cache-control'].should.equal('max-age=720000');
+      res.header['cache-control'].should.equal('public, max-age=720000');
 
       var tt = res.header['x-rev-cache-total-time'];
       parseInt(totalTime).should.be.above(parseInt(tt));
@@ -555,7 +612,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=7200');
       res.header.should.not.have.property(['x-rev-cache-hits']);
-      res.header['x-rev-beresp-grace'].should.not.equal('0.000');
+      //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
     });
   });
@@ -570,7 +627,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=7200');
       res.header['x-rev-cache-hits'].should.equal('1');
-      res.header['x-rev-beresp-grace'].should.not.equal('0.000');
+      //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
     });
   });
@@ -585,7 +642,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=7200');
       res.header['x-rev-cache-hits'].should.equal('2');
-      res.header['x-rev-beresp-grace'].should.not.equal('0.000');
+      //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
       //tools.mySleep(1000);
     });
