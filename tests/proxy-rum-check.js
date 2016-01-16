@@ -33,7 +33,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should get domain config and enable_rum must be false', function (done) {
@@ -68,7 +68,7 @@ describe('Proxy RUM control enable_rum', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -78,7 +78,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get rum code (after create)', function (done) {
@@ -88,7 +88,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.text.should.not.match(rumBeaconString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_rum to true', function (done) {
@@ -99,7 +99,7 @@ describe('Proxy RUM control enable_rum', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -109,7 +109,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get rum code (after set enable_rum to true)', function (done) {
@@ -120,7 +120,7 @@ describe('Proxy RUM control enable_rum', function () {
       //console.log(res.text);
       res.text.should.match(rumBeaconString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_rum to false', function (done) {
@@ -131,7 +131,7 @@ describe('Proxy RUM control enable_rum', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -141,7 +141,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get RUM code (after set enable_rum to false)', function (done) {
@@ -151,7 +151,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.text.should.not.match(rumBeaconString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -164,7 +164,7 @@ describe('Proxy RUM control enable_rum', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
 });

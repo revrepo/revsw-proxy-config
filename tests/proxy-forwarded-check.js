@@ -41,7 +41,7 @@ describe('Proxy X-Forwarded-For check', function () {
       AccountIP = response_json.origin;
       ipCheckString = AccountIP + ', ' + testProxyIp;
       done();
-    });
+    }).catch(done);
   });
 
   it('(smoke) should return AccountId', function (done) {
@@ -51,7 +51,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -71,7 +71,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 1 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -81,7 +81,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTP origin IPs', function (done) {
@@ -92,7 +92,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTPS origin IPs', function (done) {
@@ -103,7 +103,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTP request with set XFF and check that proxy ignores it', function (done) {
@@ -115,7 +115,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTPS request with set XFF and check that proxy ignores it', function (done) {
@@ -127,7 +127,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTP request with set QUIC and check that proxy ignores it', function (done) {
@@ -139,7 +139,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTPS request with set QUIC and check that proxy ignores it', function (done) {
@@ -151,7 +151,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTP request with set XFF, QUIC and check that returned setted IPs', function (done) {
@@ -163,7 +163,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
-    });
+    }).catch(done);
   });
 
   it('should send HTTPS request with set XFF, QUIC and check that returned setted IPs', function (done) {
@@ -175,7 +175,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -188,7 +188,7 @@ describe('Proxy X-Forwarded-For check', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new app', function (done) {
@@ -211,7 +211,7 @@ describe('Proxy X-Forwarded-For check', function () {
         appSdkKey = responseJson.sdk_key;
         appSdkDomain = responseJson.sdk_key + '.revsdk.net';
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -221,7 +221,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should make request with set XFF and check that proxy ignores it', function (done) {
@@ -233,7 +233,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should make request with set QUIC and check that proxy ignores it', function (done) {
@@ -245,7 +245,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(ipCheckString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should make HTTP request with set XFF, QUIC and check that returned setted IPs', function (done) {
@@ -257,7 +257,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
-    });
+    }).catch(done);
   });
 
   it('should make HTTPS request with set XFF, QUIC and check that returned setted IPs', function (done) {
@@ -269,7 +269,7 @@ describe('Proxy X-Forwarded-For check', function () {
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete app' + appKeyID, function (done) {
@@ -281,7 +281,7 @@ describe('Proxy X-Forwarded-For check', function () {
       responseJson.statusCode.should.be.equal(200);
       responseJson.message.should.be.equal('The application has been successfully deleted');
       done();
-    });
+    }).catch(done);
   });
 
 });

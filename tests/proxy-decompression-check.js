@@ -33,7 +33,7 @@ describe('Proxy decompression control ', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy decompression control ', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should get domain config and enable_decompression must be true if present on config', function (done) {
@@ -72,7 +72,7 @@ describe('Proxy decompression control ', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published"', function (done) {
@@ -82,7 +82,7 @@ describe('Proxy decompression control ', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTP content length after domain create', function (done) {
@@ -99,7 +99,7 @@ describe('Proxy decompression control ', function () {
 
       //console.log(contentHTTPLength);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTPS content length after domain create', function (done) {
@@ -127,7 +127,7 @@ describe('Proxy decompression control ', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published"', function (done) {
@@ -137,7 +137,7 @@ describe('Proxy decompression control ', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTP content length and check that it is smaller after config changes', function (done) {
@@ -154,7 +154,7 @@ describe('Proxy decompression control ', function () {
       contentHTTPLength = HTTPLength;
       //console.log(contentHTTPLength);
       done();
-    });
+    }).catch(done);
   });
 
     it('should get HTTPS content length and check that it is smaller after config changes', function (done) {
@@ -171,7 +171,7 @@ describe('Proxy decompression control ', function () {
       contentHTTPSLength = HTTPSLength;
       //console.log(contentHTTPSLength);
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_decompression to true', function (done) {
@@ -182,7 +182,7 @@ describe('Proxy decompression control ', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published"', function (done) {
@@ -192,7 +192,7 @@ describe('Proxy decompression control ', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTP content length and check that it is bigger after config changes', function (done) {
@@ -209,7 +209,7 @@ describe('Proxy decompression control ', function () {
       contentHTTPLength = HTTPLength;
       //console.log(contentHTTPLength);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get HTTPS content length and check that it is bigger after config changes', function (done) {
@@ -226,7 +226,7 @@ describe('Proxy decompression control ', function () {
       contentHTTPSLength = HTTPSLength;
       //console.log(contentHTTPSLength);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -239,7 +239,7 @@ describe('Proxy decompression control ', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
 });

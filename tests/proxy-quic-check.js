@@ -33,7 +33,7 @@ describe('Proxy QUIC control enable_quic', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy QUIC control enable_quic', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should get domain config and enable_quic must be false', function (done) {
@@ -68,7 +68,7 @@ describe('Proxy QUIC control enable_quic', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -78,7 +78,7 @@ describe('Proxy QUIC control enable_quic', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get quic header in http request (after create)', function (done) {
@@ -89,7 +89,7 @@ describe('Proxy QUIC control enable_quic', function () {
       //console.log(res.header);
       res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get quic header in https request (after create)', function (done) {
@@ -100,7 +100,7 @@ describe('Proxy QUIC control enable_quic', function () {
       //console.log(res.header);
       res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_quic to true', function (done) {
@@ -111,7 +111,7 @@ describe('Proxy QUIC control enable_quic', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -121,7 +121,7 @@ describe('Proxy QUIC control enable_quic', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get quic headers in http request (after config update)', function (done) {
@@ -138,7 +138,7 @@ describe('Proxy QUIC control enable_quic', function () {
         res.header['alt-svc'].should.startWith(headerAltSvc);
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should get quic headers in https request (after config update)', function (done) {
@@ -155,7 +155,7 @@ describe('Proxy QUIC control enable_quic', function () {
         res.header['alt-svc'].should.startWith(headerAltSvc);
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_quic to false', function (done) {
@@ -166,7 +166,7 @@ describe('Proxy QUIC control enable_quic', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -176,7 +176,7 @@ describe('Proxy QUIC control enable_quic', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get quic header in http request (after set enable_quic to false)', function (done) {
@@ -187,7 +187,7 @@ describe('Proxy QUIC control enable_quic', function () {
       //console.log(res.header);
       res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get quic header in https request (after set enable_quic to false)', function (done) {
@@ -198,7 +198,7 @@ describe('Proxy QUIC control enable_quic', function () {
       //console.log(res.header);
       res.header.should.not.have.properties(['alternate-protocol', 'alt-svc']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -211,7 +211,7 @@ describe('Proxy QUIC control enable_quic', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
 });
