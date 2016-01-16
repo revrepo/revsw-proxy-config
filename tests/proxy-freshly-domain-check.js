@@ -33,7 +33,7 @@ describe('Proxy freshly domain control', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy freshly domain control', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should get domain config and check some defaults parameters', function (done) {
@@ -84,7 +84,7 @@ describe('Proxy freshly domain control', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -94,7 +94,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check HTTP GET request headers', function (done) {
@@ -120,7 +120,7 @@ describe('Proxy freshly domain control', function () {
       // rum test
       res.text.should.not.match(rumBeaconString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check HTTPS GET request headers', function (done) {
@@ -146,7 +146,7 @@ describe('Proxy freshly domain control', function () {
       // rum test
       res.text.should.not.match(rumBeaconString);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check HIT cache header and sleep 65 second', function (done) {
@@ -162,7 +162,7 @@ describe('Proxy freshly domain control', function () {
       setTimeout(function () {
         done();
       }, 65000);
-    });
+    }).catch(done);
   });
 
   it('should check MISS cache header after timeout', function (done) {
@@ -177,7 +177,7 @@ describe('Proxy freshly domain control', function () {
       }
 
       done();
-    });
+    }).catch(done);
   });
 
   it('should check set header requests', function (done) {
@@ -192,7 +192,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check dynamic requests', function (done) {
@@ -210,7 +210,7 @@ describe('Proxy freshly domain control', function () {
         res.header['x-rev-beresp-ttl'].should.equal('0.000');
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should check MISS cache for dynamic requests', function (done) {
@@ -228,7 +228,7 @@ describe('Proxy freshly domain control', function () {
         res.header['x-rev-beresp-ttl'].should.equal('0.000');
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should check POST request', function (done) {
@@ -245,7 +245,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check that POST don\'t use cache', function (done) {
@@ -262,7 +262,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check PATCH request', function (done) {
@@ -279,7 +279,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check that PATCH don\'t use cache', function (done) {
@@ -296,7 +296,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check PUT request', function (done) {
@@ -313,7 +313,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check that PUT don\'t use cache', function (done) {
@@ -330,7 +330,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check DELETE request', function (done) {
@@ -346,7 +346,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should check that DELETE don\'t use cache', function (done) {
@@ -362,7 +362,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.header.should.not.have.properties(['x-rev-beresp-ttl', 'x-rev-beresp-grace']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get origin robots.txt', function (done) {
@@ -372,7 +372,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.text.should.not.be.equal('User-agent: *\nDisallow: /\n');
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set block_crawlers to true', function (done) {
@@ -383,7 +383,7 @@ describe('Proxy freshly domain control', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -393,7 +393,7 @@ describe('Proxy freshly domain control', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get system robots.txt', function (done) {
@@ -404,7 +404,7 @@ describe('Proxy freshly domain control', function () {
       //console.log(res.text);
       res.text.should.be.equal('User-agent: *\nDisallow: /\n');
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -417,7 +417,7 @@ describe('Proxy freshly domain control', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
 });

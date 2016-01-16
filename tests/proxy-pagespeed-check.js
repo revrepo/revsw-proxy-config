@@ -32,7 +32,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    });
+    }).catch(done);
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -52,7 +52,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    });
+    }).catch(done);
   });
 
   it('should get domain config and enable_optimization must be false', function (done) {
@@ -67,7 +67,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      });
+      }).catch(done);
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -77,7 +77,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get Pagespeed header in http request (after create)', function (done) {
@@ -88,7 +88,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       //console.log(res.header);
       res.header.should.not.have.property(['x-page-speed']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get Pagespeed header in https request (after create)', function (done) {
@@ -99,7 +99,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       //console.log(res.header);
       res.header.should.not.have.property(['x-page-speed']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_optimization to true', function (done) {
@@ -110,7 +110,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -120,7 +120,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should get Pagespeed headers in http request (after config update)', function (done) {
@@ -134,7 +134,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
         res.header['x-page-speed'].should.match(regexPagespeed);
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should get Pagespeed headers in https request (after config update)', function (done) {
@@ -148,7 +148,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
         res.header['x-page-speed'].should.match(regexPagespeed);
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should change domain config and set enable_optimization to false', function (done) {
@@ -159,7 +159,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
         throw rej;
       }
       done();
-    });
+    }).catch(done);
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -169,7 +169,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       }
       res.should.be.equal(true);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get Pagespeed header in http request (after set enable_optimization to false)', function (done) {
@@ -180,7 +180,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       //console.log(res.header);
       res.header.should.not.have.property(['x-page-speed']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should not get Pagespeed header in https request (after set enable_optimization to false)', function (done) {
@@ -191,7 +191,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       //console.log(res.header);
       res.header.should.not.have.property(['x-page-speed']);
       done();
-    });
+    }).catch(done);
   });
 
   it('should delete the domain config', function (done) {
@@ -204,7 +204,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    });
+    }).catch(done);
   });
 
 });
