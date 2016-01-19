@@ -25,7 +25,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
 describe('Proxy X-Forwarded-For check', function () {
 
   this.timeout(120000);
-
+//1
   it('(smoke) should return AccountId', function (done) {
     api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
@@ -35,7 +35,7 @@ describe('Proxy X-Forwarded-For check', function () {
       done();
     }).catch(function (err) { done(err); });
   });
-
+//2
   it('should create new app', function (done) {
     var createAppJSON = {
       "account_id": AccountId,
@@ -48,20 +48,17 @@ describe('Proxy X-Forwarded-For check', function () {
         if (rej) {
           throw rej;
         }
-        console.log(res.text);
         var responseJson = JSON.parse(res.text);
         responseJson.statusCode.should.be.equal(200);
         responseJson.message.should.be.equal('The application record has been successfully created');
         appKeyID = responseJson.id;
         appSdkKey = responseJson.sdk_key;
         appSdkDomain = responseJson.sdk_key + '.revsdk.net';
-        console.log(appSdkDomain);
         done();
       }).catch(function (err) { done(err); });
   });
-
+//3
   it('should wait max 120 seconds till the global and staging config statuses are "Published"', function (done) {
-    console.log(appKeyID);
     tools.waitAppPublishStatus(appKeyID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -69,12 +66,10 @@ describe('Proxy X-Forwarded-For check', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
-// 1
+//4
   it('should make simple HTTP request and receive keep alive value step 1', function (done) {
-    console.log(appSdkDomain);
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -84,12 +79,12 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
+      console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
     }).catch(function (err) { done(err); });
   });
-
+//5
   it('should make simple HTTP request and receive keep alive value step 2', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
@@ -100,13 +95,13 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
+      console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].should.be.equal('2');
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 2
+//6
   it('should make simple HTTPS request and receive keep alive value step 1', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
@@ -117,12 +112,12 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      console.log(res.header);
-      //res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
     }).catch(function (err) { done(err); });
   });
-
+//7
   it('should make simple HTTPS request and receive keep alive value step 2', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
@@ -133,29 +128,29 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      console.log(res.header);
-      //res.header['x-rev-origin-ka'].should.be.equal('2');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].should.be.equal('2');
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 3
+//8
   it('should make simple HTTP request and receive keep alive with missing x-rev-host', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Proto': 'http'
     };
-    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders).then(function (res, rej) {
+    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders, 400).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header.should.not.have.property('x-rev-origin-ka');
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 4
+//9
   it('should make simple HTTP request and receive keep alive with missing x-rev-proto', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
@@ -165,48 +160,48 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('2');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 5
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//10
+  it('should make simple HTTP request and with bad X-Rev-Proto', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
       'X-Rev-Proto': 'httx'
     };
-    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders).then(function (res, rej) {
+    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders, 400).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header.should.not.have.property('x-rev-origin-ka');
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 6
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//11
+  it('should make simple HTTP request and with bad Host', function (done) {
     setHeaders = {
       'Host': appSdkDomain + '1',
       'X-Rev-Host': originHostHeader,
-      'X-Rev-Proto': 'httx'
+      'X-Rev-Proto': 'http'
     };
-    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders).then(function (res, rej) {
+    tools.getSetRequest(testHTTPSUrl, '/html', setHeaders, 503).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header.should.not.have.property('x-rev-origin-ka');
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 7
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//12
+  it('should make simple HTTP request and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -216,14 +211,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 8
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//13
+  it('should make simple HTTP request and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -233,14 +228,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 9
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//14
+  it('should make simple HTTP request on 8888 port and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':8888',
       'X-Rev-Host': originHostHeader,
@@ -250,14 +245,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].should.match(function(n) { return n > 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 10
-  it('should make simple HTTPS request and receive keep alive value step 1', function (done) {
+//15
+  it('should make simple HTTPS request on 8889 port and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':8889',
       'X-Rev-Host': originHostHeader,
@@ -267,14 +262,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 11
-  it('should make simple HTTP request on HTTPS port and receive keep alive value step 1', function (done) {
+//16
+  it('should make simple HTTP request on HTTPS port and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':443',
       'X-Rev-Host': originHostHeader,
@@ -284,14 +279,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 12
-  it('should make simple HTTPS request on HTTP port and receive keep alive value step 1', function (done) {
+//17
+  it('should make simple HTTPS request on HTTP port and receive keep alive value', function (done) {
     setHeaders = {
       'Host': appSdkDomain + ':80',
       'X-Rev-Host': originHostHeader,
@@ -301,14 +296,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 13
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//18
+  it('should make simple HTTP request and receive keep alive', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -318,14 +313,14 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
-// 14
-  it('should make simple HTTP request and receive keep alive value step 1', function (done) {
+//19
+  it('should make simple HTTP request and receive keep alive', function (done) {
     setHeaders = {
       'Host': appSdkDomain,
       'X-Rev-Host': originHostHeader,
@@ -335,12 +330,13 @@ describe('Proxy X-Forwarded-For check', function () {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      console.log(res.header['x-rev-origin-ka']);
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
 
+//20
   it('should delete app' + appKeyID, function (done) {
     api.deleteAppById(appKeyID, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
