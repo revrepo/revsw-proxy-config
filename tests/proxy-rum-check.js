@@ -79,7 +79,7 @@ describe('Proxy RUM control enable_rum', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get rum code (after create)', function (done) {
@@ -111,7 +111,7 @@ describe('Proxy RUM control enable_rum', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get rum code (after set enable_rum to true)', function (done) {
@@ -144,7 +144,7 @@ describe('Proxy RUM control enable_rum', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get RUM code (after set enable_rum to false)', function (done) {

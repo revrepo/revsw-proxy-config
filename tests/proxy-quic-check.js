@@ -79,7 +79,7 @@ describe('Proxy QUIC control enable_quic', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get quic header in http request (after create)', function (done) {
@@ -123,7 +123,7 @@ describe('Proxy QUIC control enable_quic', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get quic headers in http request (after config update)', function (done) {
@@ -179,7 +179,7 @@ describe('Proxy QUIC control enable_quic', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get quic header in http request (after set enable_quic to false)', function (done) {

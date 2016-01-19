@@ -121,7 +121,6 @@ describe('Proxy cache check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
   it('should check url parameter with wildcard and edge_caching', function (done) {
@@ -209,7 +208,6 @@ describe('Proxy cache check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
   it('should check request to css file', function (done) {
@@ -325,7 +323,7 @@ describe('Proxy cache check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should check GET request to url and receiving cookies', function (done) {
@@ -343,7 +341,6 @@ describe('Proxy cache check ', function () {
       json_text.cookies['myApp-token'].should.be.equal(json_text.cookies['myApp-token']);
       done();
     }).catch(function (err) { done(err); });
-
   });
 
   it('should check repeated GET request to url and receiving cookies', function (done) {
@@ -408,7 +405,7 @@ describe('Proxy cache check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
 

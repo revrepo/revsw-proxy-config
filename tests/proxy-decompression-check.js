@@ -85,7 +85,7 @@ describe('Proxy decompression control ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get HTTP content length after domain create', function (done) {
@@ -141,7 +141,7 @@ describe('Proxy decompression control ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get HTTP content length and check that it is smaller after config changes', function (done) {
@@ -197,7 +197,6 @@ describe('Proxy decompression control ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
   it('should get HTTP content length and check that it is bigger after config changes', function (done) {
