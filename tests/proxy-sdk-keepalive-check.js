@@ -80,7 +80,7 @@ describe('Proxy X-Forwarded-For check', function () {
         throw rej;
       }
       console.log(res.header['x-rev-origin-ka']);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
@@ -96,7 +96,7 @@ describe('Proxy X-Forwarded-For check', function () {
         throw rej;
       }
       console.log(res.header['x-rev-origin-ka']);
-      res.header['x-rev-origin-ka'].should.be.equal('2');
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
@@ -113,7 +113,7 @@ describe('Proxy X-Forwarded-For check', function () {
         throw rej;
       }
       console.log(res.header['x-rev-origin-ka']);
-      res.header['x-rev-origin-ka'].should.be.equal('1');
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
@@ -129,7 +129,7 @@ describe('Proxy X-Forwarded-For check', function () {
         throw rej;
       }
       console.log(res.header['x-rev-origin-ka']);
-      res.header['x-rev-origin-ka'].should.be.equal('2');
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
@@ -246,7 +246,7 @@ describe('Proxy X-Forwarded-For check', function () {
         throw rej;
       }
       console.log(res.header['x-rev-origin-ka']);
-      res.header['x-rev-origin-ka'].should.match(function(n) { return n > 1; });
+      res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
     }).catch(function (err) { done(err); });
   });
