@@ -24,7 +24,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
 
 describe('Proxy X-Forwarded-For check', function () {
 
-  this.timeout(30000);
+  this.timeout(120000);
 
   it('(smoke) should return AccountId', function (done) {
     api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
@@ -33,7 +33,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should create new app', function (done) {
@@ -57,18 +57,18 @@ describe('Proxy X-Forwarded-For check', function () {
         appSdkDomain = responseJson.sdk_key + '.revsdk.net';
         console.log(appSdkDomain);
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the global and staging config statuses are "Published"', function (done) {
+  it('should wait max 120 seconds till the global and staging config statuses are "Published"', function (done) {
     console.log(appKeyID);
-    tools.waitAppPublishStatus(appKeyID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+    tools.waitAppPublishStatus(appKeyID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
     tools.mySleep(2000);
   });
 
@@ -87,7 +87,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should make simple HTTP request and receive keep alive value step 2', function (done) {
@@ -103,7 +103,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('2');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 2
@@ -120,7 +120,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header);
       //res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should make simple HTTPS request and receive keep alive value step 2', function (done) {
@@ -136,7 +136,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header);
       //res.header['x-rev-origin-ka'].should.be.equal('2');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 3
@@ -152,7 +152,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 4
@@ -168,7 +168,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('2');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 5
@@ -185,7 +185,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 6
@@ -202,7 +202,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 7
@@ -219,7 +219,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 8
@@ -236,7 +236,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 9
@@ -253,7 +253,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 10
@@ -270,7 +270,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 11
@@ -287,7 +287,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 12
@@ -304,7 +304,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 13
@@ -321,7 +321,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 // 14
@@ -338,7 +338,7 @@ describe('Proxy X-Forwarded-For check', function () {
       //console.log(res.header);
       res.header['x-rev-origin-ka'].should.be.equal('1');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should delete app' + appKeyID, function (done) {
@@ -350,7 +350,7 @@ describe('Proxy X-Forwarded-For check', function () {
       responseJson.statusCode.should.be.equal(200);
       responseJson.message.should.be.equal('The application has been successfully deleted');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 });

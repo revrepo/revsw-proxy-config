@@ -24,7 +24,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
 
 describe('Proxy PURGE check ', function () {
 
-  this.timeout(60000);
+  this.timeout(120000);
 
   it('should return AccountId', function (done) {
     api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
@@ -33,7 +33,7 @@ describe('Proxy PURGE check ', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy PURGE check ', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get domain config', function (done) {
@@ -67,7 +67,7 @@ describe('Proxy PURGE check ', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -77,7 +77,8 @@ describe('Proxy PURGE check ', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -90,7 +91,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTPS static css file and receive HIT and max-age of 720000', function (done) {
@@ -103,7 +104,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
@@ -116,7 +117,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTPS static js file and receive HIT and max-age of 720000', function (done) {
@@ -129,7 +130,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive MISS and max-age of 720000', function (done) {
@@ -142,7 +143,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTPS static jpg file and receive HIT and max-age of 720000', function (done) {
@@ -155,7 +156,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send PURGE request and clear all cache', function (done) {
@@ -180,17 +181,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -203,7 +205,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
@@ -216,7 +218,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive MISS and max-age of 720000', function (done) {
@@ -229,7 +231,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send PURGE request for jpg or jpeg files without wildcard', function (done) {
@@ -254,17 +256,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive HIT and max-age of 720000', function (done) {
@@ -277,7 +280,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive HIT and max-age of 720000', function (done) {
@@ -290,7 +293,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive MISS and max-age of 720000', function (done) {
@@ -303,7 +306,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send PURGE request for css file files without wildcard', function (done) {
@@ -328,17 +331,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -351,7 +355,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive HIT and max-age of 720000', function (done) {
@@ -364,7 +368,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive HIT and max-age of 720000', function (done) {
@@ -377,7 +381,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send PURGE request with url regexp without wildcard', function (done) {
@@ -402,17 +406,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -425,7 +430,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
@@ -438,7 +443,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive MISS and max-age of 720000', function (done) {
@@ -451,7 +456,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send PURGE request for css and js with wildcard', function (done) {
@@ -476,17 +481,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -499,7 +505,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
@@ -512,7 +518,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive HIT and max-age of 720000', function (done) {
@@ -525,7 +531,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send fail PURGE request for css and js with wildcard', function (done) {
@@ -550,17 +556,18 @@ describe('Proxy PURGE check ', function () {
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
-  it('should wait max 30 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 3, 10000).then(function (res, rej) {
+  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get by HTTP static css file and receive HIT and max-age of 720000', function (done) {
@@ -573,7 +580,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static js file and receive HIT and max-age of 720000', function (done) {
@@ -586,7 +593,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get by HTTP static jpg file and receive HIT and max-age of 720000', function (done) {
@@ -599,7 +606,7 @@ describe('Proxy PURGE check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should send false purge request', function (done) {
@@ -622,7 +629,7 @@ describe('Proxy PURGE check ', function () {
         res.body.error.should.be.equal('Bad Request');
         res.body.message.should.be.equal('Domain not found');
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
   it('should delete the domain config', function (done) {
@@ -635,7 +642,7 @@ describe('Proxy PURGE check ', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 });

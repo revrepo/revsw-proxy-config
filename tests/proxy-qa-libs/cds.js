@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 var request = require('supertest');
 var debug = false;
 
-function showDebugError(message){
+function showDebugError(message) {
   console.log("\x1b[36m");
   console.log("================ Debug ================");
   console.log(message.method);
@@ -34,7 +34,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -48,17 +50,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .post('/v1/domain_configs')
-        .set('Authorization', 'Bearer ' + token)
-        .send(JSON.parse(body))
-        .end(function (err, res) {
-          if (err) {
-            if(debug) { showDebugError(res.error); }
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .post('/v1/domain_configs')
+          .set('Authorization', 'Bearer ' + token)
+          .send(JSON.parse(body))
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -73,7 +79,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -87,18 +95,22 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .put('/v1/domain_configs/' + domainID + options)
-        .set('Authorization', 'Bearer ' + token)
-        .send(body)
-        .expect(200)
-        .end(function (err, res) {
-          if (err) {
-            if(debug) { showDebugError(res.error); }
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .put('/v1/domain_configs/' + domainID + options)
+          .set('Authorization', 'Bearer ' + token)
+          .send(body)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -115,12 +127,14 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
-              if(debug) { showDebugError(res.error); }
+              if (debug) {
+                showDebugError(res.error);
+              }
               throw reject(err);
             }
             return resolve(res);
           });
-      }, 20000);
+      }, 2000);
     });
   },
 
@@ -136,7 +150,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -156,7 +172,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -178,7 +196,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -198,7 +218,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -218,7 +240,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -232,17 +256,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .post('/v1/apps')
-        .set('Authorization', 'Bearer ' + token)
-        .send(JSON.parse(body))
-        .end(function (err, res) {
-          if (err) {
-            if(debug) { showDebugError(res.error); }
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .post('/v1/apps')
+          .set('Authorization', 'Bearer ' + token)
+          .send(JSON.parse(body))
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -258,7 +286,9 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -272,18 +302,22 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .put('/v1/apps/' + key + options)
-        .set('Authorization', 'Bearer ' + token)
-        .send(body)
-        .expect(200)
-        .end(function (err, res) {
-          if (err) {
-            if(debug) { showDebugError(res.error); }
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .put('/v1/apps/' + key + options)
+          .set('Authorization', 'Bearer ' + token)
+          .send(body)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -300,12 +334,14 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
-              if(debug) { showDebugError(res.error); }
+              if (debug) {
+                showDebugError(res.error);
+              }
               throw reject(err);
             }
             return resolve(res);
           });
-      }, 20000);
+      }, 2000);
     });
   },
 
@@ -313,7 +349,9 @@ module.exports = {
 
   // Purge objects cached on Rev edge servers
   getPurge: function (key, url, token, expect) {
-    if (!expect || expect === ''){ expect = 200; }
+    if (!expect || expect === '') {
+      expect = 200;
+    }
     if (!body || body === '' || !url || url === '' || !token || token === '') {
       return;
     }
@@ -324,7 +362,9 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);
@@ -334,7 +374,9 @@ module.exports = {
 
   // Get the status of a previously submitted purge request
   getPurgeJobsStatus: function (url, token, expect) {
-    if (!expect || expect === ''){ expect = 200; }
+    if (!expect || expect === '') {
+      expect = 200;
+    }
     if (!id || id === '' || !url || url === '' || !token || token === '') {
       return;
     }
@@ -345,7 +387,9 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
-            if(debug) { showDebugError(res.error); }
+            if (debug) {
+              showDebugError(res.error);
+            }
             throw reject(err);
           }
           return resolve(res);

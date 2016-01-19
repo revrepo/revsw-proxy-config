@@ -24,7 +24,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
 
 describe('Proxy RUM control enable_rum', function () {
 
-  this.timeout(240000);
+  this.timeout(120000);
 
   it('should return AccountId', function (done) {
     api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
@@ -33,7 +33,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -53,7 +53,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should get domain config and enable_rum must be false', function (done) {
@@ -68,7 +68,7 @@ describe('Proxy RUM control enable_rum', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      }).catch(done);
+      }).catch(function (err) { done(err); });
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -78,7 +78,8 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should not get rum code (after create)', function (done) {
@@ -88,7 +89,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.text.should.not.match(rumBeaconString);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should change domain config and set enable_rum to true', function (done) {
@@ -99,7 +100,7 @@ describe('Proxy RUM control enable_rum', function () {
         throw rej;
       }
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -109,7 +110,8 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should get rum code (after set enable_rum to true)', function (done) {
@@ -120,7 +122,7 @@ describe('Proxy RUM control enable_rum', function () {
       //console.log(res.text);
       res.text.should.match(rumBeaconString);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should change domain config and set enable_rum to false', function (done) {
@@ -131,7 +133,7 @@ describe('Proxy RUM control enable_rum', function () {
         throw rej;
       }
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -141,7 +143,8 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
+    tools.mySleep(2000);
   });
 
   it('should not get RUM code (after set enable_rum to false)', function (done) {
@@ -151,7 +154,7 @@ describe('Proxy RUM control enable_rum', function () {
       }
       res.text.should.not.match(rumBeaconString);
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
   it('should delete the domain config', function (done) {
@@ -164,7 +167,7 @@ describe('Proxy RUM control enable_rum', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    }).catch(done);
+    }).catch(function (err) { done(err); });
   });
 
 });
