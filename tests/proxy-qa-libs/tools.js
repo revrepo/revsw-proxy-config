@@ -99,7 +99,7 @@ module.exports = {
         .patch(post)
         .set('Host', set)
         .send(body)
-        .expect(200)
+        .expect(expect)
         .end(function (err, res) {
           if (err) {
             if(debug) { showDebugError(res.error); }
@@ -117,7 +117,7 @@ module.exports = {
         .post(post)
         .set('Host', set)
         .send(body)
-        .expect(200)
+        .expect(expect)
         .end(function (err, res) {
           if (err) {
             if(debug) { showDebugError(res.error); }
@@ -135,7 +135,7 @@ module.exports = {
         .put(put)
         .set('Host', set)
         .send(body)
-        .expect(200)
+        .expect(expect)
         .end(function (err, res) {
           if (err) {
             if(debug) { showDebugError(res.error); }
@@ -152,7 +152,7 @@ module.exports = {
       return request(url)
         .del(del)
         .set('Host', set)
-        .expect(200)
+        .expect(expect)
         .end(function (err, res) {
           if (err) {
             if(debug) { showDebugError(res.error); }
@@ -181,7 +181,7 @@ module.exports = {
               throw rej;
             }
             responseJson = res.body;
-            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
             if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
               publishFlag = true;
               callback(true);
@@ -218,7 +218,7 @@ module.exports = {
               throw rej;
             }
             responseJson = res.body;
-            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
             if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
               publishFlag = true;
               callback(true);
@@ -255,7 +255,7 @@ module.exports = {
               throw rej;
             }
             responseJson = res.body;
-            // console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
             if (responseJson.message === 'Success') {
               publishFlag = true;
               callback(true);

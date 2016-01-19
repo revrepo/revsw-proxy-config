@@ -2,7 +2,23 @@
 
 var Promise = require('bluebird');
 var request = require('supertest');
+var debug = false;
+
+function showDebugError(message){
+  console.log("\x1b[36m");
+  console.log("================ Debug ================");
+  console.log(message.method);
+  console.log(message.status);
+  console.log(message.text);
+  console.log("=======================================");
+  console.log("\x1b[0m");
+}
+
 module.exports = {
+
+  debugMode: function (status) {
+    debug = status;
+  },
 
 // domain_configs
 
@@ -18,6 +34,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -37,6 +54,7 @@ module.exports = {
         .send(JSON.parse(body))
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -55,6 +73,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -68,18 +87,22 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .put('/v1/domain_configs/' + domainID + options)
-        .auth(login, password)
-        .send(body)
-        .expect(200)
-        .end(function (err, res) {
-          if (err) {
-            console.log(res.error);
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .put('/v1/domain_configs/' + domainID + options)
+          .auth(login, password)
+          .send(body)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -96,11 +119,12 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
+              if(debug) { showDebugError(res.error); }
               throw reject(err);
             }
             return resolve(res);
           });
-      }, 20000);
+      }, 2000);
     });
   },
 
@@ -116,6 +140,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -135,6 +160,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -156,6 +182,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -175,6 +202,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -194,6 +222,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -207,16 +236,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .post('/v1/apps')
-        .auth(login, password)
-        .send(JSON.parse(body))
-        .end(function (err, res) {
-          if (err) {
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .post('/v1/apps')
+          .auth(login, password)
+          .send(JSON.parse(body))
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -232,6 +266,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -245,17 +280,22 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .put('/v1/apps/' + key + options)
-        .auth(login, password)
-        .send(body)
-        .expect(200)
-        .end(function (err, res) {
-          if (err) {
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .put('/v1/apps/' + key + options)
+          .auth(login, password)
+          .send(body)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -272,11 +312,12 @@ module.exports = {
           .expect(200)
           .end(function (err, res) {
             if (err) {
+              if(debug) { showDebugError(res.error); }
               throw reject(err);
             }
             return resolve(res);
           });
-      }, 20000);
+      }, 2000);
     });
   },
 
@@ -289,17 +330,22 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
-        .post('/v1/purge')
-        .auth(login, password)
-        .send(body)
-        .expect(expect)
-        .end(function (err, res) {
-          if (err) {
-            throw reject(err);
-          }
-          return resolve(res);
-        });
+      setTimeout(function () {
+        return request(url)
+          .post('/v1/purge')
+          .auth(login, password)
+          .send(body)
+          .expect(expect)
+          .end(function (err, res) {
+            if (err) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              throw reject(err);
+            }
+            return resolve(res);
+          });
+      }, 2000);
     });
   },
 
@@ -316,6 +362,7 @@ module.exports = {
         .expect(expect)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
@@ -337,6 +384,7 @@ module.exports = {
         .expect(200)
         .end(function (err, res) {
           if (err) {
+            if(debug) { showDebugError(res.error); }
             throw reject(err);
           }
           return resolve(res);
