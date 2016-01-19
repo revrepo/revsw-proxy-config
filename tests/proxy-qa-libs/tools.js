@@ -165,112 +165,130 @@ module.exports = {
 
   waitPublishStatus: function (domain, url, login, password, loops, timeout) {
     return new Promise(function (resolve, reject) {
-      var a = [],
-        publishFlag = false,
-        responseJson;
+      setTimeout(function () {
+        var a = [],
+          publishFlag = false,
+          responseJson;
 
-      for (var i = 0; i < loops; i++) {
-        a.push(i);
-      }
-
-      async.eachSeries(a, function (n, callback) {
-        setTimeout(function () {
-          api.getDomainConfigsByIdStatus(domain, url, login, password).then(function (res, rej) {
-            if(debug) { showDebugError(res.error); }
-            if (rej) {
-              throw rej;
-            }
-            responseJson = res.body;
-            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
-            if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
-              publishFlag = true;
-              callback(true);
-            } else {
-              callback(false);
-            }
-          });
-        }, timeout);
-      }, function (err) {
-        if (publishFlag === false) {
-          throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
-        } else {
-          return resolve(true);
+        for (var i = 0; i < loops; i++) {
+          a.push(i);
         }
-      });
+
+        async.eachSeries(a, function (n, callback) {
+          setTimeout(function () {
+            api.getDomainConfigsByIdStatus(domain, url, login, password).then(function (res, rej) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              if (rej) {
+                throw rej;
+              }
+              responseJson = res.body;
+              if (debug) {
+                console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+              }
+              if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
+                publishFlag = true;
+                callback(true);
+              } else {
+                callback(false);
+              }
+            });
+          }, timeout);
+        }, function (err) {
+          if (publishFlag === false) {
+            throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+          } else {
+            return resolve(true);
+          }
+        });
+      }, 5000);
     });
   },
 
   waitAppPublishStatus: function (key, url, login, password, loops, timeout) {
     return new Promise(function (resolve, reject) {
-      var a = [],
-        publishFlag = false,
-        responseJson;
+      setTimeout(function () {
+        var a = [],
+          publishFlag = false,
+          responseJson;
 
-      for (var i = 0; i < loops; i++) {
-        a.push(i);
-      }
-
-      async.eachSeries(a, function (n, callback) {
-        setTimeout(function () {
-          api.getAppConfigsStatus(key, url, login, password).then(function (res, rej) {
-            if(debug) { showDebugError(res.error); }
-            if (rej) {
-              throw rej;
-            }
-            responseJson = res.body;
-            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
-            if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
-              publishFlag = true;
-              callback(true);
-            } else {
-              callback(false);
-            }
-          });
-        }, timeout);
-      }, function (err) {
-        if (publishFlag === false) {
-          throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
-        } else {
-          return resolve(true);
+        for (var i = 0; i < loops; i++) {
+          a.push(i);
         }
-      });
+
+        async.eachSeries(a, function (n, callback) {
+          setTimeout(function () {
+            api.getAppConfigsStatus(key, url, login, password).then(function (res, rej) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              if (rej) {
+                throw rej;
+              }
+              responseJson = res.body;
+              if (debug) {
+                console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+              }
+              if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
+                publishFlag = true;
+                callback(true);
+              } else {
+                callback(false);
+              }
+            });
+          }, timeout);
+        }, function (err) {
+          if (publishFlag === false) {
+            throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+          } else {
+            return resolve(true);
+          }
+        });
+      }, 5000);
     });
   },
 
   waitPurgeStatus: function (key, url, login, password, loops, timeout) {
     return new Promise(function (resolve, reject) {
-      var a = [],
-        publishFlag = false,
-        responseJson;
+      setTimeout(function () {
+        var a = [],
+          publishFlag = false,
+          responseJson;
 
-      for (var i = 0; i < loops; i++) {
-        a.push(i);
-      }
-
-      async.eachSeries(a, function (n, callback) {
-        setTimeout(function () {
-          api.getPurgeStatus(key, url, login, password).then(function (res, rej) {
-            if(debug) { showDebugError(res.error); }
-            if (rej) {
-              throw rej;
-            }
-            responseJson = res.body;
-            if(debug) { console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson)); }
-            if (responseJson.message === 'Success') {
-              publishFlag = true;
-              callback(true);
-            } else {
-              callback(false);
-            }
-          });
-        }, timeout);
-      }, function (err) {
-        if (publishFlag === false) {
-          throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
-        } else {
-          return resolve(true);
+        for (var i = 0; i < loops; i++) {
+          a.push(i);
         }
-      });
+
+        async.eachSeries(a, function (n, callback) {
+          setTimeout(function () {
+            api.getPurgeStatus(key, url, login, password).then(function (res, rej) {
+              if (debug) {
+                showDebugError(res.error);
+              }
+              if (rej) {
+                throw rej;
+              }
+              responseJson = res.body;
+              if (debug) {
+                console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+              }
+              if (responseJson.message === 'Success') {
+                publishFlag = true;
+                callback(true);
+              } else {
+                callback(false);
+              }
+            });
+          }, timeout);
+        }, function (err) {
+          if (publishFlag === false) {
+            throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
+          } else {
+            return resolve(true);
+          }
+        });
+      }, 5000);
     });
   },
 

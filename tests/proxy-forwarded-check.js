@@ -82,7 +82,7 @@ describe('Proxy X-Forwarded-For check', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get HTTP origin IPs', function (done) {
@@ -223,7 +223,7 @@ describe('Proxy X-Forwarded-For check', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should make request with set XFF and check that proxy ignores it', function (done) {

@@ -78,7 +78,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get Pagespeed header in http request (after create)', function (done) {
@@ -122,7 +122,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get Pagespeed headers in http request (after config update)', function (done) {
@@ -172,7 +172,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should not get Pagespeed header in http request (after set enable_optimization to false)', function (done) {

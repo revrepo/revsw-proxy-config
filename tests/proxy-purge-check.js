@@ -78,7 +78,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -192,7 +192,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -267,7 +267,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive HIT and max-age of 720000', function (done) {
@@ -342,7 +342,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -417,7 +417,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -492,7 +492,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive MISS and max-age of 720000', function (done) {
@@ -567,7 +567,7 @@ describe('Proxy PURGE check ', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
+
   });
 
   it('should get by HTTP static css file and receive HIT and max-age of 720000', function (done) {

@@ -95,7 +95,6 @@ describe('Proxy freshly domain control', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
   it('should check HTTP GET request headers', function (done) {
@@ -395,7 +394,6 @@ describe('Proxy freshly domain control', function () {
       res.should.be.equal(true);
       done();
     }).catch(function (err) { done(err); });
-    tools.mySleep(2000);
   });
 
   it('should get system robots.txt', function (done) {
