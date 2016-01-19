@@ -22,7 +22,7 @@ var apiLogin = config.get('qaUserWithAdminPerm'),
   contentHTTPLength='',
   contentHTTPSLength='';
 
-api.debugMode(true);
+api.debugMode(false);
 
 describe('Proxy decompression control ', function () {
 
