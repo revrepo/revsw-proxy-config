@@ -534,7 +534,7 @@ class ConfigTransaction:
         # Finally, save the previous config for reference
         run_cmd("mv -f /tmp/revsw-apache-config.%d.tar %s" %
                 (self.curr_idx, ConfigTransaction.backup_file), _log,
-                "Compressing (multithread) and saving previous config to '%s'" % ConfigTransaction.backup_file)
+                "Saving previous config to '%s'" % ConfigTransaction.backup_file)
 
 
 def _webserver_write_command(f):
