@@ -60,7 +60,7 @@ server {
 upstream revsw_up {
     server 127.0.0.1; # one server is required or config will not be accepted.
     revsw_upstream; # upstream type
-    zone rev 256k; # keep it.
+    zone rev 8192k; # keep it.
 }
  
 
@@ -85,6 +85,10 @@ server {
 
     if ($origin_proto !~ "^(http|https)$") {
         return 400 "X-Rev-Proto HTTP request header can be either 'http' or 'https'";
+    }
+
+    if ($http_x_rev_host = "") {
+        return 400 "X-Rev-Host HTTP request header must be set in RevSDK requests";
     }
 
     location / {
