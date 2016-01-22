@@ -332,12 +332,6 @@
     	RevJSSubstituteEnabled off;
       root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
     }
-    # TODO: Alias /rev-js /usr/share/revsw-libapache2-mod-rev-js-substitute
-    # TODO: ProxyPass /rev-js !
-    # TODO: <Directory /usr/share/revsw-libapache2-mod-rev-js-substitute>
-    # TODO: RevJSSubstituteEnabled Off
-    # TODO: Require all granted
-    # TODO: </Directory>
   {% endif %}{# ENABLE_JS_SUBSTITUTE #}
 
   location / {
@@ -746,18 +740,6 @@ server {
 	{{ caller(False) }}
 	{{ this.CUSTOM_WEBSERVER_CO_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
 	# End optional customizations after generic options
-
-	{% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
-	  # Make sure absolute URLs pointing to the origin go through us instead
-	  {% if (this.ENABLE_HTTP and this.ENABLE_HTTPS) and not is_https %}{# both supported; must prevent conversion from secure to unsecure #}
-	    # HTTPS links are turned into absolute ones to our own server
-	    subs_filter ([\"'])https://{{this.ORIGIN_SERVER_NAME}} $1https://{{this.SERVER_NAME}} r;
-	    # HTTP links are turned into relative ones
-	    subs_filter ([\"'])(http:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
-	  {% else %}{# only HTTP or only HTTPS #}
-	    subs_filter ([\"'])(https?:)?//{{this.ORIGIN_SERVER_NAME}} $1 r;
-	  {% endif %}{# HTTP and/or HTTPS #}
-	{% endif %}{# this.SERVER_NAME != this.ORIGIN_SERVER_NAME #}
 
 	{{ third_party_mod.replace_urls(this, proto, this.ENABLE_OPTIMIZATION) }}
 
