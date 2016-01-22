@@ -106,7 +106,7 @@ def wildcard_to_regex(expr):
                     out.write(".+")
                     i += 1
             else:
-                out.write("[^/]+")
+                out.write("(.+)")
         elif ch == '?':
             out.write(".")
         elif ch == '.' or ch == '^':
