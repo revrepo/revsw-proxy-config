@@ -7,6 +7,7 @@ var https = require('https');
 
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
+var util = require('./proxy-qa-libs/util.js');
 
 var apiLogin = config.get('qaUserWithAdminPerm'),
   apiPassword = config.get('qaUserWithAdminPermPassword'),
@@ -104,7 +105,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
-    console.log(domainConfig);
+    //console.log(domainConfig);
     api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
       testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {

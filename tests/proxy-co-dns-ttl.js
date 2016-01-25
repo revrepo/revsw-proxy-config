@@ -43,7 +43,7 @@ describe('DNS TTL Test', function() {
   var nsone_api = 'https://api.nsone.net';
   var nsone_url = '/v1/zones/revqa.net/testsjc20-co-test.revqa.net/A';
 
-
+  this.timeout(60000);
 
 
 
@@ -147,7 +147,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.50 - 5 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -156,7 +155,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(6000);
+        sleep(5);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -167,7 +166,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(7000);
+            sleep(5);
             done();
           });
 
@@ -178,7 +177,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.51 - 5 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -187,7 +185,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(7000);
+        sleep(5);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -198,7 +196,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(7000);
+            sleep(5);
             done();
           });
 
@@ -211,7 +209,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.50 - 5 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -220,7 +217,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(7000);
+        sleep(5);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -231,7 +228,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(8000);
+            sleep(5);
             done();
           });
 
@@ -243,7 +240,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.51 - 2 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -252,7 +248,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(4000);
+        sleep(2);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -277,7 +273,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.50 - 2 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -286,7 +281,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(4000);
+        sleep(2);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -307,7 +302,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.51 - 2 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -316,7 +310,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(4000);
+        sleep(2);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -338,7 +332,6 @@ describe('DNS TTL Test', function() {
 
 
   it('Testing DNS failover - 192.168.4.50 - 2 seconds', function(done) {
-    this.timeout(60000);
     request(nsone_api)
       .post(nsone_url)
       .set(nsone_header, nsone_key)
@@ -347,7 +340,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(4000);
+        sleep(2);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -365,25 +358,18 @@ describe('DNS TTL Test', function() {
       });
 
   });
-
-
-
-
-
 
 });
 
 
 
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds) {
-      break;
+function sleep(s) {
+      var e = new Date().getTime() + (s * 1000);
+      while (new Date().getTime() <= e) {
+        ;
+      }
     }
-  }
-}
 
 var grep = function(items, callback) {
   var filtered = [],
