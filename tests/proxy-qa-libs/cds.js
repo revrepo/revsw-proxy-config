@@ -14,6 +14,16 @@ function showDebugError(message) {
   console.log("\x1b[0m");
 }
 
+function mySleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    //console.log(new Date().getTime() - start);
+    if ((new Date().getTime() - start) > milliseconds) {
+      break;
+    }
+  }
+}
+
 module.exports = {
 
   debugMode: function (status) {
@@ -50,21 +60,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .post('/v1/domain_configs')
-          .set('Authorization', 'Bearer ' + token)
-          .send(JSON.parse(body))
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .post('/v1/domain_configs')
+        .set('Authorization', 'Bearer ' + token)
+        .send(JSON.parse(body))
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -95,22 +104,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .put('/v1/domain_configs/' + domainID + options)
-          .set('Authorization', 'Bearer ' + token)
-          .send(body)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .put('/v1/domain_configs/' + domainID + options)
+        .set('Authorization', 'Bearer ' + token)
+        .send(body)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -120,21 +128,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .del('/v1/domain_configs/' + domainID)
-          .set('Authorization', 'Bearer ' + token)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .del('/v1/domain_configs/' + domainID)
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -256,21 +263,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .post('/v1/apps')
-          .set('Authorization', 'Bearer ' + token)
-          .send(JSON.parse(body))
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .post('/v1/apps')
+        .set('Authorization', 'Bearer ' + token)
+        .send(JSON.parse(body))
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -302,22 +308,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .put('/v1/apps/' + key + options)
-          .set('Authorization', 'Bearer ' + token)
-          .send(body)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .put('/v1/apps/' + key + options)
+        .set('Authorization', 'Bearer ' + token)
+        .send(body)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -327,21 +332,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .del('/v1/apps/' + key)
-          .set('Authorization', 'Bearer ' + token)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .del('/v1/apps/' + key)
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 

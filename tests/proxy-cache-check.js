@@ -104,6 +104,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
+    console.log(domainConfig);
     api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
       testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
@@ -138,7 +139,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(err); });
   });
 //2
-  it('should added browser_caching rules for css files and cookies for txt', function (done) {
+  it('should add browser_caching rules for css files and cookies for txt', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
       {
