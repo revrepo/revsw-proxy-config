@@ -2,6 +2,7 @@
 
 var Promise = require('bluebird');
 var request = require('supertest');
+var util = require('./util.js');
 var debug = false;
 
 function showDebugError(message) {
@@ -50,21 +51,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .post('/v1/domain_configs')
-          .set('Authorization', 'Bearer ' + token)
-          .send(JSON.parse(body))
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .post('/v1/domain_configs')
+        .set('Authorization', 'Bearer ' + token)
+        .send(JSON.parse(body))
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -95,22 +95,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .put('/v1/domain_configs/' + domainID + options)
-          .set('Authorization', 'Bearer ' + token)
-          .send(body)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .put('/v1/domain_configs/' + domainID + options)
+        .set('Authorization', 'Bearer ' + token)
+        .send(body)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -120,21 +119,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .del('/v1/domain_configs/' + domainID)
-          .set('Authorization', 'Bearer ' + token)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .del('/v1/domain_configs/' + domainID)
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -256,21 +254,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .post('/v1/apps')
-          .set('Authorization', 'Bearer ' + token)
-          .send(JSON.parse(body))
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .post('/v1/apps')
+        .set('Authorization', 'Bearer ' + token)
+        .send(JSON.parse(body))
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -302,22 +299,21 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .put('/v1/apps/' + key + options)
-          .set('Authorization', 'Bearer ' + token)
-          .send(body)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .put('/v1/apps/' + key + options)
+        .set('Authorization', 'Bearer ' + token)
+        .send(body)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 
@@ -327,21 +323,20 @@ module.exports = {
       return;
     }
     return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        return request(url)
-          .del('/v1/apps/' + key)
-          .set('Authorization', 'Bearer ' + token)
-          .expect(200)
-          .end(function (err, res) {
-            if (err) {
-              if (debug) {
-                showDebugError(res.error);
-              }
-              throw reject(err);
+      return request(url)
+        .del('/v1/apps/' + key)
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) {
+            if (debug) {
+              showDebugError(res.error);
             }
-            return resolve(res);
-          });
-      }, 2000);
+            throw reject(err);
+          }
+          util.mySleep(2000);
+          return resolve(res);
+        });
     });
   },
 

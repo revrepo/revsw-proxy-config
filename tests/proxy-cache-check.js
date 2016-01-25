@@ -104,6 +104,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
+    console.log(domainConfig);
     api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
       testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
@@ -138,7 +139,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(err); });
   });
 //2
-  it('should added browser_caching rules for css files and cookies for txt', function (done) {
+  it('should add browser_caching rules for css files and cookies for txt', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
       {
@@ -499,7 +500,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-be-1st-byte-time'].should.not.equal('0');
       done();
       cacheAge = res.header.age;
-      tools.mySleep(1000);
+      util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -516,7 +517,7 @@ describe('Proxy cache check ', function () {
       res.header.age.should.match(function(n) { return n > cacheAge; });
       cacheAge = res.header.age;
       done();
-      tools.mySleep(1000);
+      util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -532,7 +533,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-be-1st-byte-time'].should.equal('0');
       res.header.age.should.match(function(n) { return n > cacheAge; });
       done();
-      //tools.mySleep(1000);
+      //util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -552,7 +553,7 @@ describe('Proxy cache check ', function () {
       cacheAge = ccheader[1];
       totalTime = res.header['x-rev-cache-total-time'];
       done();
-      tools.mySleep(1000);
+      util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -577,7 +578,7 @@ describe('Proxy cache check ', function () {
       cacheAge = revobj[0];
       done();
 
-      tools.mySleep(1000);
+      util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -645,7 +646,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-cache-hits'].should.equal('2');
       //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
-      //tools.mySleep(1000);
+      //util.mySleep(1000);
     }).catch(function (err) { done(err); });
   });
 
@@ -660,7 +661,7 @@ describe('Proxy cache check ', function () {
         if (rej) {
           throw rej;
         }
-        tools.mySleep(3000);
+        util.mySleep(3000);
 
         tools.getHostRequest(testHTTPUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
           if (rej) {
@@ -685,7 +686,7 @@ describe('Proxy cache check ', function () {
         if (rej) {
           throw rej;
         }
-        tools.mySleep(3000);
+        util.mySleep(3000);
 
         tools.getHostRequest(testHTTPSUrl, '/static/etag/item.dat', newDomainName).then(function (res, rej) {
           if (rej) {
