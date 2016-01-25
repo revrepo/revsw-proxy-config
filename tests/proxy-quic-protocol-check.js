@@ -147,7 +147,7 @@ describe('Proxy QUIC protocol control', function () {
 
     resp.Status.should.be.equal(200);
 
-    resp.Headers.Age.should.be.containEql('1');
+    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('5.000');
