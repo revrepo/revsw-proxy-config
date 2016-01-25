@@ -90,7 +90,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
     resp.Status.should.be.equal(200);
     done();
@@ -101,7 +101,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -120,7 +120,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/5\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -142,7 +142,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/5\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -164,7 +164,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/60\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -186,7 +186,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -203,7 +203,7 @@ describe('Proxy QUIC protocol control', function () {
         " \"X-Forwarded-For\": [\""+forwardedIP+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -220,7 +220,7 @@ describe('Proxy QUIC protocol control', function () {
         " \"X-Forwarded-For\": [\""+forwardedIP+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -237,7 +237,7 @@ describe('Proxy QUIC protocol control', function () {
         " \"X-Rev-Transport\": [\"QUIC\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
@@ -272,7 +272,7 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
     resp.Status.should.be.equal(200);
     //console.log(resp.Headers);
@@ -284,10 +284,10 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
     resp.Status.should.be.equal(200);
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
 
     resp.Headers['Content-Type'].should.be.containEql('text/css');
     resp.Headers['X-Rev-Host'].should.be.containEql(newDomainName);
@@ -301,11 +301,11 @@ describe('Proxy QUIC protocol control', function () {
       var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
 
     resp.Headers['X-Rev-Cache'].should.be.containEql('HIT');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('1440000.000');
