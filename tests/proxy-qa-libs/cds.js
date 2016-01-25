@@ -2,6 +2,7 @@
 
 var Promise = require('bluebird');
 var request = require('supertest');
+var util = require('./util.js');
 var debug = false;
 
 function showDebugError(message) {
@@ -12,16 +13,6 @@ function showDebugError(message) {
   console.log(message.text);
   console.log("=======================================");
   console.log("\x1b[0m");
-}
-
-function mySleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    //console.log(new Date().getTime() - start);
-    if ((new Date().getTime() - start) > milliseconds) {
-      break;
-    }
-  }
 }
 
 module.exports = {
@@ -71,7 +62,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });
@@ -116,7 +107,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });
@@ -139,7 +130,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });
@@ -274,7 +265,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });
@@ -320,7 +311,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });
@@ -343,7 +334,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          mySleep(2000);
+          util.mySleep(2000);
           return resolve(res);
         });
     });

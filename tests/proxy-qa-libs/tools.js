@@ -1,6 +1,7 @@
 'use strict';
 
 var api = require('./api.js');
+var util = require('./util.js');
 var Promise = require('bluebird');
 var request = require('supertest');
 var async = require('async');
@@ -14,15 +15,6 @@ function showDebugError(message) {
   console.log(message.text);
   console.log("=======================================");
   console.log("\x1b[0m");
-}
-
-function mySleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds) {
-      break;
-    }
-  }
 }
 
 module.exports = {
@@ -223,7 +215,7 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          mySleep(5000);
+          util.mySleep(5000);
           return resolve(true);
         }
       });
@@ -265,7 +257,7 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          mySleep(5000);
+          util.mySleep(5000);
           return resolve(true);
         }
       });
@@ -307,20 +299,10 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          mySleep(5000);
+          util.mySleep(5000);
           return resolve(true);
         }
       });
     });
-  },
-
-  mySleep: function (milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds) {
-        break;
-      }
-    }
   }
-
 };
