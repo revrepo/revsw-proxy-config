@@ -704,6 +704,7 @@ def generate_bp_domain_json(domain):
         "BYPASS_CO_LOCATIONS": [],
         "ORIGIN_SERVERS_HTTP": [] if not domain["http"] else ["%s://%s" % (http, domain["ows"])],
         "ORIGIN_SERVERS_HTTPS": [] if not domain["https"] else ["%s://%s" % (https, domain["ows"])],
+        "ORIGIN_SECURE_PROTOCOL": "use_end_user_protocol",
         "ORIGIN_IDLE_TIMEOUT": 80,
         "ORIGIN_REUSE_CONNS": True,
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
@@ -968,6 +969,7 @@ def generate_ui_config_json(domain):
         "origin_domain": domain["ows"],
         "operation": "config",
         "origin_server": domain["ows_domain"],
+        "origin_secure_protocol": "use_end_user_protocol",
         "config_command_options": _get_ui_config_command_opts(domain),
         "rev_component_co": generate_co_ui_config_json(domain),
         "rev_traffic_mgr": {

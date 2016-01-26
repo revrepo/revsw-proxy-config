@@ -160,6 +160,9 @@
                 "format": "uri"
             }
         },
+        "ORIGIN_SECURE_PROTOCOL": {
+            "type": "string"
+        },
         "ORIGIN_IDLE_TIMEOUT": {
             "type": "integer",
             "minimum": 0
@@ -250,6 +253,7 @@
         "BYPASS_CO_LOCATIONS",
         "ORIGIN_SERVERS_HTTP",
         "ORIGIN_SERVERS_HTTPS",
+        "ORIGIN_SECURE_PROTOCOL",
         "ORIGIN_IDLE_TIMEOUT",
         "ORIGIN_REUSE_CONNS",
         "ENABLE_VARNISH_GEOIP_HEADERS",

@@ -100,7 +100,7 @@ if __name__ == "__main__":
             with open("/tmp/apache-config.conf", "w") as c:
                 json.dump(vars(args), c)
             with open("/tmp/apache-config.json", "w") as j:
-                j.write('{"type": "apache", "version": %d, "commands": []}' % API_VERSION)
+                j.write('{"origin_secure_protocol": "use_end_user_protocol", "type": "apache", "version": %d, "commands": []}' % API_VERSION)
             sys.exit(0)
 
         with open("/tmp/apache-config.conf") as c:
