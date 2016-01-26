@@ -124,8 +124,6 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-
-    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('5.000');
@@ -146,8 +144,6 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-
-    //resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('5.000');
@@ -168,8 +164,6 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-
-    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('60.000');
@@ -193,7 +187,6 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
 
@@ -209,7 +202,6 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
 
@@ -225,28 +217,8 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
-
-/*
-  it('should make /ip request with set XFF and check that proxy ignores it', function (done) {
-    try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"]," +
-        " \"X-Forwarded-For\": [\""+forwardedIP+"\"], \"X-Rev-Transport\": [\"QUIC\"] } }";
-      var resp = send_quic(httpGet);
-    } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
-    }
-
-    resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(forwardedIP + ', ' + testProxyIp);
-    console.log(resp.Reply)
-    console.log(resp.Headers);
-    //console.log(ipCheckString);
-    done();
-  });
-*/
 
   it('should make /post request and check status', function (done) {
     try {
@@ -258,6 +230,7 @@ describe('Proxy QUIC protocol control', function () {
 
     resp.Status.should.be.equal(200);
     resp.Reply.should.be.containEql(ipCheckString);
+    resp.Reply.should.be.containEql("test=test");
     //console.log(resp.Reply)
     //console.log(resp.Headers);
     done();
@@ -272,10 +245,9 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(ipCheckString);
     resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
     //console.log(resp.Reply)
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
     done();
   });
 
@@ -303,10 +275,9 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(ipCheckString);
     resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
     //console.log(resp.Reply)
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
     done();
   });
 
@@ -334,10 +305,9 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(ipCheckString);
     resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
     //console.log(resp.Reply)
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
     done();
   });
 
@@ -365,10 +335,9 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(ipCheckString);
     resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
     //console.log(resp.Reply)
-    console.log(resp.Headers);
+    //console.log(resp.Headers);
     done();
   });
 
@@ -410,8 +379,6 @@ describe('Proxy QUIC protocol control', function () {
     }
 
     resp.Status.should.be.equal(200);
-    //console.log(resp.Headers);
-
     resp.Headers['X-Rev-Cache'].should.be.containEql('HIT');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('1440000.000');
     resp.Headers['X-Rev-Cache-Be-1st-Byte-Time'].should.be.containEql('0');
