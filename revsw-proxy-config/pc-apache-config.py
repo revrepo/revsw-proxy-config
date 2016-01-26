@@ -51,8 +51,6 @@ class ConfigCommon:
 
     def _parse_config_command_options(self):
         self.cmd_opts = {
-            "ows_http": True,
-            "ows_https": True,
             "http": True,
             "https": True,
             "spdy": True,
@@ -71,11 +69,7 @@ class ConfigCommon:
         }
 
         for opt in self.ui_config.get("config_command_options", "").split():
-            if opt == "ows-http-only":
-                self.cmd_opts["ows_https"] = False
-            elif opt == "ows-https-only":
-                self.cmd_opts["ows_http"] = False
-            elif opt == "disable-spdy":
+            if opt == "disable-spdy":
                 self.cmd_opts["spdy"] = False
             elif opt == "no-bp":
                 self.cmd_opts["config_bp"] = False

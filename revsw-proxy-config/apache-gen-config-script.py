@@ -344,18 +344,6 @@ def parse_line(line):
             check_unused_and_set_domain(arg, States.PROFILES_DISABLED)
             domain["profiles_disabled"] = True
             Nl.needs_param = False
-        elif arg == "ows-http-only":
-            if States.OWS_HTTPS_ONLY in used_states:
-                fail("Can't use 'ows-http-only' and 'ows-https-only' at the same time.")
-            check_unused_and_set_domain(arg, States.OWS_HTTP_ONLY)
-            domain["ows_https"] = False
-            Nl.needs_param = False
-        elif arg == "ows-https-only":
-            if States.OWS_HTTP_ONLY in used_states:
-                fail("Can't use 'ows-http-only' and 'ows-https-only' at the same time.")
-            check_unused_and_set_domain(arg, States.OWS_HTTPS_ONLY)
-            domain["ows_http"] = False
-            Nl.needs_param = False
         elif arg == "varnish-ignore-cookies-url-regex":
             check_unused_and_set_domain(arg, States.IGNORE_COOKIES)
         elif arg == "static-content-servers":
@@ -770,50 +758,6 @@ def generate_bp_varnish_domain_json(domain):
     json.dump(site, f, indent=2)
     return f.getvalue()
 
-
-def generate_co_domain_json(domain):
-    # At least one is always True
-    http = "http" if domain["ows_http"] else "https"
-    https = "https" if domain["ows_https"] else "http"
-
-    co = {
-        "VERSION": _CO_CONFIG_VERSION,
-        "ssl": {},
-        "ENABLE_HTTP": domain["http"],
-        "ENABLE_HTTPS": domain["https"],
-        "SERVER_NAME": domain["name"],
-        "ORIGIN_SERVER_NAME": domain["ows_domain"],
-        "ORIGIN_SERVERS_HTTP": [] if not domain["http"] else ["%s://%s" % (http, domain["ows"])],
-        "ORIGIN_SERVERS_HTTPS": [] if not domain["https"] else ["%s://%s" % (https, domain["ows"])],
-        "DOMAINS_TO_PROXY_HTTP": sorted_non_empty(domain["static_servers_http"]),
-        "DOMAINS_TO_PROXY_HTTPS": sorted_non_empty(domain["static_servers_https"]),
-        "DOMAINS_TO_OPTIMIZE_HTTP": sorted_non_empty(domain["static_servers_http"]),
-        "DOMAINS_TO_OPTIMIZE_HTTPS": sorted_non_empty(domain["static_servers_https"]),
-        "REV_PROFILES_COUNT": domain["profiles_count"],
-        "REV_PROFILES_BASE_PORT_HTTP": domain["base_http_port"],
-        "LISTEN_REV_PROFILES_BASE_PORT_HTTP": False,  # domain["base_http_port"] != 80,
-        "REV_PROFILES_BASE_PORT_HTTPS": domain["base_https_port"],
-        "LISTEN_REV_PROFILES_BASE_PORT_HTTPS": False,  # domain["base_https_port"] != 443
-        "REV_RUM_BEACON_URL": RUM_BEACON_URL,
-        "DOMAIN_SHARDS_COUNT": domain["shards_count"],
-        "ENABLE_OPTIMIZATION": domain["enable_opt"],
-        "ENABLE_DECOMPRESSION": domain["enable_decompression"],
-        "CUSTOM_WEBSERVER_CODE_AFTER": "",
-        "ENABLE_JS_SUBSTITUTE": domain["enable_js_subst"],
-        "ENABLE_HTML_SUBSTITUTE": domain["enable_html_subst"],
-        "PROXY_TIMEOUT": 5,
-        "ENABLE_PROXY_BUFFERING": False,
-        "DEBUG_MODE": False,
-        "ORIGIN_IDLE_TIMEOUT": 80,
-        "ORIGIN_REUSE_CONNS": True,
-        "ORIGIN_REQUEST_HEADERS": [] # (BP-92)
-    }
-
-    f = StringIO()
-    json.dump({"co": co, "co_profiles": get_co_profiles()}, f, indent=2)
-    return f.getvalue()
-
-
 def generate_bp(domain):
     # print >>sys.stderr, "BP Domain:", domain
 
@@ -848,42 +792,9 @@ apache-config.py config -V %s $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
 """ % (varn_fname, basename_templ, json_fname))
 
 
-def generate_co(domain):
-    # print >>sys.stderr, "CO Domain:", domain
-
-    cfg_name = _(domain["name"])
-    basename_templ = re.sub("\.jinja$", "", domain["co_template"])
-
-    json_fname = apache_vars_name("co", domain)
-
-    j = generate_co_domain_json(domain)
-    with open(json_fname, "w") as f:
-        f.write(j)
-
-    print_configure_sh("""
-DOMAIN_NAME=%s
-CFG_NAME=%s
-""" % (domain["name"], cfg_name))
-
-    if domain["certs"]:
-        print_configure_sh("""
-echo "    -> configuring $DOMAIN_NAME certificates"
-apache-config.py certs $CFG_NAME %s || EXIT=$?
-""" % domain["certs"])
-
-    print_configure_sh("""
-echo "    -> configuring site $DOMAIN_NAME"
-apache-config.py config $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
-""" % (basename_templ, json_fname))
-
-
 def _get_ui_config_command_opts(domain):
     opts = StringIO()
 
-    if not domain["ows_http"]:
-        opts.write("ows-https-only ")
-    if not domain["ows_https"]:
-        opts.write("ows-http-only ")
     if not domain["http"]:
         opts.write("https-only ")
     if not domain["https"]:
@@ -1047,29 +958,6 @@ def generate_config_sh():
     apache-config.py copy %s || EXIT=$?
     """ % (args.copy_to, args.copy_to))
 
-    if not args.no_co:
-        for addr, domains in _cos.iteritems():
-            print_configure_sh("""
-    CO=%s
-    echo "Configuring CO '$CO'"
-    apache-config.py start -I $THIS_DIR $CO || EXIT=$?""" % addr)
-            if args.flush:
-                print_configure_sh("""echo "    -> removing all sites on server"
-    apache-config.py flush-sites || EXIT=$?
-    """)
-            for domain in domains:
-                generate_co(domain)
-            if not args.no_send:
-                print_configure_sh("""
-    echo "    -> sending configuration"
-    apache-config.py send || EXIT=$?
-    """)
-            if args.copy_to:
-                print_configure_sh("""
-    echo "    -> copying configuration to '%s'"
-    apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to))
-
     print_configure_sh("exit $EXIT")
 
 
@@ -1115,8 +1003,6 @@ parser = argparse.ArgumentParser(description="Generate configuration and/or conf
 parser.add_argument("--manual", help="Display the usage manual",
                     action="store_true")
 parser.add_argument("--no-bp", help="Don't generate BP configuration commands",
-                    action="store_true")
-parser.add_argument("--no-co", help="Don't generate CO configuration commands",
                     action="store_true")
 parser.add_argument("--no-flush", help="Don't generate flush commands (obsolete, unused)",
                     action="store_true")
