@@ -22,6 +22,7 @@ var agent = require("supertest-as-promised");
 var express = require('express');
 var fs = require('fs');
 var https = require('https');
+var util = require('./proxy-qa-libs/util.js');
 
 
 
@@ -155,7 +156,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(5);
+        util.mySleep(5000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -166,7 +167,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(5);
+            util.mySleep(5000);
             done();
           });
 
@@ -185,7 +186,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(5);
+        util.mySleep(5000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -196,7 +197,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(5);
+            util.mySleep(5000);
             done();
           });
 
@@ -217,7 +218,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(5);
+        util.mySleep(5000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -228,7 +229,7 @@ describe('DNS TTL Test', function() {
             if (i < 15) {
               throw new Error("Proxy did not follow the TTL");
             }
-            sleep(5);
+            util.mySleep(5000);
             done();
           });
 
@@ -248,7 +249,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(2);
+        util.mySleep(2000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -281,7 +282,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(2);
+        util.mySleep(2000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -310,7 +311,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(2);
+        util.mySleep(2000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -340,7 +341,7 @@ describe('DNS TTL Test', function() {
         if (err) {
           throw err;
         }
-        sleep(2);
+        util.mySleep(2000);
         request(url)
           .get('/cgi-bin/envtest.cgi')
           .set('Host', domain_cache)
@@ -360,16 +361,6 @@ describe('DNS TTL Test', function() {
   });
 
 });
-
-
-
-
-function sleep(s) {
-      var e = new Date().getTime() + (s * 1000);
-      while (new Date().getTime() <= e) {
-        ;
-      }
-    }
 
 var grep = function(items, callback) {
   var filtered = [],
