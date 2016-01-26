@@ -87,7 +87,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('(smoke) should / make request by 443 port and check status code', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -98,7 +98,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make / request on 443 port and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -117,15 +117,13 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/5 request and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/5\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/5", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-
-    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('5.000');
@@ -139,15 +137,13 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/5 again request and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/5\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/5", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-
-    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('5.000');
@@ -161,15 +157,13 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/60 request and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/cache/60\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/60", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-
-    resp.Headers.Age.should.be.containEql('0');
     resp.Headers['Content-Type'].should.be.containEql('application/json');
     resp.Headers['X-Rev-Beresp-Grace'].should.be.containEql('60.000');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('60.000');
@@ -183,7 +177,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /ip request and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -193,14 +187,12 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
 
   it('should make /ip request with set XFF and check that proxy ignores it', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"]," +
-        " \"X-Forwarded-For\": [\""+forwardedIP+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"], "X-Forwarded-For": ["'+forwardedIP+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -210,31 +202,12 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
-    done();
-  });
-
-  it('should make /ip request with set XFF and check that proxy ignores it', function (done) {
-    try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"]," +
-        " \"X-Forwarded-For\": [\""+forwardedIP+"\"] } }";
-      var resp = send_quic(httpGet);
-    } catch (err) {
-      throw "Error: " + err;
-    }
-
-    resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(ipCheckString);
-    //console.log(resp.Reply)
-    //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
 
   it('should make /ip request with set QUIC and check that proxy ignores it', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"]," +
-        " \"X-Rev-Transport\": [\"QUIC\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"], "X-Rev-Transport": ["QUIC"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -244,32 +217,133 @@ describe('Proxy QUIC protocol control', function () {
     resp.Reply.should.be.containEql(ipCheckString);
     //console.log(resp.Reply)
     //console.log(resp.Headers);
-    //console.log(ipCheckString);
     done();
   });
 
-/*
-  it('should make /ip request with set XFF and check that proxy ignores it', function (done) {
+  it('should make /post request and check status', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/ip\", \"Headers\": { \"Host\": [\""+newDomainName+"\"]," +
-        " \"X-Forwarded-For\": [\""+forwardedIP+"\"], \"X-Rev-Transport\": [\"QUIC\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/post", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "POST", "Data": "test=test" }';
       var resp = send_quic(httpGet);
     } catch (err) {
-      done(new Error("Error: " + err + ":" + out));
+      throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-    resp.Reply.should.be.containEql(forwardedIP + ', ' + testProxyIp);
-    console.log(resp.Reply)
-    console.log(resp.Headers);
-    //console.log(ipCheckString);
+    resp.Reply.should.be.containEql(ipCheckString);
+    resp.Reply.should.be.containEql("test=test");
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
     done();
   });
-*/
+
+  it('should make /post request and check headers', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/post", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "POST", "Data": "test=test" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /patch request and check status', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/patch", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PATCH" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Reply.should.be.containEql(ipCheckString);
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /patch request and check headers', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/patch", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PATCH" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /put request and check status', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/put", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PUT" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Reply.should.be.containEql(ipCheckString);
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /put request and check headers', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/put", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PUT" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /delete request and check status', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/delete", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "DELETE" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Reply.should.be.containEql(ipCheckString);
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
+
+  it('should make /delete request and check headers', function (done) {
+    try {
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/delete", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "DELETE" }';
+      var resp = send_quic(httpGet);
+    } catch (err) {
+      throw "Error: " + err;
+    }
+
+    resp.Status.should.be.equal(200);
+    resp.Headers['X-Rev-Cache'].should.be.containEql('MISS');
+    //console.log(resp.Reply)
+    //console.log(resp.Headers);
+    done();
+  });
 
   it('(smoke) should get CSS file request by 443 port', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -281,7 +355,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should get CSS file request by 443 port and check headers', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -298,15 +372,13 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should get CSS file request by 443 port and check cache', function (done) {
     try {
-      var httpGet = "{ \"Endpoint\": \""+testHTTPSUrl+":443/static/file.css\", \"Headers\": { \"Host\": [\""+newDomainName+"\"] } }";
+      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
     } catch (err) {
       throw "Error: " + err;
     }
 
     resp.Status.should.be.equal(200);
-    //console.log(resp.Headers);
-
     resp.Headers['X-Rev-Cache'].should.be.containEql('HIT');
     resp.Headers['X-Rev-Beresp-Ttl'].should.be.containEql('1440000.000');
     resp.Headers['X-Rev-Cache-Be-1st-Byte-Time'].should.be.containEql('0');
