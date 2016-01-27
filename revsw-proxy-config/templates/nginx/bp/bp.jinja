@@ -486,13 +486,14 @@
 
     {% if this.ENABLE_HTTP %}
       {% set origins = this.ORIGIN_SERVERS_HTTP %}
-      {% set proto_port = this.REV_PROFILES_BASE_PORT_HTTP if origins[0]|truncate(5, True, "") == "http" else this.REV_PROFILES_BASE_PORT_HTTPS %}
+      {% set proto_port = this.REV_PROFILES_BASE_PORT_HTTPS if origins[0]|truncate(5, True, "") == "https" else this.REV_PROFILES_BASE_PORT_HTTP %}
       {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", proto_port, false) }}{# same balancer name as _common_co_location_params #}
       {{ _common_upstream_block_co(this, "bp_cos", "", proto_port, false) }}{# same balancer name as _common_co_location_params #}
       {% if this.ENABLE_VARNISH %}
 	{{ _common_upstream_block_varnish(this, 8080, false) }}
       {% endif %}
       {{ balancer_mod.define_bp_ows_balancer(this, false) }}
+# Origin {{ origins[0] }} / Proto port {{ proto_port }}
 server {
       listen 80;
 
@@ -553,6 +554,7 @@ server {
     {{ _common_upstream_block_varnish(this, 8443, true) }}
   {% endif %}
   {{ balancer_mod.define_bp_ows_balancer(this, true) }}
+# Origin {{ origins[0] }} / Proto port {{ proto_port }}
 server {
   # listen 443 ssl{{ " spdy" if this.ENABLE_SPDY else "" }};
   listen 443 ssl http2;
