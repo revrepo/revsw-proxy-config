@@ -53,6 +53,8 @@ class ConfigCommon:
         self.cmd_opts = {
             "http": True,
             "https": True,
+            "ows-http-only": False,
+            "ows-https-only": False,
             "spdy": True,
             "shards_count": 0,
             "config_bp": True,
@@ -97,9 +99,9 @@ class ConfigCommon:
                 self.cmd_opts["client_response_timeout"] = int(opt[24:])
             # Don't use options
             elif opt.startswith("ows-http-only"):
-                pass
-            elif opt.startswith("ows-http-only"):
-                pass
+                self.cmd_opts["ows-http-only"] = True
+            elif opt.startswith("ows-https-only"):
+                self.cmd_opts["ows-https-only"] = True
             else:
                 fatal("Invalid config command option '%s'" % opt)
 
@@ -389,6 +391,11 @@ class ConfigCommon:
         origin_secure_protocol = self.ui_config.get("origin_secure_protocol", "")
         http = "http" if origin_secure_protocol != "https_only" else "https"
         https = "https" if origin_secure_protocol != "http_only" else "http"
+
+        if self.cmd_opts["ows-http-only"]:
+            https = "http"
+        if self.cmd_opts["ows-https-only"]:
+            http = "https"
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
