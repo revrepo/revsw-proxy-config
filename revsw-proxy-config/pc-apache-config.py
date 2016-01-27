@@ -389,7 +389,7 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
 
         origin_secure_protocol = self.ui_config.get("origin_secure_protocol", "")
-        http = "http" if origin_secure_protocol != "https_only" or self.cmd_opts["ows-http-only"] else "https"
+        http = "http" if origin_secure_protocol != "https_only" else "https"
         https = "https" if origin_secure_protocol != "http_only" else "http"
 
         if self.cmd_opts["ows-http-only"]:
