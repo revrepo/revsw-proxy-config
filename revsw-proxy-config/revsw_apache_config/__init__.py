@@ -423,9 +423,6 @@ class PlatformWebServer:
             raise RuntimeError("Neither Nginx nor Apache are installed; please check your configuration")
         self._name = _g_webserver_name
 
-    def _is_apache(self):
-        return self._name == "APACHE"
-
     def _is_nginx(self):
         return self._name == "NGINX"
 
@@ -433,10 +430,10 @@ class PlatformWebServer:
         return self._name
 
     def service_name(self):
-        return "revsw-apache2" if self._is_apache() else "revsw-nginx"
+        return "revsw-nginx"
 
     def etc_dir(self):
-        return "/etc/apache2" if self._is_apache() else "/etc/nginx"
+        return "/etc/nginx"
 
     def config_class(self):
         return NginxConfig
@@ -700,6 +697,8 @@ class NginxConfig(WebServerConfig):
             env.globals["HOSTNAME_FULL"] = hostname_full
             env.globals["HOSTNAME_SHORT"] = hostname_short
             env.globals["DNS_SERVERS"] = dns_servers()
+
+            env.globals["bypass_location_root"] = False
 
             template = env.from_string(template_str)
             cfg = template.render(input_vars)
@@ -1036,9 +1035,9 @@ def configure_all(config):
             _domain_name = _check_and_get_attr(command, "domain_name")
             transaction.run(lambda: run_cmd("rm -f /opt/revsw-config/policy/ui-config-%s.json" % _domain_name, _log,
                                             "Removing policy '%s' if it exists" % _domain_name))
-            _log.LOGD("Removing site '%s'" % _domain_name)
             acfg.remove_site()
             vcfg.remove_site()
+            _log.LOGD("Removing site '%s'" % _domain_name)
 
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)

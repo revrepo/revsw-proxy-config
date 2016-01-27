@@ -51,8 +51,6 @@ class ConfigCommon:
 
     def _parse_config_command_options(self):
         self.cmd_opts = {
-            "ows_http": True,
-            "ows_https": True,
             "http": True,
             "https": True,
             "spdy": True,
@@ -64,21 +62,14 @@ class ConfigCommon:
             "include_user_agent": False,
             "cache_ps_html": False,
             "cache_ignore_auth": False,
+            "origin_secure_protocol": "use_end_user_protocol",
             "proxy_timeout": 5,
             "debug": False,
             "client_response_timeout": 600
         }
 
         for opt in self.ui_config.get("config_command_options", "").split():
-            if opt == "ows-http-only":
-                self.cmd_opts["ows_https"] = False
-            elif opt == "ows-https-only":
-                self.cmd_opts["ows_http"] = False
-            elif opt == "http-only":
-                self.cmd_opts["https"] = False
-            elif opt == "https-only":
-                self.cmd_opts["http"] = False
-            elif opt == "disable-spdy":
+            if opt == "disable-spdy":
                 self.cmd_opts["spdy"] = False
             elif opt == "no-bp":
                 self.cmd_opts["config_bp"] = False
@@ -98,6 +89,8 @@ class ConfigCommon:
                 self.cmd_opts["cache_ps_html"] = True
             elif opt == "cache-ignore-auth":
                 self.cmd_opts["cache_ignore_auth"] = True
+            elif opt == "origin_secure_protocol":
+                self.cmd_opts["origin_secure_protocol"] = "use_end_user_protocol"
             elif opt.startswith("proxy-timeout="):
                 self.cmd_opts["proxy_timeout"] = int(opt[14:])
             elif opt.startswith("client_response_timeout="):
@@ -375,6 +368,7 @@ class ConfigCommon:
                                             self.ui_config.get("proxy_timeout", self.cmd_opts["proxy_timeout"]))
         self._patch_if_changed_bp_webserver("ORIGIN_IDLE_TIMEOUT", misc.get("origin_http_keepalive_ttl", 80))
         self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
+
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
         self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
@@ -387,12 +381,17 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", co.get("enable_optimization", True))
         self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", co.get("enable_decompression", True))
 
+        origin_secure_protocol = self.ui_config.get("origin_secure_protocol", "")
+        http = "http" if origin_secure_protocol != "https_only" else "https"
+        https = "https" if origin_secure_protocol != "http_only" else "http"
+
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
             self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
-                                                else ["http://%s" % co for co in bp_cos])
+                                                else ["%s://%s" % (http, co) for co in bp_cos])
             self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
-                                                else ["https://%s" % co for co in bp_cos])
+                                                else ["%s://%s" % (https, co) for co in bp_cos])
+
             self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
                                               else bp_cos)
             self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
@@ -402,8 +401,6 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("BYPASS_CO_LOCATIONS", co_bypass_urls)
         self._patch_if_changed_bp_varnish("BYPASS_CO_LOCATIONS", co_bypass_urls)
 
-        http = "http" if self.cmd_opts["ows_http"] else "https"
-        https = "https" if self.cmd_opts["ows_https"] else "http"
 
         _check_valid_domains([ows_server], "Origin server")
 
@@ -411,6 +408,10 @@ class ConfigCommon:
                                             else ["%s://%s" % (http, ows_server)])
         self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
                                             else ["%s://%s" % (https, ows_server)])
+
+
+        self._patch_if_changed_bp_webserver("ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
+
         log.LOGD("Finished vars update in misc")
 
 
@@ -600,15 +601,12 @@ def _gen_initial_domain_config(domain_name, ui_config):
     mapping = _get_domain_mapping(domain_name)
     ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
 
-    # Let's see if we are a BP or a CO by looking at which package is installed
-    #role = _get_server_role()
-    role = "bp"
 
     # Let's see if we have a custom config for this domain
     config_str = ""
 
     try:
-        with open("/opt/revsw-config/apache/custom-sites/%s/%s.json" % (domain_name, role)) as j:
+        with open("/opt/revsw-config/apache/custom-sites/%s/bp.json" % (domain_name)) as j:
             config_str = j.read()
     except IOError as e:  # file doesn't exist
         if e.errno != errno.ENOENT:
@@ -617,7 +615,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open("/opt/revsw-config/apache/generic-site/%s.json" % role) as j:
+        with open("/opt/revsw-config/apache/generic-site/bp.json") as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -627,18 +625,17 @@ def _gen_initial_domain_config(domain_name, ui_config):
 
     config = json.loads(config_str)
 
-    if role == "bp":
-        bp_cos = _get_content_optimizers(ui_config)
-        if not bp_cos:
-            bp_cos = mapping.get("optimizers")
-        if bp_cos:
-            for cmd in config["commands"]:
-                if "varnish_config_vars" in cmd:
-                    cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = bp_cos
-                    cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = bp_cos
-                if "config_vars" in cmd and "bp" in cmd["config_vars"]:
-                    cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in bp_cos]
-                    cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in bp_cos]
+    bp_cos = _get_content_optimizers(ui_config)
+    if not bp_cos:
+        bp_cos = mapping.get("optimizers")
+    if bp_cos:
+        for cmd in config["commands"]:
+            if "varnish_config_vars" in cmd:
+                cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = bp_cos
+                cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = bp_cos
+            if "config_vars" in cmd and "bp" in cmd["config_vars"]:
+                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in bp_cos]
+                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in bp_cos]
 
     return config
 
@@ -664,7 +661,6 @@ def delete_domain(domain_name):
 def add_or_update_domain(domain_name, ui_config):
     site_name = _(domain_name)
     acfg = NginxConfig(site_name)
-
     if not acfg.exists():
         log.LOGI("Adding domain '%s'" % domain_name)
         # Initial, default config
@@ -677,7 +673,7 @@ def add_or_update_domain(domain_name, ui_config):
     log.LOGI("Updating domain '%s'" % domain_name)
 
     webserver_config_vars = acfg.load_input_vars()
-    #log.LOGI(u"Input JSON is: ", webserver_config_vars)
+    log.LOGD(u"Input JSON is: ", json.dumps(webserver_config_vars))
 
     try:
         log.LOGD(u"Start read Varnish Config")
