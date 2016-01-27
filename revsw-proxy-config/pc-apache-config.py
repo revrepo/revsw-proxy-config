@@ -96,7 +96,8 @@ class ConfigCommon:
             elif opt.startswith("client_response_timeout="):
                 self.cmd_opts["client_response_timeout"] = int(opt[24:])
             else:
-                fatal("Invalid config command option '%s'" % opt)
+                #fatal("Invalid config command option '%s'" % opt)
+                log.LOGI("Invalid config command option '%s'" % opt)
 
     def _add_ban_urls(self, ban_urls):
         self.ban_urls.update(ban_urls)
