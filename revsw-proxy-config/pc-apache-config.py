@@ -95,9 +95,13 @@ class ConfigCommon:
                 self.cmd_opts["proxy_timeout"] = int(opt[14:])
             elif opt.startswith("client_response_timeout="):
                 self.cmd_opts["client_response_timeout"] = int(opt[24:])
+            # Don't use options
+            elif opt.startswith("ows-http-only"):
+                pass
+            elif opt.startswith("ows-http-only"):
+                pass
             else:
-                #fatal("Invalid config command option '%s'" % opt)
-                log.LOGI("Invalid config command option '%s'" % opt)
+                fatal("Invalid config command option '%s'" % opt)
 
     def _add_ban_urls(self, ban_urls):
         self.ban_urls.update(ban_urls)
