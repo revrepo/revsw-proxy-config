@@ -485,8 +485,10 @@
   {% if this.SECURITY_MODE != "block" %}{# "block" means "block site", so we simply remove the site from Apache #}
 
     {% if this.ENABLE_HTTP %}
-      {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", this.REV_PROFILES_BASE_PORT_HTTP, false) }}{# same balancer name as _common_co_location_params #}
-      {{ _common_upstream_block_co(this, "bp_cos", "", this.REV_PROFILES_BASE_PORT_HTTP, false) }}{# same balancer name as _common_co_location_params #}
+      {% set origins = this.ORIGIN_SERVERS_HTTP %}
+      {% set proto_port = this.REV_PROFILES_BASE_PORT_HTTP if origins[0]|truncate(5, True, "") == "http" else this.REV_PROFILES_BASE_PORT_HTTPS %}
+      {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", proto_port, false) }}{# same balancer name as _common_co_location_params #}
+      {{ _common_upstream_block_co(this, "bp_cos", "", proto_port, false) }}{# same balancer name as _common_co_location_params #}
       {% if this.ENABLE_VARNISH %}
 	{{ _common_upstream_block_varnish(this, 8080, false) }}
       {% endif %}
@@ -499,7 +501,7 @@ server {
         more_set_headers Alternate-Protocol:443:quic,p=1;
     {% endif %}
 
-      {% if this.ENABLE_VARNISH %}
+{% if this.ENABLE_VARNISH %}
 	{{ _common_frontend(this) }}
 	{{ _common_proxy_config_step1(this, co_profiles_mod, co_profiles, 8080, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
 	}
@@ -543,8 +545,10 @@ server {
 {% endif %}{# this.ENABLE_HTTP #}
 
 {% if this.ENABLE_HTTPS %}
-  {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", this.REV_PROFILES_BASE_PORT_HTTPS, true) }}{# same balancer name as _common_co_location_params #}
-  {{ _common_upstream_block_co(this, "bp_cos", "", this.REV_PROFILES_BASE_PORT_HTTPS, true) }}{# same balancer name as _common_co_location_params #}
+  {% set origins = this.ORIGIN_SERVERS_HTTPS %}
+  {% set proto_port = this.REV_PROFILES_BASE_PORT_HTTPS if origins[0]|truncate(5, True, "") == "https" else this.REV_PROFILES_BASE_PORT_HTTP %}
+  {{ _common_upstream_block_co(this, "bp_cos_bypass", "B", proto_port, true) }}{# same balancer name as _common_co_location_params #}
+  {{ _common_upstream_block_co(this, "bp_cos", "", proto_port, true) }}{# same balancer name as _common_co_location_params #}
   {% if this.ENABLE_VARNISH %}
     {{ _common_upstream_block_varnish(this, 8443, true) }}
   {% endif %}
