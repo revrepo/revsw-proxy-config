@@ -753,16 +753,16 @@ class NginxConfig(WebServerConfig):
     @staticmethod
     def get_all_active_domains():
         domains = []
-        base_dir = "/etc/nginx/sites-enabled"
+        conf_dir = "/etc/nginx/sites-available/"
+        base_dir = "/opt/revsw-config/apache"
         server_name_re = re.compile("^\s*server_name\s+((?!-)[A-Z\d-]{1,63}(?<!-)(\.(?!-)[A-Z\d-]{1,63}(?<!-))*)\s*;\s*$",
                                     re.IGNORECASE)
 
         paths = os.listdir(base_dir)
-
         for name in paths:
-            if name.startswith("000-") or not name.endswith(".conf"):
+            if name.endswith("generic-site"):
                 continue
-
+            name = conf_dir + name + ".conf"
             acfg = NginxConfig(WebServerConfig._site_name_from_config_file(name))
             if not acfg.exists():
                 continue
