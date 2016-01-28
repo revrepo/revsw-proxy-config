@@ -6,5 +6,9 @@ module.exports = {
       while (new Date().getTime() <= e) {
         ;
       }
+  },
+
+  getError: function (err) {
+    return err || Error('Caught undefined error');
   }
 };

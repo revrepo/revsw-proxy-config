@@ -5,6 +5,7 @@ var https = require('https');
 var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
+var util = require('./proxy-qa-libs/util.js');
 var sh = require('execSync');
 
 var apiLogin = config.get('qaUserWithAdminPerm'),
@@ -39,7 +40,7 @@ describe('Proxy QUIC protocol control', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('(smoke) should get system IP', function (done) {
@@ -51,7 +52,7 @@ describe('Proxy QUIC protocol control', function () {
       AccountIP = response_json.origin;
       ipCheckString = AccountIP + ', ' + testProxyIp;
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -71,7 +72,7 @@ describe('Proxy QUIC protocol control', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -81,7 +82,7 @@ describe('Proxy QUIC protocol control', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
 
   });
 
@@ -400,7 +401,7 @@ describe('Proxy QUIC protocol control', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 });
