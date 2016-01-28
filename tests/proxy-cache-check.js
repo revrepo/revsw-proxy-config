@@ -38,7 +38,7 @@ describe('Proxy cache check ', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should create new configuration for domain ' + newDomainName, function (done) {
@@ -58,7 +58,7 @@ describe('Proxy cache check ', function () {
       }
       domainConfigId = res.body.object_id;
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get domain config', function (done) {
@@ -72,7 +72,7 @@ describe('Proxy cache check ', function () {
         delete domainConfig.cname;
         delete domainConfig.domain_name;
         done();
-      }).catch(function (err) { done(err); });
+      }).catch(function (err) { done(util.getError(err)); });
   });
 
 //1
@@ -112,7 +112,7 @@ describe('Proxy cache check ', function () {
         throw rej;
       }
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -122,7 +122,7 @@ describe('Proxy cache check ', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should check url parameter with wildcard and edge_caching', function (done) {
@@ -137,7 +137,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-beresp-ttl'].should.equal('120.000');
       res.header['x-rev-beresp-grace'].should.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 //2
   it('should add browser_caching rules for css files and cookies for txt', function (done) {
@@ -199,7 +199,7 @@ describe('Proxy cache check ', function () {
         throw rej;
       }
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -209,7 +209,7 @@ describe('Proxy cache check ', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should check request to css file', function (done) {
@@ -224,7 +224,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-beresp-ttl'].should.equal('120.000');
       res.header['x-rev-beresp-grace'].should.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should check repeated request to css file', function (done) {
@@ -239,7 +239,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-beresp-ttl'].should.equal('120.000');
       res.header['x-rev-beresp-grace'].should.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 
@@ -255,7 +255,7 @@ describe('Proxy cache check ', function () {
       //res.header['x-rev-beresp-ttl'].should.equal('120.000');
       //res.header['x-rev-beresp-grace'].should.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should check repeated request to css file', function (done) {
@@ -275,7 +275,7 @@ describe('Proxy cache check ', function () {
       //res.header['x-rev-beresp-ttl'].should.equal('120.000');
       //res.header['x-rev-beresp-grace'].should.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //3
@@ -314,7 +314,7 @@ describe('Proxy cache check ', function () {
         throw rej;
       }
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -324,7 +324,7 @@ describe('Proxy cache check ', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
 
   });
 
@@ -342,7 +342,7 @@ describe('Proxy cache check ', function () {
       json_text = JSON.parse(res.text);
       json_text.cookies['myApp-token'].should.be.equal(json_text.cookies['myApp-token']);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should check repeated GET request to url and receiving cookies', function (done) {
@@ -358,7 +358,7 @@ describe('Proxy cache check ', function () {
       json_text = JSON.parse(res.text);
       json_text.cookies['myApp-token'].should.be.equal(json_text.cookies['myApp-token']);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should set js and css cache settings', function (done) {
@@ -396,7 +396,7 @@ describe('Proxy cache check ', function () {
         throw rej;
       }
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
@@ -406,7 +406,7 @@ describe('Proxy cache check ', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
 
   });
 
@@ -421,7 +421,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('public, max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static css file and receive HIT and max-age of 720000', function (done) {
@@ -434,7 +434,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('text/css');
       res.header['cache-control'].should.equal('public, max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static js file and receive MISS and max-age of 720000', function (done) {
@@ -447,7 +447,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('public, max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static js file and receive HIT and max-age of 720000', function (done) {
@@ -460,7 +460,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('application/x-javascript');
       res.header['cache-control'].should.equal('public, max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static jpg file and receive MISS and max-age of 7200', function (done) {
@@ -473,7 +473,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static jpg file and receive HIT and max-age of 720000', function (done) {
@@ -486,7 +486,7 @@ describe('Proxy cache check ', function () {
       res.header['content-type'].should.equal('image/jpeg');
       res.header['cache-control'].should.equal('max-age=720000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static js file and check cache age and that X-Rev-Cache-BE-1st-Byte-Time is not 0', function (done) {
@@ -502,7 +502,7 @@ describe('Proxy cache check ', function () {
       done();
       cacheAge = res.header.age;
       util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static js file and check cache age and that X-Rev-Cache-BE-1st-Byte-Time is 0', function (done) {
@@ -519,7 +519,7 @@ describe('Proxy cache check ', function () {
       cacheAge = res.header.age;
       done();
       util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static js file and check cache age and that X-Rev-Cache-BE-1st-Byte-Time is 0', function (done) {
@@ -535,7 +535,7 @@ describe('Proxy cache check ', function () {
       res.header.age.should.match(function(n) { return n > cacheAge; });
       done();
       //util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static css file and check X-Rev-beresp-ttl, X-Rev-object-ttl and X-Rev-Cache-Total-Time', function (done) {
@@ -555,7 +555,7 @@ describe('Proxy cache check ', function () {
       totalTime = res.header['x-rev-cache-total-time'];
       done();
       util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static css file and check X-Rev-beresp-ttl, X-Rev-object-ttl and X-Rev-Cache-Total-Time', function (done) {
@@ -580,7 +580,7 @@ describe('Proxy cache check ', function () {
       done();
 
       util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static css file and check X-Rev-beresp-ttl, X-Rev-object-ttl and X-Rev-Cache-Total-Time', function (done) {
@@ -602,7 +602,7 @@ describe('Proxy cache check ', function () {
       beresp[0].should.equal(ccheader[1]);
       parseInt(cacheAge).should.be.above(parseInt(revobj[0]));
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static jpeg file and check X-Rev-Cache-Hits, X-Rev-Beresp-Grace', function (done) {
@@ -617,7 +617,7 @@ describe('Proxy cache check ', function () {
       res.header.should.not.have.property(['x-rev-cache-hits']);
       //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP static jpeg file and check X-Rev-Cache-Hits, X-Rev-Beresp-Grace', function (done) {
@@ -632,7 +632,7 @@ describe('Proxy cache check ', function () {
       res.header['x-rev-cache-hits'].should.equal('1');
       //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS static jpeg file and check X-Rev-Cache-Hits, X-Rev-Beresp-Grace', function (done) {
@@ -648,7 +648,7 @@ describe('Proxy cache check ', function () {
       //res.header['x-rev-beresp-grace'].should.not.equal('0.000');
       done();
       //util.mySleep(1000);
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
     it('should get by HTTP and generate object for cache and check ETag', function (done) {
@@ -671,9 +671,9 @@ describe('Proxy cache check ', function () {
           firstetag.should.be.equal(res.header.etag);
           //console.log(res.header);
           done();
-        }).catch(function (err) { done(err); });
-      }).catch(function (err) { done(err); });
-    }).catch(function (err) { done(err); });
+        }).catch(function (err) { done(util.getError(err)); });
+      }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS and generate object for cache and check ETag', function (done) {
@@ -696,9 +696,9 @@ describe('Proxy cache check ', function () {
           firstetag.should.be.equal(res.header.etag);
           //console.log(res.header);
           done();
-        }).catch(function (err) { done(err); });
-      }).catch(function (err) { done(err); });
-    }).catch(function (err) { done(err); });
+        }).catch(function (err) { done(util.getError(err)); });
+      }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTP and generate object for cache and check ETag consistency checking', function (done) {
@@ -715,8 +715,8 @@ describe('Proxy cache check ', function () {
         firstetag.should.be.equal(res.header.etag);
         //console.log(res.header);
         done();
-      }).catch(function (err) { done(err); });
-    }).catch(function (err) { done(err); });
+      }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should get by HTTPS and generate object for cache and check ETag consistency checking', function (done) {
@@ -733,8 +733,8 @@ describe('Proxy cache check ', function () {
         firstetag.should.be.equal(res.header.etag);
         //console.log(res.header);
         done();
-      }).catch(function (err) { done(err); });
-    }).catch(function (err) { done(err); });
+      }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
   it('should delete the domain config', function (done) {
@@ -747,7 +747,7 @@ describe('Proxy cache check ', function () {
       responseJson.statusCode.should.be.equal(202);
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 });

@@ -6,6 +6,7 @@ var https = require('https');
 var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
+var util = require('./proxy-qa-libs/util.js');
 
 var apiLogin = config.get('qaUserWithAdminPerm'),
   apiPassword = config.get('qaUserWithAdminPermPassword'),
@@ -33,7 +34,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       AccountId = res.body.companyId[0];
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 //2
   it('should create new app', function (done) {
@@ -55,7 +56,7 @@ describe('Proxy X-Forwarded-For check', function () {
         appSdkKey = responseJson.sdk_key;
         appSdkDomain = responseJson.sdk_key + '.revsdk.net';
         done();
-      }).catch(function (err) { done(err); });
+      }).catch(function (err) { done(util.getError(err)); });
   });
 //3
   it('should wait max 120 seconds till the global and staging config statuses are "Published"', function (done) {
@@ -65,7 +66,7 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       res.should.be.equal(true);
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //4
@@ -82,7 +83,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 //5
   it('should make simple HTTP request and receive keep alive value step 2', function (done) {
@@ -98,7 +99,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //6
@@ -115,7 +116,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 //7
   it('should make simple HTTPS request and receive keep alive value step 2', function (done) {
@@ -131,7 +132,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //8
@@ -147,7 +148,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header.should.not.have.property('x-rev-origin-ka');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //9
@@ -163,7 +164,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //10
@@ -180,7 +181,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header.should.not.have.property('x-rev-origin-ka');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //11
@@ -197,7 +198,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header.should.not.have.property('x-rev-origin-ka');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //12
@@ -214,7 +215,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //13
@@ -231,7 +232,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //14
@@ -248,7 +249,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //15
@@ -265,7 +266,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //16
@@ -282,7 +283,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //17
@@ -299,7 +300,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //18
@@ -316,7 +317,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //19
@@ -333,7 +334,7 @@ describe('Proxy X-Forwarded-For check', function () {
       console.log(res.header['x-rev-origin-ka']);
       res.header['x-rev-origin-ka'].match(function(n) { return n >= 1; });
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 //20
@@ -346,7 +347,7 @@ describe('Proxy X-Forwarded-For check', function () {
       responseJson.statusCode.should.be.equal(200);
       responseJson.message.should.be.equal('The application has been successfully deleted');
       done();
-    }).catch(function (err) { done(err); });
+    }).catch(function (err) { done(util.getError(err)); });
   });
 
 });
