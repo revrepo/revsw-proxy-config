@@ -106,8 +106,7 @@ describe('Proxy cache check ', function () {
       }
     ];
     //console.log(domainConfig);
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -193,8 +192,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -308,8 +306,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -390,8 +387,7 @@ describe('Proxy cache check ', function () {
         }
       }
     ];
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

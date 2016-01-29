@@ -106,8 +106,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
 
   it('should change domain config and set enable_optimization to true', function (done) {
     domainConfig.rev_component_co.enable_optimization = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -156,8 +155,7 @@ describe('Proxy Pagespeed control enable_optimization', function () {
 
   it('should change domain config and set enable_optimization to false', function (done) {
     domainConfig.rev_component_co.enable_optimization = false;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

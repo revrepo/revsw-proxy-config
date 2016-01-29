@@ -125,8 +125,7 @@ describe('Proxy decompression control ', function () {
   it('should change domain config and disable enable_decompression and enable_cache', function (done) {
     domainConfig.rev_component_bp.enable_cache = false;
     domainConfig.rev_component_co.enable_decompression = false;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -181,8 +180,7 @@ describe('Proxy decompression control ', function () {
 
   it('should change domain config and set enable_decompression to true', function (done) {
     domainConfig.rev_component_co.enable_decompression = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

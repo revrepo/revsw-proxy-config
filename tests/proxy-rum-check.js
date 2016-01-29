@@ -95,8 +95,7 @@ describe('Proxy RUM control enable_rum', function () {
 
   it('should change domain config and set enable_rum to true', function (done) {
     domainConfig.rev_component_co.enable_rum = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -128,8 +127,7 @@ describe('Proxy RUM control enable_rum', function () {
 
   it('should change domain config and set enable_rum to false', function (done) {
     domainConfig.rev_component_co.enable_rum = false;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

@@ -378,8 +378,7 @@ describe('Proxy freshly domain control', function () {
 
   it('should change domain config and set block_crawlers to true', function (done) {
     domainConfig.rev_component_bp.block_crawlers = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
