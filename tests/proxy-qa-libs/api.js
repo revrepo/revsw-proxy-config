@@ -90,13 +90,13 @@ module.exports = {
   },
 
   // Update detailed domain configuration ( options mast be set with ?options, example '?options=verify_only'
-  putDomainConfigsById: function (domainID, options, body, url, login, password) {
+  putDomainConfigsById: function (domainID, body, url, login, password) {
     if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
       return request(url)
-        .put('/v1/domain_configs/' + domainID + options)
+        .put('/v1/domain_configs/' + domainID + '?options=publish')
         .auth(login, password)
         .send(body)
         .expect(200)

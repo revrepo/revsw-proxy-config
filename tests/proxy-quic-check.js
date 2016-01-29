@@ -107,8 +107,7 @@ describe('Proxy QUIC control enable_quic', function () {
 
   it('should change domain config and set enable_quic to true', function (done) {
     domainConfig.rev_component_bp.enable_quic = true;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -163,8 +162,7 @@ describe('Proxy QUIC control enable_quic', function () {
 
   it('should change domain config and set enable_quic to false', function (done) {
     domainConfig.rev_component_bp.enable_quic = false;
-    api.putDomainConfigsById(domainConfigId, '?options=publish', domainConfig,
-      testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

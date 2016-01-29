@@ -90,13 +90,13 @@ module.exports = {
   },
 
   // Update detailed domain configuration ( options mast be set with ?options, example '?options=verify_only'
-  putDomainConfigsById: function (domainID, options, body, url, token) {
+  putDomainConfigsById: function (domainID, body, url, token) {
     if (!domainID || domainID === '' || !url || url === '' || !token || token === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
       return request(url)
-        .put('/v1/domain_configs/' + domainID + options)
+        .put('/v1/domain_configs/' + domainID + '?options=publish')
         .set('Authorization', 'Bearer ' + token)
         .send(body)
         .expect(200)
