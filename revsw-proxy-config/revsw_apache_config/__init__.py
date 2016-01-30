@@ -753,28 +753,15 @@ class NginxConfig(WebServerConfig):
     @staticmethod
     def get_all_active_domains():
         domains = []
-        conf_dir = "/etc/nginx/sites-available/"
-        base_dir = "/opt/revsw-config/apache"
-        server_name_re = re.compile("^\s*server_name\s+((?!-)[A-Z\d-]{1,63}(?<!-)(\.(?!-)[A-Z\d-]{1,63}(?<!-))*)\s*;\s*$",
-                                    re.IGNORECASE)
-
+        base_dir = "/opt/revsw-config/apache/"
         paths = os.listdir(base_dir)
         for name in paths:
             if name.endswith("generic-site"):
                 continue
-            name = conf_dir + name + ".conf"
-            acfg = NginxConfig(WebServerConfig._site_name_from_config_file(name))
-            if not acfg.exists():
-                continue
-
-            # Find domain name by looking at the ServerName directive
-            with open(os.path.join(base_dir, name)) as f:
-                for line in f:
-                    m = server_name_re.match(line)
-                    if m:
-                        domains.append(m.group(1))
-                        break
-
+            main_file = base_dir + name + "/main.json"
+            json_main = open(main_file).read()
+            main_config = json.loads(json_main)
+            domains.append(main_config['bp']['SERVER_NAME'])
         return domains
 
     @staticmethod
