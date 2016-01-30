@@ -753,23 +753,15 @@ class NginxConfig(WebServerConfig):
     @staticmethod
     def get_all_active_domains():
         domains = []
-        conf_dir = "/etc/nginx/sites-available/"
         base_dir = "/opt/revsw-config/apache/"
         paths = os.listdir(base_dir)
         for name in paths:
             if name.endswith("generic-site"):
                 continue
-            conf_name = conf_dir + name + ".conf"
-            acfg = NginxConfig(WebServerConfig._site_name_from_config_file(conf_name))
-            if not acfg.exists():
-                continue
-            try:
-                main_file = base_dir + name + "/main.json"
-                json_main = open(main_file).read()
-                main_config = json.loads(json_main)
-                domains.append(main_config['bp']['SERVER_NAME'])
-            except:
-                pass
+            main_file = base_dir + name + "/main.json"
+            json_main = open(main_file).read()
+            main_config = json.loads(json_main)
+            domains.append(main_config['bp']['SERVER_NAME'])
         return domains
 
     @staticmethod
