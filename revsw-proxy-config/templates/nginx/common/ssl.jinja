@@ -42,10 +42,3 @@
 {{  _do_setup_proxy_only(this, site_cert_dir) }}
     # End SSL setup
 {%- endmacro %}
-
-{% macro setup_bp_co(this) %}
-    # Begin SSL setup
-{{  _do_setup_no_proxy(this, "/opt/revsw-config/apache/co-certs") }}
-{{  _do_setup_proxy_only(this, "/opt/revsw-config/apache/co-certs") }}
-    # End SSL setup
-{%- endmacro %}
