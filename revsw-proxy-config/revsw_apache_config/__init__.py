@@ -756,7 +756,7 @@ class NginxConfig(WebServerConfig):
         base_dir = "/opt/revsw-config/apache/"
         paths = os.listdir(base_dir)
         for name in paths:
-            if name.endswith("generic-site"):
+            if name.endswith("generic-site") or name.endswith("co-certs"):
                 continue
             main_file = base_dir + name + "/main.json"
             json_main = open(main_file).read()
