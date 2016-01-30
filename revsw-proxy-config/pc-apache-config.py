@@ -102,6 +102,10 @@ class ConfigCommon:
                 self.cmd_opts["ows-http-only"] = True
             elif opt.startswith("ows-https-only"):
                 self.cmd_opts["ows-https-only"] = True
+            elif opt == "http-only":
+                self.cmd_opts["https"] = False
+            elif opt == "https-only":
+                self.cmd_opts["http"] = False
             else:
                 fatal("Invalid config command option '%s'" % opt)
 
