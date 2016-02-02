@@ -849,7 +849,7 @@ sub vcl_backend_response {
 {{ _for_each_site_custom_vcl("backend_response", "bereq") }}
 
 # Don't cache requests with status code between 307 and 499
-if (beresp.status > 307 && beresp.status <= 499) {
+if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
 set beresp.ttl = 0s;
 {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
   chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
@@ -859,7 +859,7 @@ return (deliver);
 }
 
 # Serve stale object if problem with backend
-if (beresp.status >= 500) {
+if (beresp.status >= 500 && beresp.status != 508) {
 set beresp.ttl = 0s;
 {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
   chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
