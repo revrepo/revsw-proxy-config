@@ -9,14 +9,13 @@ var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
 
-var apiLogin = config.get('qaUserWithAdminPerm'),
-  apiPassword = config.get('qaUserWithAdminPermPassword'),
-  originHostHeader = 'httpbin_org.revsw.net',
+var originHostHeader = 'httpbin_org.revsw.net',
   originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
+  waitTime = config.get('waitTime'),
+  waitCount = config.get('waitCount'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
-  testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
   AccountId = '',
   domainConfig = '',
@@ -28,7 +27,7 @@ describe('Proxy PURGE check ', function () {
   this.timeout(120000);
 
   it('should return AccountId', function (done) {
-    api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.getUsersMyself().then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -47,8 +46,7 @@ describe('Proxy PURGE check ', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON), testAPIUrl, apiLogin,
-      apiPassword).then(function (res, rej) {
+    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -58,7 +56,7 @@ describe('Proxy PURGE check ', function () {
   });
 
   it('should get domain config', function (done) {
-    api.getDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword)
+    api.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -71,8 +69,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -171,7 +169,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -185,8 +183,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -246,7 +244,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -260,8 +258,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -321,7 +319,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -335,8 +333,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -396,7 +394,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -410,8 +408,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -471,7 +469,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -485,8 +483,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, waitCount, waitTime).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -546,7 +544,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword)
+    api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -560,8 +558,8 @@ describe('Proxy PURGE check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 120 seconds till the PURGE process statuses are "Success"', function (done) {
-    tools.waitPurgeStatus(requestID, testAPIUrl, apiLogin, apiPassword, 12, 10000).then(function (res, rej) {
+  it('should wait till the PURGE process statuses are "Success"', function (done) {
+    tools.waitPurgeStatus(requestID, 12, 10000).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -621,7 +619,7 @@ describe('Proxy PURGE check ', function () {
       }]
     };
 
-    api.postPurge(jsonPurge, testAPIUrl, apiLogin, apiPassword, 400)
+    api.postPurge(jsonPurge, 400)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -634,7 +632,7 @@ describe('Proxy PURGE check ', function () {
   });
 
   it('should delete the domain config', function (done) {
-    api.deleteDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

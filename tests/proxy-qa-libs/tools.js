@@ -180,7 +180,7 @@ module.exports = {
     });
   },
 
-  waitPublishStatus: function (domain, url, login, password, loops, timeout) {
+  waitPublishStatus: function (domain, loops, timeout) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,
@@ -192,7 +192,7 @@ module.exports = {
 
       async.eachSeries(a, function (n, callback) {
         setTimeout(function () {
-          api.getDomainConfigsByIdStatus(domain, url, login, password).then(function (res, rej) {
+          api.getDomainConfigsByIdStatus(domain).then(function (res, rej) {
             if (debug) {
               showDebugError(res.error);
             }
@@ -222,7 +222,7 @@ module.exports = {
     });
   },
 
-  waitAppPublishStatus: function (key, url, login, password, loops, timeout) {
+  waitAppPublishStatus: function (key, loops, timeout) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,
@@ -234,7 +234,7 @@ module.exports = {
 
       async.eachSeries(a, function (n, callback) {
         setTimeout(function () {
-          api.getAppConfigsStatus(key, url, login, password).then(function (res, rej) {
+          api.getAppConfigsStatus(key).then(function (res, rej) {
             if (debug) {
               showDebugError(res.error);
             }
@@ -264,7 +264,7 @@ module.exports = {
     });
   },
 
-  waitPurgeStatus: function (key, url, login, password, loops, timeout) {
+  waitPurgeStatus: function (key, loops, timeout) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,
@@ -276,7 +276,7 @@ module.exports = {
 
       async.eachSeries(a, function (n, callback) {
         setTimeout(function () {
-          api.getPurgeStatus(key, url, login, password).then(function (res, rej) {
+          api.getPurgeStatus(key).then(function (res, rej) {
             if (debug) {
               showDebugError(res.error);
             }
