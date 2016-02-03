@@ -10,21 +10,14 @@ var cds = require('./proxy-qa-libs/cds.js');
 var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
 
-var apiLogin = config.get('qaUserWithAdminPerm'),
-  apiPassword = config.get('qaUserWithAdminPermPassword'),
-  originServer = 'httpbin_org.revsw.net',
+var originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
-  testAPIUrl = config.get('testAPIUrl'),
-  testCDSUrl = config.get('testCDSServers1'),
   testGroup = config.get('test_group'),
-  token = config.get('token_with_api_scope'),
   AccountId = '',
   domainConfig = '',
   domainConfigId = '',
-  waitCount = 12,
-  waitTime = 10000,
   httpEnvJson = '/get?show_env=1',
   staticEnvJson = '/static/cgi-bin/envjson.cgi';
 
@@ -33,7 +26,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   this.timeout(120000);
 
   it('should return AccountId', function (done) {
-    api.getUsersMyself(testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.getUsersMyself().then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -54,8 +47,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON), testAPIUrl, apiLogin,
-      apiPassword).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -67,7 +59,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should get cds domain config', function (done) {
-    cds.getDomainConfigsById(domainConfigId, testCDSUrl, token)
+    cds.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -102,7 +94,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
     cdsConfig.co_apache_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-CO  $remote_addr;\n# END NGINX CONFIG';
     cdsConfig.updated_by = 'victor@revsw.com';
     //console.log(cdsConfig);
-    cds.putDomainConfigsById(domainConfigId, cdsConfig, testCDSUrl, token).then(function (res, rej) {
+    cds.putDomainConfigsById(domainConfigId, cdsConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -111,7 +103,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -121,7 +113,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should get domain config and origin_secure_protocol must be use_end_user_protocol', function (done) {
-    api.getDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword)
+    api.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -139,7 +131,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -212,7 +204,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
 
   it('should change domain config and set origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -223,7 +215,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -290,7 +282,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
 
   it('should change domain config and set origin_secure_protocol to https_only', function (done) {
     domainConfig.origin_secure_protocol = 'https_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -301,7 +293,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -377,7 +369,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
     domainConfig.origin_secure_protocol = 'http_only';
     domainConfig.rev_component_bp.enable_cache = false;
 
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -388,7 +380,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -455,7 +447,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
 
   it('should change domain config and set origin_secure_protocol to https_only', function (done) {
     domainConfig.origin_secure_protocol = 'https_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -466,7 +458,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -542,7 +534,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
     domainConfig.rev_component_bp.enable_cache = true;
     domainConfig.rev_component_bp.co_bypass_locations = ["/static"];
 
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -553,7 +545,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -621,7 +613,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
 
   it('should set co_bypass_locations and change domain config and set origin_secure_protocol to https_only', function (done) {
     domainConfig.origin_secure_protocol = 'https_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -632,7 +624,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -709,7 +701,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
     domainConfig.rev_component_bp.enable_cache = true;
     domainConfig.rev_component_bp.co_bypass_locations = ["/static"];
 
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -720,7 +712,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -795,7 +787,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
 
   it('should disable cache, set co_bypass_locations and change domain config and set origin_secure_protocol to https_only', function (done) {
     domainConfig.origin_secure_protocol = 'https_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -806,7 +798,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -891,7 +883,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
     domainConfig.rev_component_bp.enable_cache = true;
     domainConfig.rev_component_bp.cache_bypass_locations = ["/static"];
 
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -902,7 +894,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -967,7 +959,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
 
   it('should set cache_bypass_locations and change domain config and set origin_secure_protocol to https_only', function (done) {
     domainConfig.origin_secure_protocol = 'https_only';
-    api.putDomainConfigsById(domainConfigId, domainConfig, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -978,7 +970,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, testAPIUrl, apiLogin, apiPassword, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -1040,7 +1032,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
   });
 
   it('should delete the domain config', function (done) {
-    api.deleteDomainConfigsById(domainConfigId, testAPIUrl, apiLogin, apiPassword).then(function (res, rej) {
+    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

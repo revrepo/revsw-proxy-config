@@ -2,8 +2,13 @@
 
 var Promise = require('bluebird');
 var request = require('supertest');
+var config = require('config');
 var util = require('./util.js');
 var debug = false;
+
+var apiLogin = config.get('qaUserWithAdminPerm'),
+  apiPassword = config.get('qaUserWithAdminPermPassword'),
+  testAPIUrl = config.get('testAPIUrl');
 
 function showDebugError(message) {
   console.log("\x1b[36m");
@@ -24,14 +29,11 @@ module.exports = {
 // domain_configs
 
   // Get a list of domains registered for a customer
-  getDomainConfigs: function (url, login, password) {
-    if (!url || url === '' || !login || login === '' || !password || password === '') {
-      return;
-    }
+  getDomainConfigs: function () {
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/domain_configs')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -46,15 +48,15 @@ module.exports = {
   },
 
   // Create a new domain configuration
-  postDomainConfigs: function (body, url, login, password) {
-    if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  postDomainConfigs: function (body) {
+    if (!body || body === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .post('/v1/domain_configs')
-        .auth(login, password)
-        .send(JSON.parse(body))
+        .auth(apiLogin, apiPassword)
+        .send(body)
         .end(function (err, res) {
           if (err) {
             if (debug) {
@@ -68,14 +70,14 @@ module.exports = {
     });
   },
 
-  getDomainConfigsById: function (domainID, url, login, password) {
-    if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getDomainConfigsById: function (domainID) {
+    if (!domainID || domainID === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -90,14 +92,14 @@ module.exports = {
   },
 
   // Update detailed domain configuration ( options mast be set with ?options, example '?options=verify_only'
-  putDomainConfigsById: function (domainID, body, url, login, password) {
-    if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  putDomainConfigsById: function (domainID, body) {
+    if (!domainID || domainID === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .put('/v1/domain_configs/' + domainID + '?options=publish')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .send(body)
         .expect(200)
         .end(function (err, res) {
@@ -114,14 +116,14 @@ module.exports = {
   },
 
   // Delete a domain
-  deleteDomainConfigsById: function (domainID, url, login, password) {
-    if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  deleteDomainConfigsById: function (domainID) {
+    if (!domainID || domainID === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .del('/v1/domain_configs/' + domainID)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -137,14 +139,14 @@ module.exports = {
   },
 
   // Get the publishing status of a domain configuration
-  getDomainConfigsByIdStatus: function (domainID, url, login, password) {
-    if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getDomainConfigsByIdStatus: function (domainID) {
+    if (!domainID || domainID === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/config_status')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -159,14 +161,14 @@ module.exports = {
   },
 
   // Get a list of domain configuration versions
-  getDomainConfigsByIdVersions: function (domainID, url, login, password) {
-    if (!domainID || domainID === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getDomainConfigsByIdVersions: function (domainID) {
+    if (!domainID || domainID === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/versions')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -183,14 +185,14 @@ module.exports = {
 // apps
 
   // Get a list of currently registered mobile applications
-  getAppConfigs: function (url, login, password) {
-    if (!url || url === '' || !login || login === '' || !password || password === '') {
+  getAppConfigs: function (url) {
+    if (!url || url === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/apps')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -205,14 +207,14 @@ module.exports = {
   },
 
   // Get the publishing status of a domain configuration
-  getAppConfigsStatus: function (key, url, login, password) {
-    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getAppConfigsStatus: function (key) {
+    if (!key || key === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/apps/' + key + '/config_status')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -227,14 +229,14 @@ module.exports = {
   },
 
   // Get a list of domain configuration versions
-  getAppConfigsVersions: function (key, url, login, password) {
-    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getAppConfigsVersions: function (key) {
+    if (!key || key === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/apps/' + key + '/versions')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -249,15 +251,15 @@ module.exports = {
   },
 
   // Register a new mobile application configuration
-  postAppConfigs: function (body, url, login, password) {
-    if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  postAppConfigs: function (body) {
+    if (!body || body === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .post('/v1/apps')
-        .auth(login, password)
-        .send(JSON.parse(body))
+        .auth(apiLogin, apiPassword)
+        .send(body)
         .end(function (err, res) {
           if (err) {
             if (debug) {
@@ -272,14 +274,14 @@ module.exports = {
   },
 
   // Get current configuration of a mobile application
-  getAppById: function (key, url, login, password) {
-    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  getAppById: function (key) {
+    if (!key || key === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/apps/' + key)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -294,14 +296,14 @@ module.exports = {
   },
 
   // Update the current configuration of a mobile application ( options mast be set with ?options, example '?options=verify_only'
-  putAppById: function (key, options, body, url, login, password) {
-    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  putAppById: function (key, options, body) {
+    if (!key || key === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .put('/v1/apps/' + key + options)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .send(body)
         .expect(200)
         .end(function (err, res) {
@@ -318,14 +320,14 @@ module.exports = {
   },
 
   // Delete a mobile application configuration
-  deleteAppById: function (key, url, login, password) {
-    if (!key || key === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+  deleteAppById: function (key) {
+    if (!key || key === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .del('/v1/apps/' + key)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -343,17 +345,17 @@ module.exports = {
 // purge
 
   // Purge objects cached on Rev edge servers
-  postPurge: function (body, url, login, password, expect) {
+  postPurge: function (body, expect) {
     if (!expect || expect === '') {
       expect = 200;
     }
-    if (!body || body === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    if (!body || body === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .post('/v1/purge')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .send(body)
         .expect(expect)
         .end(function (err, res) {
@@ -370,17 +372,17 @@ module.exports = {
   },
 
   // Get the status of a previously submitted purge request
-  getPurgeStatus: function (id, url, login, password, expect) {
+  getPurgeStatus: function (id, expect) {
     if (!expect || expect === '') {
       expect = 200;
     }
-    if (!id || id === '' || !url || url === '' || !login || login === '' || !password || password === '') {
+    if (!id || id === '') {
       return;
     }
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/purge/' + id)
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(expect)
         .end(function (err, res) {
           if (err) {
@@ -397,14 +399,11 @@ module.exports = {
 // users
 
   // Get your user profile
-  getUsersMyself: function (url, login, password) {
-    if (!url || url === '' || !login || login === '' || !password || password === '') {
-      return;
-    }
+  getUsersMyself: function () {
     return new Promise(function (resolve, reject) {
-      return request(url)
+      return request(testAPIUrl)
         .get('/v1/users/myself')
-        .auth(login, password)
+        .auth(apiLogin, apiPassword)
         .expect(200)
         .end(function (err, res) {
           if (err) {
