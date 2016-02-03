@@ -62,7 +62,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          util.mySleep(2000);
+          util.mySleep(5000);
           return resolve(res);
         });
     });
