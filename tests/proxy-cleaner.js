@@ -36,21 +36,27 @@ describe('Proxy cleaner', function () {
 
   it('should remove don\'t use domains', function (done) {
     return new Promise(function () {
-      var finish = 0;
-      for (var i = 0; i < domains.length; i++) {
-        api.deleteDomainConfigsById(domains[i]).then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          var responseJson = JSON.parse(res.text);
-          //console.log(response_json);
-          responseJson.statusCode.should.be.equal(202);
-          responseJson.message.should.be.equal('The domain has been scheduled for removal');
-          finish++;
-          if(finish === domains.length) { done();}
-        }).catch(function (err) {
-          done(util.getError(err));
-        });
+      if (domains.length) {
+        var finish = 0;
+        for (var i = 0; i < domains.length; i++) {
+          api.deleteDomainConfigsById(domains[i]).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            var responseJson = JSON.parse(res.text);
+            //console.log(response_json);
+            responseJson.statusCode.should.be.equal(202);
+            responseJson.message.should.be.equal('The domain has been scheduled for removal');
+            finish++;
+            if (finish === domains.length) {
+              done();
+            }
+          }).catch(function (err) {
+            done(util.getError(err));
+          });
+        }
+      } else {
+        done();
       }
     });
     done();
