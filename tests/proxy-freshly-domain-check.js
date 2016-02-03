@@ -44,7 +44,7 @@ describe('Proxy freshly domain control', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -84,8 +84,8 @@ describe('Proxy freshly domain control', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, 18, 10000).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -382,8 +382,8 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, 18, 10000).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

@@ -12,8 +12,6 @@ var originHostHeader = 'httpbin_org.revsw.net',
   originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
@@ -47,7 +45,7 @@ describe('Proxy QUIC control enable_quic', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -71,8 +69,8 @@ describe('Proxy QUIC control enable_quic', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 3 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -114,8 +112,8 @@ describe('Proxy QUIC control enable_quic', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -169,8 +167,8 @@ describe('Proxy QUIC control enable_quic', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait max 2 minutes till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

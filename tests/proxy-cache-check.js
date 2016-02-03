@@ -13,8 +13,6 @@ var originHostHeader = 'httpbin_org.revsw.net',
   originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testGroup = config.get('test_group'),
   AccountId = '',
@@ -50,7 +48,7 @@ describe('Proxy cache check ', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -113,7 +111,7 @@ describe('Proxy cache check ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -199,7 +197,7 @@ describe('Proxy cache check ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -313,7 +311,7 @@ describe('Proxy cache check ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -394,7 +392,7 @@ describe('Proxy cache check ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

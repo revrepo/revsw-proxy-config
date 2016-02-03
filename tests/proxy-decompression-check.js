@@ -12,8 +12,6 @@ var originHostHeader = 'cdn.mbeans2.com',
   originServer = 'cdn.mbeans2.com',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
@@ -49,7 +47,7 @@ describe('Proxy decompression control ', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -78,7 +76,7 @@ describe('Proxy decompression control ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -133,7 +131,7 @@ describe('Proxy decompression control ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -188,7 +186,7 @@ describe('Proxy decompression control ', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

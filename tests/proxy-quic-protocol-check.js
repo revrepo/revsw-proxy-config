@@ -13,8 +13,6 @@ var originHostHeader = 'httpbin_org.revsw.net',
   testHTTPSUrl = config.get('test_proxy_https'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testGroup = config.get('test_group'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   AccountId = '',
   AccountIP = '',
   ipCheckString = '',
@@ -63,7 +61,7 @@ describe('Proxy QUIC protocol control', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -73,7 +71,7 @@ describe('Proxy QUIC protocol control', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

@@ -14,8 +14,6 @@ var originServer = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   testGroup = config.get('test_group'),
   AccountId = '',
   domainConfig = '',
@@ -49,7 +47,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -105,7 +103,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -133,7 +131,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -217,7 +215,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -295,7 +293,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -382,7 +380,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -460,7 +458,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -547,7 +545,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -626,7 +624,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -714,7 +712,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -800,7 +798,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -896,7 +894,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -972,7 +970,7 @@ describe('Proxy origin secure protocol checker with setted cache_bypass_location
   });
 
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

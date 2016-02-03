@@ -54,7 +54,7 @@ module.exports = {
       return request(testCDSUrl)
         .post('/v1/domain_configs')
         .set('Authorization', 'Bearer ' + token)
-        .send(JSON.parse(body))
+        .send(body)
         .end(function (err, res) {
           if (err) {
             if (debug) {
@@ -254,7 +254,7 @@ module.exports = {
       return request(testCDSUrl)
         .post('/v1/apps')
         .set('Authorization', 'Bearer ' + token)
-        .send(JSON.parse(body))
+        .send(body)
         .end(function (err, res) {
           if (err) {
             if (debug) {

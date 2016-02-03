@@ -10,8 +10,6 @@ var util = require('./proxy-qa-libs/util.js');
 
 var originHostHeader = 'httpbin_org.revsw.net',
   testHTTPSUrl = config.get('test_proxy_https'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   AccountId = '',
   appKeyID = '',
   appSdkKey = '',
@@ -38,7 +36,7 @@ describe('Proxy X-Forwarded-For check', function () {
       "app_platform": "Android"
     };
 
-    api.postAppConfigs(JSON.stringify(createAppJSON))
+    api.postAppConfigs(createAppJSON)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -54,7 +52,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 //3
   it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitAppPublishStatus(appKeyID, waitCount, waitTime).then(function (res, rej) {
+    tools.waitAppPublishStatus(appKeyID).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

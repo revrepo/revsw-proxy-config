@@ -5,7 +5,10 @@ var util = require('./util.js');
 var Promise = require('bluebird');
 var request = require('supertest');
 var async = require('async');
-var debug = false;
+var config = require('config');
+var debug = false,
+  timeout = config.get('waitTime'),
+  loops = config.get('waitCount');
 
 function showDebugError(message) {
   console.log("\x1b[36m");
@@ -180,7 +183,7 @@ module.exports = {
     });
   },
 
-  waitPublishStatus: function (domain, loops, timeout) {
+  waitPublishStatus: function (domain) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,
@@ -222,7 +225,7 @@ module.exports = {
     });
   },
 
-  waitAppPublishStatus: function (key, loops, timeout) {
+  waitAppPublishStatus: function (key) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,
@@ -264,7 +267,7 @@ module.exports = {
     });
   },
 
-  waitPurgeStatus: function (key, loops, timeout) {
+  waitPurgeStatus: function (key) {
     return new Promise(function (resolve, reject) {
       var a = [],
         publishFlag = false,

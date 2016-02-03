@@ -14,8 +14,6 @@ var originHostHeader = 'httpbin_org.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testGroup = config.get('test_group'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   AccountId = '',
   domainConfig = '',
   domainConfigId = '',
@@ -46,7 +44,7 @@ describe('Proxy RUM control enable_rum', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -71,7 +69,7 @@ describe('Proxy RUM control enable_rum', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -102,7 +100,7 @@ describe('Proxy RUM control enable_rum', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -134,7 +132,7 @@ describe('Proxy RUM control enable_rum', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

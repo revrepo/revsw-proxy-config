@@ -15,8 +15,6 @@ var originHostHeader = 'httpbin_org.revsw.net',
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
-  waitTime = config.get('waitTime'),
-  waitCount = config.get('waitCount'),
   AccountId = '',
   AccountIP = '',
   domainConfig = '',
@@ -65,7 +63,7 @@ describe('Proxy X-Forwarded-For check', function () {
       'tolerance': '0'
     };
 
-    api.postDomainConfigs(JSON.stringify(createDomainConfigJSON)).then(function (res, rej) {
+    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -75,7 +73,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId, waitCount, waitTime).then(function (res, rej) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -199,7 +197,7 @@ describe('Proxy X-Forwarded-For check', function () {
       "app_platform": "Android"
     };
 
-    api.postAppConfigs(JSON.stringify(createAppJSON))
+    api.postAppConfigs(createAppJSON)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -216,7 +214,7 @@ describe('Proxy X-Forwarded-For check', function () {
   });
 
   it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitAppPublishStatus(appKeyID, waitCount, waitTime).then(function (res, rej) {
+    tools.waitAppPublishStatus(appKeyID).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
