@@ -29,12 +29,11 @@ var https = require('https');
 
 
 describe('Nginx custom commands', function() {
+  this.timeout(60000);
     var url = 'http://testsjc20-bp01.revsw.net';
     var testDomain = 'qa-api-test-proxy-nginx-custom-commands.revsw.net'
     var urls = 'https://testsjc20-bp01.revsw.net';
     var api_url = 'https://TESTSJC20-API01.revsw.net';
-    var api_user = 'purge_api_test@revsw.com';
-    var api_pass = '123456789123456789';
     var apiDomainURL = '/v1/domains/56188c7e144de0433c4e68f8';
     var apiDomainDetailsURL = '/v1/domains/56188c7e144de0433c4e68f8/details';
     var domainJson;
@@ -43,7 +42,6 @@ describe('Nginx custom commands', function() {
     var qaUserWithAdminPermPassword = 'password1';
 
   xit('should read basic configuration for domain ' + testDomain, function(done) {
-    this.timeout(600000);
     request(api_url).get(apiDomainURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword).expect(200).end(function(err, res) {
       if (err) {
         throw err;
@@ -56,7 +54,6 @@ describe('Nginx custom commands', function() {
   });
 
   xit('should write back the basic configuration for domain ' + testDomain, function(done) {
-    this.timeout(600000);
     request(api_url).put(apiDomainURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .send(domainJson)
@@ -72,7 +69,6 @@ describe('Nginx custom commands', function() {
   });
 
   xit('should read detailed configuration for domain ' + testDomain, function(done) {
-    this.timeout(600000);
     request(api_url).get(apiDomainDetailsURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword).expect(200).end(function(err, res) {
       if (err) {
         throw err;
@@ -85,7 +81,6 @@ describe('Nginx custom commands', function() {
   });
 
   xit('should write back the detailed configuration for domain ' + testDomain, function(done) {
-    this.timeout(600000);
     request(api_url).put(apiDomainDetailsURL).auth(qaUserWithAdminPerm, qaUserWithAdminPermPassword)
       .expect(200)
       .send(domainJsonDetails)

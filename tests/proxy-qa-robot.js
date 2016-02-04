@@ -29,9 +29,9 @@ var fs = require('fs');
 var https = require('https');
 //var clientCertificateAuth = require('client-certificate-auth');
 
-
-
 describe('Basic tests', function() {
+  this.timeout(60000);
+
   var url = 'http://testsjc20-bp01.revsw.net';
   var urls = 'https://testsjc20-bp01.revsw.net';
   var api_url = 'https://TESTSJC20-API01.revsw.net';
@@ -46,16 +46,8 @@ describe('Basic tests', function() {
   var test_object_js_2 = '/test_object_purge_api02.js';
   var test_object_css_1 = '/b.find.1.0.55.css';
   var test_object_jpg_1 = '/news-title.jpg';
-  var bypass_test_object_jpg_1 = '/bypass/test-64k-file.jpg';
   var rum_page_test = '/rum-test.html';
-  var third_party_test = '/parse.html';
-  var third_party_object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg';
-  var third_party_object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg';
-  var third_party_object_3 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg';
-  var third_party_object_4 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg';
-  var third_party_object_5 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg';
   var ssl_ciphers_test = ["DHE-RSA-AES128-SHA256", "DHE-RSA-AES256-SHA256", "DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-SHA256", "ECDHE-RSA-AES256-SHA384", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384", "RC4-SHA", "DES-CBC3-SHA", "RC4-SHA", "DES-CBC3-SHA", "DHE-RSA-AES128-SHA", "DHE-RSA-AES256-SHA", "DHE-RSA-CAMELLIA128-SHA", "DHE-RSA-CAMELLIA256-SHA", "DHE-RSA-SEED-SHA", "ECDHE-RSA-RC4-SHA", "ECDHE-RSA-DES-CBC3-SHA", "ECDHE-RSA-AES128-SHA", "ECDHE-RSA-AES256-SHA"]
-  var ssl_ciphers_test_one = 'DHE-RSA-AES128-SHA256';
   var etagobject = '/etag/item.dat';
   var etagfgen = '/cgi-bin/etag.cgi';
   var expirehead = '/test-cache.js';
@@ -106,9 +98,7 @@ describe('Basic tests', function() {
 
   // Purge
 
-
   it('Flush the cache cache config one', function(done) {
-    this.timeout(60000);
     request(api_url)
       .post('/v1/purge')
       .auth(api_user, api_pass)
@@ -143,10 +133,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('Flush the cache for cache config two', function(done) {
-    this.timeout(60000);
     request(api_url)
       .post('/v1/purge')
       .auth(api_user, api_pass)
@@ -180,7 +167,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
 
   /******************
 
@@ -263,18 +249,13 @@ describe('Basic tests', function() {
 
   ***********************/
 
-
   //
   // GET
   //
 
   // first
 
-
-
-
   it('Testing object for cache MISS and max-age of 360000', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -290,9 +271,7 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Testing object for cache MISS and max-age of 290304000 on base config', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache_two)
@@ -308,9 +287,7 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('HTTP DSA  GET cache test and checking max-age of 0', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_dsa)
@@ -326,10 +303,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('HTTPS DSA GET cache test and checking max-age of 0', function(done) {
-    this.timeout(900000);
     request(urls)
       .get(test_object_js_1)
       .set('Host', domain_dsa)
@@ -345,16 +319,11 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   //
   // Basic GET
   //
 
-
   it('Simple HTTP GET test object and max-age of 360000 for JS', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -370,10 +339,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('Simple HTTP GET test object and max-age of 99999 for CSS', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_css_1)
       .set('Host', domain_cache)
@@ -388,8 +354,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
 
   it('Simple HTTP GET test object and max-age of 37731 for JPG', function(done) {
     request(url)
@@ -407,9 +371,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('HTTPS GET test object', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -423,7 +384,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
 
   it('Simple HTTP  GET test dynamic object', function(done) {
     request(url)
@@ -439,7 +399,6 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Simple HTTPS GET test dynamic object', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -454,12 +413,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-  //
-  //  robots.txt
-  //
-
-
   it('HTTP Testing to ensure there is NO robots.txt', function(done) {
     request(url)
       .get('/robots.txt')
@@ -471,9 +424,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('HTTPS Testing to ensure there is NO robots.txt', function(done) {
     request(urls)
       .get('/robots.txt')
@@ -484,8 +434,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
 
   it('HTTP Testing to ensure there is a robots.txt', function(done) {
     request(url)
@@ -502,8 +450,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('HTTPS Testing to ensure there is a robots.txt', function(done) {
     request(urls)
       .get('/robots.txt')
@@ -518,13 +464,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
-  //
-  // RUM
-  //
-
-
 
   it('HTTP Test to see that boomerang-rev.min.js is injected', function(done) {
     request(url)
@@ -556,7 +495,6 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('HTTP Test to see that boomerang-rev.min.js is NOT injected', function(done) {
     request(url)
       .get(rum_page_test)
@@ -572,7 +510,6 @@ describe('Basic tests', function() {
         }
       });
   });
-
 
   it('HTTPS Test to see that boomerang-rev.min.js is NOT injected', function(done) {
     request(urls)
@@ -590,13 +527,10 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   i = 1;
   for (; ssl_ciphers_test[i];) {
     cipher = (ssl_ciphers_test[i]);
-    //it('SSL Cert Check for ' + ssl_ciphers_test[i], function(done) 
+    //it('SSL Cert Check for ' + ssl_ciphers_test[i], function(done)
     opensslcall(cipher);
     i++;
   }
@@ -630,18 +564,7 @@ describe('Basic tests', function() {
     });
   }
 
-
-
-
-
-
-  // etag_switch_obj
-
-
-
-
   it('ETag Test RMA - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_rma)
@@ -668,11 +591,8 @@ describe('Basic tests', function() {
           });
       });
   });
-
-
 
   it('ETag Test RMA - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_rma)
@@ -700,14 +620,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
-
-
   it('ETag Test DSA - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_dsa)
@@ -734,10 +647,8 @@ describe('Basic tests', function() {
           });
       });
   });
-
 
   it('ETag Test DSA - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_dsa)
@@ -765,10 +676,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('ETag Test cache - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_cache)
@@ -796,12 +704,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
   it('ETag Test cache - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_cache)
@@ -829,10 +732,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('ETag consistency checking - caches - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_cache)
@@ -851,7 +751,6 @@ describe('Basic tests', function() {
   });
 
   it('ETag consistency checking - DSA - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_dsa)
@@ -870,7 +769,6 @@ describe('Basic tests', function() {
   });
 
   it('ETag consistency checking - cache - HTTP', function(done) {
-    this.timeout(60000);
     request(url)
       .get(etagobject)
       .set('Host', domain_rma)
@@ -888,10 +786,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('ETag consistency checking - caches - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_cache)
@@ -910,7 +805,6 @@ describe('Basic tests', function() {
   });
 
   it('ETag consistency checking - DSA - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_dsa)
@@ -929,7 +823,6 @@ describe('Basic tests', function() {
   });
 
   it('ETag consistency checking - cache - HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(etagobject)
       .set('Host', domain_rma)
@@ -947,16 +840,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
-
-
-
-
   it('Checking Age on cache config for js', function(done) {
-    this.timeout(60000);
     request(url)
       .get(expirehead)
       .expect('X-Rev-Cache', 'MISS')
@@ -982,7 +866,6 @@ describe('Basic tests', function() {
   });
 
   it('Checking Age on cache config for RMA', function(done) {
-    this.timeout(60000);
     request(url)
       .get(expirehead)
       .expect('X-Rev-Cache', 'MISS')
@@ -1009,7 +892,6 @@ describe('Basic tests', function() {
   });
 
   it('Checking Age on cache config for DSA', function(done) {
-    this.timeout(60000);
     request(url)
       .get(expirehead)
       .expect('Content-Type', /javascript/)
@@ -1032,7 +914,6 @@ describe('Basic tests', function() {
           });
       });
   });
-
 
   it('Testing test_object_js_2 for cache MISS and max-age of 360000', function(done) {
     request(url)
@@ -1066,9 +947,7 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Flush the single object test_object_js_2', function(done) {
-    this.timeout(900000);
     request(api_url)
       .post('/v1/purge')
       .auth(api_user, api_pass)
@@ -1103,10 +982,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('Testing test_object_js_1 for cache HIT and max-age of 360000', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -1122,9 +998,7 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Testing test_object_js_2 for cache MISS and max-age of 360000', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_2)
       .set('Host', domain_cache)
@@ -1140,11 +1014,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('Testing test_object_js_2 for cache HIT and max-age of 360000', function(done) {
-    this.timeout(900000);
     request(url)
       .get(test_object_js_2)
       .set('Host', domain_cache)
@@ -1159,7 +1029,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
 
   it('Create the file to test Last-Modified HTTP', function(done) {
     request(url)
@@ -1206,9 +1075,7 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Remove the file to test stale cache HTTP', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(rmstale)
       .set('Host', domain_cache)
@@ -1221,7 +1088,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
 
   it('Create the file to test Last-Modified HTTPS', function(done) {
     request(url)
@@ -1271,10 +1137,7 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('Remove the file to test stale cache HTTPS', function(done) {
-    this.timeout(60000);
     request(urls)
       .get(rmstale)
       .set('Host', domain_cache)
@@ -1286,9 +1149,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
-
 
   it('Testing object for X-Rev-Cache-BE-1st-Byte-Time is 0', function(done) {
     request(url)
@@ -1305,21 +1165,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
-
-
-
-
-
-
-
-  ///////////////////////////////////////
-
-
-
-
-
 
   it('Testing cache config object for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
     request(url)
@@ -1340,6 +1185,7 @@ describe('Basic tests', function() {
         done();
       });
   });
+
   it('Testing cache config object for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1360,10 +1206,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
   it('Testing RMA config object for x-rev-be-1st-byte-time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1373,7 +1215,7 @@ describe('Basic tests', function() {
       .end(function(err, res) {
         if (err) {
           throw err;
-        } 
+        }
         request(url)
           .get(test_object_js_1)
           .set('Host', domain_rma)
@@ -1385,13 +1227,14 @@ describe('Basic tests', function() {
             }
             res.should.have.status(200);
             if (res.headers['x-rev-be-1st-byte-time'] != 0) {
-    
+
               throw new Error("There is a problem with the x-rev-be-1st-byte-time");
             }
             done();
         });
       });
   });
+
   it('Testing RMA config object for x-rev-be-1st-byte-time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1413,10 +1256,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
   it('Testing cache config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1437,6 +1276,7 @@ describe('Basic tests', function() {
         done();
       });
   });
+
   it('Testing cache config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1458,9 +1298,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('Testing RMA config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1481,6 +1318,7 @@ describe('Basic tests', function() {
         done();
       });
   });
+
   it('Testing RMA config object for X-Rev-Cache-BE-1st-Byte-Time is 0 HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1526,7 +1364,6 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Testing cache config object X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1550,10 +1387,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
-
-
-
 
   it('Testing rma config object X-Rev-beresp-ttl matches max-age HTTP', function(done) {
     request(url)
@@ -1579,7 +1412,6 @@ describe('Basic tests', function() {
       });
   });
 
-
   it('Testing rma config object X-Rev-beresp-ttl matches max-age HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1604,13 +1436,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-  /////
-
-
-
-
   it('Testing cache config object x-rev-cache-hits HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1624,7 +1449,6 @@ describe('Basic tests', function() {
         }
         var hitsfirst = res.headers['x-rev-cache-hits'];
         res.should.have.status(200);
-
 
         request(urls)
           .get(test_object_js_1)
@@ -1643,8 +1467,6 @@ describe('Basic tests', function() {
           });
       });
   });
-
-
 
   it('Testing cache config object x-rev-cache-hits HTTP', function(done) {
     request(url)
@@ -1678,6 +1500,7 @@ describe('Basic tests', function() {
           });
       });
   });
+
   it('Testing rma config object x-rev-cache-hits HTTPS', function(done) {
     request(urls)
       .get(test_object_js_1)
@@ -1691,7 +1514,6 @@ describe('Basic tests', function() {
         }
         var hitsfirst = res.headers['x-rev-cache-hits'];
         res.should.have.status(200);
-
 
         request(urls)
           .get(test_object_js_1)
@@ -1711,8 +1533,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
   it('Testing rma config object x-rev-cache-hits HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1726,7 +1546,6 @@ describe('Basic tests', function() {
         }
         var hitsfirst = res.headers['x-rev-cache-hits'];
         res.should.have.status(200);
-
 
         request(url)
           .get(test_object_js_1)
@@ -1745,14 +1564,6 @@ describe('Basic tests', function() {
           });
       });
   });
-
-
-
-
-
-
-
-
 
   it('Testing object cache config X-Rev-beresp-grace is 0 - HTTPS', function(done) {
     request(urls)
@@ -1773,9 +1584,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('Testing object cache config X-Rev-beresp-grace is 0 - HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1794,7 +1602,6 @@ describe('Basic tests', function() {
         done();
       });
   });
-
 
   it('Testing object rma config X-Rev-beresp-grace is 0 - HTTPS', function(done) {
     request(urls)
@@ -1815,9 +1622,6 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
   it('Testing object rma config X-Rev-beresp-grace is 0 - HTTP', function(done) {
     request(url)
       .get(test_object_js_1)
@@ -1837,19 +1641,9 @@ describe('Basic tests', function() {
       });
   });
 
-
-
-
-
-
-
-
   // ENDENDEND
 });
 // ENDENDEND
-
-
-
 
 function sleep(milliseconds) {
   var start = new Date().getTime();

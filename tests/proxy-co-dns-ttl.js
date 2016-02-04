@@ -28,26 +28,13 @@ var util = require('./proxy-qa-libs/util.js');
 
 describe('DNS TTL Test', function() {
   var url = 'http://testsjc20-bp01.revsw.net';
-  var urls = 'https://testsjc20-bp01.revsw.net';
-  var api_url = 'https://TESTSJC20-API01.revsw.net';
-  var api_checkstatus_url = '/checkStatus';
-  var api_user = 'purge_api_test@revsw.com';
-  var api_pass = '123456789123456789';
   var domain_cache = 'test-proxy-cache-config.revsw.net';
-  var domain_cache_two = 'test-proxy-cache-config-02.revsw.net';
-  var domain_dsa = 'test-proxy-dsa-config.revsw.net';
-  var domain_rma = 'test-proxy-rma-config.revsw.net';
-
-
   var nsone_header = 'X-NSONE-Key';
   var nsone_key = 'WCA2e7hfa5xF4EFWYnpM';
   var nsone_api = 'https://api.nsone.net';
   var nsone_url = '/v1/zones/revqa.net/testsjc20-co-test.revqa.net/A';
 
   this.timeout(60000);
-
-
-
 
   var JSON50 = {
     "id": "55d4e4122db1566b3b89fb9a",
