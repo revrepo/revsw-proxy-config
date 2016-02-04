@@ -283,7 +283,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
 		]
 	});
 	test_cache_time(0, {
@@ -300,7 +300,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
 		]
 	});
 	test_cache_time(2000, {
@@ -317,7 +317,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
 		]
 	});
 });
@@ -469,7 +469,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+ 			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
  		]
  	});
  	test_cache_time(1000, {
@@ -547,7 +547,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+ 			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
  		]
  	});
  	test_cache_time(6000, {
@@ -563,7 +563,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
+ 			{ 'k': 'Cache-Control', 'v': /max-age=0, no-cache, no-store/ }
  		]
  	});
 	test_cache_time(0, {
