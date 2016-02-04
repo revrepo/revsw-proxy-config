@@ -32,6 +32,8 @@ var https = require('https');
 
 
 describe('Basic stale tests', function() {
+  this.timeout(60000);
+
     var url = 'http://testsjc20-bp01.revsw.net';
     var urls = 'https://testsjc20-bp01.revsw.net';
     var api_url = 'https://TESTSJC20-API01.revsw.net';
@@ -40,31 +42,9 @@ describe('Basic stale tests', function() {
     var api_pass = 'password1';
     var domain_cache = 'test-proxy-cache-config.revsw.net';
     var domain_cache_two = 'test-proxy-cache-config-02.revsw.net';
-    var domain_dsa = 'test-proxy-dsa-config.revsw.net';
-    var domain_rma = 'test-proxy-rma-config.revsw.net';
-    var test_object_js_1 = '/test_object_purge_api01.js';
-    var test_object_js_2 = '/test_object_purge_api02.js';
-    var test_object_css_1 = '/b.find.1.0.55.css';
-    var test_object_jpg_1 = '/news-title.jpg';
-    var bypass_test_object_jpg_1 = '/bypass/test-64k-file.jpg';
-    var rum_page_test = '/rum-test.html';
-    var third_party_test = '/parse.html';
-    var third_party_object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg';
-    var third_party_object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg';
-    var third_party_object_3 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg';
-    var third_party_object_4 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg';
-    var third_party_object_5 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg';
-    var ssl_ciphers_test_one = 'DHE-RSA-AES128-SHA256';
-    var etagobject = '/etag/item.dat';
-    var etagfgen = '/cgi-bin/etag.cgi';
-    var expirehead = '/test-cache.js';
     var mkstale = '/cgi-bin/mkstale.cgi';
     var rmstale = '/cgi-bin/rmstale.cgi';
     var stalefile = '/stale/stalecontent.js';
-    var mkstale_perm = '/cgi-bin/mkstale-perm.cgi';
-    var rmstale_perm = '/cgi-bin/rmstale-perm.cgi';
-    var stalefile_perm = '/stale-perm/stalecontent.dat';
-
 
     // Removed to operate with new API gateway
     // "version": 1,
@@ -87,30 +67,11 @@ describe('Basic stale tests', function() {
             }
         }]
     }
-    var JSON3 = {
-        "domainName": "test-proxy-cache-config.revsw.net",
-        "purges": [{
-            "url": {
-                "is_wildcard": true,
-                "expression": "/test_object_purge_api02.js"
-            }
-        }]
-    }
-    var JSON4 = {
-        "domainName": "test-proxy-cache-config.revsw.net",
-        "purges": [{
-            "url": {
-                "is_wildcard": true,
-                "expression": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/*"
-            }
-        }]
-    }
 
     // Purge
 
 
     it('Flush the cache cache config one', function(done) {
-        this.timeout(900000);
         request(api_url)
             .post('/v1/purge')
             .auth(api_user, api_pass)
@@ -148,7 +109,6 @@ describe('Basic stale tests', function() {
 
 
     it('Flush the cache for cache config two', function(done) {
-        this.timeout(900000);
         request(api_url)
             .post('/v1/purge')
             .auth(api_user, api_pass)
@@ -192,7 +152,6 @@ describe('Basic stale tests', function() {
 
 
     it('Create, test, remove and test a file for stale cache HTTP', function(done) {
-        this.timeout(900000);
         request(url)
             .get(mkstale)
             .set('Host', domain_cache)
@@ -262,7 +221,6 @@ describe('Basic stale tests', function() {
     });
 
     it('Create, test, remove and test a file for stale cache HTTPS', function(done) {
-        this.timeout(900000);
         request(urls)
             .get(mkstale)
             .set('Host', domain_cache)
@@ -329,7 +287,6 @@ describe('Basic stale tests', function() {
 
 /**********************
     it('Create, test, remove and test a file for stale perm cache HTTP', function(done) {
-        this.timeout(90000);
         request(url)
             .get(mkstale_perm)
             .set('Host', domain_cache)

@@ -31,34 +31,12 @@ var https = require('https');
 
 describe('Proxy ACL tests', function() {
   var url = 'http://testsjc20-bp01.revsw.net';
-  var urls = 'https://testsjc20-bp01.revsw.net';
   var api_url = 'https://TESTSJC20-API01.revsw.net';
-  var api_checkstatus_url = '/checkStatus';
   var api_user = 'purge_api_test@revsw.com';
   var api_pass = '123456789123456789';
-  var domain_cache = 'test-proxy-cache-config.revsw.net';
-  var domain_cache_two = 'test-proxy-cache-config-02.revsw.net';
-  var domain_dsa = 'test-proxy-dsa-config.revsw.net';
-  var domain_rma = 'test-proxy-rma-config.revsw.net';
   var domain_acl = 'test-proxy-acl-deny-except.revsw.net';
   var test_object_js_1 = '/test_object_purge_api01.js';
-  var test_object_js_2 = '/test_object_purge_api02.js';
-  var test_object_css_1 = '/b.find.1.0.55.css';
-  var test_object_jpg_1 = '/news-title.jpg';
-  var bypass_test_object_jpg_1 = '/bypass/test-64k-file.jpg';
-  var rum_page_test = '/rum-test.html';
-  var third_party_test = '/parse.html';
-  var third_party_object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg';
-  var third_party_object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg';
-  var third_party_object_3 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg';
-  var third_party_object_4 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg';
-  var third_party_object_5 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg';
-  var etagobject = '/etag/item.dat';
-  var etagfgen = '/cgi-bin/etag.cgi';
-  var expirehead = '/test-cache.js';
-  var mkstgale = '/cgi-bin/mkstale.cgi';
   var rmstale = '/cgi-bin/rmstale.cgi';
-  var stalefile = '/stale/stalecontent.js';
   var aclapiurl = '/v1/domains/55a2c050a9d291d85d831317/details';
 
   //  Version was removed as the new API code did not support version

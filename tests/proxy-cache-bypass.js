@@ -32,20 +32,8 @@ var https = require('https');
 describe('Proxy cache bypass feature', function() {
   var url = 'http://testsjc20-bp01.revsw.net';
   var urls = 'https://testsjc20-bp01.revsw.net';
-  var api_url = 'https://TESTSJC20-API01.revsw.net';
-  var api_checkstatus_url = '/v1/purge/';
-  var api_user = 'purge_api_test@revsw.com';
-  var api_pass = '123456789123456789';
   var domain_cache = 'test-proxy-cache-config.revsw.net';
-  var domain_cache_two = 'test-proxy-cache-config-02.revsw.net';
-  var domain_dsa = 'test-proxy-dsa-config.revsw.net';
-  var domain_rma = 'test-proxy-rma-config.revsw.net';
-  var test_object_js_1 = '/test_object_purge_api01.js';
-  var test_object_js_2 = '/test_object_purge_api02.js';
-  var test_object_css_1 = '/b.find.1.0.55.css';
-  var test_object_jpg_1 = '/news-title.jpg';
   var bypass_test_object_jpg_1 = '/bypass/test-64k-file.jpg';
-  var etagfgen = '/cgi-bin/etag.cgi';
 
 
   it('should not see X-Rev-Cache header in response for HTTP test object', function(done) {
