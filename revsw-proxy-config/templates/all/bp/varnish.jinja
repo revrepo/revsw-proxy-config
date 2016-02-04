@@ -942,6 +942,7 @@ unset beresp.http.Expires;
   return (retry);
   }
   else if (beresp.status != 200) { # don't follow origin redirects
+  set beresp.http.Cache-Control = "max-age=0, no-cache, no-store";
   set beresp.ttl = 0s;
   {% if site.DEBUG_MODE %}
     chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is not 200; don't cache; return DELIVER");
