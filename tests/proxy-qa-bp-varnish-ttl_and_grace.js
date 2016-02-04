@@ -799,7 +799,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': -14, 'max': -13
+			'min': -14, 'max': -12
 		}
 	});
 	test_cache_time(0, {
@@ -821,10 +821,10 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': -15, 'max': -13
+			'min': -15, 'max': -12
 		}
 	});
-	test_cache_time(2000, {
+	test_cache_time(3000, {
 		'debug': false,
 		'obj': test_obj_1,
 		'request_headers': {
@@ -981,7 +981,7 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 			{ 'k': 'Cache-Control', 'v': /public, max-age=9/ }
 		],
 		'ttl_interval': {
-			'min': -23, 'max': -22
+			'min': -23, 'max': -21
 		}
 	});
 	test_cache_time(4000, {
