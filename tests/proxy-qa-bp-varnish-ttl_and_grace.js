@@ -28,8 +28,8 @@ var hostname = 'http://qa-api-test-proxy-bp-varnish-ttl-grace.revsw.net';
 function custom_sleep(time) {
 	var stop = new Date().getTime();
 
-	while(new Date().getTime() < stop + time) { 
-		; 
+	while(new Date().getTime() < stop + time) {
+		;
 	}
 }
 
@@ -112,19 +112,20 @@ function test_cache_time(sleep_time, generic_object)
 }
 
 describe('Headers Manipulation Test - check specific timing related headers and the normal flow (no backend problems)', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_normalflow=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -135,13 +136,13 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 	});
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check that the resource is served from cache', 
+		'desc': 'Test 2 - check that the resource is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -152,17 +153,17 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		],
 		'ttl_interval': {
 			'min': 2, 'max': 3
-		} 
+		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
+		'desc': 'Test 3 - check 1 second later that the resource is still served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -175,16 +176,16 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'min': 1, 'max': 2
 		}
 	});
-	
-	test_cache_time(2000, { 
+
+	test_cache_time(2000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check first request when TTL<0 & GRACE>0 - check if object is served from cache', 
+		'desc': 'Test 4 - check first request when TTL<0 & GRACE>0 - check if object is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -198,15 +199,15 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		}
 	});
 
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 5 - check that the object was fetched from the backend after the first request that had TTL<0 & GRACE>0', 
+		'desc': 'Test 5 - check that the object was fetched from the backend after the first request that had TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -219,16 +220,16 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 			'min': 1, 'max': 2
 		}
 	});
-	
-	test_cache_time(1000, { 
+
+	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 6 - check TTL>0 and is in the expected range', 
+		'desc': 'Test 6 - check TTL>0 and is in the expected range',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -242,15 +243,15 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 		}
 	});
 
-	test_cache_time(16000, { 
+	test_cache_time(16000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 7 - check that the resource with TTL<0 & GRACE<0 is not served from cache', 
+		'desc': 'Test 7 - check that the resource with TTL<0 & GRACE<0 is not served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -263,88 +264,90 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 });
 
 describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 404 status codes', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
 
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
 		]
 	});
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 2 - check again resource is not in cache', 
+		'desc': 'Test 2 - check again resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
 		]
 	});
 	test_cache_time(2000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
-			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
 		]
 	});
 });
 
 describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 500 status codes', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
 
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
 	});
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
 		'desc': 'Test 2 - check again that resource is not in cache',
 		'response_headers': [
@@ -353,13 +356,13 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 	});
 	test_cache_time(3000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -367,19 +370,20 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 });
 
 describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 404 status codes', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404half_flow=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -390,7 +394,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 	});
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
@@ -407,17 +411,17 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 		],
 		'ttl_interval': {
 			'min': 2, 'max': 3
-		} 
+		}
 	});
 	test_cache_time(2000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check that resource is served from cache for the first request before TTL<0 & GRACE>0', 
+		'desc': 'Test 3 - check that resource is served from cache for the first request before TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -430,16 +434,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': 0, 'max': 1
 		}
 	});
-	test_cache_time(4000, { 
+	test_cache_time(4000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0', 
+		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -452,32 +456,32 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': -4, 'max': -3
 		}
 	});
- 	test_cache_time(7000, { 
+ 	test_cache_time(7000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 5 - check that 404 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 5 - check that 404 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
  		]
  	});
- 	test_cache_time(1000, { 
+ 	test_cache_time(1000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 6 - check that 200 response is returned when object has TTL<0 & GRACE<0 and the resource could not be fetched previously because the backend was sick and now the backend works', 
+ 		'desc': 'Test 6 - check that 200 response is returned when object has TTL<0 & GRACE<0 and the resource could not be fetched previously because the backend was sick and now the backend works',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -486,16 +490,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		]
  	});
- 	test_cache_time(1000, { 
+ 	test_cache_time(1000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0', 
+ 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -508,16 +512,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': 1, 'max': 2
 		}
  	});
-	test_cache_time(4000, { 
+	test_cache_time(4000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '404',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - this request triggers a backed refresh', 
+		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - this request triggers a backed refresh',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -530,48 +534,48 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': -3, 'max': -2
 		}
 	});
- 	test_cache_time(7000, { 
+ 	test_cache_time(7000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 9 - check that 404 response is returned when object has TTL<0 & GRACE>0 - an object refresh was previously triggered', 
+ 		'desc': 'Test 9 - check that 404 response is returned when object has TTL<0 & GRACE>0 - an object refresh was previously triggered',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
  		]
  	});
- 	test_cache_time(6000, { 
+ 	test_cache_time(6000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '404',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 404,
- 		'desc': 'Test 10 - check that 404 response is returned when object is not in cache after a while', 
+ 		'desc': 'Test 10 - check that 404 response is returned when object is not in cache after a while',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ },
- 			{ 'k': 'Cache-Control', 'v': /public, max-age=2/ }
+ 			{ 'k': 'Cache-Control', 'v': /public, max-age=0/ }
  		]
  	});
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 11 - first test that the resource is cacheable if available', 
+		'desc': 'Test 11 - first test that the resource is cacheable if available',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -582,14 +586,14 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 	});
 	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 12 - second test that the resource is served from cache', 
+		'desc': 'Test 12 - second test that the resource is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -600,24 +604,25 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
-		} 
+		}
 	});
 });
 
 describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 500 status codes', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500half_flow=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -628,13 +633,13 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 	});
 	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check that resource is served from cache', 
+		'desc': 'Test 2 - check that resource is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -645,17 +650,17 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 		],
 		'ttl_interval': {
 			'min': 2, 'max': 3
-		} 
+		}
 	});
 	test_cache_time(2000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check that resource is served from cache for first request before TTL<0 & GRACE>0', 
+		'desc': 'Test 3 - check that resource is served from cache for first request before TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -668,16 +673,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': 0, 'max': 1
 		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '503',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0', 
+		'desc': 'Test 4 - check that 200 response is returned when object has TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -690,16 +695,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': -1, 'max': 0
 		}
 	});
- 	test_cache_time(4000, { 
+ 	test_cache_time(4000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '503',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 5 - check that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 5 - check that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -709,19 +714,19 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		],
 		'ttl_interval': {
-			'min': -5, 'max': -4
+			'min': -6, 'max': -4
 		}
  	});
- 	test_cache_time(1000, { 
+ 	test_cache_time(1000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 6 - check again that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend', 
+ 		'desc': 'Test 6 - check again that 200 response is returned when object has TTL<0 & GRACE>0 and the resource was previously fetched from backend',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -731,16 +736,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
  			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
  		]
  	});
- 	test_cache_time(1000, { 
+ 	test_cache_time(1000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 200,
- 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0', 
+ 		'desc': 'Test 7 - check that 200 response is returned when object has TTL>0 & GRACE>0',
  		'response_headers': [
  			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -753,16 +758,16 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': 1, 'max': 2
 		}
  	});
-	test_cache_time(4000, { 
+	test_cache_time(4000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - check headers have the expected values', 
+		'desc': 'Test 8 - check that 200 response is returned when object has TTL<0 & GRACE>0 - check headers have the expected values',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -775,9 +780,9 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': -3, 'max': -2
 		}
 	});
-	test_cache_time(11000, { 
+	test_cache_time(10000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
@@ -797,9 +802,9 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			'min': -14, 'max': -13
 		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(0, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
@@ -816,12 +821,12 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			{ 'k': 'Cache-Control', 'v': /public, max-age=4/ }
 		],
 		'ttl_interval': {
-			'min': -15, 'max': -14
+			'min': -15, 'max': -13
 		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(2000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'CUSTOM-RESPONSE-CODE': '500',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
@@ -833,30 +838,30 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
 	});
- 	test_cache_time(4000, { 
+ 	test_cache_time(4000, {
  		'debug': false,
- 		'obj': test_obj_1, 
+ 		'obj': test_obj_1,
  		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '500',
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
  		},
  		'status_code': 503,
- 		'desc': 'Test 12 - check that 503 response is returned after a while when object has TTL<0 & GRACE<0 and the backend is still sick', 
+ 		'desc': 'Test 12 - check that 503 response is returned after a while when object has TTL<0 & GRACE<0 and the backend is still sick',
  		'response_headers': [
  			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
  		]
  	});
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 13 - first test that the resource is cacheable', 
+		'desc': 'Test 13 - first test that the resource is cacheable',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -867,14 +872,14 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 	});
 	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=2',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 14 - second test that the resource is served from cache', 
+		'desc': 'Test 14 - second test that the resource is served from cache',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /3.000/ },
@@ -885,25 +890,26 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 		],
 		'ttl_interval': {
 			'min': 1, 'max': 2
-		} 
+		}
 	});
 });
 
 describe('Headers Manipulation Test - check grace value in normal circumstances for test resource', function() {
+  this.timeout(30000);
 	var fr = '/fictive_resource_for_grace.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_grace_normal_flow=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
-		'obj': test_obj_1, 
+		'debug': false,
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that the resource is accessible', 
+		'desc': 'Test 1 - check that the resource is accessible',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
@@ -914,14 +920,14 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 	});
 	test_cache_time(1000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check that the resource has been cached', 
+		'desc': 'Test 2 - check that the resource has been cached',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
@@ -932,18 +938,18 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 		],
 		'ttl_interval': {
 			'min': 3, 'max': 4
-		} 
+		}
 	});
 	test_cache_time(3000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check object TTL before TTL<0', 
+		'desc': 'Test 3 - check object TTL before TTL<0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
@@ -956,16 +962,16 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 			'min': 0, 'max': 1
 		}
 	});
-	test_cache_time(23000, {
+	test_cache_time(22000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 4 - check object TTL and that the resource is still served from cache when GRACE is almost 0', 
+		'desc': 'Test 4 - check object TTL and that the resource is still served from cache when GRACE is almost 0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
@@ -980,14 +986,14 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 	});
 	test_cache_time(4000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 5 - check that the object was refreshed after the first request with TTL<0 & GRACE>0', 
+		'desc': 'Test 5 - check that the object was refreshed after the first request with TTL<0 & GRACE>0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
@@ -1002,14 +1008,14 @@ describe('Headers Manipulation Test - check grace value in normal circumstances 
 	});
 	test_cache_time(24000, {
 		'debug': false,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
  			'CUSTOM-RESPONSE-CODE': '200',
 			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=7',
 			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 6 - check object is not fetched from cache when TTL<0 & GRACE<0', 
+		'desc': 'Test 6 - check object is not fetched from cache when TTL<0 & GRACE<0',
 		'response_headers': [
 			{ 'k': 'ttl-grace', 'v': 'working_add_header' },
 			{ 'k': 'x-rev-beresp-ttl', 'v': /5.000/ },
