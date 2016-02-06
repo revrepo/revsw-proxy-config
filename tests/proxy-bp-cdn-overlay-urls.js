@@ -2,7 +2,7 @@
  *
  * REV SOFTWARE CONFIDENTIAL
  *
- * [2013] - [2015] Rev Software, Inc.
+ * [2013] - [2016] Rev Software, Inc.
  * All Rights Reserved.
  *
  * NOTICE:  All information contained herein is, and remains
@@ -25,13 +25,14 @@ var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
 
-var originHostHeader = 'testsjc20-website01.revsw.net',
-  originServer = 'testsjc20-website01.revsw.net',
+var originHostHeader = 'test-proxy-cache-config.revsw.net',
+  originServer = 'test-proxy-cache-config.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
+  page = '/parse.html',
   object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg',
   object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg',
   object_3 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg',
@@ -39,8 +40,47 @@ var originHostHeader = 'testsjc20-website01.revsw.net',
   object_5 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg';
 
 
-describe('HTML Third Party Links', function() {
-  this.timeout(60000);
+describe('Proxy check cdn_overlay_urls', function() {
+  this.timeout(120000);
+
+  var expected = [
+    {
+      "description": "should check overlay urls in html page",
+      "url": page,
+      "header": [],
+      "text": [object_1, object_2, object_3, object_4, object_5]
+    },
+    {
+      "description": "should check overlay url for 1 jpeg",
+      "url": object_1,
+      "header": {'content-length': '110174', 'x-rev-cache': 'MISS', 'x-rev-beresp-ttl':'0.000', 'cache-control':'max-age=0, public', 'content-type':'image/jpeg'},
+      "text": []
+    },
+    {
+      "description": "should check overlay url for 2 jpeg",
+      "url": object_2,
+      "header": {'content-length': '60989', 'x-rev-cache': 'MISS', 'x-rev-beresp-ttl':'0.000', 'cache-control':'max-age=0, public', 'content-type':'image/jpeg'},
+      "text": []
+    },
+    {
+      "description": "should check overlay url for 3 jpeg",
+      "url": object_3,
+      "header": {'content-length': '127000', 'x-rev-cache': 'MISS', 'x-rev-beresp-ttl':'0.000', 'cache-control':'max-age=0, public', 'content-type':'image/jpeg'},
+      "text": []
+    },
+    {
+      "description": "should check overlay url for 4 jpeg",
+      "url": object_4,
+      "header": {'content-length': '136746', 'x-rev-cache': 'MISS', 'x-rev-beresp-ttl':'0.000', 'cache-control':'max-age=0, public', 'content-type':'image/jpeg'},
+      "text": []
+    },
+    {
+      "description": "should check overlay url for 5 jpeg",
+      "url": object_5,
+      "header": {'content-length': '141080', 'x-rev-cache': 'MISS', 'x-rev-beresp-ttl':'0.000', 'cache-control':'max-age=0, public', 'content-type':'image/jpeg'},
+      "text": []
+    }
+  ];
 
   it('should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {
@@ -105,145 +145,67 @@ describe('HTML Third Party Links', function() {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should get by HTTP 1 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPUrl, object_1, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
+  for (var attr in expected) {
+    (function(attr) {
+      it(expected[attr]['description'], function (done) {
+        tools.getHostRequest(testHTTPSUrl, expected[attr]['url'], newDomainName).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          //console.log(res.header);
+          //console.log(expected[attr]['url']);
 
-  it('should get by HTTPS 1 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPSUrl, object_1, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
+          for (var key in expected[attr]) {
+            if (expected[attr][key] != '') {
+              if (key == 'header') {
+                for (var header in expected[attr][key]) {
+                  res.header[header].should.equal(expected[attr][key][header]);
+                }
+              }
+              if (key == 'text') {
+                for (var text in expected[attr][key]) {
+                  res.text.should.containEql(expected[attr][key][text]);
+                }
+              }
+            }
+          }
+          done();
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
+      });
+    })(attr);
+  }
 
-  it('should get by HTTP 2 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPUrl, object_2, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
+  for (var attr in expected) {
+    (function (attr) {
+      it(expected[attr]['description'] + " (HTTPS)", function (done) {
+        tools.getHostRequest(testHTTPSUrl, expected[attr]['url'], newDomainName).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
 
-  it('should get by HTTPS 2 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPSUrl, object_2, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTP 3 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPUrl, object_3, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTPS 3 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPSUrl, object_3, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTP 4 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPUrl, object_4, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTPS 4 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPSUrl, object_4, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTP 5 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPUrl, object_5, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get by HTTPS 5 jpeg file from overlay url', function (done) {
-    tools.getHostRequest(testHTTPSUrl, object_5, newDomainName).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      //console.log(res.header);
-      res.header['x-rev-cache'].should.equal('MISS');
-      res.header['x-rev-beresp-ttl'].should.equal('0.000');
-      res.header['cache-control'].should.equal('max-age=0, public');
-      res.header['content-type'].should.equal('image/jpeg');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
+          for (var key in expected[attr]) {
+            if (expected[attr][key] != '') {
+              if (key == 'header') {
+                for (var header in expected[attr][key]) {
+                  res.header[header].should.equal(expected[attr][key][header]);
+                }
+              }
+              if (key == 'text') {
+                for (var text in expected[attr][key]) {
+                  res.text.should.containEql(expected[attr][key][text]);
+                }
+              }
+            }
+          }
+          done();
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
+      });
+    })(attr);
+  }
 
   it('should delete the domain config', function (done) {
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
