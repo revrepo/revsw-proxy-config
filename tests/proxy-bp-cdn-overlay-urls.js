@@ -82,6 +82,40 @@ describe('Proxy check cdn_overlay_urls', function() {
     }
   ];
 
+  function get_expected(test_desc, test_url) {
+    for (var attr in expected) {
+      (function (attr) {
+        it(expected[attr]['description']+test_desc, function (done) {
+          tools.getHostRequest(test_url, expected[attr]['url'], newDomainName).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            //console.log(res.header);
+            //console.log(expected[attr]['url']);
+
+            for (var key in expected[attr]) {
+              if (expected[attr][key] != '') {
+                if (key == 'header') {
+                  for (var header in expected[attr][key]) {
+                    res.header[header].should.equal(expected[attr][key][header]);
+                  }
+                }
+                if (key == 'text') {
+                  for (var text in expected[attr][key]) {
+                    res.text.should.containEql(expected[attr][key][text]);
+                  }
+                }
+              }
+            }
+            done();
+          }).catch(function (err) {
+            done(util.getError(err));
+          });
+        });
+      })(attr);
+    }
+  }
+
   it('should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {
       if (rej) {
@@ -145,67 +179,8 @@ describe('Proxy check cdn_overlay_urls', function() {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  for (var attr in expected) {
-    (function(attr) {
-      it(expected[attr]['description'], function (done) {
-        tools.getHostRequest(testHTTPSUrl, expected[attr]['url'], newDomainName).then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          //console.log(res.header);
-          //console.log(expected[attr]['url']);
-
-          for (var key in expected[attr]) {
-            if (expected[attr][key] != '') {
-              if (key == 'header') {
-                for (var header in expected[attr][key]) {
-                  res.header[header].should.equal(expected[attr][key][header]);
-                }
-              }
-              if (key == 'text') {
-                for (var text in expected[attr][key]) {
-                  res.text.should.containEql(expected[attr][key][text]);
-                }
-              }
-            }
-          }
-          done();
-        }).catch(function (err) {
-          done(util.getError(err));
-        });
-      });
-    })(attr);
-  }
-
-  for (var attr in expected) {
-    (function (attr) {
-      it(expected[attr]['description'] + " (HTTPS)", function (done) {
-        tools.getHostRequest(testHTTPSUrl, expected[attr]['url'], newDomainName).then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-
-          for (var key in expected[attr]) {
-            if (expected[attr][key] != '') {
-              if (key == 'header') {
-                for (var header in expected[attr][key]) {
-                  res.header[header].should.equal(expected[attr][key][header]);
-                }
-              }
-              if (key == 'text') {
-                for (var text in expected[attr][key]) {
-                  res.text.should.containEql(expected[attr][key][text]);
-                }
-              }
-            }
-          }
-          done();
-        }).catch(function (err) {
-          done(util.getError(err));
-        });
-      });
-    })(attr);
-  }
+  get_expected(" (HTTP)", testHTTPUrl);
+  get_expected(" (HTTPS)", testHTTPSUrl);
 
   it('should delete the domain config', function (done) {
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
