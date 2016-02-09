@@ -94,6 +94,48 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
+  it('should check HTTP proxy timeout and receive 200 answer', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should change domain config and set proxy_timeout', function (done) {
+    domainConfig.proxy_timeout = 5;
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should check HTTP proxy timeout and receive 504 answer', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName, 504).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
   it('should check HTTP GET request headers', function (done) {
     tools.getHostRequest(testHTTPUrl, '/cache/5', newDomainName).then(function (res, rej) {
       if (rej) {
@@ -382,7 +424,7 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
