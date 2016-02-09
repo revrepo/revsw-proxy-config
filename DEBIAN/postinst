@@ -18,9 +18,14 @@ echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-nginx-s
 rm -f /etc/nginx/conf.d/revsw-nginx-status-page.conf
 echo "Removing obsolete proxy configuration file /etc/nginx/conf.d/revsw-json-access-log-nginx.conf ..."
 rm -f /etc/nginx/conf.d/revsw-json-access-log-nginx.conf 
+echo "Removing obsolete logrotate configuration files..."
+rm -f /etc/nginx/logrotate_nginx_access.conf /etc/cron.d/logrotate_nginx_access
 
 echo "Moving new /etc/nginx/nginx.conf.revsw to /etc/nginx/nginx.conf..."
 mv /etc/nginx/nginx.conf.revsw /etc/nginx/nginx.conf
+
+echo "Moving new /etc/logrotate.d/revsw-nginx to /etc/logrotate.d/nginx..."
+mv /etc/logrotate.d/revsw-nginx /etc/logrotate.d/nginx
 
 if [ -f /opt/revsw-config/apache/GeoLite2-City.dat ]; then
     echo "Remove old GeoLite2-City.dat"

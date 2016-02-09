@@ -76,6 +76,7 @@ mkdir -p $FOLDERNAME/$DST/apache/generic-site
 mkdir -p $FOLDERNAME/$DST/varnish/sites
 mkdir -p $FOLDERNAME/$DST/templates/all/bp
 mkdir -p $FOLDERNAME/etc/nginx/conf.d
+mkdir -p $FOLDERNAME/etc/logrotate.d
 mkdir -p $FOLDERNAME/var/www
 mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
@@ -104,6 +105,7 @@ cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/nginx.conf $FOLDERNAME/etc/nginx/nginx.conf.revsw
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var/www/
+cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/logrotate_revsw-nginx $FOLDERNAME/etc/logrotate.d/revsw-nginx
 
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
