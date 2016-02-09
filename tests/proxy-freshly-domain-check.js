@@ -200,7 +200,7 @@ describe('Proxy freshly domain control', function () {
       }
       setTimeout(function () {
         done();
-      }, 65000);
+      }, 70000);
     }).catch(function (err) { done(util.getError(err)); });
   });
 
