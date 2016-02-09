@@ -94,7 +94,7 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should check HTTP proxy timeout and receive 200 answer', function (done) {
+  it('should check HTTP proxy timeout and receive 200 answer on 10sec delay', function (done) {
     tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -125,8 +125,30 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should check HTTP proxy timeout and receive 504 answer', function (done) {
+  it('should check HTTP proxy timeout and receive 504 answer on 10sec delay', function (done) {
     tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName, 504).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should check HTTP proxy timeout and receive 200 answer on 1sec delay', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/1', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should check HTTP proxy read timeout and receive 504 answer on stream long answer', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/stream/1000', newDomainName, 504).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
