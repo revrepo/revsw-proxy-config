@@ -1,7 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var should = require('should-http');
-var async = require('async');
+var request = require("request");
 var https = require('https');
 var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
@@ -94,6 +94,86 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
+  it('should check HTTP proxy timeout and receive 200 answer on 10sec delay', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should change domain config and set proxy_timeout', function (done) {
+    domainConfig.proxy_timeout = 5;
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should check HTTP proxy timeout and receive 504 answer on 10sec delay', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/10', newDomainName, 504).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
+  });
+
+  it('should check HTTP proxy timeout and receive 200 answer on 1sec delay', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/delay/1', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.text);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+/*
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
+  });
+
+  it('should check HTTP proxy read timeout and receive 504 answer on stream long answer', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/stream-delay/1000', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      console.log(res.header);
+      console.log(res.text);
+      console.log(res.body);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+*/
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
+  });
+
   it('should check HTTP GET request headers', function (done) {
     tools.getHostRequest(testHTTPUrl, '/cache/5', newDomainName).then(function (res, rej) {
       if (rej) {
@@ -158,7 +238,7 @@ describe('Proxy freshly domain control', function () {
       }
       setTimeout(function () {
         done();
-      }, 65000);
+      }, 70000);
     }).catch(function (err) { done(util.getError(err)); });
   });
 
@@ -382,7 +462,7 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
