@@ -1,7 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var should = require('should-http');
-var async = require('async');
+var request = require("request");
 var https = require('https');
 var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
@@ -136,6 +136,11 @@ describe('Proxy freshly domain control', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
+  });
+
   it('should check HTTP proxy timeout and receive 200 answer on 1sec delay', function (done) {
     tools.getHostRequest(testHTTPUrl, '/delay/1', newDomainName).then(function (res, rej) {
       if (rej) {
@@ -146,16 +151,27 @@ describe('Proxy freshly domain control', function () {
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
+/*
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
+  });
 
   it('should check HTTP proxy read timeout and receive 504 answer on stream long answer', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/stream/1000', newDomainName, 504).then(function (res, rej) {
+    tools.getHostRequest(testHTTPUrl, '/stream-delay/1000', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      //console.log(res.header);
-      //console.log(res.text);
+      console.log(res.header);
+      console.log(res.text);
+      console.log(res.body);
       done();
     }).catch(function (err) { done(util.getError(err)); });
+  });
+*/
+  it('should wait 20sec', function (done) {
+    util.mySleep(20000);
+    done();
   });
 
   it('should check HTTP GET request headers', function (done) {
