@@ -151,24 +151,28 @@ describe('Proxy freshly domain control', function () {
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
-/*
+
   it('should wait 20sec', function (done) {
     util.mySleep(20000);
     done();
   });
 
-  it('should check HTTP proxy read timeout and receive 504 answer on stream long answer', function (done) {
+  it('should check HTTP proxy read timeout and receive clear answer with complete = false', function (done) {
     tools.getHostRequest(testHTTPUrl, '/stream-delay/1000', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      console.log(res.header);
-      console.log(res.text);
-      console.log(res.body);
+      //console.log(res.header);
+      //console.log(res.text);
+      //console.log(res.body);
+      //console.log(res);
+      res.res.complete.should.be.false;
+      res.body.should.equal('');
+      res.text.should.equal('');
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
-*/
+
   it('should wait 20sec', function (done) {
     util.mySleep(20000);
     done();
