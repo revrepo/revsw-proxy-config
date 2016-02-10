@@ -71,7 +71,6 @@ describe('Proxy cache check ', function () {
       }).catch(function (err) { done(util.getError(err)); });
   });
 
-//1
   it('should set url parameter with wildcard and edge_caching', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -110,7 +109,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -134,7 +133,7 @@ describe('Proxy cache check ', function () {
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
-//2
+
   it('should add browser_caching rules for css files and cookies for txt', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -196,7 +195,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -272,7 +271,6 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-//3
   it('should set rules for cookies checking', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -310,7 +308,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -391,7 +389,7 @@ describe('Proxy cache check ', function () {
     }).catch(function (err) { done(util.getError(err)); });
   });
 
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
     tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -726,6 +724,214 @@ describe('Proxy cache check ', function () {
         //console.log(res.header);
         done();
       }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should set query_string_list_is_keep to false and remove list', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": true,
+          "value": "/get**"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 120,
+          "override_no_cc": true,
+          "query_string_list_is_keep": false,
+          "query_string_keep_or_remove_list": ["hello", "rev"]
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        }
+      }
+    ];
+    //console.log(domainConfig);
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with some query string parameters and remove all except the option foo', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=bar&hello=world&rev=software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?foo=bar');
+      res.header['x-rev-cache'].should.equal('MISS');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?foo=bar');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with some query string parameters and remove all except the option foo and receive cache HIT', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=bar&hello=new-world&rev=new-software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?foo=bar');
+      res.header['x-rev-cache'].should.equal('HIT');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?foo=bar');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with changed some query string parameters and remove all except the option foo and receive cache MISS', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=new-bar&hello=new-world&rev=new-software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?foo=new-bar');
+      res.header['x-rev-cache'].should.equal('MISS');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?foo=new-bar');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should set query_string_list_is_keep to true and remove list', function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+    [
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": true,
+          "value": "/get**"
+        },
+        "edge_caching": {
+          "override_origin": true,
+          "new_ttl": 120,
+          "override_no_cc": true,
+          "query_string_list_is_keep": true,
+          "query_string_keep_or_remove_list": ["hello", "rev"]
+        },
+        "browser_caching": {
+          "override_edge": false,
+          "new_ttl": 0,
+          "force_revalidate": false
+        },
+        "cookies": {
+          "override": false,
+          "ignore_all": false,
+          "list_is_keep": false,
+          "keep_or_ignore_list": [],
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        }
+      }
+    ];
+    //console.log(domainConfig);
+    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should wait till the global and staging config statuses are "Published"', function (done) {
+    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.should.be.equal(true);
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with some query string parameters and remove foo option', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=bar&hello=world&rev=software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?hello=world&rev=software');
+      res.header['x-rev-cache'].should.equal('MISS');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?hello=world&rev=software');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with some query string parameters and remove foo option and receive cache HIT', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=new-bar&hello=world&rev=software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?hello=world&rev=software');
+      res.header['x-rev-cache'].should.equal('HIT');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?hello=world&rev=software');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it('should send first GET request with changed some query string parameters and remove foo option and receive cache MISS', function (done) {
+    tools.getHostRequest(testHTTPUrl, '/get?foo=new-bar&hello=new-world&rev=software', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      //console.log(res.header);
+      //console.log(res.body);
+      var responseJson = JSON.parse(res.text);
+      responseJson.url.should.equal('http://httpbin_org.revsw.net/get?hello=new-world&rev=software');
+      res.header['x-rev-cache'].should.equal('MISS');
+      res.header['content-type'].should.equal('application/json');
+      res.header['x-rev-url'].should.equal('/get?hello=new-world&rev=software');
+      res.header['x-rev-beresp-ttl'].should.equal('120.000');
+      res.header['x-rev-beresp-grace'].should.equal('0.000');
+      done();
     }).catch(function (err) { done(util.getError(err)); });
   });
 
