@@ -17,7 +17,8 @@ var originHostHeader = 'httpbin_org.revsw.net',
   AccountId = '',
   domainConfig = '',
   domainConfigId = '',
-  cookie_url = '/header-cookies';
+  header_cookies = '/header-cookies',
+  cookie_url = '/cookies';
 
 describe('Proxy cookies cache control', function () {
 
@@ -31,14 +32,16 @@ describe('Proxy cookies cache control', function () {
             if (rej) {
               throw rej;
             }
+
             //console.log(res.header);
+            //console.log(res.header['set-cookie']);
             //console.log(res.text);
             //console.log(expected[attr]['url']);
             for (var key in expected[attr]) {
               if (expected[attr][key] != '') {
                 if (key == 'header') {
                   for (var header in expected[attr][key]) {
-                    res.header[header].should.equal(expected[attr][key][header]);
+                    res.header[header].should.eql(expected[attr][key][header]);
                   }
                 }
                 if (key == 'text') {
@@ -175,49 +178,96 @@ describe('Proxy cookies cache control', function () {
   var expected = [
     {
       "description": "should send request with cookies k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v1 and receive HIT",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v3; k2=v3 and receive HIT",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    }
+  ];
+
+  get_expected(expected, " (HTTP) "+header_cookies, testHTTPUrl);
+
+  var expected = [
+    {
+      "description": "should send request with cookies k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'MISS'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v1 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v1 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v3; k2=v3 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     }
   ];
 
-  get_expected(expected, " (HTTP)", testHTTPUrl);
+  get_expected(expected, " (HTTP) "+cookie_url, testHTTPUrl);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   it('should change cookies options, set override, list_is_keep and keep_or_ignore_list', function (done) {
     domainConfig.rev_component_bp.caching_rules =
@@ -274,49 +324,96 @@ describe('Proxy cookies cache control', function () {
   var expected = [
     {
       "description": "should send request with cookies k1=v1; k2=v2",
-      "url": cookie_url,
+      "url": header_cookies,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
-      "header": {'x-rev-cache': 'MISS'},
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v1; k2=v2']},
       "text": ['k1=v1; k2=v2']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v2 and receive HIT  / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT  / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS / k1=v2; k2=v1",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v2; k2=v1']},
+      "text": ['k1=v2; k2=v1']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT  / k1=v2; k2=v1",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v2; k2=v1']},
+      "text": ['k1=v2; k2=v1']
+    },
+    {
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS / k1=v3; k2=v3",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v3; k2=v3']},
+      "text": ['k1=v3; k2=v3']
+    }
+  ];
+
+  get_expected(expected, " (HTTPS) "+header_cookies, testHTTPSUrl);
+
+  var expected = [
+    {
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "url": cookie_url,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'MISS'},
+      "text": ['"k1": "v1"', '"k2": "v2"']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v1 and receive HIT  / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v1 and receive MISS / k1=v2; k2=v1",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
       "header": {'x-rev-cache': 'MISS'},
-      "text": ['k1=v2; k2=v1']
+      "text": ['"k1": "v2"', '"k2": "v1"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v2 and receive HIT  / k1=v2; k2=v1",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v2; k2=v1']
+      "text": ['"k1": "v2"', '"k2": "v1"']
     },
     {
       "description": "should send request with cookies k1=v3; k2=v3 and receive MISS / k1=v3; k2=v3",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
       "header": {'x-rev-cache': 'MISS'},
-      "text": ['k1=v3; k2=v3']
+      "text": ['"k1": "v3"', '"k2": "v3"']
     }
   ];
 
-  get_expected(expected, " (HTTP)", testHTTPUrl);
+  get_expected(expected, " (HTTPS) "+cookie_url, testHTTPSUrl);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   it('should change cookies options, set ignore_all', function (done) {
     domainConfig.rev_component_bp.caching_rules =
@@ -373,49 +470,96 @@ describe('Proxy cookies cache control', function () {
   var expected = [
     {
       "description": "should send request with cookies k1=v1; k2=v2",
-      "url": cookie_url,
+      "url": header_cookies,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
-      "header": {'x-rev-cache': 'MISS'},
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v1; k2=v2']},
       "text": ['k1=v1; k2=v2']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v2 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v1 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v3; k2=v3 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    }
+  ];
+
+get_expected(expected, " (HTTP) "+header_cookies, testHTTPUrl);
+
+  var expected = [
+    {
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "url": cookie_url,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'MISS'},
+      "text": ['"k1": "v1"', '"k2": "v2"']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v1 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v1 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v2 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v3; k2=v3 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     }
   ];
 
-  get_expected(expected, " (HTTP)", testHTTPUrl);
+  get_expected(expected, " (HTTP) "+cookie_url, testHTTPUrl);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   it('should change cookies options, set default list_is_keep and keep_or_ignore_list', function (done) {
     domainConfig.rev_component_bp.caching_rules =
@@ -472,49 +616,96 @@ describe('Proxy cookies cache control', function () {
   var expected = [
     {
       "description": "should send request with cookies k1=v1; k2=v2",
-      "url": cookie_url,
+      "url": header_cookies,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
-      "header": {'x-rev-cache': 'MISS'},
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v1; k2=v2']},
       "text": ['k1=v1; k2=v2']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v2 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v1 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    },
+    {
+      "description": "should send request with cookies k1=v3; k2=v3 and receive HIT / k1=v1; k2=v2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1; k2=v2']},
+      "text": ['k1=v1; k2=v2']
+    }
+  ];
+
+get_expected(expected, " (HTTPS) "+header_cookies, testHTTPSUrl);
+
+  var expected = [
+    {
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "url": cookie_url,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'MISS'},
+      "text": ['"k1": "v1"', '"k2": "v2"']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v1 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v1 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v2 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     },
     {
       "description": "should send request with cookies k1=v3; k2=v3 and receive HIT / k1=v1; k2=v2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1; k2=v2']
+      "text": ['"k1": "v1"', '"k2": "v2"']
     }
   ];
 
-  get_expected(expected, " (HTTP)", testHTTPUrl);
+  get_expected(expected, " (HTTPS) "+cookie_url, testHTTPSUrl);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   it('should change cookies options, set default ignore_all and set remove_ignored_from_request', function (done) {
     domainConfig.rev_component_bp.caching_rules =
@@ -571,49 +762,96 @@ describe('Proxy cookies cache control', function () {
   var expected = [
     {
       "description": "should send request with cookies k1=v1; k2=v2 and remove k2",
-      "url": cookie_url,
+      "url": header_cookies,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
-      "header": {'x-rev-cache': 'MISS'},
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v1;']},
       "text": ['k1=v1;']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v2 and receive HIT  / k1=v1; and remove k2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1;']},
+      "text": ['k1=v1;']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT  / k1=v1; and remove k2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v1;']},
+      "text": ['k1=v1;']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS / k1=v2; and remove k2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v2;']},
+      "text": ['k1=v2;']
+    },
+    {
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT  / k1=v2; and remove k2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
+      "header": {'x-rev-cache': 'HIT', "set-cookie":['k1=v2;']},
+      "text": ['k1=v2;']
+    },
+    {
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS / k1=v3; and remove k2",
+      "url": header_cookies,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
+      "header": {'x-rev-cache': 'MISS', "set-cookie":['k1=v3;']},
+      "text": ['k1=v3;']
+    }
+  ];
+
+get_expected(expected, " (HTTP) "+header_cookies, testHTTPUrl);
+
+  var expected = [
+    {
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "url": cookie_url,
+      "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
+      "header": {'x-rev-cache': 'MISS'},
+      "text": ['"k1": "v1"']
+    },
+    {
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1;']
+      "text": ['"k1": "v1"']
     },
     {
       "description": "should send request with cookies k1=v1; k2=v1 and receive HIT  / k1=v1; and remove k2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v1; k2=v1'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v1;']
+      "text": ['"k1": "v1"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v1 and receive MISS / k1=v2; and remove k2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v1'] },
       "header": {'x-rev-cache': 'MISS'},
-      "text": ['k1=v2;']
+      "text": ['"k1": "v2"']
     },
     {
       "description": "should send request with cookies k1=v2; k2=v2 and receive HIT  / k1=v2; and remove k2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v2; k2=v2'] },
       "header": {'x-rev-cache': 'HIT'},
-      "text": ['k1=v2;']
+      "text": ['"k1": "v2"']
     },
     {
       "description": "should send request with cookies k1=v3; k2=v3 and receive MISS / k1=v3; and remove k2",
       "url": cookie_url,
       "set": { 'Host': newDomainName, 'Cookie': ['k1=v3; k2=v3'] },
       "header": {'x-rev-cache': 'MISS'},
-      "text": ['k1=v3;']
+      "text": ['"k1": "v3"']
     }
   ];
 
-  get_expected(expected, " (HTTP)", testHTTPUrl);
+  get_expected(expected, " (HTTP) "+cookie_url, testHTTPUrl);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   it('should delete the domain config', function (done) {
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
