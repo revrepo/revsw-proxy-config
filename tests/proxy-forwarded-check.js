@@ -27,6 +27,8 @@ var originHostHeader = 'httpbin_org.revsw.net',
   cookie = '',
   ipCheckString = '';
 
+tools.debugMode(false);
+
 describe('Proxy X-Forwarded-For check', function () {
 
   this.timeout(120000);

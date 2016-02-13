@@ -260,7 +260,7 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          util.mySleep(10000);
+          util.mySleep(15000);
           return resolve(true);
         }
       });
