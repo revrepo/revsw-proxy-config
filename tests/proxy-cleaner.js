@@ -26,11 +26,11 @@ describe('Proxy cleaner', function () {
       for (var attributename in response_json) {
         var domain = response_json[attributename].domain_name;
         if (
-            domain.substring(0, 10) == "delete-me-" ||
-            domain.substring(0, 13) == "first-domain-" ||
-            domain.substring(0, 14) == "second-domain-" ||
-            domain.substring(0, 9) == "mydomain-" ||
-            domain.substring(0, 13) == "negativetest-"
+            domain.substring(0, 11) == "delete-me-1" ||
+            domain.substring(0, 14) == "first-domain-1" ||
+            domain.substring(0, 15) == "second-domain-1" ||
+            domain.substring(0, 10) == "mydomain-1" ||
+            domain.substring(0, 14) == "negativetest-1"
         ) {
           //console.log(domain);
           domains.push(response_json[attributename].id);
