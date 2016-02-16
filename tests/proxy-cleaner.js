@@ -24,7 +24,15 @@ describe('Proxy cleaner', function () {
       var response_json = JSON.parse(res.text);
       //console.log(response_json);
       for (var attributename in response_json) {
-        if (response_json[attributename].domain_name.substring(0, 10) == "delete-me-") {
+        var domain = response_json[attributename].domain_name;
+        if (
+            domain.substring(0, 11) == "delete-me-1" ||
+            domain.substring(0, 14) == "first-domain-1" ||
+            domain.substring(0, 15) == "second-domain-1" ||
+            domain.substring(0, 10) == "mydomain-1" ||
+            domain.substring(0, 14) == "negativetest-1"
+        ) {
+          //console.log(domain);
           domains.push(response_json[attributename].id);
         }
       }
