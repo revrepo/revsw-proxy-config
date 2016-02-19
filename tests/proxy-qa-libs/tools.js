@@ -7,6 +7,7 @@ var request = require('supertest');
 var async = require('async');
 var config = require('config');
 var debug = false,
+  testGroup = config.get('test_group'),
   timeout = config.get('waitTime'),
   loops = config.get('waitCount');
 
@@ -28,7 +29,7 @@ module.exports = {
 
   getRequest: function (url, get, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .get(get)
         .expect(expect)
@@ -39,14 +40,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   getSDKRequest: function (url, get, host, revhost, revproto, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .get(get)
         .set('Host', host)
@@ -60,14 +61,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   getSetRequest: function (url, get, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .get(get)
         .set(set)
@@ -79,7 +80,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -87,7 +88,7 @@ module.exports = {
   // Get content by url and get request with special Host
   getHostRequest: function (url, get, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .get(get)
         .set('Host', set)
@@ -99,14 +100,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   patchHostRequest: function (url, post, body, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .patch(post)
         .set('Host', set)
@@ -119,14 +120,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   postHostRequest: function (url, post, body, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .post(post)
         .set('Host', set)
@@ -139,14 +140,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   putHostRequest: function (url, put, body, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .put(put)
         .set('Host', set)
@@ -159,14 +160,14 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   delHostRequest: function (url, del, set, expect) {
     expect = expect || 200;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(url)
         .del(del)
         .set('Host', set)
@@ -178,13 +179,13 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
 
   waitPublishStatus: function (domain) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       var a = [],
         publishFlag = false,
         responseJson;
@@ -219,14 +220,14 @@ module.exports = {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           util.mySleep(10000);
-          return resolve(true);
+          return response(true);
         }
       });
     });
   },
 
   waitAppPublishStatus: function (key) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       var a = [],
         publishFlag = false,
         responseJson;
@@ -261,14 +262,14 @@ module.exports = {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           util.mySleep(10000);
-          return resolve(true);
+          return response(true);
         }
       });
     });
   },
 
   waitPurgeStatus: function (key) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       var a = [],
         publishFlag = false,
         responseJson;
@@ -303,9 +304,85 @@ module.exports = {
           throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
         } else {
           util.mySleep(10000);
-          return resolve(true);
+          return response(true);
         }
       });
+    });
+  },
+
+  createNewDomain: function (newDomainName, origin) {
+    return new Promise(function (response, reject) {
+      var AccountId = "",
+        domainConfigId = "";
+      console.log('[===] return AccountId');
+
+      api.getUsersMyself()
+        .then(function (res) {
+          AccountId = res.body.companyId[0];
+          console.log('[===] create new configuration for domain ' + newDomainName);
+          var createDomainConfigJSON = {
+            'domain_name': newDomainName,
+            'account_id': AccountId,
+            'origin_host_header': origin,
+            'origin_server': origin,
+            'origin_server_location_id': testGroup,
+            'tolerance': '0'
+          };
+          return api.postDomainConfigs(createDomainConfigJSON)
+        })
+        .then(function () {
+          console.log('[===] wait till the global and staging config statuses are "Published"');
+          return module.exports.waitPublishStatus(domainConfigId)
+        })
+        .then(function () {
+          return response(domainConfigId);
+        })
+        .catch(function (err) {
+          return reject(util.getError(err));
+        });
+    });
+  },
+
+  beforeSetDomain: function (newDomainName, origin) {
+    return new Promise(function (response, reject) {
+      var AccountId = "",
+        domainConfigId = "";
+      console.log('[===] return AccountId');
+
+      api.getUsersMyself()
+        .then(function (res) {
+          AccountId = res.body.companyId[0];
+          console.log('[===] create new configuration for domain ' + newDomainName);
+          var createDomainConfigJSON = {
+            'domain_name': newDomainName,
+            'account_id': AccountId,
+            'origin_host_header': origin,
+            'origin_server': origin,
+            'origin_server_location_id': testGroup,
+            'tolerance': '0'
+          };
+          return api.postDomainConfigs(createDomainConfigJSON);
+        })
+        .then(function (res) {
+          domainConfigId = res.body.object_id;
+          return response(domainConfigId);
+        })
+        .catch(function (err) {
+          return reject(util.getError(err));
+        });
+    });
+  },
+
+  afterSetDomain: function (domainConfigId, domainConfig) {
+    return new Promise(function (response, reject) {
+      api.putDomainConfigsById(domainConfigId, domainConfig)
+        .then(function () {
+          console.log('[===] wait till the global and staging config statuses are "Published"');
+          return response(module.exports.waitPublishStatus(domainConfigId))
+        })
+        .catch(function (err) {
+          return reject(util.getError(err));
+        });
     });
   }
 };
