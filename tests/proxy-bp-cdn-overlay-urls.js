@@ -24,7 +24,7 @@ var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
-
+var Promise = require('bluebird');
 var originHostHeader = 'test-proxy-cache-config.revsw.net',
   originServer = 'test-proxy-cache-config.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
@@ -32,6 +32,7 @@ var originHostHeader = 'test-proxy-cache-config.revsw.net',
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
+  AccountId = "",
   page = '/parse.html',
   object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg',
   object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg',
@@ -117,76 +118,88 @@ describe('Proxy check cdn_overlay_urls', function() {
   }
 
   before(function (done) {
-    // get account id
-    api.getUsersMyself().then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      AccountId = res.body.companyId[0];
-      var createDomainConfigJSON = {
-        'domain_name': newDomainName,
-        'account_id': AccountId,
-        'origin_host_header': originHostHeader,
-        'origin_server': originServer,
-        'origin_server_location_id': testGroup,
-        'tolerance': '0'
-      };
-      // create new domain
-      api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
-        if (rej) {
-          throw rej;
-        }
-        domainConfigId = res.body.object_id;
-        // get domain config
-        api.getDomainConfigsById(domainConfigId)
-          .then(function (res, rej) {
+    return new Promise(function (resolve, reject) {
+      return Promise.props({
+        Accountid: ""
+      }).then(function () {
+          console.log('should return AccountId');
+          api.getUsersMyself().then(function (res, rej) {
             if (rej) {
               throw rej;
             }
-            var responseJson = JSON.parse(res.text);
-            domainConfig = responseJson;
-            delete domainConfig.cname;
-            delete domainConfig.domain_name;
-            // set cdn_overlay_urls
-            domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
-            api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+            AccountId = res.body.companyId[0];
+            return AccountId;
+          })
+        })
+        .then(function (AccountId) {
+          console.log('should create new configuration for domain ' + newDomainName);
+          var createDomainConfigJSON = {
+            'domain_name': newDomainName,
+            'account_id': AccountId,
+            'origin_host_header': originHostHeader,
+            'origin_server': originServer,
+            'origin_server_location_id': testGroup,
+            'tolerance': '0'
+          };
+
+          api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            domainConfigId = res.body.object_id;
+            return domainConfigId;
+          }).catch(function (err) {
+            done(util.getError(err));
+          });
+        })
+        .then(function (domainConfigId) {
+          console.log('should get domain config');
+          api.getDomainConfigsById(domainConfigId)
+            .then(function (res, rej) {
               if (rej) {
                 throw rej;
               }
-              tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
-                if (rej) {
-                  throw rej;
-                }
-                res.should.be.equal(true);
-                // wait "Publish" status
-                tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
-                  if (rej) {
-                    throw rej;
-                  }
-                  res.should.be.equal(true);
-                  done();
-                }).catch(function (err) {
-                  done(util.getError(err));
-                });
-              }).catch(function (err) {
-                done(util.getError(err));
-              });
+              var responseJson = JSON.parse(res.text);
+              domainConfig = responseJson;
+              delete domainConfig.cname;
+              delete domainConfig.domain_name;
+              return domainConfig;
             }).catch(function (err) {
-              done(util.getError(err));
-            });
+            done(util.getError(err));
+          });
+        })
+        .then(function (domainConfig) {
+          console.log('should set cdn_overlay_urls');
+          domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
+          api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
           }).catch(function (err) {
+            done(util.getError(err));
+          });
+        })
+        .then(function () {
+          console.log('should wait till the global and staging config statuses are "Published"');
+          tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            res.should.be.equal(true);
+            done();
+          }).catch(function (err) {
+            done(util.getError(err));
+          });
+        })
+        .catch(function (err) {
           done(util.getError(err));
         });
-      }).catch(function (err) {
-        done(util.getError(err));
-      });
-    }).catch(function (err) {
-      done(util.getError(err));
+
     });
   });
 
   after(function (done) {
-    // delete the domain config
+    console.log('should delete the domain config');
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
