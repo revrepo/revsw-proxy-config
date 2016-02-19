@@ -124,14 +124,9 @@ describe('Proxy check cdn_overlay_urls', function() {
           throw rej;
         }
         domainConfigId = res.id;
-        return res.config;
-      })
-      .then(function (res) {
-        domainConfig = res;
+        domainConfig = res.config;
         domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
-        return domainConfig;
-      })
-      .then(function (domainConfig) {
+
         return tools.afterSetDomain(domainConfigId, domainConfig);
       })
       .then(function() { done(); })
