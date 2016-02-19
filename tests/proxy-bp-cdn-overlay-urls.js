@@ -123,28 +123,19 @@ describe('Proxy check cdn_overlay_urls', function() {
         if (rej) {
           throw rej;
         }
-        domainConfigId = res;
-        return domainConfigId;
-      })
-      .then(function (domainID) {
-        return api.getDomainConfigsById(domainID);
+        domainConfigId = res.id;
+        return res.config;
       })
       .then(function (res) {
-        var responseJson = JSON.parse(res.text);
-        domainConfig = responseJson;
-        delete domainConfig.cname;
-        delete domainConfig.domain_name;
+        domainConfig = res;
         domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
         return domainConfig;
       })
       .then(function (domainConfig) {
         return tools.afterSetDomain(domainConfigId, domainConfig);
       })
-      .then(function() {
-        done();
-      })
-      .catch(function(err) {
-      done(util.getError(err));
+      .then(function() { done(); })
+      .catch(function(err) { done(util.getError(err));
     });
   });
 

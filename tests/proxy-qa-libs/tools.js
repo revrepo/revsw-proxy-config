@@ -330,7 +330,8 @@ module.exports = {
           };
           return api.postDomainConfigs(createDomainConfigJSON)
         })
-        .then(function () {
+        .then(function (res) {
+          domainConfigId = res.body.object_id;
           console.log('[===] wait till the global and staging config statuses are "Published"');
           return module.exports.waitPublishStatus(domainConfigId)
         })
@@ -365,7 +366,16 @@ module.exports = {
         })
         .then(function (res) {
           domainConfigId = res.body.object_id;
-          return response(domainConfigId);
+          return api.getDomainConfigsById(domainConfigId);
+        })
+        .then(function (res) {
+          var responseJson = JSON.parse(res.text);
+          delete responseJson.cname;
+          delete responseJson.domain_name;
+          var domainConfig = {}
+          domainConfig.id = domainConfigId
+          domainConfig.config = responseJson
+          return response(domainConfig)
         })
         .catch(function (err) {
           return reject(util.getError(err));
