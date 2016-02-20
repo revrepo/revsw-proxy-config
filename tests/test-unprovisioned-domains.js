@@ -27,7 +27,7 @@ describe('Test with not existing domain name', function() {
   var urls = config.get('test_proxy_https');
   var notExistingDomain = config.get('not_existing_domain');
 
-  it('should return 503 status code for HTTP request', function(done) {
+  it('should return 503 status code for HTTP request for domain ' + notExistingDomain, function(done) {
     request(url)
       .get('/')
       .set('Host', notExistingDomain)
@@ -41,7 +41,7 @@ describe('Test with not existing domain name', function() {
     });
   });
 
-  it('should return 503 status code for HTTPS request', function(done) {
+  it('should return 503 status code for HTTPS request for doamin ' + notExistingDomain, function(done) {
     request(urls)
       .get('/')
       .set('Host', notExistingDomain)
@@ -55,7 +55,7 @@ describe('Test with not existing domain name', function() {
     });
   });
 
-  it('should return 503 status code for CO HTTP request', function(done) {
+  it('should return 503 status code for CO HTTP request for domain ' + notExistingDomain, function(done) {
     request(url + ':18000')
       .get('/')
       .set('Host', notExistingDomain)
@@ -70,7 +70,7 @@ describe('Test with not existing domain name', function() {
     });
   });
 
-  it('should return 503 status code for CO HTTPS request', function(done) {
+  it('should return 503 status code for CO HTTPS request for domain ' + notExistingDomain, function(done) {
     request(urls + ':19000')
       .get('/')
       .set('Host', notExistingDomain)
