@@ -33,6 +33,34 @@ describe('Proxy X-Forwarded-For check', function () {
 
   this.timeout(120000);
 
+  before(function (done) {
+    tools.beforeSetDomain(newDomainName, originServer)
+      .then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        domainConfigId = res.id;
+        domainConfig = res.config;
+        return tools.afterSetDomain(domainConfigId, domainConfig);
+      })
+      .catch(function(err) { done(util.getError(err)) })
+      .then(function() { done(); })
+  });
+
+  after(function (done) {
+    console.log('[===] delete the domain config');
+    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var responseJson = JSON.parse(res.text);
+      //console.log(response_json);
+      responseJson.statusCode.should.be.equal(202);
+      responseJson.message.should.be.equal('The domain has been scheduled for removal');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
   it('(smoke) should get system IP', function (done) {
     tools.getRequest('http://' + originServer, '/ip').then(function (res, rej) {
       if (rej) {
@@ -43,46 +71,6 @@ describe('Proxy X-Forwarded-For check', function () {
       ipCheckString = AccountIP + ', ' + testProxyIp;
       done();
     }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('(smoke) should return AccountId', function (done) {
-    api.getUsersMyself().then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      AccountId = res.body.companyId[0];
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should create new configuration for domain ' + newDomainName, function (done) {
-    var createDomainConfigJSON = {
-      'domain_name': newDomainName,
-      'account_id': AccountId,
-      'origin_host_header': originHostHeader,
-      'origin_server': originServer,
-      'origin_server_location_id': testGroup,
-      'tolerance': '0'
-    };
-
-    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      domainConfigId = res.body.object_id;
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.should.be.equal(true);
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-
   });
 
   it('should get HTTP origin IPs', function (done) {
@@ -270,18 +258,6 @@ describe('Proxy X-Forwarded-For check', function () {
       }
       var response_json = JSON.parse(res.text);
       response_json.origin.should.equal(forwardedIP + ', ' + testProxyIp);
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should delete app' + appKeyID, function (done) {
-    api.deleteAppById(appKeyID).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      var responseJson = JSON.parse(res.text);
-      responseJson.statusCode.should.be.equal(200);
-      responseJson.message.should.be.equal('The application has been successfully deleted');
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });

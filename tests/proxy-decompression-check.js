@@ -27,63 +27,35 @@ describe('Proxy decompression control ', function () {
 
   this.timeout(120000);
 
-  it('(smoke) should return AccountId', function (done) {
-    api.getUsersMyself().then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      AccountId = res.body.companyId[0];
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should create new configuration for domain ' + newDomainName, function (done) {
-    var createDomainConfigJSON = {
-      'domain_name': newDomainName,
-      'account_id': AccountId,
-      'origin_host_header': originHostHeader,
-      'origin_server': originServer,
-      'origin_server_location_id': testGroup,
-      'tolerance': '0'
-    };
-
-    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      domainConfigId = res.body.object_id;
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get domain config and enable_decompression must be true if present on config', function (done) {
-    api.getDomainConfigsById(domainConfigId)
+  before(function (done) {
+    tools.beforeSetDomain(newDomainName, originServer)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
         }
-        var responseJson = JSON.parse(res.text);
-        if (responseJson.rev_component_co.enable_decompression) {
-          responseJson.rev_component_co.enable_decompression.should.equal(true);
-        }
-        //console.log(responseJson);
-        //responseJson.rev_component_co.enable_decompression.should.be.equal(true);
-        domainConfig = responseJson;
-        delete domainConfig.cname;
-        delete domainConfig.domain_name;
-        done();
-      }).catch(function (err) { done(util.getError(err)); });
+        domainConfigId = res.id;
+        domainConfig = res.config;
+        domainConfig.rev_component_bp.enable_cache = false;
+        domainConfig.rev_component_co.enable_decompression = false;
+
+        return tools.afterSetDomain(domainConfigId, domainConfig);
+      })
+      .catch(function(err) { done(util.getError(err)) })
+      .then(function() { done(); })
   });
 
-  it('should wait till the global and staging config statuses are "Published"', function (done) {
-    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
+  after(function (done) {
+    console.log('[===] delete the domain config');
+    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      res.should.be.equal(true);
+      var responseJson = JSON.parse(res.text);
+      //console.log(response_json);
+      responseJson.statusCode.should.be.equal(202);
+      responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
     }).catch(function (err) { done(util.getError(err)); });
-
   });
 
   it('should get HTTP content length after domain create', function (done) {
@@ -225,19 +197,6 @@ describe('Proxy decompression control ', function () {
       HTTPSLength.should.match(function(n) { return n > contentHTTPSLength; });
       contentHTTPSLength = HTTPSLength;
       //console.log(contentHTTPSLength);
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should delete the domain config', function (done) {
-    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      var responseJson = JSON.parse(res.text);
-      //console.log(response_json);
-      responseJson.statusCode.should.be.equal(202);
-      responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
