@@ -219,7 +219,7 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          util.mySleep(10000);
+          util.mySleep(15000);
           return response(true);
         }
       });
@@ -262,7 +262,7 @@ module.exports = {
           throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           util.mySleep(15000);
-          return resolve(true);
+          return response(true);
         }
       });
     });
@@ -303,7 +303,7 @@ module.exports = {
         if (publishFlag === false) {
           throw reject('The PURGE is still not finished. Last status response: ' + JSON.stringify(responseJson));
         } else {
-          util.mySleep(10000);
+          util.mySleep(15000);
           return response(true);
         }
       });
