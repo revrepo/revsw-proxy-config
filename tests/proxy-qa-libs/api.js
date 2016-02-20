@@ -30,7 +30,7 @@ module.exports = {
 
   // Get a list of domains registered for a customer
   getDomainConfigs: function () {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs')
         .auth(apiLogin, apiPassword)
@@ -42,7 +42,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -52,7 +52,7 @@ module.exports = {
     if (!body || body === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/domain_configs')
         .auth(apiLogin, apiPassword)
@@ -65,7 +65,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(5000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -74,7 +74,7 @@ module.exports = {
     if (!domainID || domainID === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID)
         .auth(apiLogin, apiPassword)
@@ -86,7 +86,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -96,7 +96,7 @@ module.exports = {
     if (!domainID || domainID === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .put('/v1/domain_configs/' + domainID + '?options=publish')
         .auth(apiLogin, apiPassword)
@@ -110,7 +110,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -120,7 +120,7 @@ module.exports = {
     if (!domainID || domainID === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .del('/v1/domain_configs/' + domainID)
         .auth(apiLogin, apiPassword)
@@ -133,7 +133,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -143,7 +143,7 @@ module.exports = {
     if (!domainID || domainID === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/config_status')
         .auth(apiLogin, apiPassword)
@@ -155,7 +155,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -165,7 +165,7 @@ module.exports = {
     if (!domainID || domainID === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/versions')
         .auth(apiLogin, apiPassword)
@@ -177,7 +177,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -189,7 +189,7 @@ module.exports = {
     if (!url || url === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps')
         .auth(apiLogin, apiPassword)
@@ -201,7 +201,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -211,7 +211,7 @@ module.exports = {
     if (!key || key === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key + '/config_status')
         .auth(apiLogin, apiPassword)
@@ -223,7 +223,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -233,7 +233,7 @@ module.exports = {
     if (!key || key === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key + '/versions')
         .auth(apiLogin, apiPassword)
@@ -245,7 +245,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -255,7 +255,7 @@ module.exports = {
     if (!body || body === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/apps')
         .auth(apiLogin, apiPassword)
@@ -268,7 +268,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -278,7 +278,7 @@ module.exports = {
     if (!key || key === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key)
         .auth(apiLogin, apiPassword)
@@ -290,7 +290,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -300,7 +300,7 @@ module.exports = {
     if (!key || key === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .put('/v1/apps/' + key + options)
         .auth(apiLogin, apiPassword)
@@ -314,7 +314,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -324,7 +324,7 @@ module.exports = {
     if (!key || key === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .del('/v1/apps/' + key)
         .auth(apiLogin, apiPassword)
@@ -337,7 +337,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -352,7 +352,7 @@ module.exports = {
     if (!body || body === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/purge')
         .auth(apiLogin, apiPassword)
@@ -366,7 +366,7 @@ module.exports = {
             throw reject(err);
           }
           util.mySleep(2000);
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -379,7 +379,7 @@ module.exports = {
     if (!id || id === '') {
       return;
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/purge/' + id)
         .auth(apiLogin, apiPassword)
@@ -391,7 +391,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   },
@@ -400,7 +400,7 @@ module.exports = {
 
   // Get your user profile
   getUsersMyself: function () {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/users/myself')
         .auth(apiLogin, apiPassword)
@@ -412,7 +412,7 @@ module.exports = {
             }
             throw reject(err);
           }
-          return resolve(res);
+          return response(res);
         });
     });
   }

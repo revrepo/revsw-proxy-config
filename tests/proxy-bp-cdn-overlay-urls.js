@@ -24,14 +24,15 @@ var config = require('config');
 var api = require('./proxy-qa-libs/api.js');
 var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
-
-var originHostHeader = 'test-proxy-cache-config.revsw.net',
-  originServer = 'test-proxy-cache-config.revsw.net',
+var Promise = require('bluebird');
+var origin = 'test-proxy-cache-config.revsw.net',
   testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
+  domainConfigId = "",
+  AccountId = "",
   page = '/parse.html',
   object_1 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg',
   object_2 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg',
@@ -116,73 +117,24 @@ describe('Proxy check cdn_overlay_urls', function() {
     }
   }
 
-  it('should return AccountId', function (done) {
-    api.getUsersMyself().then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      AccountId = res.body.companyId[0];
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should create new configuration for domain ' + newDomainName, function (done) {
-    var createDomainConfigJSON = {
-      'domain_name': newDomainName,
-      'account_id': AccountId,
-      'origin_host_header': originHostHeader,
-      'origin_server': originServer,
-      'origin_server_location_id': testGroup,
-      'tolerance': '0'
-    };
-
-    api.postDomainConfigs(createDomainConfigJSON).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      domainConfigId = res.body.object_id;
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should get domain config', function (done) {
-    api.getDomainConfigsById(domainConfigId)
+  before(function (done) {
+    tools.beforeSetDomain(newDomainName, origin)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
         }
-        var responseJson = JSON.parse(res.text);
-        domainConfig = responseJson;
-        delete domainConfig.cname;
-        delete domainConfig.domain_name;
-        done();
-      }).catch(function (err) { done(util.getError(err)); });
+        domainConfigId = res.id;
+        domainConfig = res.config;
+        domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
+
+        return tools.afterSetDomain(domainConfigId, domainConfig);
+      })
+      .catch(function(err) { done(util.getError(err)) })
+      .then(function() { done(); })
   });
 
-  it('should set cdn_overlay_urls', function (done) {
-    domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
-    api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  it('should wait till the global and staging config statuses are "Published" (after create)', function (done) {
-    tools.waitPublishStatus(domainConfigId).then(function (res, rej) {
-      if (rej) {
-        throw rej;
-      }
-      res.should.be.equal(true);
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
-  });
-
-  get_expected(" (HTTP)", testHTTPUrl);
-  get_expected(" (HTTPS)", testHTTPSUrl);
-
-  it('should delete the domain config', function (done) {
+  after(function (done) {
+    console.log('[===] delete the domain config');
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -194,5 +146,8 @@ describe('Proxy check cdn_overlay_urls', function() {
       done();
     }).catch(function (err) { done(util.getError(err)); });
   });
+
+  get_expected(" (HTTP)", testHTTPUrl);
+  get_expected(" (HTTPS)", testHTTPSUrl);
 
 });
