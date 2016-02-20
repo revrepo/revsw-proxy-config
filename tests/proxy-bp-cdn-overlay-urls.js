@@ -129,9 +129,8 @@ describe('Proxy check cdn_overlay_urls', function() {
 
         return tools.afterSetDomain(domainConfigId, domainConfig);
       })
+      .catch(function(err) { done(util.getError(err)) })
       .then(function() { done(); })
-      .catch(function(err) { done(util.getError(err));
-    });
   });
 
   after(function (done) {
