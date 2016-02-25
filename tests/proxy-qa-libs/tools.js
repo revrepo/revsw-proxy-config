@@ -396,5 +396,22 @@ module.exports = {
           return reject(util.getError(err));
         });
     });
+  },
+
+  deleteDomain: function (domainConfigId) {
+    return new Promise(function (response, reject) {
+      api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        var responseJson = JSON.parse(res.text);
+        responseJson.statusCode.should.be.equal(202);
+        responseJson.message.should.be.equal('The domain has been scheduled for removal');
+        console.log('    \u001b[33m♦\u001b[36m domain deleting\u001B[0m');
+        return response(true);
+      }).catch(function (err) {
+        return reject(util.getError(err));
+      });
+    });
   }
 };

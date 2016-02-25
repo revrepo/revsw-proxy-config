@@ -1,6 +1,7 @@
 {
   "name": "Proxy decompression control",
   "timeout": 240000,
+  "origin": "cdn.mbeans2.com",
   "tasks": {
     "create": {
       "command": "create",
