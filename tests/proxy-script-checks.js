@@ -7,7 +7,8 @@ var
   Promise = require('bluebird'),
   api = require('./proxy-qa-libs/api.js'),
   tools = require('./proxy-qa-libs/tools.js'),
-  util = require('./proxy-qa-libs/util.js');
+  util = require('./proxy-qa-libs/util.js'),
+  parallel = require('mocha.parallel');
 
 var testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
@@ -56,7 +57,6 @@ var checking = function (host, url, domain, values) {
           throw rej;
         }
         //console.log(res.header);
-
         for (var key in values) {
           if (values[key] != '') {
             if (key == 'header') {
@@ -71,7 +71,6 @@ var checking = function (host, url, domain, values) {
             }
           }
         }
-
         response(true);
       })
       .catch(function (err) {
@@ -86,6 +85,25 @@ describe(jsonContent.name, function () {
   var tasks = jsonContent.tasks;
 
   function process(value) {
+
+    var sub = function (key) {
+      var internal = value.cases[key];
+      it(internal.description, function (done) {
+        var host = testHTTPUrl;
+        if (value.protocol == "HTTPS") {
+          host = testHTTPSUrl;
+        }
+        checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          done();
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
+      });
+    };
+
     switch (value.command) {
 
       // Domain creation for testing
@@ -117,7 +135,7 @@ describe(jsonContent.name, function () {
               throw rej;
             }
             done();
-          });
+          }).catch(function (err) { done(util.getError(err)); });
         });
         break;
 
@@ -129,14 +147,13 @@ describe(jsonContent.name, function () {
               throw rej;
             }
             done();
-          });
+          }).catch(function (err) { done(util.getError(err)); });
         });
         break;
 
       // Make test
       case "check":
         it(value.description, function (done) {
-
           var host = testHTTPUrl
           if (value.protocol == "HTTPS") {
             host = testHTTPSUrl
@@ -146,12 +163,21 @@ describe(jsonContent.name, function () {
               throw rej;
             }
             done();
-          });
+          }).catch(function (err) { done(util.getError(err)); });
+        });
+        break;
+
+      // Make async tests
+      case "async":
+        parallel(value.description, function () {
+          for (var key in value.cases) {
+            sub(key);
+          }
         });
         break;
 
       default:
-        it.skip("Skipped test", function (done) {
+        it.skip("Skipped command " + value.command, function (done) {
           done();
         })
     }

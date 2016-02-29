@@ -1,5 +1,5 @@
 {
-  "name": "Proxy decompression control",
+  "name": "Proxy check cdn_overlay_urls",
   "timeout": 240000,
   "origin": "cdn.mbeans2.com",
   "tasks": {
@@ -169,113 +169,120 @@
       },
       "delay": 0
     },
-    "case 1": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay urls in html page",
-      "delay": 0,
-      "protocol": "HTTP",
-      "check": {
-        "url": "/parse.html",
-        "header": [],
-        "content": [
-          "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg",
-          "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg",
-          "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg",
-          "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg",
-          "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg"
-        ]
-      }
-    },
-    "case 2": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 1 jpeg",
-      "delay": 0,
-      "protocol": "HTTPS",
-      "check": {
-        "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg",
-        "header": {
-          "content-length": "110174",
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "37731.000",
-          "cache-control": "public, max-age=37731",
-          "content-type": "image/jpeg"
+    "tests": {
+      "command": "async",
+      "description": "should make async test",
+      "cases": {
+        "case 1": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay urls in html page",
+          "delay": 0,
+          "protocol": "HTTP",
+          "check": {
+            "url": "/parse.html",
+            "header": [],
+            "content": [
+              "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg",
+              "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg",
+              "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg",
+              "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg",
+              "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg"
+            ]
+          }
         },
-        "text": []
-      }
-    },
-    "case 3": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 2 jpeg",
-      "delay": 0,
-      "protocol": "HTTP",
-      "check": {
-        "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg",
-        "header": {
-          "content-length": "60989",
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "37731.000",
-          "cache-control": "public, max-age=37731",
-          "content-type": "image/jpeg"
+        "case 2": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay url for 1 jpeg",
+          "delay": 0,
+          "protocol": "HTTPS",
+          "check": {
+            "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/1.jpg",
+            "header": {
+              "content-length": "110174",
+              "x-rev-cache": "MISS",
+              "x-rev-beresp-ttl": "37731.000",
+              "cache-control": "public, max-age=37731",
+              "content-type": "image/jpeg"
+            },
+            "text": []
+          }
         },
-        "text": []
-      }
-    },
-    "case 4": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 3 jpeg",
-      "delay": 0,
-      "protocol": "HTTPS",
-      "check": {
-        "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg",
-        "header": {
-          "content-length": "127000",
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "37731.000",
-          "cache-control": "public, max-age=37731",
-          "content-type": "image/jpeg"
+        "case 3": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay url for 2 jpeg",
+          "delay": 0,
+          "protocol": "HTTP",
+          "check": {
+            "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/2.jpg",
+            "header": {
+              "content-length": "60989",
+              "x-rev-cache": "MISS",
+              "x-rev-beresp-ttl": "37731.000",
+              "cache-control": "public, max-age=37731",
+              "content-type": "image/jpeg"
+            },
+            "text": []
+          }
         },
-        "text": []
-      }
-    },
-    "case 5": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 4 jpeg",
-      "delay": 0,
-      "protocol": "HTTP",
-      "check": {
-        "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg",
-        "header": {
-          "content-length": "136746",
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "37731.000",
-          "cache-control": "public, max-age=37731",
-          "content-type": "image/jpeg"
+        "case 4": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay url for 3 jpeg",
+          "delay": 0,
+          "protocol": "HTTPS",
+          "check": {
+            "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg",
+            "header": {
+              "content-length": "127000",
+              "x-rev-cache": "MISS",
+              "x-rev-beresp-ttl": "37731.000",
+              "cache-control": "public, max-age=37731",
+              "content-type": "image/jpeg"
+            },
+            "text": []
+          }
         },
-        "text": []
-      }
-    },
-    "case 6": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 5 jpeg",
-      "delay": 0,
-      "protocol": "HTTPS",
-      "check": {
-        "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg",
-        "header": {
-          "content-length": "141080",
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "37731.000",
-          "cache-control": "public, max-age=37731",
-          "content-type": "image/jpeg"
+        "case 5": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay url for 4 jpeg",
+          "delay": 0,
+          "protocol": "HTTP",
+          "check": {
+            "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg",
+            "header": {
+              "content-length": "136746",
+              "x-rev-cache": "MISS",
+              "x-rev-beresp-ttl": "37731.000",
+              "cache-control": "public, max-age=37731",
+              "content-type": "image/jpeg"
+            },
+            "text": []
+          }
         },
-        "text": []
-      }
+        "case 6": {
+          "display": true,
+          "command": "check",
+          "description": "should check overlay url for 5 jpeg",
+          "delay": 0,
+          "protocol": "HTTPS",
+          "check": {
+            "url": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg",
+            "header": {
+              "content-length": "141080",
+              "x-rev-cache": "MISS",
+              "x-rev-beresp-ttl": "37731.000",
+              "cache-control": "public, max-age=37731",
+              "content-type": "image/jpeg"
+            },
+            "text": []
+          }
+        }
+      },
+      "delay": 0
     },
     "delete": {
       "command": "delete",
