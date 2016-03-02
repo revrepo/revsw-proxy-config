@@ -17,9 +17,6 @@ var testHTTPUrl = config.get('test_proxy_http'),
   domainConfig = '',
   domainConfigId = '';
 
-var contents = fs.readFileSync("./scripts/decompression.json");
-var jsonContent = JSON.parse(contents);
-
 api.debugMode(false);
 tools.debugMode(true);
 //console.log(jsonContent);
@@ -79,111 +76,136 @@ var checking = function (host, url, domain, values) {
   });
 };
 
-describe(jsonContent.name, function () {
-  this.timeout(jsonContent.timeout);
+describe("Proxy check", function () {
+  var items = fs.readdirSync('./scripts/');
+  var files = [];
 
-  var tasks = jsonContent.tasks;
+  if(process.argv[3]){
+    files.push(process.argv[3]);
+  }else{
+    for (var i = 0; i < items.length; i++) {
+      files.push('./scripts/'+items[i]);
+    }
+  }
 
-  function process(value) {
+  for (var i = 0; i < files.length; i++) {
+    var contents = fs.readFileSync(files[i]);
+    var jsonContent = JSON.parse(contents);
 
-    var sub = function (key) {
-      var internal = value.cases[key];
-      it(internal.description, function (done) {
-        var host = testHTTPUrl;
-        if (value.protocol == "HTTPS") {
-          host = testHTTPSUrl;
-        }
-        checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          done();
-        }).catch(function (err) {
-          done(util.getError(err));
-        });
-      });
-    };
+    describe(jsonContent.name, function () {
+      this.timeout(jsonContent.timeout);
 
-    switch (value.command) {
+      var tasks = jsonContent.tasks;
 
-      // Domain creation for testing
-      case "create":
-        before(function (done) {
-          tools.beforeSetDomain(newDomainName, jsonContent.origin)
-            .then(function (res, rej) {
+      function process(value) {
+
+        var sub = function (key) {
+          var internal = value.cases[key];
+          it(internal.description, function (done) {
+            var host = testHTTPUrl;
+            if (value.protocol == "HTTPS") {
+              host = testHTTPSUrl;
+            }
+            checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
               if (rej) {
                 throw rej;
               }
-              domainConfigId = res.id;
-              domainConfig = res.config;
-            })
-            .catch(function (err) {
-              done(util.getError(err))
-            })
-            .then(function () {
               done();
-            })
-        });
-        break;
+            }).catch(function (err) {
+              done(util.getError(err));
+            });
+          });
+        };
 
-      // Setting domain options
-      case "update":
-        it(value.description, function (done) {
-          domainConfig = merge(domainConfig, value.set);
-          tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) { done(util.getError(err)); });
-        });
-        break;
+        switch (value.command) {
 
-      // Domain removing
-      case "delete":
-        after(function (done) {
-          tools.deleteDomain(domainConfigId).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) { done(util.getError(err)); });
-        });
-        break;
+          // Domain creation for testing
+          case "create":
+            before(function (done) {
+              tools.beforeSetDomain(newDomainName, jsonContent.origin)
+                .then(function (res, rej) {
+                  if (rej) {
+                    throw rej;
+                  }
+                  domainConfigId = res.id;
+                  domainConfig = res.config;
+                })
+                .catch(function (err) {
+                  done(util.getError(err))
+                })
+                .then(function () {
+                  done();
+                });
+            });
+            break;
 
-      // Make test
-      case "check":
-        it(value.description, function (done) {
-          var host = testHTTPUrl
-          if (value.protocol == "HTTPS") {
-            host = testHTTPSUrl
-          }
-          checking(host, value.check.url, newDomainName, value.check).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) { done(util.getError(err)); });
-        });
-        break;
+          // Setting domain options
+          case "update":
+            it(value.description, function (done) {
+              domainConfig = merge(domainConfig, value.set);
+              console.log(domainConfig);
+              tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
+                if (rej) {
+                  throw rej;
+                }
+                done();
+              }).catch(function (err) {
+                done(util.getError(err));
+              });
+            });
+            break;
 
-      // Make async tests
-      case "async":
-        parallel(value.description, function () {
-          for (var key in value.cases) {
-            sub(key);
-          }
-        });
-        break;
+          // Domain removing
+          case "delete":
+            after(function (done) {
+              tools.deleteDomain(domainConfigId).then(function (res, rej) {
+                if (rej) {
+                  throw rej;
+                }
+                done();
+              }).catch(function (err) {
+                done(util.getError(err));
+              });
+            });
+            break;
 
-      default:
-        it.skip("Skipped command " + value.command, function (done) {
-          done();
-        })
-    }
-  };
+          // Make test
+          case "check":
+            it(value.description, function (done) {
+              var host = testHTTPUrl;
+              if (value.protocol == "HTTPS") {
+                host = testHTTPSUrl;
+              }
+              checking(host, value.check.url, newDomainName, value.check).then(function (res, rej) {
+                if (rej) {
+                  throw rej;
+                }
+                done();
+              }).catch(function (err) {
+                done(util.getError(err));
+              });
+            });
+            break;
 
-  for (var task in tasks) {
-    process(tasks[task]);
+          // Make async tests
+          case "async":
+            parallel(value.description, function () {
+              for (var key in value.cases) {
+                sub(key);
+              }
+            });
+            break;
+
+          default:
+            it.skip("Skipped command " + value.command, function (done) {
+              done();
+            });
+        }
+      };
+
+      for (var task in tasks) {
+        process(tasks[task]);
+      }
+    });
   }
 });
