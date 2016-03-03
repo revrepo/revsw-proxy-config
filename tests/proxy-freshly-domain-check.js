@@ -57,7 +57,7 @@ describe('Proxy freshly domain control', function () {
   });
 
   after(function (done) {
-    console.log('[===] delete the domain config');
+    console.log('    \u001b[33m♦\u001b[36m domain deleting\u001B[0m');
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;

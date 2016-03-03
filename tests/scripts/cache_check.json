@@ -1,0 +1,381 @@
+{
+  "name": "cache options",
+  "timeout": 240000,
+  "origin": "httpbin_org.revsw.net",
+  "tasks": {
+    "create": {
+      "command": "create",
+      "description": "should create new configuration for domain",
+      "delay": 0
+    },
+    "update 1": {
+      "command": "update",
+      "description": "should enabled enable_cache and enable_decompression",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "/st**css"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 120,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      },
+      "delay": 0
+    },
+    "case 1": {
+      "display": true,
+      "command": "check",
+      "description": "should check url parameter with wildcard and edge_caching",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "120.000",
+          "x-rev-beresp-grace": "0.000",
+          "cache-control": "public, max-age=120",
+          "content-type": "text/css"
+        },
+        "text": []
+      }
+    },
+    "update 2": {
+      "command": "update",
+      "description": "should enabled enable_cache and enable_decompression",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "/st**css"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 120,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": true,
+                "new_ttl": 240,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      },
+      "delay": 0
+    },
+    "case 2": {
+      "display": true,
+      "command": "check",
+      "description": "should check css file cache parameters",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "120.000",
+          "x-rev-beresp-grace": "0.000",
+          "cache-control": "public, max-age=240",
+          "content-type": "text/css"
+        },
+        "text": []
+      }
+    },
+    "case 3": {
+      "display": true,
+      "command": "check",
+      "description": "should check txt file cache parameters",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/stale/stalecontent.txt",
+        "header": {
+          "x-rev-cache": "MISS",
+          "x-rev-beresp-ttl": "4.000",
+          "x-rev-beresp-grace": "0.000",
+          "cache-control": "max-age=4",
+          "content-type": "text/plain"
+        },
+        "text": []
+      }
+    },
+    "case 4": {
+      "display": true,
+      "command": "check",
+      "description": "should check txt file cache parameters",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "Cookie": [
+          "myApp-token=12345679"
+        ]
+      },
+      "check": {
+        "url": "/static/stale/stalecontent.txt",
+        "header": {
+          "x-rev-cache": "HIT",
+          "x-rev-beresp-ttl": "4.000",
+          "x-rev-beresp-grace": "0.000",
+          "cache-control": "max-age=4",
+          "content-type": "text/plain"
+        },
+        "text": []
+      }
+    },
+    "update 3": {
+      "command": "update",
+      "description": "should set rules for cookies checking",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 120,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      },
+      "delay": 0
+    },
+    "case 5": {
+      "display": true,
+      "command": "check",
+      "description": "should check txt file cache parameters",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "Cookie": [
+          "myApp-token=12345679"
+        ]
+      },
+      "check": {
+        "url": "/cookies",
+        "header": {
+          "x-rev-cache": "MISS",
+          "x-rev-hit-for-pass": "YES",
+          "content-type": "application/json"
+        },
+        "text": [
+          "myApp-token"
+        ]
+      }
+    },
+    "case 6": {
+      "display": true,
+      "command": "check",
+      "description": "should check txt file cache parameters",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "Cookie": [
+          "myApp-token=12345679"
+        ]
+      },
+      "check": {
+        "url": "/cookies",
+        "header": {
+          "x-rev-cache": "MISS",
+          "x-rev-hit-for-pass": "YES",
+          "content-type": "application/json"
+        },
+        "text": [
+          "myApp-token"
+        ]
+      }
+    },
+    "update 4": {
+      "command": "update",
+      "description": "should set rules for cookies checking",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": false,
+                "value": "\\.(js|css)(\\?.*)?$"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 720000,
+                "override_no_cc": true
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      },
+      "delay": 0
+    },
+    "case 7": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-cache": "MISS",
+          "cache-control": "public, max-age=720000",
+          "content-type": "text/css"
+        },
+        "text": []
+      }
+    },
+    "case 8": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-cache": "HIT",
+          "x-rev-cache-hits": "1",
+          "cache-control": "public, max-age=720000",
+          "content-type": "text/css"
+        },
+        "text": []
+      }
+    },
+    "case 9": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-cache": "MISS",
+          "cache-control": "public, max-age=720000",
+          "content-type": "application/x-javascript"
+        },
+        "text": []
+      }
+    },
+    "case 10": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-cache": "HIT",
+          "x-rev-cache-hits": "1",
+          "cache-control": "public, max-age=720000",
+          "content-type": "application/x-javascript"
+        },
+        "text": []
+      }
+    },
+    "case 11": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static jpg file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-cache": "MISS",
+          "cache-control": "max-age=720000",
+          "content-type": "image/jpeg"
+        },
+        "text": []
+      }
+    },
+    "case 12": {
+      "display": true,
+      "command": "check",
+      "description": "should get by HTTP static jpg file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-cache": "HIT",
+          "x-rev-cache-hits": "1",
+          "cache-control": "max-age=720000",
+          "content-type": "image/jpeg"
+        },
+        "text": []
+      }
+    },
+    "delete": {
+      "command": "delete",
+      "description": "should delete the domain config",
+      "delay": 0
+    }
+  }
+}

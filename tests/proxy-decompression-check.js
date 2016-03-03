@@ -35,8 +35,8 @@ describe('Proxy decompression control ', function () {
         }
         domainConfigId = res.id;
         domainConfig = res.config;
-        domainConfig.rev_component_bp.enable_cache = false;
-        domainConfig.rev_component_co.enable_decompression = false;
+        //domainConfig.rev_component_bp.enable_cache = false;
+        //domainConfig.rev_component_co.enable_decompression = false;
 
         return tools.afterSetDomain(domainConfigId, domainConfig);
       })

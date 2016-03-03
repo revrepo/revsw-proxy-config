@@ -12,13 +12,15 @@ var debug = false,
   loops = config.get('waitCount');
 
 function showDebugError(message) {
-  console.log("\x1b[36m");
-  console.log("================ Debug ================");
-  console.log(message.method);
-  console.log(message.status);
-  console.log(message.text);
-  console.log("=======================================");
-  console.log("\x1b[0m");
+  if(message){
+    console.log("\x1b[36m");
+    console.log("================ Debug ================");
+    console.log(message.method);
+    console.log(message.status);
+    console.log(message.text);
+    console.log("=======================================");
+    console.log("\x1b[0m");
+  }
 }
 
 module.exports = {
@@ -205,7 +207,7 @@ module.exports = {
             }
             responseJson = res.body;
             if (debug) {
-              console.log('Iteraction ' + n + ', received response = ', JSON.stringify(responseJson));
+              console.log('          Iteraction ' + n + ', response = ', responseJson.staging_status, ' / ' , responseJson.global_status);
             }
             if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
               publishFlag = true;
@@ -217,7 +219,7 @@ module.exports = {
         }, timeout);
       }, function (err) {
         if (publishFlag === false) {
-          throw reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
+          return reject('The configuraton is still not published. Last status response: ' + JSON.stringify(responseJson));
         } else {
           util.mySleep(15000);
           return response(true);
@@ -314,12 +316,12 @@ module.exports = {
     return new Promise(function (response, reject) {
       var AccountId = "",
         domainConfigId = "";
-      console.log('[===] return AccountId');
+      console.log('    \u001b[33m♦\u001b[36m return AccountId\u001B[0m');
 
       api.getUsersMyself()
         .then(function (res) {
           AccountId = res.body.companyId[0];
-          console.log('[===] create new configuration for domain ' + newDomainName);
+          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName +'\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
             'account_id': AccountId,
@@ -332,7 +334,7 @@ module.exports = {
         })
         .then(function (res) {
           domainConfigId = res.body.object_id;
-          console.log('[===] wait till the global and staging config statuses are "Published"');
+          console.log('\u001b[33m♦\u001b[36m wait till the global and staging config statuses are "Published"\u001B[0m');
           return module.exports.waitPublishStatus(domainConfigId)
         })
         .then(function () {
@@ -348,12 +350,12 @@ module.exports = {
     return new Promise(function (response, reject) {
       var AccountId = "",
         domainConfigId = "";
-      console.log('[===] return AccountId');
+      console.log('    \u001b[33m♦\u001b[36m return AccountId\u001B[0m');
 
       api.getUsersMyself()
         .then(function (res) {
           AccountId = res.body.companyId[0];
-          console.log('[===] create new configuration for domain ' + newDomainName);
+          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName +'\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
             'account_id': AccountId,
@@ -387,12 +389,29 @@ module.exports = {
     return new Promise(function (response, reject) {
       api.putDomainConfigsById(domainConfigId, domainConfig)
         .then(function () {
-          console.log('[===] wait till the global and staging config statuses are "Published"');
+          console.log('    \u001b[33m♦\u001b[36m wait till the global and staging config statuses are "Published"\u001B[0m');
           return response(module.exports.waitPublishStatus(domainConfigId))
         })
         .catch(function (err) {
           return reject(util.getError(err));
         });
+    });
+  },
+
+  deleteDomain: function (domainConfigId) {
+    return new Promise(function (response, reject) {
+      api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        var responseJson = JSON.parse(res.text);
+        responseJson.statusCode.should.be.equal(202);
+        responseJson.message.should.be.equal('The domain has been scheduled for removal');
+        console.log('    \u001b[33m♦\u001b[36m domain deleting\u001B[0m');
+        return response(true);
+      }).catch(function (err) {
+        return reject(util.getError(err));
+      });
     });
   }
 };
