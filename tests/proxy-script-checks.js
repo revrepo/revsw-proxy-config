@@ -19,6 +19,8 @@ var testHTTPUrl = config.get('test_proxy_http'),
 
 api.debugMode(false);
 tools.debugMode(true);
+
+var development = false;
 //console.log(jsonContent);
 
 var merge = function () {
@@ -29,8 +31,8 @@ var merge = function () {
     for (prop in source) {
       if (prop in destination && Array.isArray(destination[prop])) {
         // Concat Arrays
-        destination[prop] = destination[prop].concat(source[prop]);
-
+        //destination[prop] = destination[prop].concat(source[prop]);
+        destination[prop] = source[prop];
       } else if (prop in destination && typeof destination[prop] === "object") {
         // Merge Objects
         destination[prop] = merge(destination[prop], source[prop]);
@@ -45,34 +47,72 @@ var merge = function () {
   return destination;
 };
 
-var checking = function (host, url, domain, values) {
+var checking = function (host, url, domain, values, set) {
   //console.log(host, url, domain, values);
   return new Promise(function (response, reject) {
-    tools.getHostRequest(host, url, domain)
-      .then(function (res, rej) {
-        if (rej) {
-          throw rej;
-        }
-        //console.log(res.header);
-        for (var key in values) {
-          if (values[key] != '') {
-            if (key == 'header') {
-              for (var header in values[key]) {
-                res.header[header].should.equal(values[key][header]);
+    if (!set || set === '') {
+      var setValues = {
+        'Host': domain
+      };
+      setValues = merge(setValues, set);
+      tools.getSetRequest(host, url, setValues)
+        .then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          if (development == true) { console.log(res.header); }
+          for (var key in values) {
+            if (values[key] != '') {
+              if (key == 'header') {
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.equal(values[key][header]);
+                }
               }
-            }
-            if (key == 'content') {
-              for (var text in values[key]) {
-                res.text.should.containEql(values[key][text]);
+              if (key == 'content') {
+                for (var text in values[key]) {
+                  res.text.should.containEql(values[key][text]);
+                }
               }
             }
           }
-        }
-        response(true);
-      })
-      .catch(function (err) {
-        reject(err);
-      });
+          response(true);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    }else{
+      tools.getHostRequest(host, url, domain)
+        .then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          if (development == true) { console.log(res.header); }
+          for (var key in values) {
+            if (values[key] != '') {
+              if (key == 'header') {
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.equal(values[key][header]);
+                }
+              }
+              if (key == 'content') {
+                for (var text in values[key]) {
+                  res.text.should.containEql(values[key][text]);
+                }
+              }
+            }
+          }
+          response(true);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    }
   });
 };
 
@@ -142,8 +182,9 @@ describe("Proxy check", function () {
           // Setting domain options
           case "update":
             it(value.description, function (done) {
+              //console.log(JSON.stringify(domainConfig));
               domainConfig = merge(domainConfig, value.set);
-              console.log(domainConfig);
+              if(development == true) { console.log(JSON.stringify(domainConfig)); }
               tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
                 if (rej) {
                   throw rej;
@@ -176,7 +217,7 @@ describe("Proxy check", function () {
               if (value.protocol == "HTTPS") {
                 host = testHTTPSUrl;
               }
-              checking(host, value.check.url, newDomainName, value.check).then(function (res, rej) {
+              checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
                 if (rej) {
                   throw rej;
                 }

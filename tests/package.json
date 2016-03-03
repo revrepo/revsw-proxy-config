@@ -23,5 +23,8 @@
     "superagent": "~1.2.0",
     "supertest": "~1.0.1",
     "supertest-as-promised": "~2.0.2"
+  },
+  "devDependencies": {
+    "mocha-better-spec-reporter": "^3.0.1"
   }
 }

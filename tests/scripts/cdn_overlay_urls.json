@@ -1,12 +1,11 @@
 {
-  "name": "Proxy check cdn_overlay_urls",
+  "name": "option cdn_overlay_urls",
   "timeout": 240000,
-  "origin": "cdn.mbeans2.com",
+  "origin": "test-proxy-cache-config.revsw.net",
   "tasks": {
     "create": {
       "command": "create",
       "description": "should create new configuration for domain",
-      "set": "",
       "delay": 0
     },
     "update": {
