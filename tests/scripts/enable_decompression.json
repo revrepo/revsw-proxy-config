@@ -24,7 +24,7 @@
     "case 1": {
       "display": true,
       "command": "check",
-      "description": "should check overlay url for 1 jpeg",
+      "description": "should check svg file request",
       "delay": 0,
       "protocol": "HTTP",
       "check": {
@@ -42,7 +42,7 @@
     "case 2": {
       "display": true,
       "command": "check",
-      "description": "should check overlay url for 1 jpeg",
+      "description": "should check svg file request and receive HIT and content-length",
       "delay": 0,
       "protocol": "HTTPS",
       "check": {
@@ -74,28 +74,9 @@
     "case 3": {
       "display": true,
       "command": "check",
-      "description": "should check overlay url for 1 jpeg",
+      "description": "should check svg file and receive smaller content-length",
       "delay": 0,
       "protocol": "HTTP",
-      "check": {
-        "url": "/media/fonts/ProximaNova.svg",
-        "header": {
-          "content-length": "14305",
-          "x-rev-cache": "HIT",
-          "x-rev-beresp-ttl": "604800.000",
-          "cache-control": "public, max-age=604800",
-          "x-rev-beresp-grace": "0.000",
-          "content-type": "image/svg+xml"
-        },
-        "text": []
-      }
-    },
-    "case 4": {
-      "display": true,
-      "command": "check",
-      "description": "should check overlay url for 1 jpeg",
-      "delay": 0,
-      "protocol": "HTTPS",
       "check": {
         "url": "/media/fonts/ProximaNova.svg",
         "header": {
