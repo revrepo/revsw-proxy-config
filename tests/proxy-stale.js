@@ -32,7 +32,7 @@ var https = require('https');
 
 
 describe('Basic stale tests', function() {
-  this.timeout(60000);
+  this.timeout(240000);
 
     var url = 'http://testsjc20-bp01.revsw.net';
     var urls = 'https://testsjc20-bp01.revsw.net';
@@ -69,7 +69,7 @@ describe('Basic stale tests', function() {
     }
 
     // Purge
-
+/*
 
     it('Flush the cache cache config one', function(done) {
         request(api_url)
@@ -342,7 +342,8 @@ describe('Basic stale tests', function() {
             });
     });
 
-*******************/
+
+*/
 
 
 

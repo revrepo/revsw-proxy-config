@@ -30,7 +30,7 @@ var https = require('https');
 //var clientCertificateAuth = require('client-certificate-auth');
 
 describe('HTML Third Party Links', function() {
-  this.timeout(60000);
+  this.timeout(240000);
 
   var url = 'http://testsjc20-bp01.revsw.net';
   var api_url = 'https://TESTSJC20-API01.revsw.net';

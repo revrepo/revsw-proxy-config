@@ -31,6 +31,7 @@ var origin = 'test-proxy-cache-config.revsw.net',
   testAPIUrl = config.get('testAPIUrl'),
   testGroup = config.get('test_group'),
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
+  domainConfig = "",
   domainConfigId = "",
   AccountId = "",
   page = '/parse.html',
@@ -42,7 +43,7 @@ var origin = 'test-proxy-cache-config.revsw.net',
 
 
 describe('Proxy check cdn_overlay_urls', function() {
-  this.timeout(120000);
+  this.timeout(240000);
 
   var expected = [
     {
@@ -125,9 +126,6 @@ describe('Proxy check cdn_overlay_urls', function() {
         }
         domainConfigId = res.id;
         domainConfig = res.config;
-        domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
-
-        return tools.afterSetDomain(domainConfigId, domainConfig);
       })
       .catch(function(err) { done(util.getError(err)) })
       .then(function() { done(); })
@@ -145,6 +143,17 @@ describe('Proxy check cdn_overlay_urls', function() {
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
     }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it("update config", function (done) {
+    domainConfig.rev_component_bp.cdn_overlay_urls = ["test-proxy-dsa-config.revsw.net"];
+    tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+    }).catch(function (err) {
+      done(util.getError(err));
+    }).then(function() { done(); });
   });
 
   get_expected(" (HTTP)", testHTTPUrl);

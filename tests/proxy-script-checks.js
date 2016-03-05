@@ -60,7 +60,9 @@ var checking = function (host, url, domain, values, set) {
           if (rej) {
             throw rej;
           }
-          if (development == true) { console.log(res.header); }
+          if (development == true) {
+            console.log(res.header);
+          }
           for (var key in values) {
             if (values[key] != '') {
               if (key == 'header') {
@@ -83,13 +85,15 @@ var checking = function (host, url, domain, values, set) {
         .catch(function (err) {
           reject(err);
         });
-    }else{
+    } else {
       tools.getHostRequest(host, url, domain)
         .then(function (res, rej) {
           if (rej) {
             throw rej;
           }
-          if (development == true) { console.log(res.header); }
+          if (development == true) {
+            console.log(res.header);
+          }
           for (var key in values) {
             if (values[key] != '') {
               if (key == 'header') {
@@ -121,15 +125,56 @@ function getRandomInt(min, max) {
 }
 
 function test_process(value, newDomainName, jsonContent) {
-      //console.log(newDomainName);
-      var sub = function (key) {
-        var internal = value.cases[key];
-      it(internal.description, function (done) {
-        var host = testHTTPUrl;
-        if (value.protocol == "HTTPS") {
-          host = testHTTPSUrl;
+  //console.log(newDomainName);
+  var sub = function (key) {
+    var internal = value.cases[key];
+    it(internal.description, function (done) {
+      var host = testHTTPUrl;
+      if (value.protocol == "HTTPS") {
+        host = testHTTPSUrl;
+      }
+      checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
+        if (rej) {
+          throw rej;
         }
-        checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
+        done();
+      }).catch(function (err) {
+        done(util.getError(err));
+      });
+    });
+  };
+
+  switch (value.command) {
+
+    // Domain creation for testing
+    case "create":
+      it(value.description, function (done) {
+        tools.beforeSetDomain(newDomainName, jsonContent.origin)
+          .then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            domainConfigId = res.id;
+            domainConfig = res.config;
+          })
+          .catch(function (err) {
+            done(util.getError(err))
+          })
+          .then(function () {
+            done();
+          });
+      });
+      break;
+
+    // Setting domain options
+    case "update":
+      it(value.description, function (done) {
+        //console.log(JSON.stringify(domainConfig));
+        domainConfig = merge(domainConfig, value.set);
+        if (development == true) {
+          console.log(JSON.stringify(domainConfig));
+        }
+        tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
           if (rej) {
             throw rej;
           }
@@ -138,103 +183,64 @@ function test_process(value, newDomainName, jsonContent) {
           done(util.getError(err));
         });
       });
-    };
+      break;
 
-    switch (value.command) {
-
-      // Domain creation for testing
-      case "create":
-        it(value.description, function (done) {
-          tools.beforeSetDomain(newDomainName, jsonContent.origin)
-            .then(function (res, rej) {
-              if (rej) {
-                throw rej;
-              }
-              domainConfigId = res.id;
-              domainConfig = res.config;
-            })
-            .catch(function (err) {
-              done(util.getError(err))
-            })
-            .then(function () {
-              done();
-            });
-        });
-        break;
-
-      // Setting domain options
-      case "update":
-        it(value.description, function (done) {
-          //console.log(JSON.stringify(domainConfig));
-          domainConfig = merge(domainConfig, value.set);
-          if(development == true) { console.log(JSON.stringify(domainConfig)); }
-          tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) {
-            done(util.getError(err));
-          });
-        });
-        break;
-
-      // Domain removing
-      case "delete":
-        it(value.description, function (done) {
-          tools.deleteDomain(domainConfigId).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) {
-            done(util.getError(err));
-          });
-        });
-        break;
-
-      // Make test
-      case "check":
-        it(value.description, function (done) {
-          var host = testHTTPUrl;
-          if (value.protocol == "HTTPS") {
-            host = testHTTPSUrl;
+    // Domain removing
+    case "delete":
+      it(value.description, function (done) {
+        tools.deleteDomain(domainConfigId).then(function (res, rej) {
+          if (rej) {
+            throw rej;
           }
-          checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) {
-            done(util.getError(err));
-          });
-        });
-        break;
-
-      // Make async tests
-      case "async":
-        parallel(value.description, function () {
-          for (var key in value.cases) {
-            sub(key);
-          }
-        });
-        break;
-
-      default:
-        it.skip("Skipped command " + value.command, function (done) {
           done();
+        }).catch(function (err) {
+          done(util.getError(err));
         });
-    }
+      });
+      break;
 
-  };
+    // Make test
+    case "check":
+      it(value.description, function (done) {
+        var host = testHTTPUrl;
+        if (value.protocol == "HTTPS") {
+          host = testHTTPSUrl;
+        }
+        checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          done();
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
+      });
+      break;
+
+    // Make async tests
+    case "async":
+      parallel(value.description, function () {
+        for (var key in value.cases) {
+          sub(key);
+        }
+      });
+      break;
+
+    default:
+      it.skip("Skipped command " + value.command, function (done) {
+        done();
+      });
+  }
+
+};
 
 describe("Proxy check", function () {
   var items = fs.readdirSync(sctiptsFolder);
   var files = [];
 
-  if(process.argv[3]){
+  if (process.argv[3]) {
     files.push(process.argv[3]);
-  }else{
+  } else {
     for (var i = 0; i < items.length; i++) {
       files.push(sctiptsFolder + items[i]);
     }
@@ -243,7 +249,7 @@ describe("Proxy check", function () {
   for (var i = 0; i < files.length; i++) {
     var contents = fs.readFileSync(files[i]);
     var jsonContent = JSON.parse(contents);
-    var newDomainName = config.get('test_domain_start') + Date.now() + getRandomInt(1000,9999) + config.get('test_domain_end');
+    var newDomainName = config.get('test_domain_start') + Date.now() + getRandomInt(1000, 9999) + config.get('test_domain_end');
     var tasks = jsonContent.tasks;
 
     describe(jsonContent.name, function () {

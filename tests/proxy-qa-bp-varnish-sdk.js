@@ -33,8 +33,8 @@ var x_rev_hostname_external = 'httpbin.org';
 function custom_sleep(time) {
 	var stop = new Date().getTime();
 
-	while(new Date().getTime() < stop + time) { 
-		; 
+	while(new Date().getTime() < stop + time) {
+		;
 	}
 }
 
@@ -50,7 +50,7 @@ function test_cache_time(sleep_time, generic_object)
 	var req_head = generic_object['request_headers'];
 	var res_head = generic_object['response_headers'];
 	var res_body = generic_object['response_body'];
-	
+
 	if (generic_object['get_proto']) {
 		protocol = generic_object['get_proto'];
 	}
@@ -141,14 +141,14 @@ describe('SDK external test - basic header and ttl & grace', function() {
 	var test_obj_1 = fr + "?rand_version_basic=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
+		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -161,12 +161,12 @@ describe('SDK external test - basic header and ttl & grace', function() {
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check that the resource is served from cache', 
+		'desc': 'Test 2 - check that the resource is served from cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -178,17 +178,17 @@ describe('SDK external test - basic header and ttl & grace', function() {
 		],
 		'ttl_interval': {
 			'min': 29, 'max': 30
-		} 
+		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
+		'desc': 'Test 3 - check 1 second later that the resource is still served from cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -199,13 +199,14 @@ describe('SDK external test - basic header and ttl & grace', function() {
 			{ 'k': 'Cache-Control', 'v': /public, max-age=30/ }
 		],
 		'ttl_interval': {
-			'min': 28, 'max': 29
+			'min': 27, 'max': 29
 		}
 	});
-	
+
 });
 
 describe('SKD external test - check response for 404 revsdk requests', function() {
+  this.timeout(240000);
 	var fr = '/status/404';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
@@ -213,13 +214,13 @@ describe('SKD external test - check response for 404 revsdk requests', function(
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -227,13 +228,13 @@ describe('SKD external test - check response for 404 revsdk requests', function(
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 2 - check again resource is not in cache', 
+		'desc': 'Test 2 - check again resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -241,13 +242,13 @@ describe('SKD external test - check response for 404 revsdk requests', function(
 	test_cache_time(2000, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -255,6 +256,7 @@ describe('SKD external test - check response for 404 revsdk requests', function(
 });
 
 describe('SDK external test - check headers for 500 status code for the revsdk component', function() {
+  this.timeout(240000);
 	var fr = '/status/500';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
@@ -262,13 +264,13 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -276,11 +278,11 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
 		'desc': 'Test 2 - check again that resource is not in cache',
 		'response_headers': [
@@ -290,13 +292,13 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 	test_cache_time(3000, {
 		'debug': false,
 		'hostname': hostname_external,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -304,21 +306,22 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 });
 
 describe('SDK external test - check http proto over https', function() {
+  this.timeout(240000);
 	var fr = '/get';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
+		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "http"
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource contains specified values in headers and body', 
+		'desc': 'Test 1 - check that resource contains specified values in headers and body',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -337,13 +340,13 @@ describe('SDK external test - check http proto over https', function() {
 		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "http"
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check headers and body content again', 
+		'desc': 'Test 2 - check headers and body content again',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -358,17 +361,17 @@ describe('SDK external test - check http proto over https', function() {
 			'"url": "http://httpbin.org/get'
 		]
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "http"
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check 1 second later the response headers and body', 
+		'desc': 'Test 3 - check 1 second later the response headers and body',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -383,25 +386,26 @@ describe('SDK external test - check http proto over https', function() {
 			'"url": "http://httpbin.org/get'
 		]
 	});
-	
+
 });
 
 describe('SDK external test - check https proto over https', function() {
+  this.timeout(240000);
 	var fr = '/get';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
 
 	test_cache_time(0, {
-		'debug': false, 
+		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "https"
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource contains specified values in headers and body', 
+		'desc': 'Test 1 - check that resource contains specified values in headers and body',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -420,13 +424,13 @@ describe('SDK external test - check https proto over https', function() {
 		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "https"
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check headers and body content again', 
+		'desc': 'Test 2 - check headers and body content again',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -441,17 +445,17 @@ describe('SDK external test - check https proto over https', function() {
 			'"url": "https://httpbin.org/get'
 		]
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
 		'hostname': hostname_external,
 		'get_proto': 'https',
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_external,
 			'X-Rev-Proto': "https"
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check 1 second later the response headers and body', 
+		'desc': 'Test 3 - check 1 second later the response headers and body',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net/ },
@@ -466,11 +470,12 @@ describe('SDK external test - check https proto over https', function() {
 			'"url": "https://httpbin.org/get'
 		]
 	});
-	
+
 });
 
 // Internal tests
 describe('SDK internal test - basic header and ttl & grace', function() {
+  this.timeout(240000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
  	var test_obj_1 = fr + "?rand_internal_version_basic=" + random_number.toString();
@@ -478,14 +483,14 @@ describe('SDK internal test - basic header and ttl & grace', function() {
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
@@ -499,14 +504,14 @@ describe('SDK internal test - basic header and ttl & grace', function() {
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 2 - check that the resource is served from cache', 
+		'desc': 'Test 2 - check that the resource is served from cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
@@ -518,20 +523,20 @@ describe('SDK internal test - basic header and ttl & grace', function() {
 			{ 'k': 'ttl-grace', 'v': /working_add_header/ }
 		],
 		'ttl_interval': {
-			'min': 20, 'max': 21
-		} 
+			'min': 19, 'max': 21
+		}
 	});
-	test_cache_time(1000, { 
+	test_cache_time(1000, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
  			'ADD-RESPONSE-HEADER-Cache-Control': 'public, max-age=21',
  			'ADD-RESPONSE-HEADER-ttl-grace': 'working_add_header'
 		},
 		'status_code': 200,
-		'desc': 'Test 3 - check 1 second later that the resource is still served from cache', 
+		'desc': 'Test 3 - check 1 second later that the resource is still served from cache',
 		'response_headers': [
 			{ 'k': 'x-rev-sdk', 'v': /1/ },
 			{ 'k': 'x-rev-host', 'v': /0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net/ },
@@ -543,13 +548,14 @@ describe('SDK internal test - basic header and ttl & grace', function() {
 			{ 'k': 'ttl-grace', 'v': /working_add_header/ }
 		],
 		'ttl_interval': {
-			'min': 18, 'max': 19
+			'min': 17, 'max': 19
 		}
 	});
-	
+
 });
 
 describe('SDK internal test - check headers for 404 status code for the revsdk component', function() {
+  this.timeout(240000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_internal_version_404flow=" + random_number.toString();
@@ -557,14 +563,14 @@ describe('SDK internal test - check headers for 404 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '404'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 404,
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -572,13 +578,13 @@ describe('SDK internal test - check headers for 404 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '404'
 		},
-		'action': 'TTL', 
-		'status_code': 404, 
+		'action': 'TTL',
+		'status_code': 404,
 		'desc': 'Test 2 - check again that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
@@ -587,14 +593,14 @@ describe('SDK internal test - check headers for 404 status code for the revsdk c
 	test_cache_time(3000, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '404'
 		},
-		'action': 'TTL', 
-		'status_code': 404, 
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'action': 'TTL',
+		'status_code': 404,
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -602,6 +608,7 @@ describe('SDK internal test - check headers for 404 status code for the revsdk c
 });
 
 describe('SDK internal test - check headers for 500 status code for the revsdk component', function() {
+  this.timeout(240000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_internal_version_500flow=" + random_number.toString();
@@ -609,14 +616,14 @@ describe('SDK internal test - check headers for 500 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 1 - check that resource is not in cache', 
+		'desc': 'Test 1 - check that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]
@@ -624,12 +631,12 @@ describe('SDK internal test - check headers for 500 status code for the revsdk c
 	test_cache_time(0, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
 		'desc': 'Test 2 - check again that resource is not in cache',
 		'response_headers': [
@@ -639,14 +646,14 @@ describe('SDK internal test - check headers for 500 status code for the revsdk c
 	test_cache_time(3000, {
 		'debug': false,
 		'hostname': hostname_internal,
-		'obj': test_obj_1, 
+		'obj': test_obj_1,
 		'request_headers': {
 			'X-Rev-Host': x_rev_hostname_internal,
 			'CUSTOM-RESPONSE-CODE': '500'
 		},
-		'action': 'TTL', 
+		'action': 'TTL',
 		'status_code': 503, // default varnish response code
-		'desc': 'Test 3 - check with delay that resource is not in cache', 
+		'desc': 'Test 3 - check with delay that resource is not in cache',
 		'response_headers': [
 			{ 'k': 'X-Rev-Cache', 'v': /MISS/ }
 		]

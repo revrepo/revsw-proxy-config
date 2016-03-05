@@ -22,7 +22,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
 
 describe('Proxy cookies cache control', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
   var expected = [];
 
   function get_expected(expected, test_desc, test_url) {
@@ -69,7 +69,27 @@ describe('Proxy cookies cache control', function () {
         }
         domainConfigId = res.id;
         domainConfig = res.config;
-        domainConfig.rev_component_bp.caching_rules =
+      })
+      .catch(function(err) { done(util.getError(err)) })
+      .then(function() { done(); })
+  });
+
+  after(function (done) {
+    console.log('[===] delete the domain config');
+    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      var responseJson = JSON.parse(res.text);
+      //console.log(response_json);
+      responseJson.statusCode.should.be.equal(202);
+      responseJson.message.should.be.equal('The domain has been scheduled for removal');
+      done();
+    }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it("update config", function (done) {
+    domainConfig.rev_component_bp.caching_rules =
           [
             {
               "version": 1,
@@ -99,25 +119,13 @@ describe('Proxy cookies cache control', function () {
               }
             }
           ];
-
-        return tools.afterSetDomain(domainConfigId, domainConfig);
-      })
-      .catch(function(err) { done(util.getError(err)) })
-      .then(function() { done(); })
-  });
-
-  after(function (done) {
-    console.log('[===] delete the domain config');
-    api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
+    tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      var responseJson = JSON.parse(res.text);
-      //console.log(response_json);
-      responseJson.statusCode.should.be.equal(202);
-      responseJson.message.should.be.equal('The domain has been scheduled for removal');
-      done();
-    }).catch(function (err) { done(util.getError(err)); });
+    }).catch(function (err) {
+      done(util.getError(err));
+    }).then(function() { done(); });
   });
 
   expected = [

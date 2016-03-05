@@ -34,7 +34,7 @@ describe('DNS TTL Test', function() {
   var nsone_api = 'https://api.nsone.net';
   var nsone_url = '/v1/zones/revqa.net/testsjc20-co-test.revqa.net/A';
 
-  this.timeout(60000);
+  this.timeout(240000);
 
   var JSON50 = {
     "id": "55d4e4122db1566b3b89fb9a",
