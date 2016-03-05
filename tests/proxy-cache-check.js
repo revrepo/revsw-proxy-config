@@ -21,11 +21,11 @@ var originServer = 'httpbin_org.revsw.net',
   cacheAge = '',
   totalTime = '';
 
-tools.debugMode(false);
+tools.debugMode(true);
 
 describe('Proxy cache check ', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)
@@ -35,43 +35,13 @@ describe('Proxy cache check ', function () {
         }
         domainConfigId = res.id;
         domainConfig = res.config;
-        domainConfig.rev_component_bp.caching_rules =
-          [
-            {
-              "version": 1,
-              "url": {
-                "is_wildcard": true,
-                "value": "/st**css"
-              },
-              "edge_caching": {
-                "override_origin": true,
-                "new_ttl": 120,
-                "override_no_cc": false
-              },
-              "browser_caching": {
-                "override_edge": false,
-                "new_ttl": 0,
-                "force_revalidate": false
-              },
-              "cookies": {
-                "override": false,
-                "ignore_all": false,
-                "list_is_keep": false,
-                "keep_or_ignore_list": [],
-                "remove_ignored_from_request": false,
-                "remove_ignored_from_response": false
-              }
-            }
-          ];
-
-        return tools.afterSetDomain(domainConfigId, domainConfig);
       })
       .catch(function(err) { done(util.getError(err)) })
       .then(function() { done(); })
   });
 
   after(function (done) {
-    console.log('[===] delete the domain config');
+    console.log('    ✓ delete the domain config');
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -82,6 +52,44 @@ describe('Proxy cache check ', function () {
       responseJson.message.should.be.equal('The domain has been scheduled for removal');
       done();
     }).catch(function (err) { done(util.getError(err)); });
+  });
+
+  it("update config", function (done) {
+    domainConfig.rev_component_bp.caching_rules =
+      [
+        {
+          "version": 1,
+          "url": {
+            "is_wildcard": true,
+            "value": "/st**css"
+          },
+          "edge_caching": {
+            "override_origin": true,
+            "new_ttl": 120,
+            "override_no_cc": false
+          },
+          "browser_caching": {
+            "override_edge": false,
+            "new_ttl": 0,
+            "force_revalidate": false
+          },
+          "cookies": {
+            "override": false,
+            "ignore_all": false,
+            "list_is_keep": false,
+            "keep_or_ignore_list": [],
+            "remove_ignored_from_request": false,
+            "remove_ignored_from_response": false
+          }
+        }
+      ];
+    tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+    }).catch(function (err) {
+      done(util.getError(err));
+    }).then(function() { done(); });
   });
 
   it('should check url parameter with wildcard and edge_caching', function (done) {

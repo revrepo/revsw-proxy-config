@@ -30,7 +30,7 @@ var https = require('https');
 //var clientCertificateAuth = require('client-certificate-auth');
 
 describe('Basic tests', function() {
-  this.timeout(60000);
+  this.timeout(240000);
 
   var url = 'http://testsjc20-bp01.revsw.net';
   var urls = 'https://testsjc20-bp01.revsw.net';
@@ -95,7 +95,7 @@ describe('Basic tests', function() {
       }
     }]
   }
-
+/*
   // Purge
 
   it('Flush the cache cache config one', function(done) {
@@ -247,7 +247,6 @@ describe('Basic tests', function() {
         });
     });
 
-  ***********************/
 
   //
   // GET
@@ -1640,7 +1639,7 @@ describe('Basic tests', function() {
         done();
       });
   });
-
+*/
   // ENDENDEND
 });
 // ENDENDEND

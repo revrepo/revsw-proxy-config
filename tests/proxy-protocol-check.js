@@ -23,7 +23,7 @@ var originServer = 'httpbin_org.revsw.net',
 
 describe('Proxy origin secure protocol checker with default configuration', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {
@@ -363,7 +363,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
 // disable cache
 describe('Proxy origin secure protocol checker with disabled cache', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should change domain config disable cache and set origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
@@ -527,7 +527,7 @@ describe('Proxy origin secure protocol checker with disabled cache', function ()
 // enable cache and set co_bypass_locations
 describe('Proxy origin secure protocol checker with setted co_bypass_locations', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should change domain config enable cache, set co_bypass_locations and origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
@@ -694,7 +694,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
 // disable cache and set co_bypass_locations
 describe('Proxy origin secure protocol checker with disabled cache and setted co_bypass_locations', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should change domain config disable cache, set co_bypass_locations and origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
@@ -876,7 +876,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
 // enable cache and set cache_bypass_locations
 describe('Proxy origin secure protocol checker with setted cache_bypass_locations', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should change domain config enable cache, set cache_bypass_locations and origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';

@@ -21,7 +21,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
 
 
 describe('Proxy RUM control enable_rum', function () {
-  this.timeout(120000);
+  this.timeout(240000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)

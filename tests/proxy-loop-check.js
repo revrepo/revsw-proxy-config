@@ -23,7 +23,7 @@ tools.debugMode(false);
 
 describe('Proxy loop detect checker', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {

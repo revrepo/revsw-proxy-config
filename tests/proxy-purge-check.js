@@ -22,7 +22,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
 
 describe('Proxy PURGE check ', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)

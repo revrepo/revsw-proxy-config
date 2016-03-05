@@ -14,7 +14,7 @@ var domains = [];
 tools.debugMode(false);
 
 describe('Proxy cleaner', function () {
-  this.timeout(120000);
+  this.timeout(240000);
 
   it('should find don\'t use domains', function (done) {
     api.getDomainConfigs().then(function (res, rej) {
@@ -26,7 +26,7 @@ describe('Proxy cleaner', function () {
       for (var attributename in response_json) {
         var domain = response_json[attributename].domain_name;
         if (
-            domain.substring(0, 11) == "delete-me-1" ||
+            domain.substring(0, 10) == "delete-me-" ||
             domain.substring(0, 14) == "first-domain-1" ||
             domain.substring(0, 15) == "second-domain-1" ||
             domain.substring(0, 10) == "mydomain-1" ||

@@ -27,7 +27,7 @@ function send_quic(request){
 
 describe('Proxy QUIC protocol control', function () {
 
-  this.timeout(120000);
+  this.timeout(240000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)
