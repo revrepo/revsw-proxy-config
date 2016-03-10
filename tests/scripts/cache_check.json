@@ -1,51 +1,35 @@
 {
   "name": "cache options",
+  "enabled": true,
   "timeout": 240000,
-  "origin": "httpbin_org.revsw.net",
-  "tasks": {
-    "create": {
-      "command": "create",
-      "description": "should create new configuration for domain",
-      "delay": 0
+  "tasks": [
+    {
+      "name": "cache-options",
+      "step": "step-3",
+      "command": "check",
+      "description": "should purge step-3 domain",
+      "delay": 0,
+      "purge": true
     },
-    "update 1": {
-      "command": "update",
-      "description": "should enabled enable_cache and enable_decompression",
-      "set": {
-        "rev_component_bp": {
-          "caching_rules": [
-            {
-              "version": 1,
-              "url": {
-                "is_wildcard": true,
-                "value": "/st**css"
-              },
-              "edge_caching": {
-                "override_origin": true,
-                "new_ttl": 120,
-                "override_no_cc": false
-              },
-              "browser_caching": {
-                "override_edge": false,
-                "new_ttl": 0,
-                "force_revalidate": false
-              },
-              "cookies": {
-                "override": false,
-                "ignore_all": false,
-                "list_is_keep": false,
-                "keep_or_ignore_list": [],
-                "remove_ignored_from_request": false,
-                "remove_ignored_from_response": false
-              }
-            }
-          ]
-        }
-      },
-      "delay": 0
+    {
+      "name": "cache-options",
+      "step": "step-4",
+      "command": "check",
+      "description": "should purge step-4 domain",
+      "delay": 0,
+      "purge": true
     },
-    "case 1": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
+      "command": "check",
+      "description": "should purge step-5 domain",
+      "delay": 0,
+      "purge": true
+    },
+    {
+      "name": "cache-options",
+      "step": "step-2",
       "command": "check",
       "description": "should check url parameter with wildcard and edge_caching",
       "delay": 0,
@@ -61,44 +45,9 @@
         "text": []
       }
     },
-    "update 2": {
-      "command": "update",
-      "description": "should enabled enable_cache and enable_decompression",
-      "set": {
-        "rev_component_bp": {
-          "caching_rules": [
-            {
-              "version": 1,
-              "url": {
-                "is_wildcard": true,
-                "value": "/st**css"
-              },
-              "edge_caching": {
-                "override_origin": true,
-                "new_ttl": 120,
-                "override_no_cc": false
-              },
-              "browser_caching": {
-                "override_edge": true,
-                "new_ttl": 240,
-                "force_revalidate": false
-              },
-              "cookies": {
-                "override": false,
-                "ignore_all": false,
-                "list_is_keep": false,
-                "keep_or_ignore_list": [],
-                "remove_ignored_from_request": false,
-                "remove_ignored_from_response": false
-              }
-            }
-          ]
-        }
-      },
-      "delay": 0
-    },
-    "case 2": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-3",
       "command": "check",
       "description": "should check css file cache parameters",
       "delay": 0,
@@ -114,8 +63,9 @@
         "text": []
       }
     },
-    "case 3": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-3",
       "command": "check",
       "description": "should check txt file cache parameters",
       "delay": 0,
@@ -132,10 +82,11 @@
         "text": []
       }
     },
-    "case 4": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-3",
       "command": "check",
-      "description": "should check txt file cache parameters",
+      "description": "should check txt file cache parameters again",
       "delay": 0,
       "protocol": "HTTP",
       "set": {
@@ -155,44 +106,9 @@
         "text": []
       }
     },
-    "update 3": {
-      "command": "update",
-      "description": "should set rules for cookies checking",
-      "set": {
-        "rev_component_bp": {
-          "caching_rules": [
-            {
-              "version": 1,
-              "url": {
-                "is_wildcard": true,
-                "value": "**"
-              },
-              "edge_caching": {
-                "override_origin": true,
-                "new_ttl": 120,
-                "override_no_cc": false
-              },
-              "browser_caching": {
-                "override_edge": false,
-                "new_ttl": 0,
-                "force_revalidate": false
-              },
-              "cookies": {
-                "override": false,
-                "ignore_all": false,
-                "list_is_keep": false,
-                "keep_or_ignore_list": [],
-                "remove_ignored_from_request": false,
-                "remove_ignored_from_response": false
-              }
-            }
-          ]
-        }
-      },
-      "delay": 0
-    },
-    "case 5": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-4",
       "command": "check",
       "description": "should check txt file cache parameters",
       "delay": 0,
@@ -214,8 +130,9 @@
         ]
       }
     },
-    "case 6": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-4",
       "command": "check",
       "description": "should check txt file cache parameters",
       "delay": 0,
@@ -237,44 +154,9 @@
         ]
       }
     },
-    "update 4": {
-      "command": "update",
-      "description": "should set rules for cookies checking",
-      "set": {
-        "rev_component_bp": {
-          "caching_rules": [
-            {
-              "version": 1,
-              "url": {
-                "is_wildcard": false,
-                "value": "\\.(js|css)(\\?.*)?$"
-              },
-              "edge_caching": {
-                "override_origin": true,
-                "new_ttl": 720000,
-                "override_no_cc": true
-              },
-              "browser_caching": {
-                "override_edge": false,
-                "new_ttl": 0,
-                "force_revalidate": false
-              },
-              "cookies": {
-                "override": false,
-                "ignore_all": false,
-                "list_is_keep": false,
-                "keep_or_ignore_list": [],
-                "remove_ignored_from_request": false,
-                "remove_ignored_from_response": false
-              }
-            }
-          ]
-        }
-      },
-      "delay": 0
-    },
-    "case 7": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
@@ -289,12 +171,13 @@
         "text": []
       }
     },
-    "case 8": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
-      "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
+      "description": "should get by HTTPS static css file and receive HIT and max-age of 720000",
       "delay": 0,
-      "protocol": "HTTP",
+      "protocol": "HTTPS",
       "check": {
         "url": "/static/file.css",
         "header": {
@@ -306,8 +189,9 @@
         "text": []
       }
     },
-    "case 9": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
@@ -322,8 +206,9 @@
         "text": []
       }
     },
-    "case 10": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
       "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
       "delay": 0,
@@ -339,8 +224,9 @@
         "text": []
       }
     },
-    "case 11": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
       "description": "should get by HTTP static jpg file and receive MISS and max-age of 720000",
       "delay": 0,
@@ -355,8 +241,9 @@
         "text": []
       }
     },
-    "case 12": {
-      "display": true,
+    {
+      "name": "cache-options",
+      "step": "step-5",
       "command": "check",
       "description": "should get by HTTP static jpg file and receive HIT and max-age of 720000",
       "delay": 0,
@@ -371,11 +258,6 @@
         },
         "text": []
       }
-    },
-    "delete": {
-      "command": "delete",
-      "description": "should delete the domain config",
-      "delay": 0
     }
-  }
+  ]
 }

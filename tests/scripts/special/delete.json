@@ -1,0 +1,8 @@
+{
+  "name": "deleting domains",
+  "enabled": false,
+  "timeout": 240000,
+  "origin": "httpbin_org.revsw.net",
+  "tasks": {
+  }
+}

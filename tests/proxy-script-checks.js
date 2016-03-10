@@ -13,6 +13,9 @@ var
 var testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
   testAPIUrl = config.get('testAPIUrl'),
+  testGroup = config.get('test_group'),
+  AccountId = '',
+  domains = [],
   sctiptsFolder = './scripts/',
   domainConfig = '',
   domainConfigId = '';
@@ -120,6 +123,36 @@ var checking = function (host, url, domain, values, set) {
   });
 };
 
+var purge = function (newDomainName) {
+  return new Promise(function (response, reject) {
+    var jsonPurge = {
+      "domainName": newDomainName,
+      "purges": [{
+        "url": {
+          "is_wildcard": true,
+          "expression": "/**/*"
+        }
+      }]
+    };
+    //console.log(jsonPurge);
+    api.postPurge(jsonPurge)
+      .then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        var responseJson = JSON.parse(res.text);
+        responseJson.statusCode.should.be.equal(200);
+        responseJson.message.should.be.equal('The purge request has been successfully queued');
+        responseJson.request_id.should.be.type('string');
+        requestID = responseJson.request_id;
+        console.log('      ♦ Cache purged');
+        response(true);
+      }).catch(function (err) {
+      reject(err);
+    });
+  });
+};
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -133,6 +166,7 @@ function test_process(value, newDomainName, jsonContent) {
       if (value.protocol == "HTTPS") {
         host = testHTTPSUrl;
       }
+      var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
       checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -163,6 +197,64 @@ function test_process(value, newDomainName, jsonContent) {
           .then(function () {
             done();
           });
+      });
+      break;
+
+    case "group_create":
+      it(value.description, function (done) {
+        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+
+        var found = false;
+        for (var ad in domains) {
+          //console.log(domains[ad]);
+          if (domains[ad] == newDomainName) {
+            found = true;
+          }
+        }
+        if (found) {
+          if (development == true) console.log('    ♦ Domain found');
+          done();
+        } else {
+          if (value.set) {
+            tools.beforeSetDomain(newDomainName, value.origin)
+              .then(function (res, rej) {
+                if (rej) {
+                  throw rej;
+                }
+                domainConfigId = res.id;
+                domainConfig = res.config;
+              })
+              .then(function () {
+                domainConfig = merge(domainConfig, value.set);
+                if (development == true) {
+                  console.log(JSON.stringify(domainConfig));
+                }
+                tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
+                  if (rej) {
+                    throw rej;
+                  }
+                  done();
+                }).catch(function (err) {
+                  done(util.getError(err));
+                });
+              });
+          } else {
+            tools.beforeSetDomain(newDomainName, value.origin)
+              .then(function (res, rej) {
+                if (rej) {
+                  throw rej;
+                }
+                domainConfigId = res.id;
+                domainConfig = res.config;
+              })
+              .catch(function (err) {
+                done(util.getError(err))
+              })
+              .then(function () {
+                done();
+              });
+          }
+        }
       });
       break;
 
@@ -201,19 +293,25 @@ function test_process(value, newDomainName, jsonContent) {
 
     // Make test
     case "check":
-      it(value.description, function (done) {
+      it(value.description + " / " + value.step, function (done) {
         var host = testHTTPUrl;
         if (value.protocol == "HTTPS") {
           host = testHTTPSUrl;
         }
-        checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
+        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+        if(value.purge) { purge(newDomainName); util.mySleep(value.delay); }
+        if(value.check) {
+          checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
+            if (rej) {
+              throw rej;
+            }
+            done();
+          }).catch(function (err) {
+            done(util.getError(err));
+          });
+        }else{
           done();
-        }).catch(function (err) {
-          done(util.getError(err));
-        });
+        }
       });
       break;
 
@@ -235,6 +333,39 @@ function test_process(value, newDomainName, jsonContent) {
 };
 
 describe("Proxy check", function () {
+  this.timeout(30000);
+
+  it('should return AccountId', function (done) {
+    api.getUsersMyself().then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        AccountId = res.body.companyId[0];
+      })
+      .then(function () {
+        api.getDomainConfigs().then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          var response_json = JSON.parse(res.text);
+          //console.log(response_json);
+          for (var attributename in response_json) {
+            var domain = response_json[attributename].domain_name;
+            if (
+              domain.substring(0, 10) == "delete-me-"
+            ) {
+              //console.log(domain);
+              domains.push(response_json[attributename].domain_name);
+            }
+          }
+          done();
+        })
+      })
+      .catch(function (err) {
+        done(util.getError(err));
+      });
+  });
+
   var items = fs.readdirSync(sctiptsFolder);
   var files = [];
 
@@ -242,7 +373,8 @@ describe("Proxy check", function () {
     files.push(process.argv[3]);
   } else {
     for (var i = 0; i < items.length; i++) {
-      files.push(sctiptsFolder + items[i]);
+      //console.log(items[i]);
+      if(items[i] != "special") files.push(sctiptsFolder + items[i]);
     }
   }
 
@@ -252,12 +384,14 @@ describe("Proxy check", function () {
     var newDomainName = config.get('test_domain_start') + Date.now() + getRandomInt(1000, 9999) + config.get('test_domain_end');
     var tasks = jsonContent.tasks;
 
-    describe(jsonContent.name, function () {
-      this.timeout(jsonContent.timeout);
-
-      for (var task in tasks) {
-        test_process(tasks[task], newDomainName, jsonContent);
-      }
-    });
+    if (jsonContent.enabled) {
+      describe(jsonContent.name, function () {
+        this.timeout(jsonContent.timeout);
+        //console.log(tasks);
+        for (var task in tasks) {
+          test_process(tasks[task], newDomainName, jsonContent);
+        }
+      });
+    }
   }
 });

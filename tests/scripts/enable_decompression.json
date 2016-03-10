@@ -1,28 +1,11 @@
 {
   "name": "option enable_decompression",
+  "enabled": true,
   "timeout": 240000,
-  "origin": "cdn.mbeans2.com",
-  "tasks": {
-    "create": {
-      "command": "create",
-      "description": "should create new configuration for domain",
-      "delay": 0
-    },
-    "update 1": {
-      "command": "update",
-      "description": "should enabled enable_cache and enable_decompression",
-      "set": {
-        "rev_component_bp": {
-          "enable_cache": true
-        },
-        "rev_component_co": {
-          "enable_decompression": true
-        }
-      },
-      "delay": 0
-    },
-    "case 1": {
-      "display": true,
+  "tasks": [
+    {
+      "name": "enable-decompression",
+      "step": "step-1",
       "command": "check",
       "description": "should check svg file request",
       "delay": 0,
@@ -30,17 +13,14 @@
       "check": {
         "url": "/media/fonts/ProximaNova.svg",
         "header": {
-          "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "604800.000",
-          "cache-control": "public, max-age=604800",
-          "x-rev-beresp-grace": "60.000",
           "content-type": "image/svg+xml"
         },
         "text": []
       }
     },
-    "case 2": {
-      "display": true,
+    {
+      "name": "enable-decompression",
+      "step": "step-1",
       "command": "check",
       "description": "should check svg file request and receive HIT and content-length",
       "delay": 0,
@@ -49,30 +29,14 @@
         "url": "/media/fonts/ProximaNova.svg",
         "header": {
           "content-length": "54445",
-          "x-rev-cache": "HIT",
-          "x-rev-beresp-ttl": "604800.000",
-          "cache-control": "public, max-age=604800",
-          "x-rev-beresp-grace": "60.000",
           "content-type": "image/svg+xml"
         },
         "text": []
       }
     },
-    "update 2": {
-      "command": "update",
-      "description": "should disabled enable_cache and enable_decompression",
-      "set": {
-        "rev_component_bp": {
-          "enable_cache": false
-        },
-        "rev_component_co": {
-          "enable_decompression": false
-        }
-      },
-      "delay": 0
-    },
-    "case 3": {
-      "display": true,
+    {
+      "name": "enable-decompression",
+      "step": "step-2",
       "command": "check",
       "description": "should check svg file and receive smaller content-length",
       "delay": 0,
@@ -81,19 +45,10 @@
         "url": "/media/fonts/ProximaNova.svg",
         "header": {
           "content-length": "14305",
-          "x-rev-cache": "HIT",
-          "x-rev-beresp-ttl": "604800.000",
-          "cache-control": "public, max-age=604800",
-          "x-rev-beresp-grace": "0.000",
           "content-type": "image/svg+xml"
         },
         "text": []
       }
-    },
-    "delete": {
-      "command": "delete",
-      "description": "should delete the domain config",
-      "delay": 0
     }
-  }
+  ]
 }
