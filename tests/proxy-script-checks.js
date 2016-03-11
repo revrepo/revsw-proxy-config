@@ -206,14 +206,16 @@ function test_process(value, newDomainName, jsonContent) {
 
         var found = false;
         for (var ad in domains) {
-          //console.log(domains[ad]);
           if (domains[ad] == newDomainName) {
             found = true;
           }
         }
+
         if (found) {
-          if (development == true) console.log('    ♦ Domain found');
-          done();
+          if (development == true)
+          {
+            console.log('    ♦ Domain found');
+          }
         } else {
           if (value.set) {
             tools.beforeSetDomain(newDomainName, value.origin)
@@ -255,6 +257,7 @@ function test_process(value, newDomainName, jsonContent) {
               });
           }
         }
+        done();
       });
       break;
 
@@ -352,7 +355,7 @@ describe("Proxy check", function () {
           for (var attributename in response_json) {
             var domain = response_json[attributename].domain_name;
             if (
-              domain.substring(0, 10) == "delete-me-"
+              domain.substring(0, config.get('test_domain_start').length) == config.get('test_domain_start')
             ) {
               //console.log(domain);
               domains.push(response_json[attributename].domain_name);
