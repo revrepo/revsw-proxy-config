@@ -16,6 +16,8 @@ from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_d
 from revsw_apache_config.varnishadmin import VarnishAdmin
 
 from revsw.logger import RevSysLogger
+# should be agreed the rule about naming functions, variables
+# set_log as acfg_set_log, acfg_set_log seems like apache_cfg_set_log. Better use long or short names everywhere
 from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_log, VarnishConfig, \
     sorted_non_empty
 
@@ -33,6 +35,9 @@ class ConfigCommon:
         self.ui_config = ui_config
         self.ban_urls = set()
         # Private members
+        # if there is regions, it should be for methods as well
+        # but there is no regions in files anymore
+        # it should be resolved by dev agreement, should we put regions like Public members, Private methods, etc
         self._must_ban_html = False
         self._config_changed = False
         self._varnish_changed = False
@@ -118,6 +123,8 @@ class ConfigCommon:
     def _patch_if_changed_bp_varnish(self, option, val, ban_html_if_changed=False):
         if not self.can_config_bp():
             return
+        # if we have co+bp, whats the point?
+
         if self.varnish_config_vars.get(option) != val:
             log.LOGI("Detected change for Varnish '%s'" % option)
             log.LOGD("From: ", json.dumps(self.varnish_config_vars.get(option)), "\r\nTo: ", json.dumps(val))
@@ -135,6 +142,7 @@ class ConfigCommon:
 
     def _patch_content_vars(self):
         content = self.ui_config["rev_component_co"]
+        # co_component ?
 
         img_level = "none"
         js_level = "none"
@@ -177,6 +185,7 @@ class ConfigCommon:
     def _patch_cache_vars(self):
         if not self.can_config_bp():
             return
+        # if we have co+bp, whats the point?
 
         cache = self.ui_config["rev_component_bp"]
 
@@ -255,8 +264,10 @@ class ConfigCommon:
     def _patch_security_vars(self):
         if not self.can_config_bp():
             return False
+        # if we have co+bp, whats the point?
 
         security = self.ui_config["rev_component_bp"]
+        # component_bp ?
 
         if not security["enable_security"]:
             mode = "off"
@@ -291,6 +302,7 @@ class ConfigCommon:
         if _compare_versions(self.ui_config.get("version", "0.0.0"), "1.0.5") < 0 or \
                 not "enable_3rd_party_runtime_rewrite" in self.ui_config.get("3rd_party_rewrite", {}):
             old_version = True
+        # hardcoded versions, version should be provided from main config or as script global variable
 
         if old_version:
             # Set sensible defaults for this option: obey "enable-js-substitute" command
@@ -305,6 +317,7 @@ class ConfigCommon:
             optimized_domains += proxied_domains
             enable_rewr = third_party["enable_3rd_party_rewrite"]
         else:  # 1.0.5 or newer
+            # version conditions should be sensitive to version, not to hardcoded one
             third_party = self.ui_config.get("3rd_party_rewrite", {
                 "enable_3rd_party_runtime_rewrite": self.cmd_opts["js_subst"],
                 "3rd_party_runtime_domains": ",".join(proxied_domains),
@@ -336,13 +349,17 @@ class ConfigCommon:
     def _patch_misc_vars(self):
         if not self.can_config_bp():
             return False, False
+        # Should be removed if co+bp
 
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
+        # These variables are named so randomly
 
         log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
+        # rewr is not intuitive understandable, should change names, usual names agreement case, short or full
+
         log.LOGD("Finished domain checking")
         log.LOGD("Start vars update in misc")
         self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
@@ -355,6 +372,8 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ORIGIN_SERVER_NAME", ows_domain)
 
         domain_wc_alias = self.ui_config.get("domain_wildcard_alias", "")
+        # somewhere wc is called wildcard, here it is wc
+
         domain_regex_alias = wildcard_to_regex(domain_wc_alias) if domain_wc_alias else ""
         self._patch_if_changed_bp_webserver("SERVER_REGEX_ALIAS", domain_regex_alias)
         self._patch_if_changed_bp_webserver("SERVER_ALIASES", self.ui_config.get("domain_aliases", []))
@@ -436,6 +455,8 @@ class ConfigCommon:
 
     def can_config_co(self):
         return "co" in self.webserver_config_vars and self.cmd_opts["config_co"]
+    # if final design is not expecting division of bp and co these functions could be removed
+    # def can_config_bp(self) and def can_config_co(self)
 
     def config_changed(self):
         return self._config_changed
@@ -445,6 +466,7 @@ class ConfigCommon:
 
     def must_ban_html(self):
         return self._must_ban_html
+    # getting and setting functions, somewhere declared, somewhere scripts get variables straight without getter/setter
 
     def patch_config(self):
         log.LOGD("Run patch content vars")
@@ -457,11 +479,13 @@ class ConfigCommon:
         self._patch_misc_vars()
 
 
+# duplication could be declared in revsw_apache_config package once for proxy config component
 def fatal(msg):
     log.LOGE(msg)
     sys.exit(1)
 
 
+# duplication could be declared in revsw_apache_config package once for proxy config component
 def _(s):
     return s.replace(".", "_")
 
@@ -491,6 +515,7 @@ def _compare_versions(ver_a, ver_b):
         raise AttributeError("Invalid version string '%s' or '%s'" % (ver_a, ver_b))
 
 
+# if its co+bp should be removed
 def _get_server_role():
     try:
         child = subprocess.Popen("dpkg -l", shell=True, stdout=subprocess.PIPE)
@@ -511,6 +536,7 @@ def _get_server_role():
                            "can't configure new site")
 
 
+# rename arg to actual name, url ?
 def _check_proto_and_hostname(arg):
     url_re = re.compile(
         r'^(https?://)?'  # http:// or https://
@@ -537,6 +563,7 @@ def _convert_static_servers(servers):
     """
     Returns a pair of unique HTTP and HTTPS server hostnames from a list of protocol+hostname URLs
     """
+    # Some functions/methods have these kind of comments, some have not, probably should be present for each one
     http_servers = set()
     https_servers = set()
     for s in sorted_non_empty(servers):
@@ -589,6 +616,7 @@ def _get_domain_mapping(domain_name):
     mapping = {}
     try:
         with open("/opt/revsw-config/apache/site-mappings.json") as j:
+            # open(revsw_config["site-mappings-filepath"]) as j ?
             mappings = json.load(j)
         mapping = mappings.get(domain_name, {})
     except IOError as e:  # file doesn't exist
@@ -671,12 +699,14 @@ def delete_domain(domain_name):
     })
     
     VarnishAdmin().ban('obj.http.X-Rev-Host == "%s"' % domain_name)
+    # should create global instance once to use continuously
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
 def add_or_update_domain(domain_name, ui_config):
     site_name = _(domain_name)
     acfg = NginxConfig(site_name)
+    # acfg = apache_config or server_config ?
     if not acfg.exists():
         log.LOGI("Adding domain '%s'" % domain_name)
         # Initial, default config
@@ -726,6 +756,7 @@ def add_or_update_domain(domain_name, ui_config):
         # Ban Varnish URLs that match changed caching rules
         if cfg_common.ban_urls or cfg_common.must_ban_html():
             vadm = VarnishAdmin()
+            # could use global instance
             for url in cfg_common.ban_urls:
                 log.LOGI("Banning URL '%s' on '%s'" % (url, domain_name))
                 vadm.ban('obj.http.X-Rev-Host == "%s" && obj.http.X-Rev-Url ~ "%s"' % (domain_name, url))
@@ -788,6 +819,7 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         ver = bp.get("VERSION", 0)
 
         new_ver = new_vars_for_version["bp"].get("VERSION", 1)
+        # we have function for this, but make it with if, just duplication
         if new_ver > _BP_CONFIG_VERSION:
             raise AttributeError("'bp' structure version is %d, which is newer than what pc-apache-config.py supports "
                                  "(%d). Upgrade your server packages." % (new_ver, _BP_CONFIG_VERSION))
@@ -878,6 +910,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["ORIGIN_REQUEST_HEADERS"] = [],
             bp["ENABLE_QUIC"] = False
 
+        # better sort this version connected "ifs" with functions
+
         bp["VERSION"] = new_ver
 
     if "co" in vars_:
@@ -937,6 +971,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         if ver <= 15 < new_ver:
             co["ENABLE_DECOMPRESSION"] = False
+
+        # better sort this version connected "ifs" with functions
 
         co["VERSION"] = new_ver
 
@@ -1203,8 +1239,11 @@ def upgrade_all_domains():
         fail_domains.add(domain_name)
 
     traceback.print_exc()
+    # print traceback anyway ?
+    # it should be in finally or except block
 
     if fail_msg:
+        # why if we're catching exception ?
         transaction.rollback()
         log.LOGE("Failures during upgrade: %s" % fail_msg)
         for f in fail_domains:
@@ -1215,6 +1254,8 @@ def upgrade_all_domains():
         log.LOGI("Upgraded all active domains")
 
 
+# _main or main func or __name__ usage, everywhere is different
+# should be fixed, suggested standard if __name__ == "__main__":
 def _main():
     global log
 

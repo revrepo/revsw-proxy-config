@@ -25,6 +25,7 @@ def set_log(alog):
     _log = alog
 
 
+# code duplication, similar func already declared
 def _(s):
     return s.replace(".", "_")
 
@@ -146,6 +147,7 @@ def wildcard_to_regex(expr):
 
 
 # Check if an expression is a valid IPv4 address - Jinja2 filter
+# similar func already declared
 def is_ipv4(expr):
     try:
         socket.inet_aton(expr)
@@ -346,6 +348,7 @@ def _generate_jinja_hierarchy(jinja_name, search_dirs, file_list, alt_name=None)
     file_list[alt_name if alt_name else jinja_name] = jinja
 
 
+# should be changed to config based path
 def jinja_config_webserver_base_dir():
     return "/opt/revsw-config/apache"
 
@@ -354,6 +357,7 @@ def jinja_config_webserver_dir(site_name):
     return os.path.join(jinja_config_webserver_base_dir(), site_name)
 
 
+# should be changed to config based path
 def jinja_config_varnish_base_dir():
     return "/opt/revsw-config/varnish"
 
@@ -363,6 +367,7 @@ def _write_template_files(files, output_dir):
 
     for fname, content in files.iteritems():
         dirname = os.path.join(output_dir, os.path.dirname(fname))
+        # dir_name ?
         basename = os.path.basename(fname)
         run_cmd("mkdir -p %s" % dirname, _log, silent=True)
         with open(os.path.join(dirname, basename), "w") as f:
@@ -437,6 +442,7 @@ class PlatformWebServer:
 
     def config_class(self):
         return NginxConfig
+
 
 class ConfigException(Exception):
     def __init__(self, message, error_domains):
@@ -984,6 +990,7 @@ def _check_and_get_attr(command, attr):
 def configure_all(config):
     if "version" not in config:
         raise AttributeError("No version info in configuration")
+    # We could use compatible version function here
     if config["version"] != API_VERSION:
         raise AttributeError("Incompatible version %d in configuration; expected %d" %
                              (config["version"], API_VERSION))
