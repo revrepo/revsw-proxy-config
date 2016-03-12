@@ -1026,6 +1026,26 @@ def configure_all(config):
             vcfg.remove_site()
             _log.LOGD("Removing site '%s'" % _domain_name)
 
+        elif action == "batch":
+            _log.LOGD("Batch configuring site '%s'" % site)
+            templates = command.get("templates")
+
+            if templates:
+                if not "nginx" in templates:
+                    raise AttributeError("Config templates don't presented")
+                real_templates = templates["nginx"]
+                _log.LOGD("Writing Jinja templates")
+                acfg.write_template_files(real_templates)
+
+            cfg_vars = _check_and_get_attr(command, "config_vars")
+            acfg.configure_site(cfg_vars)
+
+            varnish_config_vars = command.get("varnish_config_vars")
+            if varnish_config_vars:
+                vcfg.config_site(varnish_config_vars)
+                transaction.varnish_reload_cmd = None
+            transaction.webserver_reload = False
+
         elif action == "config":
             _log.LOGD("Configuring site '%s'" % site)
 
@@ -1033,7 +1053,7 @@ def configure_all(config):
 
             if templates:
                 if not "nginx" in templates:
-                    raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
+                    raise AttributeError("Config templates don't presented")
                 real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
                 acfg.write_template_files(real_templates)

@@ -674,7 +674,7 @@ def delete_domain(domain_name):
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
-def add_or_update_domain(domain_name, ui_config):
+def add_or_update_domain(domain_name, ui_config, type):
     site_name = _(domain_name)
     acfg = NginxConfig(site_name)
     if not acfg.exists():
@@ -683,6 +683,7 @@ def add_or_update_domain(domain_name, ui_config):
         config = _gen_initial_domain_config(domain_name, ui_config)
         config.update(dict(varnish_changed=False))
         config.update(dict(config_changed=False))
+        config['commands'][0].update(dict(type=type))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -709,7 +710,7 @@ def add_or_update_domain(domain_name, ui_config):
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": API_VERSION,
-            "type": "config",
+            "type": type,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
             "varnish_config_vars": varnish_config_vars,
@@ -1247,7 +1248,9 @@ def _main():
             domain_name = _ui_config["domain_name"]
 
             if _ui_config["operation"] == "update":
-                add_or_update_domain(domain_name, _ui_config)
+                add_or_update_domain(domain_name, _ui_config, "config")
+            elif _ui_config["operation"] == "update-batch":
+                add_or_update_domain(domain_name, _ui_config, "batch")
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
             else:
