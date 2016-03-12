@@ -1032,7 +1032,7 @@ def configure_all(config):
 
             if templates:
                 if not "nginx" in templates:
-                    raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
+                    raise AttributeError("Config templates don't presented")
                 real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
                 acfg.write_template_files(real_templates)
@@ -1053,7 +1053,7 @@ def configure_all(config):
 
             if templates:
                 if not "nginx" in templates:
-                    raise AttributeError("Received old-style (Apache only) config templates, but we're running Nginx")
+                    raise AttributeError("Config templates don't presented")
                 real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
                 acfg.write_template_files(real_templates)
