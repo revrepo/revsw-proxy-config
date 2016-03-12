@@ -740,6 +740,73 @@ def add_or_update_domain(domain_name, ui_config):
     log.LOGI("Updated domain '%s'" % domain_name)
 
 
+def batch_update_domain(domain_name, ui_config):
+    site_name = _(domain_name)
+    acfg = NginxConfig(site_name)
+    if not acfg.exists():
+        log.LOGI("Batch adding domain '%s'" % domain_name)
+        # Initial, default config
+        config = _gen_initial_domain_config(domain_name, ui_config)
+        config.update(dict(varnish_changed=False))
+        config.update(dict(config_changed=False))
+        config['commands'][0].update(dict(type="batch"))
+        print json.dumps(config)
+        configure_all(config)
+        log.LOGI("Added domain '%s'" % domain_name)
+
+    log.LOGI("Batch updating domain '%s'" % domain_name)
+    webserver_config_vars = acfg.load_input_vars()
+    log.LOGD(u"Input JSON is: ", json.dumps(webserver_config_vars))
+
+    try:
+        log.LOGD(u"Start read Varnish Config")
+        varnish_config_vars = VarnishConfig(site_name).load_site_config()
+        log.LOGD(u"Finish read Varnish Config")
+    except:
+        log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
+
+    log.LOGD(u"Start read Main Config")
+    cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
+    log.LOGD(u"Finish read Main Config")
+
+    log.LOGD(u"Start config patch")
+    cfg_common.patch_config()
+    log.LOGD(u"End config patch")
+    #print json.dumps(varnish_config_vars)
+    if cfg_common.config_changed() or cfg_common.varnish_changed:
+        config = {
+            "version": API_VERSION,
+            "type": "batch",
+            "site_name": site_name,
+            "config_vars": webserver_config_vars,
+            "varnish_config_vars": varnish_config_vars,
+        }
+
+        # Apply patched config
+        configure_all({
+            "version": API_VERSION,
+            "commands": [config],
+            "varnish_changed": cfg_common.varnish_changed(),
+            "config_changed": cfg_common.config_changed()
+        })
+
+        # Ban Varnish URLs that match changed caching rules
+        if cfg_common.ban_urls or cfg_common.must_ban_html():
+            vadm = VarnishAdmin()
+            for url in cfg_common.ban_urls:
+                log.LOGI("Banning URL '%s' on '%s'" % (url, domain_name))
+                vadm.ban('obj.http.X-Rev-Host == "%s" && obj.http.X-Rev-Url ~ "%s"' % (domain_name, url))
+            if cfg_common.must_ban_html():
+                log.LOGI("Banning HTML content '%s'" % domain_name)
+                vadm.ban('obj.http.X-Rev-Host == "%s" && obj.http.Content-Type == "text/html"' % domain_name)
+
+    # Save UI config
+    with open(os.path.join(jinja_config_webserver_dir(site_name), "ui-config.json"), "wt") as f:
+        json.dump(ui_config, f, indent=2)
+
+    log.LOGI("Updated batch domain '%s'" % domain_name)
+
+
 def _merge_dicts(dst, src):
     if dst is None:
         return src
@@ -1248,6 +1315,8 @@ def _main():
 
             if _ui_config["operation"] == "update":
                 add_or_update_domain(domain_name, _ui_config)
+            elif _ui_config["operation"] == "update-batch":
+                batch_update_domain(domain_name, _ui_config)
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
             else:
