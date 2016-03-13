@@ -40,9 +40,10 @@ var origin = 'test-proxy-cache-config.revsw.net',
   object_3 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/3.jpg',
   object_4 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/4.jpg',
   object_5 = '/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/5.jpg';
+// if we keep test params in describe block, why wouldn't we do the same right here
 
 
-describe('Proxy check cdn_overlay_urls', function() {
+describe('Proxy check cdn_overlay_urls', function() { // functional test title, better keep it kind of like Proxy check CDN overlay urls test
   this.timeout(240000);
 
   var expected = [

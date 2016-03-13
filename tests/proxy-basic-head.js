@@ -35,7 +35,7 @@ describe('Basic tests - HEAD', function() {
   var test_object_js_1 = '/test_object_purge_api01.js';
   var rmstale = '/cgi-bin/rmstale.cgi';
 
-  it('Simple HTTP  HEAD test object', function(done) {
+  it('Simple HTTP  HEAD test object', function(done) { // remove redundant space
     request(url)
       .get(test_object_js_1)
       .set('Host', domain_cache)
@@ -65,7 +65,7 @@ describe('Basic tests - HEAD', function() {
   });
 
 
-  it('Simple HTTP  HEAD test dynamic object', function(done) {
+  it('Simple HTTP  HEAD test dynamic object', function(done) { // remove redundant space
     request(url)
       .head(test_object_js_1)
       .set('Host', domain_dsa)
@@ -73,7 +73,7 @@ describe('Basic tests - HEAD', function() {
         if (err) {
           throw err;
         }
-
+        // remove redundant line
         res.should.have.status(200);
         done();
       });

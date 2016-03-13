@@ -37,6 +37,8 @@ var url = 'http://testsjc20-bp01.revsw.net';
 //// DELETE
 // test if header exists - if exists fail
 //////
+// it should be declared like TODO: Add test if header exists, if not fail
+// etc, have to keep TODO look like TODO
 function check_varnish_headers(generic_object)
 {
 	var operators = {
@@ -344,5 +346,6 @@ describe('Headers Manipulation Test - Varnish specific resource - specific heade
     });
 
     // END END END
+    // no regions found
   });
 });

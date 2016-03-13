@@ -18,9 +18,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfig = '',
   domainConfigId = '',
   rumBeaconString = /<script\ src='\/rev\-diablo\/js\/boomerang\-rev\.min\.js'><\/script><script>BOOMR\.init\(\{RT:\{cookie:'REV\-RT'\,\ strict_referrer:\ false\}\,\ beacon_url:\ 'https:\/\/testsjc20\-rum01\.revsw\.net\/service'\}\);\ BOOMR\.addVar\('user_ip'\,\ '.*?'\);<\/script>/m;
+// move to describe block
 
-
-describe('Proxy RUM control enable_rum', function () {
+describe('Proxy RUM control enable_rum', function () { // enable rum
   this.timeout(240000);
 
   before(function (done) {

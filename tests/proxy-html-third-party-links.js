@@ -29,7 +29,7 @@ var fs = require('fs');
 var https = require('https');
 //var clientCertificateAuth = require('client-certificate-auth');
 
-describe('HTML Third Party Links', function() {
+describe('HTML Third Party Links', function() { // test ?
   this.timeout(240000);
 
   var url = 'http://testsjc20-bp01.revsw.net';
@@ -49,7 +49,7 @@ describe('HTML Third Party Links', function() {
   // Removed to operate with new API gateway
   // "version": 1,
 
-  var JSON1 = {
+  var JSON1 = { // rename it properly
     "domainName": "test-proxy-cache-config.revsw.net",
     "purges": [{
       "url": {
@@ -57,8 +57,8 @@ describe('HTML Third Party Links', function() {
         "expression": "/**/*"
       }
     }]
-  }
-  var JSON2 = {
+  } // missing ;
+  var JSON2 = { // rename it properly
     "domainName": "test-proxy-cache-config-02.revsw.net",
     "purges": [{
       "url": {
@@ -66,7 +66,7 @@ describe('HTML Third Party Links', function() {
         "expression": "/**/*"
       }
     }]
-  }
+  } // missing ;
 
   // Purge
 
@@ -237,7 +237,7 @@ describe('HTML Third Party Links', function() {
   });
 });
 
-function sleep(milliseconds) {
+function sleep(milliseconds) { // we can keep the function in test_utils somewhere instead of duplicating it
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
     if ((new Date().getTime() - start) > milliseconds) {

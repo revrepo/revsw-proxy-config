@@ -34,7 +34,7 @@ describe('Basic tests - POST', function() {
   var domain_dsa = 'test-proxy-dsa-config.revsw.net';
   var rmstale = '/cgi-bin/rmstale.cgi';
 
-  it('Simple HTTP  POST test caching config', function(done) {
+  it('Simple HTTP  POST test caching config', function(done) { // remove redundant space
     request(url)
       .post('/cgi-bin/test.cgi')
       .set('Host', domain_cache)
@@ -51,7 +51,7 @@ describe('Basic tests - POST', function() {
   });
 
 
-  it('Simple HTTP  POST test dynamic config', function(done) {
+  it('Simple HTTP  POST test dynamic config', function(done) { // remove redundant space
     request(url)
       .post('/cgi-bin/test.cgi')
       .set('Host', domain_dsa)

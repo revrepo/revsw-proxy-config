@@ -19,8 +19,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfig = '',
   domainConfigId = '',
   requestID = '';
+// put vars inside describe block
 
-describe('Proxy PURGE check ', function () {
+describe('Proxy PURGE check ', function () { // redundant space
 
   this.timeout(240000);
 

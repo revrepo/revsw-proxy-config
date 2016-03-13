@@ -26,6 +26,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
   testProxyIp = config.get('test_proxy_ip'),
   cookie = '',
   ipCheckString = '';
+// describe block ?
 
 tools.debugMode(false);
 

@@ -19,6 +19,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '',
   header_cookies = '/header-cookies',
   cookie_url = '/cookies';
+// test params are outside describe block
 
 describe('Proxy cookies cache control', function () {
 
@@ -221,7 +222,7 @@ describe('Proxy cookies cache control', function () {
   ];
 
   get_expected(expected, " (HTTP) "+cookie_url, testHTTPUrl);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// remove it
   it('should change cookies options, set override, list_is_keep and keep_or_ignore_list', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -367,7 +368,7 @@ describe('Proxy cookies cache control', function () {
   ];
 
   get_expected(expected, " (HTTPS) "+cookie_url, testHTTPSUrl);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// remove it
   it('should change cookies options, set ignore_all', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -513,7 +514,7 @@ describe('Proxy cookies cache control', function () {
   ];
 
   get_expected(expected, " (HTTP) "+cookie_url, testHTTPUrl);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// remove it
   it('should change cookies options, set default list_is_keep and keep_or_ignore_list', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
@@ -659,7 +660,7 @@ describe('Proxy cookies cache control', function () {
   ];
 
   get_expected(expected, " (HTTPS) "+cookie_url, testHTTPSUrl);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// remove it
   it('should change cookies options, set default ignore_all and set remove_ignored_from_request', function (done) {
     domainConfig.rev_component_bp.caching_rules =
     [
