@@ -29,7 +29,7 @@ var https = require('https');
 
 
 
-describe('Proxy domain_aliases tests', function() {
+describe('Proxy domain_aliases tests', function() { // Proxy domain aliases tests ?
   var url = 'http://testsjc20-bp01.revsw.net';
   var domain_foo = 'www.foo.com';
   var domain_bar = 'bar.foo.com';
@@ -96,7 +96,7 @@ describe('Proxy domain_aliases tests', function() {
 
 
 
-// END
+// END // redundant we never used regions in tests
 });
 
 
@@ -106,7 +106,7 @@ describe('Proxy domain_aliases tests', function() {
 
 
 
-function sleep(milliseconds) {
+function sleep(milliseconds) { // remvoe the function, never used in this test
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
     if ((new Date().getTime() - start) > milliseconds) {

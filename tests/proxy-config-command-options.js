@@ -30,8 +30,9 @@ var https = require('https');
 
 describe('Proxy config command option "ows-http-only"', function() {
     var url = 'http://testsjc20-bp01.revsw.net';
-    var testDomain = 'qa-api-test-proxy-options-command1.revsw.net'
+    var testDomain = 'qa-api-test-proxy-options-command1.revsw.net' // skipped ;
     var urls = 'https://testsjc20-bp01.revsw.net';
+  // next vars are never used right here
     var api_url = 'https://TESTSJC20-API01.revsw.net';
     var api_user = 'purge_api_test@revsw.com';
     var api_pass = '123456789123456789';
@@ -53,7 +54,7 @@ describe('Proxy config command option "ows-http-only"', function() {
           throw err;
         }
 
-	var i = res.text.search('SERVER_PORT = 80');
+	var i = res.text.search('SERVER_PORT = 80'); // should keep identity level
         if (i < 1) {
           throw new Error("The origin does not receive the request on port 80");
         }

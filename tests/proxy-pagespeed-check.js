@@ -19,7 +19,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '',
   regexPagespeed = /[0-9]{1,10}\.[0-9]{1,10}\.[0-9]{1,10}\.[0-9-]{1,10}/m;
 
-describe('Proxy Pagespeed control enable_optimization', function () {
+// should we move it inside describe block ?
+
+describe('Proxy Pagespeed control enable_optimization', function () { // enable optimization ?
 
   this.timeout(240000);
 

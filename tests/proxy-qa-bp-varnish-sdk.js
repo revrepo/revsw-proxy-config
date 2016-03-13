@@ -29,7 +29,9 @@ var x_rev_hostname_internal = 'test-proxy-nodejs-server-status-frontend-control.
 
 var hostname_external = '0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net';
 var x_rev_hostname_external = 'httpbin.org';
+// put the data inside describe func ?
 
+// I've seen similar function already
 function custom_sleep(time) {
 	var stop = new Date().getTime();
 

@@ -20,8 +20,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '',
   headerAltSvc = 'quic=":443"; p="1"; ma=',
   headerAlternateProtocol = '443:quic,p=1';
+// put test vars inside describe block
 
-describe('Proxy QUIC control enable_quic', function () {
+describe('Proxy QUIC control enable_quic', function () { // Proxy QUIC control enable quic test ?
 
   this.timeout(240000);
 

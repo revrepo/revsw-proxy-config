@@ -43,6 +43,7 @@ describe('Proxy ACL tests', function() {
   //    "version": 1,
 
   var DENY_EXCEPT_FAIL = {
+    // this kind of variables could be named like deny_except_fail_data, cus it meant to be data for request
     "rev_component_co": {
       "img_choice": "medium",
       "js_choice": "medium",
@@ -96,11 +97,12 @@ describe('Proxy ACL tests', function() {
       "web_app_firewall": "off",
       "block_crawlers": false
     }
-  }
+  } // ; skipped
 
 
 
   var DENY_EXCEPT_SUCC = {
+    // if we used FAIL first time, why wouldn't we use SUCCESS
     "rev_component_co": {
       "img_choice": "medium",
       "js_choice": "medium",
@@ -154,11 +156,12 @@ describe('Proxy ACL tests', function() {
       "web_app_firewall": "off",
       "block_crawlers": false
     }
-  }
+  } // ; skipped
 
 
 
   var ALLOW_EXCEPT_SUCC = {
+    // SUCCESS ?
     "rev_component_co": {
       "img_choice": "medium",
       "js_choice": "medium",
@@ -212,7 +215,7 @@ describe('Proxy ACL tests', function() {
       "web_app_firewall": "off",
       "block_crawlers": false
     }
-  }
+  } // ; skipped
 
 
   var ALLOW_EXCEPT_FAIL = {
@@ -269,7 +272,7 @@ describe('Proxy ACL tests', function() {
       "web_app_firewall": "off",
       "block_crawlers": false
     }
-  }
+  } // ; skipped
 
 
   it('Push config and test for whitelist for allow_except', function(done) {
@@ -320,6 +323,7 @@ describe('Proxy ACL tests', function() {
   //     });
   //   });
   // });
+  // if we have 2 failing tests, better figure out why these aren't working as expected
 
 
   it('push config and test for blacklist for deny_except', function(done) {

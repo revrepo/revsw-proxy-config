@@ -28,7 +28,7 @@ var fs = require('fs');
 var https = require('https');
 
 
-describe('Nginx custom commands', function() {
+describe('Nginx custom commands', function() { // test ?
   this.timeout(240000);
     var url = 'http://testsjc20-bp01.revsw.net';
     var testDomain = 'qa-api-test-proxy-nginx-custom-commands.revsw.net'

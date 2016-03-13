@@ -14,11 +14,12 @@ var originHostHeader = 'httpbin_org.revsw.net',
   appKeyID = '',
   appSdkKey = '',
   appSdkDomain = '';
+// put inside describe block
 
 describe('Proxy X-Forwarded-For check', function () {
 
   this.timeout(240000);
-//1
+//1 remove redundant counter comments
   it('(smoke) should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {
       if (rej) {

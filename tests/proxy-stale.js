@@ -31,7 +31,7 @@ var https = require('https');
 
 
 
-describe('Basic stale tests', function() {
+describe('Basic stale tests', function() { // stale? state you meant
   this.timeout(240000);
 
     var url = 'http://testsjc20-bp01.revsw.net';
@@ -57,7 +57,7 @@ describe('Basic stale tests', function() {
                 "expression": "/**/*"
             }
         }]
-    }
+    } // missing ;
     var JSON2 = {
         "domainName": "test-proxy-cache-config-02.revsw.net",
         "purges": [{
@@ -66,7 +66,7 @@ describe('Basic stale tests', function() {
                 "expression": "/**/*"
             }
         }]
-    }
+    } // missing ;
 
     // Purge
 /*
@@ -359,10 +359,11 @@ describe('Basic stale tests', function() {
     // ENDENDEND
 });
 // ENDENDEND
+// remove
 
 
 
-
+// duplicated
 function sleep(milliseconds) {
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
@@ -371,3 +372,5 @@ function sleep(milliseconds) {
         }
     }
 }
+
+// ok, seems like useless script or incomplete

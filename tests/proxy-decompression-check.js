@@ -20,6 +20,7 @@ var originHostHeader = 'cdn.mbeans2.com',
   domainConfigId = '',
   contentHTTPLength='',
   contentHTTPSLength='';
+// params outside describe block
 
 api.debugMode(false);
 

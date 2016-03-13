@@ -20,12 +20,14 @@ var originHostHeader = 'httpbin_org.revsw.net',
   testProxyIp = config.get('test_proxy_ip'),
   domainConfig = '',
   domainConfigId = '';
+// move to describe block
 
+// this function duplicated
 function send_quic(request){
   return JSON.parse(sh.exec("echo '" + request + "' | ./proxy-qa-cgi-bin/test_tool 2>/dev/null").stdout);
 }
 
-describe('Proxy QUIC protocol control', function () {
+describe('Proxy QUIC protocol control', function () { // test ?
 
   this.timeout(240000);
 

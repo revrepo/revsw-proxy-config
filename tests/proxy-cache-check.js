@@ -1,3 +1,5 @@
+// missing header if required
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var config = require('config');
@@ -20,10 +22,11 @@ var originServer = 'httpbin_org.revsw.net',
   requestID = '',
   cacheAge = '',
   totalTime = '';
+// test params are outside describe block
 
 tools.debugMode(true);
 
-describe('Proxy cache check ', function () {
+describe('Proxy cache check ', function () { // redundant space
 
   this.timeout(240000);
 
@@ -41,7 +44,7 @@ describe('Proxy cache check ', function () {
   });
 
   after(function (done) {
-    console.log('    ✓ delete the domain config');
+    console.log('    ✓ delete the domain config'); // redundant symbols
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;

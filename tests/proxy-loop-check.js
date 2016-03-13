@@ -18,10 +18,11 @@ var originHostHeader = 'testsjc20-bp01.revsw.net',
   AccountId = '',
   domainConfig = '',
   domainConfigId = '';
+// put into describe block ?
 
 tools.debugMode(false);
 
-describe('Proxy loop detect checker', function () {
+describe('Proxy loop detect checker', function () { // test ?
 
   this.timeout(240000);
 

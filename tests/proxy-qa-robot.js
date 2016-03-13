@@ -59,7 +59,7 @@ describe('Basic tests', function() {
   // Removed to operate with new API gateway
   // "version": 1,
 
-  var JSON1 = {
+  var JSON1 = { // rename it, for ex. purge_1_data
     "domainName": "test-proxy-cache-config.revsw.net",
     "purges": [{
       "url": {
@@ -67,8 +67,8 @@ describe('Basic tests', function() {
         "expression": "/**/*"
       }
     }]
-  }
-  var JSON2 = {
+  } // missing ;
+  var JSON2 = { // rename it
     "domainName": "test-proxy-cache-config-02.revsw.net",
     "purges": [{
       "url": {
@@ -77,7 +77,7 @@ describe('Basic tests', function() {
       }
     }]
   }
-  var JSON3 = {
+  var JSON3 = { // rename it
     "domainName": "test-proxy-cache-config.revsw.net",
     "purges": [{
       "url": {
@@ -85,8 +85,8 @@ describe('Basic tests', function() {
         "expression": "/test_object_purge_api02.js"
       }
     }]
-  }
-  var JSON4 = {
+  } // missing ;
+  var JSON4 = { // rename it
     "domainName": "test-proxy-cache-config.revsw.net",
     "purges": [{
       "url": {
@@ -94,7 +94,7 @@ describe('Basic tests', function() {
         "expression": "/rev-third-party-http/test-proxy-dsa-config.revsw.net/images-rw/*"
       }
     }]
-  }
+  } // missing ;
 /*
   // Purge
 
@@ -1641,9 +1641,13 @@ describe('Basic tests', function() {
   });
 */
   // ENDENDEND
+  // remove
 });
 // ENDENDEND
+// remove
 
+
+// duplication
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -1652,3 +1656,5 @@ function sleep(milliseconds) {
     }
   }
 }
+
+// ok, does not seems like helpful test script

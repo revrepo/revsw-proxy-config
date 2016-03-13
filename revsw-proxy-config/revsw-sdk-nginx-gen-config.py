@@ -39,9 +39,12 @@ class NginxConfigSDK:
         self.nginx_conf["tmp_location"] = "/tmp/"
         self.nginx_conf["final_location"] = "/etc/nginx/conf.d/"
         self.nginx_conf["backup_location"] = "/etc/nginx/backup/"
+        # hardcoded paths, better have main config for this case
 
     def _interpret_arguments(self, args):
         # override local arguments if a value was provided from outside
+        # how do we know if arg from outside, this functions just appends all keys and values to nginx_config, pointless
+        # used once
         for item in args:
             self.nginx_conf[item] = args[item]
 
@@ -80,6 +83,7 @@ class NginxConfigSDK:
             return 2
         
         return 3
+        # code never reach return 3
 
     def _generate_final_nginx_config(self):
         """

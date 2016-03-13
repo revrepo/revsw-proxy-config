@@ -36,7 +36,7 @@ describe('DNS TTL Test', function() {
 
   this.timeout(240000);
 
-  var JSON50 = {
+  var JSON50 = { // show name this kind of data like json_50_data
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -60,7 +60,7 @@ describe('DNS TTL Test', function() {
   }
 
 
-  var JSON51 = {
+  var JSON51 = { // the same for the following test data as well
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -85,7 +85,7 @@ describe('DNS TTL Test', function() {
 
 
 
-  var JSON502 = {
+  var JSON502 = { // rename
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -109,7 +109,7 @@ describe('DNS TTL Test', function() {
   }
 
 
-  var JSON512 = {
+  var JSON512 = { // rename
     "id": "55d4e4122db1566b3b89fb9a",
     "use_client_subnet": true,
     "meta": {},
@@ -257,7 +257,7 @@ describe('DNS TTL Test', function() {
 
 
 
-
+// lots of redundant lines
 
 
   it('Testing DNS failover - 192.168.4.50 - 2 seconds', function(done) {

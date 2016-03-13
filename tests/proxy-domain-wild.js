@@ -30,7 +30,7 @@ var https = require('https');
 
 // Testing domain wildcarding feature (JSON setting "domain_wildcard_alias": "*.test-proxy-wildcard-domain.revsw.net" )
 
-describe('Proxy Domain Wildcard Function', function() {
+describe('Proxy Domain Wildcard Function', function() { // should we pay attention on capital characters ? Proxy domain wildcard function test
   var urlHTTP = 'http://testsjc20-bp01.revsw.net',
    urlHTTPS = 'https://testsjc20-bp01.revsw.net',
    wildcardDomain1 = 'dom1.test-proxy-wildcard-domain.revsw.net',

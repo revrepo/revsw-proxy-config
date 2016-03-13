@@ -9,6 +9,7 @@ var
   tools = require('./proxy-qa-libs/tools.js'),
   util = require('./proxy-qa-libs/util.js'),
   parallel = require('mocha.parallel');
+// better require each module with var
 
 var testHTTPUrl = config.get('test_proxy_http'),
   testHTTPSUrl = config.get('test_proxy_https'),
@@ -19,6 +20,7 @@ var testHTTPUrl = config.get('test_proxy_http'),
   sctiptsFolder = './scripts/',
   domainConfig = '',
   domainConfigId = '';
+// put test vars inside describe block
 
 api.debugMode(false);
 tools.debugMode(false);
@@ -26,6 +28,7 @@ tools.debugMode(false);
 var development = false;
 //console.log(jsonContent);
 
+// merge move to utils ?
 var merge = function () {
   var destination = {},
     sources = [].slice.call(arguments, 0);
@@ -153,6 +156,7 @@ var purge = function (newDomainName) {
   });
 };
 
+// getRandomInt potential candidate to become util function
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }

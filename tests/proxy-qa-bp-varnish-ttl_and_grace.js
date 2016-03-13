@@ -25,6 +25,7 @@ var request = require('request');
 var proxy = 'http://testsjc20-bp01.revsw.net';
 var hostname = 'http://qa-api-test-proxy-bp-varnish-ttl-grace.revsw.net';
 
+// duplication
 function custom_sleep(time) {
 	var stop = new Date().getTime();
 

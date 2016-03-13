@@ -8,12 +8,15 @@ from cStringIO import StringIO
 import json
 import shlex
 
+# move sys import and path.insertions above all importing modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
 
 from revsw_apache_config import sorted_non_empty
 
 RUM_BEACON_URL = "http://rum-02-prod-sjc.revsw.net/service"
+# adding main config with all paths and destinations would be potential improvement
+# for ex. creds_path = revsw_config["rum_beacon_url"]
 
 help_str = r"""
 This script reads a configuration from the standard input and generates a configuration shell script
@@ -186,6 +189,7 @@ class States:
     CACHING_RULES_FILE = 23
     ENABLE_JS_SUBST = 24
     ENABLE_HTML_SUBST = 25
+# States - generic name
 
 
 def fail(msg):
@@ -237,6 +241,7 @@ def check_ip_or_hostname(arg):
         fail("'%s' is not a valid IP address or hostname." % arg)
 
 
+# should be called is_valid_url
 def check_url(arg):
     url_re = re.compile(
         r'^(https?://)'  # http:// or https://
@@ -250,6 +255,7 @@ def check_url(arg):
         fail("'%s' is not a valid URL." % arg)
 
 
+# almost every func there has params called arg, arg should be renamed to path or whatever it present
 def check_file_exists(arg):
     if not os.path.exists(arg):
         fail("File '%s' doesn't exist." % arg)
@@ -257,6 +263,7 @@ def check_file_exists(arg):
 
 def parse_line(line):
     args_ = shlex.split(line)
+    # args_ ?
     state = States.NONE
     used_states = set()
 
@@ -267,6 +274,8 @@ def parse_line(line):
     global _domains
 
     # noinspection PyClassHasNoInit
+
+    # could be replaced with variables
     class Nl:
         needs_param = False
         new_state = States.NONE
@@ -490,6 +499,7 @@ def parse_line(line):
         fail("No 'domain' keyword was found.")
 
 
+# should be renamed to replace_underscore
 def _(s):
     return s.replace(".", "_")
 
@@ -513,6 +523,7 @@ def varnish_vars_name(domain):
 def fixup_domain(domain):
     create_bp_templ = False
     create_co_templ = False
+    # If bp template include CO template, we can remove all the stuff connected with CO there
 
     if not domain["bp_template"]:
         domain["bp_template"] = "bp-%s.jinja" % _(domain["name"])
@@ -520,6 +531,8 @@ def fixup_domain(domain):
 
     if domain["profiles_disabled"]:
         domain["profile_template"] = "co/standard_profiles/no_customer_profiles.jinja"
+        # Suggested to have main config for paths and directories destinations
+
         domain["profiles_count"] = 1  # hardcoded from no customer profiles
 
         domain["base_http_port"] = 80
@@ -541,6 +554,8 @@ def fixup_domain(domain):
             domain["caching_rules"] = json.load(f)
     else:
         # Implement the old URLS_REMOVE_COOKIES_REGEX rules
+        # Add TODO: if it is todo comment
+
         caching_rules = []
         for ign_cookie in domain["ignore_cookies"]:
             remove_cookies_rule = {
@@ -597,7 +612,7 @@ def fixup_domain(domain):
     "additionalProperties": false
 }
 """ % profile_basename)
-
+# add some tabs
 
 
 def parse_profile_template_get_count(fname):
@@ -644,8 +659,11 @@ def get_co_profiles():
     }
 
 
+# the following functions should have comments about domain arg, cus its dict
+# or developer should use __get__ to place default values or raise exception of arg is invalid
 def generate_bp_domain_json(domain):
     # At least one is always True
+    # Lets pretend new developer read this, doesnt make any sense
     http = "http" if domain["ows_http"] else "https"
     https = "https" if domain["ows_https"] else "http"
     bp = {
@@ -758,6 +776,7 @@ def generate_bp_varnish_domain_json(domain):
     json.dump(site, f, indent=2)
     return f.getvalue()
 
+
 def generate_bp(domain):
     # print >>sys.stderr, "BP Domain:", domain
 
@@ -790,6 +809,7 @@ apache-config.py certs $CFG_NAME %s || EXIT=$?
 echo "    -> configuring site $DOMAIN_NAME"
 apache-config.py config -V %s $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
 """ % (varn_fname, basename_templ, json_fname))
+# add tabs
 
 
 def _get_ui_config_command_opts(domain):
@@ -919,6 +939,7 @@ def generate_ui_configs():
 
 def print_configure_sh(txt):
     print txt
+# We can remove this and replace with print
 
 
 def generate_config_sh():
@@ -932,6 +953,7 @@ def generate_config_sh():
     EXIT=0
     THIS_DIR=`readlink -f .`
     """)
+    # use print ?
 
     if not args.no_bp:
         for addr, domains in _bps.iteritems():
@@ -967,6 +989,7 @@ def main():
 
     # Parse input file
     _line_no = 1
+    # Lines could be counted with enumerate wrap
     full_line = ""
     for line in sys.stdin:
         if full_line:
@@ -997,6 +1020,7 @@ def main():
 # ##################################################################################
 # MAIN
 # ##################################################################################
+# Pointless block
 
 parser = argparse.ArgumentParser(description="Generate configuration and/or configure web server and Varnish.",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -1020,3 +1044,5 @@ if args.manual:
     sys.exit(0)
 
 main()
+# should be agreed the rule about __main__
+# def _main() option or if __name__ == "__main__": [__name__ usage is standard]

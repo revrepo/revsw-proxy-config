@@ -34,7 +34,7 @@ describe('Basic tests - DELETE', function() {
   var domain_dsa = 'test-proxy-dsa-config.revsw.net';
   var rmstale = '/cgi-bin/rmstale.cgi';
 
-  it('Simple HTTP  DELETE test caching config', function(done) {
+  it('Simple HTTP  DELETE test caching config', function(done) { // remove redundant space
     request(url)
       .delete('/cgi-bin/test.cgi')
       .set('Host', domain_cache)
@@ -51,7 +51,7 @@ describe('Basic tests - DELETE', function() {
   });
 
 
-  it('Simple HTTP  DELETE test dynamic config', function(done) {
+  it('Simple HTTP  DELETE test dynamic config', function(done) { // remove redundant space
     request(url)
       .delete('/cgi-bin/test.cgi')
       .set('Host', domain_dsa)

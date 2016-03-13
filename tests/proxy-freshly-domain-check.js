@@ -19,8 +19,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '',
   cookie = '',
   rumBeaconString = /<script\ src='\/rev\-diablo\/js\/boomerang\-rev\.min\.js'><\/script><script>BOOMR\.init\(\{RT:\{cookie:'REV\-RT'\,\ strict_referrer:\ false\}\,\ beacon_url:\ 'https:\/\/testsjc20\-rum01\.revsw\.net\/service'\}\);\ BOOMR\.addVar\('user_ip'\,\ '.*?'\);<\/script>/m;
+// describe block ?
 
-describe('Proxy freshly domain control', function () {
+describe('Proxy freshly domain control', function () { // test ?
 
   this.timeout(240000);
 
@@ -42,7 +43,7 @@ describe('Proxy freshly domain control', function () {
             "enable_rum": false,
             "enable_optimization": false
           }
-        }
+        } // missing ;
 
         for (var attributename in testJson) {
           for (var subattributename in testJson[attributename]) {
@@ -57,7 +58,7 @@ describe('Proxy freshly domain control', function () {
   });
 
   after(function (done) {
-    console.log('    \u001b[33m♦\u001b[36m domain deleting\u001B[0m');
+    console.log('    \u001b[33m♦\u001b[36m domain deleting\u001B[0m'); // ???
     api.deleteDomainConfigsById(domainConfigId).then(function (res, rej) {
       if (rej) {
         throw rej;

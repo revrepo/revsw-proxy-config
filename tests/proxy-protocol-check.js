@@ -20,6 +20,7 @@ var originServer = 'httpbin_org.revsw.net',
   domainConfigId = '',
   httpEnvJson = '/get?show_env=1',
   staticEnvJson = '/static/cgi-bin/envjson.cgi';
+// we have more than 1 describe block, so we have to put vars inside each one to keep similar code look
 
 describe('Proxy origin secure protocol checker with default configuration', function () {
 
@@ -65,8 +66,8 @@ describe('Proxy origin secure protocol checker with default configuration', func
           throw rej;
         }
         //console.log(JSON.parse(res.text));
-        var responseJson = JSON.parse(res.text);
-        cdsConfig = responseJson;
+        var responseJson = JSON.parse(res.text); // redundant
+        cdsConfig = responseJson; // var cdsConfig = JSON.parse(res.text); ?
         delete cdsConfig._id;
         delete cdsConfig.__v;
         delete cdsConfig.account_id;

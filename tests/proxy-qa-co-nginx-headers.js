@@ -22,11 +22,12 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var should = require('should-http');
 var request = require('supertest');
 
-var url, domain;
+var url, domain; // double declaration of variables
 
 var domain = 'test-proxy-headers.revsw.net';
 var url = 'http://testsjc20-bp01.revsw.net';
 var path = '/cgi-bin/envtest.cgi';
+
 
 function rev_test_header(desc, action, name, value)
 {
@@ -34,7 +35,7 @@ function rev_test_header(desc, action, name, value)
 	if (action_list.indexOf(action) < 0) {
 		throw new Error('Unknow type of check action: [' + action + ']');
 		return;
-	} 
+	}
 
 	it(desc + ': (' + name + ' against ' + value + ')', function(done) {
 		request(url)
@@ -69,7 +70,7 @@ function rev_test_text(desc, action, token)
 	if (action_list.indexOf(action) < 0) {
 		throw new Error('Unknow type of check action: [' + action + ']');
 		return;
-	} 
+	}
 
 	it(desc + ': (' + token + ')', function(done) {
 		request(url)
@@ -104,15 +105,18 @@ describe('Headers Manipulation Tests Part One', function() {
 	rev_test_text('CO: Header of proxy HTTP response should contain', 'expect', /HTTP_ORG_REQ_HDR_2 = ORG-REQ-VAL-2<br>/);
 	rev_test_text('CO: Header of proxy HTTP response should NOT contain', 'never', /HTTP_ORG_REQ_HDR_3/);
 	// .
+  // better keep todo without regions if we do not use it
 
 });
 
+// if we have test functions to reduce code duplication, why would not we keep all of them in the same place of file
 function second_test_batch(generic_object)
 {
 	var operators = {
 		'<': function(a, b) { return a < b },
 		'>=': function(a, b) { return a >= b }
 	};
+  // these operators are duplicated almost in every test function, we can move it to utils
 	var final_description = 'Header Test - BP header ' + generic_object['action'] + ' function works - ' + generic_object['description'];
 	var base_header_key = generic_object['header_base_key'].toLowerCase();
 	var base_header_value = generic_object['header_base_value'];
@@ -138,6 +142,7 @@ function second_test_batch(generic_object)
 					}
 				} else if (generic_object['action'] === 'DELETE') {
 					// add extra checks on delete feature here
+          // todo ?
 					var response_json = JSON.stringify(res.header);
 					var i = response_json.search(generic_object['header_delete_key']);
 					var delete_problem = operators[generic_object['delete_op']](i, 1);
@@ -153,11 +158,12 @@ function second_test_batch(generic_object)
 }
 
 
-describe('Headers Manipulation Tests Part Two', function() {
+describe('Headers Manipulation Tests Part Two', function() { // Capital letters - Headers manipulation tests 2 ?
 	url = 'http://testsjc20-bp01.revsw.net';
 	domain_header = 'test-proxy-headers.revsw.net';
 	test_object_js_1 = '/test_object_purge_api01.js';
 	test_object_cgi_1 = '/cgi-bin/envtest.cgi';
+  // variables should have var to be declared properly in function scope
 
 	second_test_batch({
 		'get_obj': test_object_js_1,
@@ -233,6 +239,7 @@ describe('Headers Manipulation Tests Part Two', function() {
 		'header_delete_key': 'X-REV-ID',
 		'delete_op': '>='
 	});
-	
+
 	// END END END
+  // remove it
 });

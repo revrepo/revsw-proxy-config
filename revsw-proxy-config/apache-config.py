@@ -6,15 +6,20 @@ import os
 import sys
 import itertools
 
+# move sys import and path.insertions above all importing modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
 
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
+# should be agreed the rule about naming functions, variables
+# set_log as acfg_set_log, acfg_set_log seems like apache_cfg_set_log. Better use long or short names everywhere
 from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, \
     PlatformWebServer, WebServerConfig, NginxConfig
 
+# should be agreed the rule about __main__
+# def _main() option or if __name__ == "__main__": [__name__ usage is standard]
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -45,6 +50,8 @@ if __name__ == "__main__":
                          default="main")
     add_mod.add_argument("vars_file", help="Input JSON template variables file")
 
+    # should be agreed the rule about naming functions, variables
+    # dele seems like delete_action or delete, del. Better use long or short names everywhere
     dele = actions.add_parser("del", help="Delete site")
     dele.add_argument("site_name_del", help="Unique identifier of site to delete")
 
@@ -74,6 +81,8 @@ if __name__ == "__main__":
             VARNISH_TEMPL = 6
             SEND = 7
             COPY = 8
+        # Better move enum class outside main func
+        # name Actions is so generic
 
         if args.command == "start":
             action = Actions.START
@@ -93,6 +102,10 @@ if __name__ == "__main__":
             action = Actions.COPY
         else:
             raise AttributeError("Unknown command line action")
+        # After this conditions sequence we would get Action class instance
+        # and then we're checking th same conditions again with Action instance
+        # for ex. next line is action == Actions.START which equals to args.command == "start"
+        # Seems like Actions class is useless there
 
         if action == Actions.START:
             log = RevStdLogger(args.verbose)
@@ -122,11 +135,14 @@ if __name__ == "__main__":
             # Send config to server
             creds_path = "/opt/revsw-config/"
             #creds_path = "/home/sorin/ownCloud/revsw/eng/certs/conf-tools"
+            # adding main config with all paths and destinations would be potential improvement
+            # for ex. creds_path = revsw_config["main_path"]
 
             creds = RevTLSCredentials("%s/clicert.pem" % creds_path,
                                       "%s/clikey.pem" % creds_path,
                                       "alabala",
                                       "%s/srvcert.pem" % creds_path)
+            # tls_credentials or tls_creds ?
 
             if not global_cfg["simulate"]:
                 c = RevTLSClient((global_cfg["server_addr"], 16002), creds)
@@ -138,6 +154,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
         # Copy config to file and exit
+        # Comment makes no sense, below we can see Actions.COPY and log explanation
         if action == Actions.COPY:
             log.LOGD("Copying configuration to '%s'" % args.copy_file_name)
 
@@ -177,6 +194,7 @@ if __name__ == "__main__":
             templates = {}
 
             subdirs = ("all", "nginx")
+            # sub_dirs ?
             search_dirs = [os.path.join(base, subdir) for (base, subdir) in
                                itertools.product(search_dirs_base, subdirs)]
 
@@ -184,6 +202,8 @@ if __name__ == "__main__":
 
             with open(args.vars_file) as f:
                 vars = json.load(f)
+                # vars ?
+                # has to be renamed to config_vars? vars is generic name
 
             cfg = NginxConfig(args.site_name_config)
             templates["nginx"] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
@@ -227,11 +247,14 @@ if __name__ == "__main__":
             config["certs"] = certs
 
         # Add new command
+        # "Add new command" useless comment, because we can look 1 line below append
+        # these kind of cases has to be resolved by proper naming of lists, variables, functions
         global_json["commands"].append(config)
         with open("/tmp/apache-config.json", "w") as j:
             json.dump(global_json, j, indent=2)
 
     except Exception as e:
+        # modules should be imported at the top of the file
         import traceback
         traceback.print_exc()
         log.LOGE(e)
