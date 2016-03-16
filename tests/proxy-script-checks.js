@@ -20,10 +20,10 @@ var testHTTPUrl = config.get('test_proxy_http'),
   domainConfig = '',
   domainConfigId = '';
 
-api.debugMode(false);
-tools.debugMode(false);
+api.debugMode(true);
+tools.debugMode(true);
 
-var development = false;
+var development = true;
 //console.log(jsonContent);
 
 var merge = function () {
@@ -51,9 +51,73 @@ var merge = function () {
 };
 
 var checking = function (host, url, domain, values, set) {
-  //console.log(host, url, domain, values);
+  //console.log(host, url, domain, values, set);
   return new Promise(function (response, reject) {
     if (!set || set === '') {
+      tools.getHostRequest(host, url, domain)
+        .then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          if (development == true) {
+            console.log(res.header);
+          }
+          //console.log(values);
+          for (var key in values) {
+            if (values[key] != '') {
+              if (key == 'header') {
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.equal(values[key][header]);
+                }
+              }
+
+              if (key == 'header_not') {
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.not.equal(values[key][header]);
+                }
+              }
+
+              if (key == 'content') {
+                for (var text in values[key]) {
+                  res.text.should.containEql(values[key][text]);
+                }
+              }
+
+              if (key == 'content_not') {
+                for (var text in values[key]) {
+                  res.text.should.not.containEql(values[key][text]);
+                }
+              }
+
+              if (key == 'content_match') {
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.match(reg);
+                }
+              }
+
+              if (key == 'content_not_match') {
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.not.match(reg);
+                }
+              }
+            }
+          }
+          response(true);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    } else {
       var setValues = {
         'Host': domain
       };
@@ -76,40 +140,41 @@ var checking = function (host, url, domain, values, set) {
                   res.header[header].should.equal(values[key][header]);
                 }
               }
-              if (key == 'content') {
-                for (var text in values[key]) {
-                  res.text.should.containEql(values[key][text]);
-                }
-              }
-            }
-          }
-          response(true);
-        })
-        .catch(function (err) {
-          reject(err);
-        });
-    } else {
-      tools.getHostRequest(host, url, domain)
-        .then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          if (development == true) {
-            console.log(res.header);
-          }
-          for (var key in values) {
-            if (values[key] != '') {
-              if (key == 'header') {
+
+              if (key == 'header_not') {
                 for (var header in values[key]) {
                   if (development == true) {
                     console.log(res.header[header] + " <=> " + values[key][header]);
                   }
-                  res.header[header].should.equal(values[key][header]);
+                  res.header[header].should.not.equal(values[key][header]);
                 }
               }
+
               if (key == 'content') {
                 for (var text in values[key]) {
                   res.text.should.containEql(values[key][text]);
+                }
+              }
+
+              if (key == 'content_not') {
+                for (var text in values[key]) {
+                  res.text.should.not.containEql(values[key][text]);
+                }
+              }
+
+              if (key == 'content_match') {
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.match(reg);
+                }
+              }
+
+              if (key == 'content_not_match') {
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.not.match(reg);
                 }
               }
             }
@@ -123,18 +188,18 @@ var checking = function (host, url, domain, values, set) {
   });
 };
 
-var purge = function (newDomainName) {
+var purge = function (newDomainName, is_wildcard, expression) {
   return new Promise(function (response, reject) {
     var jsonPurge = {
       "domainName": newDomainName,
       "purges": [{
         "url": {
-          "is_wildcard": true,
-          "expression": "/**/*"
+          "is_wildcard": is_wildcard,
+          "expression": expression
         }
       }]
     };
-    //console.log(jsonPurge);
+    //console.log(JSON.stringify(jsonPurge));
     api.postPurge(jsonPurge)
       .then(function (res, rej) {
         if (rej) {
@@ -158,7 +223,8 @@ function getRandomInt(min, max) {
 }
 
 function test_process(value, newDomainName, jsonContent) {
-  //console.log(newDomainName);
+
+
   var sub = function (key) {
     var internal = value.cases[key];
     it(internal.description, function (done) {
@@ -176,6 +242,7 @@ function test_process(value, newDomainName, jsonContent) {
         done(util.getError(err));
       });
     });
+    return true;
   };
 
   switch (value.command) {
@@ -215,6 +282,7 @@ function test_process(value, newDomainName, jsonContent) {
           if (development == true)
           {
             console.log('    ♦ Domain found');
+            done();
           }
         } else {
           if (value.set) {
@@ -257,7 +325,6 @@ function test_process(value, newDomainName, jsonContent) {
               });
           }
         }
-        done();
       });
       break;
 
@@ -302,28 +369,42 @@ function test_process(value, newDomainName, jsonContent) {
           host = testHTTPSUrl;
         }
         var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
-        if(value.purge) { purge(newDomainName); util.mySleep(value.delay); }
-        if(value.check) {
-          checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
-            if (rej) {
-              throw rej;
-            }
-            done();
-          }).catch(function (err) {
-            done(util.getError(err));
-          });
-        }else{
+        checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
           done();
-        }
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
+      });
+      break;
+
+    // Make purge
+    case "purge":
+      it(value.description + " / " + value.step, function (done) {
+        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+        purge(newDomainName, value.is_wildcard , value.expression).then(function (res, rej) {
+          if (rej) {
+            throw rej;
+          }
+          util.mySleep(value.delay);
+          done();
+        }).catch(function (err) {
+          done(util.getError(err));
+        });
       });
       break;
 
     // Make async tests
     case "async":
-      parallel(value.description, function () {
-        for (var key in value.cases) {
-          sub(key);
-        }
+      it(value.description + " async ", function (done) {
+        //var i = Object.keys(value.cases).length;
+        parallel(value.description, function () {
+          for (var key in value.cases) {
+            sub(key);
+          }
+        });
       });
       break;
 

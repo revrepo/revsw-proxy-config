@@ -165,12 +165,18 @@
 
 
 
-
     {
       "command": "group_create",
       "description": "should enabled enable_cache and enable_decompression",
       "name": "enable-decompression",
       "step": "step-1",
+      "origin": "cdn.mbeans2.com"
+    },
+    {
+      "command": "group_create",
+      "description": "should enabled enable_cache and enable_decompression",
+      "name": "enable-decompression",
+      "step": "step-2",
       "origin": "cdn.mbeans2.com",
       "set": {
         "rev_component_bp": {
@@ -185,7 +191,7 @@
       "command": "group_create",
       "description": "should disabled enable_cache and enable_decompression",
       "name": "enable-decompression",
-      "step": "step-2",
+      "step": "step-3",
       "origin": "cdn.mbeans2.com",
       "set": {
         "rev_component_bp": {
@@ -361,6 +367,70 @@
         "origin_server": "testsjc20-website01.revsw.net",
         "tolerance": "3000"
       }
+    },
+
+
+
+
+
+    {
+      "command": "group_create",
+      "description": "should create domains and configurations for enable_rum",
+      "name": "enable-rum",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net"
+    },
+
+    {
+      "command": "group_create",
+      "description": "should enable enable_rum",
+      "name": "enable-rum",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_co": {
+          "enable_rum": true
+        }
+      }
+    },
+
+    {
+      "command": "group_create",
+      "description": "should disable enable_rum",
+      "name": "enable-rum",
+      "step": "step-3",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_co": {
+          "enable_rum": false
+        }
+      }
+    },
+
+
+
+
+
+    {
+      "command": "group_create",
+      "description": "should create domains for PURGE testing",
+      "name": "cache-purge",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net"
+    },
+    {
+      "command": "group_create",
+      "description": "should create domains for PURGE testing",
+      "name": "cache-purge",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net"
+    },
+    {
+      "command": "group_create",
+      "description": "should create domains for PURGE testing",
+      "name": "cache-purge",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net"
     }
 
   ]

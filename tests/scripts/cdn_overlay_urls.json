@@ -41,7 +41,7 @@
               "cache-control": "public, max-age=37731",
               "content-type": "image/jpeg"
             },
-            "text": []
+            "content": []
           }
         },
         {
@@ -58,7 +58,7 @@
               "cache-control": "public, max-age=37731",
               "content-type": "image/jpeg"
             },
-            "text": []
+            "content": []
           }
         },
         {
@@ -75,7 +75,7 @@
               "cache-control": "public, max-age=37731",
               "content-type": "image/jpeg"
             },
-            "text": []
+            "content": []
           }
         },
         {
@@ -92,7 +92,7 @@
               "cache-control": "public, max-age=37731",
               "content-type": "image/jpeg"
             },
-            "text": []
+            "content": []
           }
         },
         {
@@ -109,7 +109,7 @@
               "cache-control": "public, max-age=37731",
               "content-type": "image/jpeg"
             },
-            "text": []
+            "content": []
           }
         }
       ],
