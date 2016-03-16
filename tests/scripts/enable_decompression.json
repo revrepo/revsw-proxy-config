@@ -15,14 +15,45 @@
         "header": {
           "content-type": "image/svg+xml"
         },
-        "text": []
+        "content": []
       }
     },
     {
       "name": "enable-decompression",
       "step": "step-1",
       "command": "check",
-      "description": "should check svg file request and receive HIT and content-length",
+      "description": "should check svg file and make sure that decompression is enabled by default",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/media/fonts/ProximaNova.svg",
+        "header": {
+          "content-length": "54445",
+          "content-type": "image/svg+xml"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "enable-decompression",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check svg file request",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/media/fonts/ProximaNova.svg",
+        "header": {
+          "content-type": "image/svg+xml"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "enable-decompression",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check svg file and make sure that decompression is enabled",
       "delay": 0,
       "protocol": "HTTPS",
       "check": {
@@ -31,14 +62,29 @@
           "content-length": "54445",
           "content-type": "image/svg+xml"
         },
-        "text": []
+        "content": []
       }
     },
     {
       "name": "enable-decompression",
-      "step": "step-2",
+      "step": "step-3",
       "command": "check",
-      "description": "should check svg file and receive smaller content-length",
+      "description": "should check svg file request",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/media/fonts/ProximaNova.svg",
+        "header": {
+          "content-type": "image/svg+xml"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "enable-decompression",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check svg file and make sure that decompression is disabled",
       "delay": 0,
       "protocol": "HTTP",
       "check": {
@@ -47,7 +93,7 @@
           "content-length": "14305",
           "content-type": "image/svg+xml"
         },
-        "text": []
+        "content": []
       }
     }
   ]

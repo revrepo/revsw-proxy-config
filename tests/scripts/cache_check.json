@@ -6,26 +6,29 @@
     {
       "name": "cache-options",
       "step": "step-3",
-      "command": "check",
+      "command": "purge",
       "description": "should purge step-3 domain",
       "delay": 0,
-      "purge": true
+      "is_wildcard": true,
+      "expression": "/**/*"
     },
     {
       "name": "cache-options",
       "step": "step-4",
-      "command": "check",
+      "command": "purge",
       "description": "should purge step-4 domain",
       "delay": 0,
-      "purge": true
+      "is_wildcard": true,
+      "expression": "/**/*"
     },
     {
       "name": "cache-options",
       "step": "step-5",
-      "command": "check",
+      "command": "purge",
       "description": "should purge step-5 domain",
       "delay": 0,
-      "purge": true
+      "is_wildcard": true,
+      "expression": "/**/*"
     },
     {
       "name": "cache-options",
@@ -42,7 +45,7 @@
           "cache-control": "public, max-age=120",
           "content-type": "text/css"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -60,7 +63,7 @@
           "cache-control": "public, max-age=240",
           "content-type": "text/css"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -79,7 +82,7 @@
           "cache-control": "max-age=4",
           "content-type": "text/plain"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -103,7 +106,7 @@
           "cache-control": "max-age=4",
           "content-type": "text/plain"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -125,7 +128,7 @@
           "x-rev-hit-for-pass": "YES",
           "content-type": "application/json"
         },
-        "text": [
+        "content": [
           "myApp-token"
         ]
       }
@@ -149,7 +152,7 @@
           "x-rev-hit-for-pass": "YES",
           "content-type": "application/json"
         },
-        "text": [
+        "content": [
           "myApp-token"
         ]
       }
@@ -168,7 +171,7 @@
           "cache-control": "public, max-age=720000",
           "content-type": "text/css"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -186,7 +189,7 @@
           "cache-control": "public, max-age=720000",
           "content-type": "text/css"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -203,7 +206,7 @@
           "cache-control": "public, max-age=720000",
           "content-type": "application/x-javascript"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -221,7 +224,7 @@
           "cache-control": "public, max-age=720000",
           "content-type": "application/x-javascript"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -238,7 +241,7 @@
           "cache-control": "max-age=720000",
           "content-type": "image/jpeg"
         },
-        "text": []
+        "content": []
       }
     },
     {
@@ -256,7 +259,7 @@
           "cache-control": "max-age=720000",
           "content-type": "image/jpeg"
         },
-        "text": []
+        "content": []
       }
     }
   ]

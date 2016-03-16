@@ -1,0 +1,394 @@
+{
+  "name": "purge cache",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge without wildcard and with expression \\.(jpg|jpeg)$",
+      "delay": 0,
+      "is_wildcard": false,
+      "expression": "\\.(jpg|jpeg)$"
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge without wildcard and with expression \\.css$",
+      "delay": 0,
+      "is_wildcard": false,
+      "expression": "\\.css$"
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge without wildcard and with expression 'static'",
+      "delay": 0,
+      "is_wildcard": false,
+      "expression": "static"
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge without wildcard and with expression 'static'",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/sta**s$"
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.css",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "text/css"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.js",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "MISS",
+          "content-type": "application/x-javascript"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "cache-purge",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/static/file.jpg",
+        "header": {
+          "x-rev-beresp-ttl": "720000.000",
+          "x-rev-beresp-grace": "60.000",
+          "cache-control": "max-age=720000",
+          "x-rev-cache": "HIT",
+          "content-type": "image/jpeg"
+        },
+        "content": []
+      }
+    }
+  ]
+}
