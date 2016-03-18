@@ -20,10 +20,10 @@ var testHTTPUrl = config.get('test_proxy_http'),
   domainConfig = '',
   domainConfigId = '';
 
-api.debugMode(true);
-tools.debugMode(true);
+api.debugMode(false);
+tools.debugMode(false);
 
-var development = true;
+var development = false;
 //console.log(jsonContent);
 
 var merge = function () {
@@ -50,141 +50,123 @@ var merge = function () {
   return destination;
 };
 
-var checking = function (host, url, domain, values, set) {
-  //console.log(host, url, domain, values, set);
+var checking = function (host, url, domain, values, set, method) {
+  //console.log(host, url, domain, values, set, method);
   return new Promise(function (response, reject) {
-    if (!set || set === '') {
-      tools.getHostRequest(host, url, domain)
-        .then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          if (development == true) {
-            console.log(res.header);
-          }
-          //console.log(values);
-          for (var key in values) {
-            if (values[key] != '') {
-              if (key == 'header') {
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
-                  }
-                  res.header[header].should.equal(values[key][header]);
-                }
-              }
 
-              if (key == 'header_not') {
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
-                  }
-                  res.header[header].should.not.equal(values[key][header]);
-                }
-              }
+    switch (method) {
 
-              if (key == 'content') {
-                for (var text in values[key]) {
-                  res.text.should.containEql(values[key][text]);
-                }
-              }
+      case "POST":
+        var request = tools.postHostRequest(host, url, set, domain)
+        break;
 
-              if (key == 'content_not') {
-                for (var text in values[key]) {
-                  res.text.should.not.containEql(values[key][text]);
-                }
-              }
+      case "PATCH":
+        var request = tools.patchHostRequest(host, url, set, domain)
+        break;
 
-              if (key == 'content_match') {
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
-                  res.text.should.match(reg);
-                }
-              }
+      case "PUT":
+        var request = tools.putHostRequest(host, url, set, domain)
+        break;
 
-              if (key == 'content_not_match') {
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
-                  res.text.should.not.match(reg);
-                }
-              }
-            }
-          }
-          response(true);
-        })
-        .catch(function (err) {
-          reject(err);
-        });
-    } else {
-      var setValues = {
-        'Host': domain
-      };
-      setValues = merge(setValues, set);
-      tools.getSetRequest(host, url, setValues)
-        .then(function (res, rej) {
-          if (rej) {
-            throw rej;
-          }
-          if (development == true) {
-            console.log(res.header);
-          }
-          for (var key in values) {
-            if (values[key] != '') {
-              if (key == 'header') {
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
-                  }
-                  res.header[header].should.equal(values[key][header]);
-                }
-              }
+      case "DELETE":
+        //console.log(host, url, domain);
+        var request = tools.delHostRequest(host, url, domain)
+        break;
 
-              if (key == 'header_not') {
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
-                  }
-                  res.header[header].should.not.equal(values[key][header]);
-                }
-              }
-
-              if (key == 'content') {
-                for (var text in values[key]) {
-                  res.text.should.containEql(values[key][text]);
-                }
-              }
-
-              if (key == 'content_not') {
-                for (var text in values[key]) {
-                  res.text.should.not.containEql(values[key][text]);
-                }
-              }
-
-              if (key == 'content_match') {
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
-                  res.text.should.match(reg);
-                }
-              }
-
-              if (key == 'content_not_match') {
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
-                  res.text.should.not.match(reg);
-                }
-              }
-            }
-          }
-          response(true);
-        })
-        .catch(function (err) {
-          reject(err);
-        });
+      default:
+        if (!set || set === '') {
+          var request = tools.getHostRequest(host, url, domain);
+        } else {
+          var setValues = {
+            'Host': domain
+          };
+          setValues = merge(setValues, set);
+          var request = tools.getSetRequest(host, url, setValues);
+        }
+        break;
     }
+
+    request.then(function (res, rej) {
+        if (rej) {
+          throw rej;
+        }
+        if (development == true) {
+          console.log(res.header);
+        }
+        //console.log(values);
+        for (var key in values) {
+          if (values[key] != '') {
+            switch (key) {
+
+              case "header":
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.equal(values[key][header]);
+                }
+                break;
+
+              case "header_not":
+                for (var header in values[key]) {
+                  if (development == true) {
+                    console.log(res.header[header] + " <=> " + values[key][header]);
+                  }
+                  res.header[header].should.not.equal(values[key][header]);
+                }
+                break;
+
+              case "header_properties":
+                for (var header in values[key]) {
+                  res.header.should.have.properties(values[key][header]);
+                }
+                break;
+
+              case "header_not_properties":
+                for (var header in values[key]) {
+                  res.header.should.not.have.properties(values[key][header]);
+                }
+                break;
+
+              case "content":
+                for (var text in values[key]) {
+                  res.text.should.containEql(values[key][text]);
+                }
+                break;
+
+              case "content_not":
+                for (var text in values[key]) {
+                  res.text.should.not.containEql(values[key][text]);
+                }
+                break;
+
+              case "content_match":
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.match(reg);
+                }
+                break;
+
+              case "content_not_match":
+                for (var text in values[key]) {
+                  var reg = new RegExp(values[key][text]);
+                  //console.log(reg);
+                  res.text.should.not.match(reg);
+                }
+                break;
+
+              default:
+                console.log("Property '"+key+"' not found");
+                break;
+            }
+          }
+        }
+        response(true);
+      })
+      .catch(function (err) {
+        reject(err);
+      });
   });
 };
 
@@ -233,7 +215,7 @@ function test_process(value, newDomainName, jsonContent) {
         host = testHTTPSUrl;
       }
       var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
-      checking(host, internal.check.url, newDomainName, internal.check).then(function (res, rej) {
+      checking(host, internal.check.url, newDomainName, internal.check, internal.set, internal.method).then(function (res, rej) {
         if (rej) {
           throw rej;
         }
@@ -369,10 +351,11 @@ function test_process(value, newDomainName, jsonContent) {
           host = testHTTPSUrl;
         }
         var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
-        checking(host, value.check.url, newDomainName, value.check, value.set).then(function (res, rej) {
+        checking(host, value.check.url, newDomainName, value.check, value.set, value.method).then(function (res, rej) {
           if (rej) {
             throw rej;
           }
+          util.mySleep(value.delay);
           done();
         }).catch(function (err) {
           done(util.getError(err));
@@ -398,13 +381,10 @@ function test_process(value, newDomainName, jsonContent) {
 
     // Make async tests
     case "async":
-      it(value.description + " async ", function (done) {
-        //var i = Object.keys(value.cases).length;
-        parallel(value.description, function () {
-          for (var key in value.cases) {
-            sub(key);
-          }
-        });
+      parallel(value.description, function () {
+        for (var key in value.cases) {
+          sub(key);
+        }
       });
       break;
 
