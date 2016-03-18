@@ -1,0 +1,385 @@
+{
+  "name": "freshly domain",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge for freshly domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check HTTP proxy timeout and receive 200 answer on 10sec delay",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/delay/10",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check HTTP GET request headers",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/cache/5",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "cache-control": "public, max-age=5",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "x-rev-beresp-ttl": "5.000",
+          "x-rev-beresp-grace": "60.000"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check HTTPS GET request headers",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "check": {
+        "url": "/cache/30",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "cache-control": "public, max-age=30",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "x-rev-beresp-ttl": "30.000",
+          "x-rev-beresp-grace": "60.000"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check HIT cache header and sleep 65 second",
+      "delay": 65000,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/cache/5",
+        "header": {
+          "x-rev-cache": "HIT",
+          "content-type": "application/json",
+          "cache-control": "public, max-age=5",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "x-rev-beresp-ttl": "5.000",
+          "x-rev-beresp-grace": "60.000"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check MISS cache header after timeout",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "check": {
+        "url": "/cache/5",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "cache-control": "public, max-age=5",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "x-rev-beresp-ttl": "5.000",
+          "x-rev-beresp-grace": "60.000"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check set header requests",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/response-headers?Set-Cookie=k1%3Dv1&Cache-Control=public%2C%20max-age%3D30",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "cache-control": "public, max-age=30",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true"
+        },
+        "header_properties": [
+          "x-rev-cache",
+          "set-cookie"
+        ],
+        "header_not_properties": [
+          "x-rev-beresp-ttl",
+          "x-rev-beresp-grace"
+        ],
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check dynamic requests",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/response-headers?key=val",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "age": "0",
+          "x-rev-beresp-ttl": "0.000",
+          "x-rev-beresp-grace": "60.000",
+          "key": "val"
+        },
+        "header_properties": [
+          "x-rev-cache",
+          "x-rev-beresp-ttl",
+          "x-rev-beresp-grace"
+        ],
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check MISS cache for dynamic requests",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "check": {
+        "url": "/response-headers?key=val",
+        "header": {
+          "x-rev-cache": "MISS",
+          "content-type": "application/json",
+          "access-control-allow-origin": "*",
+          "access-control-allow-credentials": "true",
+          "age": "0",
+          "x-rev-beresp-ttl": "0.000",
+          "x-rev-beresp-grace": "60.000",
+          "key": "val"
+        },
+        "header_properties": [
+          "x-rev-cache",
+          "x-rev-beresp-ttl",
+          "x-rev-beresp-grace"
+        ],
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that POST don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "POST",
+      "check": {
+        "url": "/post",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that POST don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "POST",
+      "check": {
+        "url": "/post",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that PATCH don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "PATCH",
+      "check": {
+        "url": "/patch",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that PATCH don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "PATCH",
+      "check": {
+        "url": "/patch",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that PUT don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "PUT",
+      "check": {
+        "url": "/put",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that PUT don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "form": {
+          "key": "value"
+        }
+      },
+      "method": "PUT",
+      "check": {
+        "url": "/put",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that DELETE don't use cache",
+      "delay": 0,
+      "protocol": "HTTP",
+      "method": "DELETE",
+      "check": {
+        "url": "/delete",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check that DELETE don't use cache",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "method": "DELETE",
+      "check": {
+        "url": "/delete",
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": []
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-1",
+      "command": "check",
+      "description": "should get origin robots.txt",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/robots.txt",
+        "header": {},
+        "content_not": [
+          "User-agent: *\nDisallow: /\n"
+        ]
+      }
+    },
+    {
+      "name": "freshly-domain",
+      "step": "step-2",
+      "command": "check",
+      "description": "should get origin robots.txt",
+      "delay": 0,
+      "protocol": "HTTP",
+      "check": {
+        "url": "/robots.txt",
+        "header": {},
+        "content": [
+          "User-agent: *\nDisallow: /\n"
+        ]
+      }
+    }
+  ]
+}

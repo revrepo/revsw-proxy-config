@@ -162,9 +162,6 @@
         }
       }
     },
-
-
-
     {
       "command": "group_create",
       "description": "should enabled enable_cache and enable_decompression",
@@ -202,10 +199,6 @@
         }
       }
     },
-
-
-
-
     {
       "command": "group_create",
       "description": "should prepare domain to cdn_overlay_urls test",
@@ -368,11 +361,6 @@
         "tolerance": "3000"
       }
     },
-
-
-
-
-
     {
       "command": "group_create",
       "description": "should create domains and configurations for enable_rum",
@@ -380,7 +368,6 @@
       "step": "step-1",
       "origin": "httpbin_org.revsw.net"
     },
-
     {
       "command": "group_create",
       "description": "should enable enable_rum",
@@ -393,7 +380,6 @@
         }
       }
     },
-
     {
       "command": "group_create",
       "description": "should disable enable_rum",
@@ -406,11 +392,6 @@
         }
       }
     },
-
-
-
-
-
     {
       "command": "group_create",
       "description": "should create domains for PURGE testing",
@@ -420,10 +401,32 @@
     },
     {
       "command": "group_create",
-      "description": "should create domains for PURGE testing",
-      "name": "cache-purge",
+      "description": "should create domains for freshly domain testing",
+      "name": "freshly-domain",
       "step": "step-1",
-      "origin": "httpbin_org.revsw.net"
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "block_crawlers": false
+        },
+        "rev_component_co": {
+          "enable_rum": false,
+          "enable_optimization": false
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should change domain config and set block_crawlers to true",
+      "name": "freshly-domain",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "block_crawlers": true
+        }
+      }
     },
     {
       "command": "group_create",
@@ -432,6 +435,5 @@
       "step": "step-1",
       "origin": "httpbin_org.revsw.net"
     }
-
   ]
 }

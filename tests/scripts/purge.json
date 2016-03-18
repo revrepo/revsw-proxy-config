@@ -23,7 +23,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "text/css"
@@ -42,7 +42,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "application/x-javascript"
@@ -61,7 +61,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "image/jpeg"
@@ -80,7 +80,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "text/css"
@@ -99,7 +99,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "application/x-javascript"
@@ -118,7 +118,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "image/jpeg"
@@ -146,7 +146,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "text/css"
@@ -165,7 +165,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "application/x-javascript"
@@ -184,7 +184,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "image/jpeg"
@@ -212,7 +212,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "text/css"
@@ -231,7 +231,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "application/x-javascript"
@@ -250,7 +250,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "image/jpeg"
@@ -278,7 +278,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "text/css"
@@ -297,7 +297,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "application/x-javascript"
@@ -316,7 +316,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "image/jpeg"
@@ -344,7 +344,7 @@
         "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "text/css"
@@ -363,7 +363,7 @@
         "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "MISS",
           "content-type": "application/x-javascript"
@@ -382,7 +382,7 @@
         "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
-          "x-rev-beresp-grace": "60.000",
+          "x-rev-beresp-grace": "0.000",
           "cache-control": "max-age=720000",
           "x-rev-cache": "HIT",
           "content-type": "image/jpeg"
