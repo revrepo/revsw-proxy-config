@@ -10,8 +10,8 @@
       "description": "should not find rum_code",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/html",
       "check": {
-        "url": "/html",
         "header": {},
         "content_not_match": [
           "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init\\({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: 'https://testsjc20-rum01.revsw.net/service'}\\); BOOMR.addVar\\('user_ip', '.*?'\\);</script>"
@@ -25,8 +25,8 @@
       "description": "should find rum_code",
       "delay": 0,
       "protocol": "HTTPS",
+      "url": "/html",
       "check": {
-        "url": "/html",
         "header": {},
         "content_match": [
           "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init\\({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: 'https://testsjc20-rum01.revsw.net/service'}\\); BOOMR.addVar\\('user_ip', '.*?'\\);</script>"
@@ -40,8 +40,8 @@
       "description": "should not find rum_code",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/html",
       "check": {
-        "url": "/html",
         "header": {},
         "content_not_match": [
           "<script src='/rev-diablo/js/boomerang-rev.min.js'></script><script>BOOMR.init\\({RT:{cookie:'REV-RT', strict_referrer: false}, beacon_url: 'https://testsjc20-rum01.revsw.net/service'}\\); BOOMR.addVar\\('user_ip', '.*?'\\);</script>"

@@ -37,8 +37,8 @@
       "description": "should check url parameter with wildcard and edge_caching",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "120.000",
           "x-rev-beresp-grace": "0.000",
@@ -55,8 +55,8 @@
       "description": "should check css file cache parameters",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "120.000",
           "x-rev-beresp-grace": "0.000",
@@ -73,8 +73,8 @@
       "description": "should check txt file cache parameters",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/stale/stalecontent.txt",
       "check": {
-        "url": "/static/stale/stalecontent.txt",
         "header": {
           "x-rev-cache": "MISS",
           "x-rev-beresp-ttl": "4.000",
@@ -97,8 +97,8 @@
           "myApp-token=12345679"
         ]
       },
+      "url": "/static/stale/stalecontent.txt",
       "check": {
-        "url": "/static/stale/stalecontent.txt",
         "header": {
           "x-rev-cache": "HIT",
           "x-rev-beresp-ttl": "4.000",
@@ -121,8 +121,8 @@
           "myApp-token=12345679"
         ]
       },
+      "url": "/cookies",
       "check": {
-        "url": "/cookies",
         "header": {
           "x-rev-cache": "MISS",
           "x-rev-hit-for-pass": "YES",
@@ -145,8 +145,8 @@
           "myApp-token=12345679"
         ]
       },
+      "url": "/cookies",
       "check": {
-        "url": "/cookies",
         "header": {
           "x-rev-cache": "MISS",
           "x-rev-hit-for-pass": "YES",
@@ -164,8 +164,8 @@
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-cache": "MISS",
           "cache-control": "public, max-age=720000",
@@ -181,8 +181,8 @@
       "description": "should get by HTTPS static css file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTPS",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-cache": "HIT",
           "x-rev-cache-hits": "1",
@@ -199,8 +199,8 @@
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-cache": "MISS",
           "cache-control": "public, max-age=720000",
@@ -216,8 +216,8 @@
       "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-cache": "HIT",
           "x-rev-cache-hits": "1",
@@ -234,8 +234,8 @@
       "description": "should get by HTTP static jpg file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-cache": "MISS",
           "cache-control": "max-age=720000",
@@ -251,8 +251,8 @@
       "description": "should get by HTTP static jpg file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-cache": "HIT",
           "x-rev-cache-hits": "1",

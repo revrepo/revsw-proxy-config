@@ -215,7 +215,7 @@ function test_process(value, newDomainName, jsonContent) {
         host = testHTTPSUrl;
       }
       var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
-      checking(host, internal.check.url, newDomainName, internal.check, internal.set, internal.method).then(function (res, rej) {
+      checking(host, internal.url, newDomainName, internal.check, internal.set, internal.method).then(function (res, rej) {
         if (rej) {
           throw rej;
         }
@@ -264,8 +264,8 @@ function test_process(value, newDomainName, jsonContent) {
           if (development == true)
           {
             console.log('    ♦ Domain found');
-            done();
           }
+          done();
         } else {
           if (value.set) {
             tools.beforeSetDomain(newDomainName, value.origin)
@@ -351,7 +351,7 @@ function test_process(value, newDomainName, jsonContent) {
           host = testHTTPSUrl;
         }
         var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
-        checking(host, value.check.url, newDomainName, value.check, value.set, value.method).then(function (res, rej) {
+        checking(host, value.url, newDomainName, value.check, value.set, value.method).then(function (res, rej) {
           if (rej) {
             throw rej;
           }
