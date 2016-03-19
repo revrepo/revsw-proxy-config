@@ -19,8 +19,8 @@
       "description": "should check HTTP proxy timeout and receive 200 answer on 10sec delay",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/delay/10",
       "check": {
-        "url": "/delay/10",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json"
@@ -35,8 +35,8 @@
       "description": "should check HTTP GET request headers",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/cache/5",
       "check": {
-        "url": "/cache/5",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -56,8 +56,8 @@
       "description": "should check HTTPS GET request headers",
       "delay": 0,
       "protocol": "HTTPS",
+      "url": "/cache/30",
       "check": {
-        "url": "/cache/30",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -75,10 +75,10 @@
       "step": "step-1",
       "command": "check",
       "description": "should check HIT cache header and sleep 65 second",
-      "delay": 65000,
+      "delay": 70000,
       "protocol": "HTTP",
+      "url": "/cache/5",
       "check": {
-        "url": "/cache/5",
         "header": {
           "x-rev-cache": "HIT",
           "content-type": "application/json",
@@ -98,8 +98,8 @@
       "description": "should check MISS cache header after timeout",
       "delay": 0,
       "protocol": "HTTPS",
+      "url": "/cache/5",
       "check": {
-        "url": "/cache/5",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -119,8 +119,8 @@
       "description": "should check set header requests",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/response-headers?Set-Cookie=k1%3Dv1&Cache-Control=public%2C%20max-age%3D30",
       "check": {
-        "url": "/response-headers?Set-Cookie=k1%3Dv1&Cache-Control=public%2C%20max-age%3D30",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -146,8 +146,8 @@
       "description": "should check dynamic requests",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/response-headers?key=val",
       "check": {
-        "url": "/response-headers?key=val",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -173,8 +173,8 @@
       "description": "should check MISS cache for dynamic requests",
       "delay": 0,
       "protocol": "HTTPS",
+      "url": "/response-headers?key=val",
       "check": {
-        "url": "/response-headers?key=val",
         "header": {
           "x-rev-cache": "MISS",
           "content-type": "application/json",
@@ -206,8 +206,8 @@
         }
       },
       "method": "POST",
+      "url": "/post",
       "check": {
-        "url": "/post",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -227,8 +227,8 @@
         }
       },
       "method": "POST",
+      "url": "/post",
       "check": {
-        "url": "/post",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -248,8 +248,8 @@
         }
       },
       "method": "PATCH",
+      "url": "/patch",
       "check": {
-        "url": "/patch",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -269,8 +269,8 @@
         }
       },
       "method": "PATCH",
+      "url": "/patch",
       "check": {
-        "url": "/patch",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -290,8 +290,8 @@
         }
       },
       "method": "PUT",
+      "url": "/put",
       "check": {
-        "url": "/put",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -311,8 +311,8 @@
         }
       },
       "method": "PUT",
+      "url": "/put",
       "check": {
-        "url": "/put",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -327,8 +327,8 @@
       "delay": 0,
       "protocol": "HTTP",
       "method": "DELETE",
+      "url": "/delete",
       "check": {
-        "url": "/delete",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -343,8 +343,8 @@
       "delay": 0,
       "protocol": "HTTPS",
       "method": "DELETE",
+      "url": "/delete",
       "check": {
-        "url": "/delete",
         "header": {
           "x-rev-cache": "MISS"
         },
@@ -358,8 +358,8 @@
       "description": "should get origin robots.txt",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/robots.txt",
       "check": {
-        "url": "/robots.txt",
         "header": {},
         "content_not": [
           "User-agent: *\nDisallow: /\n"
@@ -373,8 +373,8 @@
       "description": "should get origin robots.txt",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/robots.txt",
       "check": {
-        "url": "/robots.txt",
         "header": {},
         "content": [
           "User-agent: *\nDisallow: /\n"

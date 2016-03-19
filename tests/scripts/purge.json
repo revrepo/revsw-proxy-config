@@ -19,8 +19,8 @@
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -38,8 +38,8 @@
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -57,8 +57,8 @@
       "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -76,8 +76,8 @@
       "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -95,8 +95,8 @@
       "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -114,8 +114,8 @@
       "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -142,8 +142,8 @@
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -161,8 +161,8 @@
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -180,8 +180,8 @@
       "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -208,8 +208,8 @@
       "description": "should get by HTTP static css file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -227,8 +227,8 @@
       "description": "should get by HTTP static js file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -246,8 +246,8 @@
       "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -274,8 +274,8 @@
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -293,8 +293,8 @@
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -312,8 +312,8 @@
       "description": "should get by HTTP static jpeg file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -340,8 +340,8 @@
       "description": "should get by HTTP static css file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.css",
       "check": {
-        "url": "/static/file.css",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -359,8 +359,8 @@
       "description": "should get by HTTP static js file and receive MISS and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.js",
       "check": {
-        "url": "/static/file.js",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
@@ -378,8 +378,8 @@
       "description": "should get by HTTP static jpeg file and receive HIT and max-age of 720000",
       "delay": 0,
       "protocol": "HTTP",
+      "url": "/static/file.jpg",
       "check": {
-        "url": "/static/file.jpg",
         "header": {
           "x-rev-beresp-ttl": "720000.000",
           "x-rev-beresp-grace": "0.000",
