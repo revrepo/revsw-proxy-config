@@ -250,6 +250,15 @@
   {% call (rule, url_re, only_some_domains) _for_each_rule(site, "bereq") %}
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
     {% set origin_redirects = rule.origin_redirects|default({"override": False, "follow": False}) %}
+
+    # Does not cache when Set-Cookies are true
+    {% if not rule.cookies.override %}
+    if (beresp.http.Set-Cookie) {
+      set beresp.ttl = 0s;
+      return (deliver);
+    }
+    {% endif %}
+
     {% if rule.edge_caching.override_origin or rule.browser_caching.override_edge or origin_redirects.override %}
       {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (bereq.url ~ "{{url_re}}") {
       # Override caching time (0 means "don't cache").
@@ -919,13 +928,6 @@ unset beresp.http.Expires;
   # Don't pass this header to the users; they don't have to know we use PS
   unset beresp.http.X-Mod-Pagespeed;
   }
-
-  {% if not rule.cookies.override %}
-    if (beresp.http.Set-Cookie) {
-      set beresp.ttl = 0s;
-      return (deliver);
-    }
-  {% endif %}
 
   # Domain-specific configuration
   call start_cookies_backend_response;
