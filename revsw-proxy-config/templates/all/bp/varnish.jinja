@@ -920,6 +920,13 @@ unset beresp.http.Expires;
   unset beresp.http.X-Mod-Pagespeed;
   }
 
+  {% if not rule.cookies.override %}
+    if (beresp.http.Set-Cookie) {
+      set beresp.ttl = 0s;
+      return (deliver);
+    }
+  {% endif %}
+
   # Domain-specific configuration
   call start_cookies_backend_response;
 
