@@ -77,8 +77,7 @@
       "check": {
         "header": {
           "x-rev-cache": "MISS",
-          "x-rev-beresp-ttl": "4.000",
-          "x-rev-beresp-grace": "0.000",
+          "set-cookie": [ "docid=test" ],
           "cache-control": "max-age=4",
           "content-type": "text/plain"
         },
@@ -100,9 +99,8 @@
       "url": "/static/stale/stalecontent.txt",
       "check": {
         "header": {
-          "x-rev-cache": "HIT",
-          "x-rev-beresp-ttl": "4.000",
-          "x-rev-beresp-grace": "0.000",
+          "x-rev-cache": "MISS",
+          "set-cookie": [ "docid=test" ],
           "cache-control": "max-age=4",
           "content-type": "text/plain"
         },

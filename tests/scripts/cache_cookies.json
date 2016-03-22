@@ -1,0 +1,1462 @@
+{
+  "name": "cache cookies options",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should purge step-1 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v1"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v1"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v2; k2=v1"
+          ]
+        },
+        "content": [
+          "k1=v2; k2=v1"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v2; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v2; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v3; k2=v3"
+          ]
+        },
+        "content": [
+          "k1=v3; k2=v3"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-1",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "purge",
+      "description": "should purge step-2 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v2; k2=v1"
+          ]
+        },
+        "content": [
+          "k1=v2; k2=v1"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v2; k2=v1"
+          ]
+        },
+        "content": [
+          "k1=v2; k2=v1"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v3; k2=v3"
+          ]
+        },
+        "content": [
+          "k1=v3; k2=v3"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v2\", \n    \"k2\": \"v1\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v2\", \n    \"k2\": \"v1\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-2",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v3\", \n    \"k2\": \"v3\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "purge",
+      "description": "should purge step-3 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-3",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "purge",
+      "description": "should purge step-4 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1; k2=v2"
+          ]
+        },
+        "content": [
+          "k1=v1; k2=v2"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-4",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\", \n    \"k2\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "purge",
+      "description": "should purge step-5 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v1;"
+          ]
+        },
+        "content": [
+          "k1=v1;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1;"
+          ]
+        },
+        "content": [
+          "k1=v1;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v1;"
+          ]
+        },
+        "content": [
+          "k1=v1;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v2;"
+          ]
+        },
+        "content": [
+          "k1=v2;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT",
+          "set-cookie": [
+            "k1=v2;"
+          ]
+        },
+        "content": [
+          "k1=v2;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/header-cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "set-cookie": [
+            "k1=v3;"
+          ]
+        },
+        "content": [
+          "k1=v3;"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v1; k2=v1 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v1; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v1\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v1 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v1"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v2; k2=v2 and receive HIT",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v2; k2=v2"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "HIT"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v2\"\n  }\n}\n"
+        ]
+      }
+    },
+    {
+      "name": "cache-cookies",
+      "step": "step-5",
+      "command": "check",
+      "description": "should send request with cookies k1=v3; k2=v3 and receive MISS",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "set": {
+        "Cookie": [
+          "k1=v3; k2=v3"
+        ]
+      },
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS"
+        },
+        "content": [
+          "{\n  \"cookies\": {\n    \"k1\": \"v3\"\n  }\n}\n"
+        ]
+      }
+    }
+  ]
+}
