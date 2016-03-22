@@ -44,7 +44,7 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "x-rev-beresp-ttl": "5.000",
-          "x-rev-beresp-grace": "60.000"
+          "x-rev-beresp-grace": "0.000"
         },
         "content": []
       }
@@ -65,7 +65,7 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "x-rev-beresp-ttl": "30.000",
-          "x-rev-beresp-grace": "60.000"
+          "x-rev-beresp-grace": "0.000"
         },
         "content": []
       }
@@ -86,7 +86,7 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "x-rev-beresp-ttl": "5.000",
-          "x-rev-beresp-grace": "60.000"
+          "x-rev-beresp-grace": "0.000"
         },
         "content": []
       }
@@ -107,7 +107,7 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "x-rev-beresp-ttl": "5.000",
-          "x-rev-beresp-grace": "60.000"
+          "x-rev-beresp-grace": "0.000"
         },
         "content": []
       }
@@ -154,12 +154,12 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "age": "0",
-          "x-rev-beresp-ttl": "0.000",
-          "x-rev-beresp-grace": "60.000",
           "key": "val"
         },
         "header_properties": [
-          "x-rev-cache",
+          "x-rev-cache"
+        ],
+        "header_not_properties": [
           "x-rev-beresp-ttl",
           "x-rev-beresp-grace"
         ],
@@ -181,12 +181,12 @@
           "access-control-allow-origin": "*",
           "access-control-allow-credentials": "true",
           "age": "0",
-          "x-rev-beresp-ttl": "0.000",
-          "x-rev-beresp-grace": "60.000",
           "key": "val"
         },
         "header_properties": [
-          "x-rev-cache",
+          "x-rev-cache"
+        ],
+        "header_not_properties": [
           "x-rev-beresp-ttl",
           "x-rev-beresp-grace"
         ],
@@ -208,10 +208,8 @@
       "method": "POST",
       "url": "/post",
       "check": {
-        "header": {
-          "x-rev-cache": "MISS"
-        },
-        "content": []
+        "header_not_properties": ["x-rev-cache"],
+        "content": ["\"data\": \"{\\\"form\\\":{\\\"key\\\":\\\"value\\\"}}\""]
       }
     },
     {
@@ -229,10 +227,8 @@
       "method": "POST",
       "url": "/post",
       "check": {
-        "header": {
-          "x-rev-cache": "MISS"
-        },
-        "content": []
+        "header_not_properties": ["x-rev-cache"],
+        "content": ["\"data\": \"{\\\"form\\\":{\\\"key\\\":\\\"value\\\"}}\""]
       }
     },
     {
@@ -250,10 +246,8 @@
       "method": "PATCH",
       "url": "/patch",
       "check": {
-        "header": {
-          "x-rev-cache": "MISS"
-        },
-        "content": []
+        "header_not_properties": ["x-rev-cache"],
+        "content": ["\"data\": \"{\\\"form\\\":{\\\"key\\\":\\\"value\\\"}}\""]
       }
     },
     {
@@ -271,10 +265,8 @@
       "method": "PATCH",
       "url": "/patch",
       "check": {
-        "header": {
-          "x-rev-cache": "MISS"
-        },
-        "content": []
+        "header_not_properties": ["x-rev-cache"],
+        "content": ["\"data\": \"{\\\"form\\\":{\\\"key\\\":\\\"value\\\"}}\""]
       }
     },
     {

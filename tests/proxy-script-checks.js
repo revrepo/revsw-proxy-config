@@ -81,6 +81,7 @@ var checking = function (host, url, domain, values, set, method) {
             'Host': domain
           };
           setValues = merge(setValues, set);
+          //console.log(setValues);
           var request = tools.getSetRequest(host, url, setValues);
         }
         break;
@@ -92,6 +93,7 @@ var checking = function (host, url, domain, values, set, method) {
         }
         if (development == true) {
           console.log(res.header);
+          //console.log(res.text);
         }
         //console.log(values);
         for (var key in values) {
@@ -103,16 +105,16 @@ var checking = function (host, url, domain, values, set, method) {
                   if (development == true) {
                     console.log(res.header[header] + " <=> " + values[key][header]);
                   }
-                  res.header[header].should.equal(values[key][header]);
+                  res.header[header].should.eql(values[key][header]);
                 }
                 break;
 
               case "header_not":
                 for (var header in values[key]) {
                   if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
+                    console.log(res.header[header] + " <!=> " + values[key][header]);
                   }
-                  res.header[header].should.not.equal(values[key][header]);
+                  res.header[header].should.not.eql(values[key][header]);
                 }
                 break;
 
@@ -130,6 +132,7 @@ var checking = function (host, url, domain, values, set, method) {
 
               case "content":
                 for (var text in values[key]) {
+                  //console.log(res.text);
                   res.text.should.containEql(values[key][text]);
                 }
                 break;

@@ -434,6 +434,212 @@
       "name": "cache-purge",
       "step": "step-1",
       "origin": "httpbin_org.revsw.net"
+    },
+    {
+      "command": "group_create",
+      "description": "should create domains for cookies domain testing",
+      "name": "cache-cookies",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 10,
+                "override_no_cc": true,
+                "query_string_list_is_keep": false,
+                "query_string_keep_or_remove_list": []
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should change cookies options, set override, list_is_keep and keep_or_ignore_list",
+      "name": "cache-cookies",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 10,
+                "override_no_cc": true,
+                "query_string_list_is_keep": false,
+                "query_string_keep_or_remove_list": []
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": true,
+                "ignore_all": false,
+                "list_is_keep": true,
+                "keep_or_ignore_list": [
+                  "k1"
+                ],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should change cookies options, set ignore_all",
+      "name": "cache-cookies",
+      "step": "step-3",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 10,
+                "override_no_cc": true,
+                "query_string_list_is_keep": false,
+                "query_string_keep_or_remove_list": []
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": true,
+                "ignore_all": true,
+                "list_is_keep": true,
+                "keep_or_ignore_list": [
+                  "k1"
+                ],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should change cookies options, set default list_is_keep and keep_or_ignore_list",
+      "name": "cache-cookies",
+      "step": "step-4",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 10,
+                "override_no_cc": true,
+                "query_string_list_is_keep": false,
+                "query_string_keep_or_remove_list": []
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": true,
+                "ignore_all": true,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should change cookies options, set default ignore_all and set remove_ignored_from_request",
+      "name": "cache-cookies",
+      "step": "step-5",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": true,
+                "new_ttl": 10,
+                "override_no_cc": true,
+                "query_string_list_is_keep": false,
+                "query_string_keep_or_remove_list": []
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": true,
+                "ignore_all": false,
+                "list_is_keep": true,
+                "keep_or_ignore_list": [
+                  "k1"
+                ],
+                "remove_ignored_from_request": true,
+                "remove_ignored_from_response": false
+              }
+            }
+          ]
+        }
+      }
     }
   ]
 }

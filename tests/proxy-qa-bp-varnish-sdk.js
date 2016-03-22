@@ -136,6 +136,7 @@ function test_cache_time(sleep_time, generic_object)
 }
 
 describe('SDK external test - basic header and ttl & grace', function() {
+  this.timeout(240000);
 	var fr = '/cache/30';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_basic=" + random_number.toString();
