@@ -296,17 +296,17 @@ static struct libwebsocket_protocols protocols[] = {
 void *
 pcm_config_thread_main (void *arg UNUSED_PTR)
 {
-    struct libwebsocket_context      *context;
+    struct libwebsocket_context      *context, *context2;
     const char                       *iface = NULL;
     char                             *ssl_ws = NULL;
-    struct lws_context_creation_info  info;
+    struct lws_context_creation_info  info, info2;
     unsigned int                      opts = 0;
     int                               use_ssl = 0;
     int                               debug_level = 6;
 
     memset(&info, 0, sizeof (info));
 
-    /* assiagn the values to info */
+    /* assign the values to info */
     info.port = PCM_CONFIG_LISTNER_PORT;
     info.iface = iface;
     info.protocols = protocols;
@@ -322,27 +322,24 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
         use_ssl = *ssl_ws - '0';
     }
 
-    if (use_ssl) {
-#ifdef DEBUG_COL_BRIDGE
-        PCMC_LOG_DEBUG ("%s: pcmc using ssl", func_name);
-#endif
-        info.ssl_cert_filepath = PCM_CONFIG_LWS_SSL_CERT;
-        info.ssl_private_key_filepath = PCM_CONFIG_LWS_SSL_KEY;
-    } else {
-#ifdef DEBUG_COL_BRIDGE
-        PCMC_LOG_DEBUG ("%s: pcmc using no-ssl", func_name);
-#endif
-        info.ssl_cert_filepath = NULL;
-        info.ssl_private_key_filepath = NULL;
-    }
+    info.ssl_cert_filepath = NULL;
+    info.ssl_private_key_filepath = NULL;
+
+
+    memcpy(&info2, &info, sizeof(info));
+    info2.ssl_cert_filepath = PCM_CONFIG_LWS_SSL_CERT;
+    info2.ssl_private_key_filepath = PCM_CONFIG_LWS_SSL_KEY;
+    info2.port = PCM_CONFIG_LISTNER_PORT_SSL;
 
     /* redirect logs to syslog, check /var/log */
     lws_set_log_level (debug_level, lwsl_emit_syslog);
 
     /* create libwebsocket context for this server */
     context = libwebsocket_create_context (&info);
+    context2 = libwebsocket_create_context (&info2);
 
-    if (context == NULL) {
+
+    if (context == NULL || context2 == NULL) {
         PCMC_LOG_ERROR ("%s: libwebsocket init failed", func_name);
     }
 
@@ -351,10 +348,12 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
 #endif
 
     while (true) {
-        libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        libwebsocket_service (context, 0);
+        libwebsocket_service (context2, 0);
     }
 
     libwebsocket_context_destroy (context);
+    libwebsocket_context_destroy (context2);
 
     return (arg);
 }
