@@ -51,9 +51,9 @@ class ConfigSSL:
         self._interpret_arguments(args)
         self._read_config_files()
         self._backup_certs()
-        if self.config_vars['operation'] == "ssl-update":
+        if self.config_vars['operation'] == "update":
             self._create_certs()
-        elif self.config_vars['operation'] == "ssl-delete":
+        elif self.config_vars['operation'] == "delete":
             self._remove_certs()
 
         print self.conf
