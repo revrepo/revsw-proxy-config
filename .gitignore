@@ -59,3 +59,5 @@ revsw-proxy-config/generic-site/configure.sh
 revsw-proxy-config/generic-site/bp-*
 revsw-policy-server/pcm/install/
 # .
+
+tests/node_modules
