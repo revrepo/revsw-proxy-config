@@ -4,8 +4,8 @@
     "properties": {
         "VERSION": {
             "type": "integer",
-            "minimum": 24,
-            "maximum": 24
+            "minimum": 0,
+            "maximum": 25
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -207,17 +207,33 @@
        "ORIGIN_REQUEST_HEADERS": {
             "type": "array",
             "items": {
-		"type": "object",
-		"properties":
-		{
-		    "operation": {"type": "string"},
-		    "header_name": {"type": "string"},
-		    "header_value": {"type": "string"}
-		}
+		        "type": "object",
+		        "properties":
+		            {
+		                "operation": {"type": "string"},
+		                "header_name": {"type": "string"},
+		                "header_value": {"type": "string"}
+		            }
             }
         },
         "ENABLE_QUIC": {
             "type": "boolean"
+        },
+
+        "SSL_ENABLED": {
+            "type": "boolean"
+        },
+        "SSL_PROTOCOLS": {
+            "type": "string"
+        },
+        "SSL_CIPHERS": {
+            "type": "string"
+        },
+        "SSL_PREFER_SERVER_CIPHERS": {
+            "type": "boolean"
+        },
+        "SSL_CERT_ID": {
+            "type": "string"
         }
     },
     "required": [
@@ -266,7 +282,13 @@
         "ENABLE_RUM",
         "REV_RUM_BEACON_URL",
         "CUSTOM_WEBSERVER_CO_CODE_AFTER",
-        "ENABLE_QUIC"
+        "ENABLE_QUIC",
+
+        "SSL_ENABLED",
+        "SSL_PROTOCOLS",
+        "SSL_CIPHERS",
+        "SSL_PREFER_SERVER_CIPHERS",
+        "SSL_CERT_ID"
     ],
    "additionalProperties": false
 }

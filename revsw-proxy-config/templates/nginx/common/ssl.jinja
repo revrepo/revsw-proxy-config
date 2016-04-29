@@ -1,7 +1,8 @@
+{% set site_cert_dir = "/opt/revsw-config/certs/" %}
 {% set ssl_ciphers = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS" %}
-{% set site_cert_dir = "/opt/revsw-config/apache/" + GLOBAL_SITE_NAME + "/certs" %}
 
 {% macro _do_setup_no_proxy(this, cert_dir) %}
+    {% if this.SSL_CERT_ID == "" %}
     # Disable SSLv2/3 because of SNI, which requires TLS
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     # No need to mitigate CRIME attack - SSL compression is off by default
@@ -9,36 +10,48 @@
     ssl_ciphers {{ssl_ciphers}};
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
-    ssl_certificate {{cert_dir}}/server-chained.crt;
-    ssl_certificate_key {{cert_dir}}/server.key;
+    ssl_certificate {{ cert_dir }}default/public.crt;
+    ssl_certificate_key {{ cert_dir }}default/private.key;
+    {% else %}
+    {% if this.SSL_PROTOCOLS %}ssl_protocols {{ this.SSL_PROTOCOLS }};{% endif %}
+
+    {% if this.SSL_CIPHERS %}ssl_ciphers {{ this.SSL_CIPHERS }};{% endif %}
+
+    ssl_prefer_server_ciphers {% if this.SSL_PREFER_SERVER_CIPHERS %}on{% else %}off{% endif %};
+    ssl_certificate {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/public.crt;
+    ssl_certificate_key {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/private.key;
+    {% endif %}
+    ssl_session_cache shared:SSL:10m;
 {%- endmacro %}
 
 {% macro _do_setup_proxy_only(this, cert_dir) %}
-    # Disable SSLv2/3 because of SNI, which requires TLS
+    {# # Disable SSLv2/3 because of SNI, which requires TLS #}
     proxy_ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    {#
     # No need to mitigate CRIME attack - SSL compression is off by default
     # Use stronger ciphers, which may mitigate BEAST attacks
+     #}
     proxy_ssl_ciphers {{ssl_ciphers}};
-    proxy_ssl_certificate {{cert_dir}}/server-chained.crt;
-    proxy_ssl_certificate_key {{cert_dir}}/server.key;
+    proxy_ssl_certificate /opt/revsw-config/certs/default/public.crt;
+    proxy_ssl_certificate_key /opt/revsw-config/certs/default/private.key;
     proxy_ssl_verify off;
 {%- endmacro %}
 
 {% macro setup_no_proxy(this) %}
     # Begin SSL setup (no proxy)
-{{  _do_setup_no_proxy(this, site_cert_dir) }}
+    {{ _do_setup_no_proxy(this, site_cert_dir) }}
     # End SSL setup
 {%- endmacro %}
 
 {% macro setup_proxy_only(this) %}
     # Begin SSL setup (proxy-only)
-{{  _do_setup_proxy_only(this, site_cert_dir) }}
+    {{ _do_setup_proxy_only(this, site_cert_dir) }}
     # End SSL setup
 {%- endmacro %}
 
 {% macro setup(this) %}
     # Begin SSL setup
-{{  _do_setup_no_proxy(this, site_cert_dir) }}
-{{  _do_setup_proxy_only(this, site_cert_dir) }}
+    {{ _do_setup_no_proxy(this, site_cert_dir) }}
+    {{ _do_setup_proxy_only(this, site_cert_dir) }}
     # End SSL setup
 {%- endmacro %}

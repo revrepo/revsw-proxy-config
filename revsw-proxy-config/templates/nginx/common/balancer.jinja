@@ -1,37 +1,38 @@
 {% macro balancer_name(this, is_https, prefix) -%}
-{{ prefix }}_{{this.SERVER_NAME|underscore_url}}_{{"https" if is_https else "http"}}
+    {{ prefix }}_{{ this.SERVER_NAME|underscore_url }}_{{ "https" if is_https else "http" }}
 {%- endmacro %}
 
 
 {% macro _common_ows_balancer_params(this, is_https) %}
-{%      set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
-{%      set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
+    {% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+    {% set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
+    {#
     # TODO: convert Apache proxy params: {{ proxy_params }}
-
     # TODO: this is Nginx Plus-only, so we have to use ip_hash instead: sticky cookie ROUTEID expires=1h;
+    #}
     ip_hash;
     dynamic_resolve fallback=stale fail_timeout=30s; # must be added AFTER ip_hash
     keepalive 32;   # keep N connections alive
-{%      for ows in origins %}
-{% 			set scheme, hostname, port, path = ows|parse_url %}
-    server {{ hostname + ":" + port|string }} max_fails=0 fail_timeout=0;
-{%      endfor %}
+    {% for ows in origins %}
+        {% set scheme, hostname, port, path = ows|parse_url %}
+        server {{ hostname + ":" + port|string }} max_fails=0 fail_timeout=0;
+    {% endfor %}
 {%- endmacro %}{# _common_ows_balancer_params #}
 
 
 {% macro define_bp_ows_balancer(this, is_https) %}
-{%  if this.BYPASS_CO_LOCATIONS %}
-# Balancer to bypass CO for certain URLs
-upstream {{ balancer_name(this, is_https, "bp_ows") }} {
-{{ 		_common_ows_balancer_params(this, is_https) }}
-}
-{%  endif %}
+    {% if this.BYPASS_CO_LOCATIONS %}
+        {# # Balancer to bypass CO for certain URLs #}
+        upstream {{ balancer_name(this, is_https, "bp_ows") }} {
+        {{ _common_ows_balancer_params(this, is_https) }}
+        }
+    {% endif %}
 {%- endmacro %}{# define_bp_ows_balancer #}
 
 
 {% macro define_co_ows_balancer(this, is_https) %}
-# Origin servers balancer
-upstream {{ balancer_name(this, is_https, "co_ows") }} {
-{{ 		_common_ows_balancer_params(this, is_https) }}
-}
+    {# # Origin servers balancer #}
+    upstream {{ balancer_name(this, is_https, "co_ows") }} {
+    {{ _common_ows_balancer_params(this, is_https) }}
+    }
 {%- endmacro %}{# define_co_ows_balancer #}

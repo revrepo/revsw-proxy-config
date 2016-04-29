@@ -20,7 +20,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 24
+_BP_CONFIG_VERSION = 25
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -279,6 +279,14 @@ class ConfigCommon:
             "acl_rules": []
         }))
 
+    def _patch_ssl_vars(self):
+        self._patch_if_changed_bp_webserver("SSL_ENABLED", self.ui_config["enable_ssl"])
+        self._patch_if_changed_bp_webserver("SSL_PROTOCOLS", self.ui_config["ssl_protocols"])
+        self._patch_if_changed_bp_webserver("SSL_CIPHERS", self.ui_config["ssl_ciphers"])
+        self._patch_if_changed_bp_webserver("SSL_PREFER_SERVER_CIPHERS", self.ui_config["ssl_prefer_server_ciphers"])
+        self._patch_if_changed_bp_webserver("SSL_CERT_ID", self.ui_config["ssl_cert_id"])
+        log.LOGD("Finished vars update in SSL")
+
     def _get_proxied_and_optimized_domains(self, cdn_urls):
         """
         Check the version number and handle appropriately due to change in
@@ -455,6 +463,8 @@ class ConfigCommon:
         self._patch_security_vars()
         log.LOGD("Run patch misc vars")
         self._patch_misc_vars()
+        log.LOGD("Run patch SSL vars")
+        self._patch_ssl_vars()
 
 
 def fatal(msg):
@@ -706,6 +716,8 @@ def add_or_update_domain(domain_name, ui_config, type):
     log.LOGD(u"Start config patch")
     cfg_common.patch_config()
     log.LOGD(u"End config patch")
+
+    log.LOGD(u"Updated JSON is: ", json.dumps(webserver_config_vars))
     #print json.dumps(varnish_config_vars)
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
@@ -878,6 +890,13 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["ENABLE_RUM"] = False
             bp["ORIGIN_REQUEST_HEADERS"] = [],
             bp["ENABLE_QUIC"] = False
+
+        if ver <= 24 < new_ver:
+            bp["SSL_ENABLED"] = True
+            bp["SSL_PROTOCOLS"] = ""
+            bp["SSL_CIPHERS"] = True
+            bp["SSL_PREFER_SERVER_CIPHERS"] = ""
+            bp["SSL_CERT_ID"] = ""
 
         bp["VERSION"] = new_ver
 
@@ -1257,6 +1276,7 @@ def _main():
                 raise AttributeError("Invalid operation '%s'" % _ui_config["operation"])
 
     except Exception as e:
+        print "========================================================================================================"
         log.LOGE(str(e))
         # raise
         sys.exit(-1)
