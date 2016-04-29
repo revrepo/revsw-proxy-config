@@ -182,7 +182,7 @@ if __name__ == "__main__":
         '--file',
         action="store",
         dest="config_vars",
-        help="Specify the configuration file for the template!"
+        help="Specify the configuration file!"
     )
     parser.add_option('-v', 
         '--verbose',
