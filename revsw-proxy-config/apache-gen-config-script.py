@@ -153,7 +153,7 @@ _ignore_cookies_default = [
     r"**"
 ]
 
-_BP_CONFIG_VERSION = 24
+_BP_CONFIG_VERSION = 25
 _CO_CONFIG_VERSION = 15
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -702,7 +702,14 @@ def generate_bp_domain_json(domain):
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "ORIGIN_REQUEST_HEADERS": [], # (BP-92)
-        "ENABLE_QUIC": False
+        "ENABLE_QUIC": False,
+
+        "ENABLE_SSL": True,
+        "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2",
+        "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",
+        "SSL_PREFER_SERVER_CIPHERS": True,
+        "SSL_CERT_ID": "default"
+
     }
 
     f = StringIO()

@@ -661,11 +661,11 @@ class NginxConfig(WebServerConfig):
             search_dirs = [jinja_config_webserver_dir(self.site_name)]
             template_file_no_ext = self._template_file_no_ext()
 
-            _log.LOGD("Loading template")
+            _log.LOGD("Loading template %s" % template_file_no_ext)
             with open("%s.jinja" % template_file_no_ext) as f:
                 template_str = f.read()
 
-            _log.LOGD("Loading vars schema")
+            _log.LOGD("Loading vars schema %s" % template_file_no_ext)
             with open("%s.vars.schema" % template_file_no_ext) as f:
                 schema = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
 

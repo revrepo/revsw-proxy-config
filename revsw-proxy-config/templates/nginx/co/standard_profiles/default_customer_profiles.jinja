@@ -8,16 +8,18 @@
     pagespeed EnableFilters extend_cache;
     pagespeed EnableFilters extend_cache_pdfs;
     pagespeed EnableFilters remove_quotes;
-    # We already use Boomerang, don't need this
+    {# # We already use Boomerang, don't need this #}
     #pagespeed EnableFilters add_instrumentation;
     pagespeed EnableFilters convert_meta_tags;
     pagespeed EnableFilters insert_dns_prefetch;
-
+    {#
     # Allow AJAX loaded resources to be optimized
     # See: https://developers.google.com/speed/pagespeed/module/system#ipro
+    #}
     pagespeed InPlaceResourceOptimization on;
-
+    {#
     # Filters to lower bandwidth usage
+    #}
     pagespeed EnableFilters combine_heads;
     pagespeed EnableFilters elide_attributes;
     pagespeed EnableFilters trim_urls;
@@ -26,10 +28,14 @@
 
 {% macro profile_selection(this) -%}
 {% if this.REV_OPTIMIZATION_LEVEL == "adaptive" -%}
+    {#
     # TODO: implement
+    #}
 {% endif %}
+    {#
     # Always use profile 0 by default
     # TODO: RevProfilesAddSelectionRule 0 1==1
+    #}
 {%- endmacro %}
 
 {% macro _optimize_up_to_level(level) -%}

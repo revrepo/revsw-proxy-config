@@ -389,8 +389,8 @@
 {% macro _common_frontend(this) %}
   #
   # Save client address:
-  # local QUIC proxy requests come from $remote_addr 127.0.0.1 but the QUIC proxy always sets 
-  # X-Forwarded-For header for real end user IP address. 
+  # local QUIC proxy requests come from $remote_addr 127.0.0.1 but the QUIC proxy always sets
+  # X-Forwarded-For header for real end user IP address.
   # Nginx log should use $clientip variable to report "clientip" attribute
   set $clientip $remote_addr;
   if ($http_x_rev_transport = "QUIC") {
