@@ -201,4 +201,4 @@ if __name__ == "__main__":
         args["verbose_debug"] = 0
     
     conf_manager = ConfigSSL(args=args)
-    #conf_manager.refresh_configuration()
+    conf_manager._reload_nginx()
