@@ -551,6 +551,22 @@ server {
 
 {# # Optional customizations before generic BP config #}
 {{ caller(True) }}
+# End optional customizations before generic BP config
+
+{% set extra_domains_http = this.DOMAINS_TO_OPTIMIZE_HTTP if this.ENABLE_JS_SUBSTITUTE else [] %}
+{% set extra_domains_https = this.DOMAINS_TO_OPTIMIZE_HTTPS if this.ENABLE_JS_SUBSTITUTE else [] %}
+
+# HTTP static content servers
+{{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTP, extra_domains_http, "http") }}
+
+{% if not this.ENABLE_HTTPS %}
+  # HTTPS static content servers
+  {{ _common_static_servers(this, this.DOMAINS_TO_PROXY_HTTPS, extra_domains_https, "https") }}
+{% endif %}
+
+{{ _common_proxy_config_step2(this, co_profiles_mod, co_profiles, this.REV_PROFILES_BASE_PORT_HTTP, false) }}
+
+# Optional customizations after generic BP config
 {{ caller(False) }}
 {{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
 {# # End optional customizations after generic BP config #}
