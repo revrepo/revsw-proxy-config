@@ -220,7 +220,7 @@
             "type": "boolean"
         },
 
-        "SSL_ENABLED": {
+        "ENABLE_SSL": {
             "type": "boolean"
         },
         "SSL_PROTOCOLS": {
@@ -284,7 +284,7 @@
         "CUSTOM_WEBSERVER_CO_CODE_AFTER",
         "ENABLE_QUIC",
 
-        "SSL_ENABLED",
+        "ENABLE_SSL",
         "SSL_PROTOCOLS",
         "SSL_CIPHERS",
         "SSL_PREFER_SERVER_CIPHERS",

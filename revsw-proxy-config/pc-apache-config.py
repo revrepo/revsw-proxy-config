@@ -280,11 +280,12 @@ class ConfigCommon:
         }))
 
     def _patch_ssl_vars(self):
-        self._patch_if_changed_bp_webserver("SSL_ENABLED", self.ui_config["enable_ssl"])
-        self._patch_if_changed_bp_webserver("SSL_PROTOCOLS", self.ui_config["ssl_protocols"])
-        self._patch_if_changed_bp_webserver("SSL_CIPHERS", self.ui_config["ssl_ciphers"])
-        self._patch_if_changed_bp_webserver("SSL_PREFER_SERVER_CIPHERS", self.ui_config["ssl_prefer_server_ciphers"])
-        self._patch_if_changed_bp_webserver("SSL_CERT_ID", self.ui_config["ssl_cert_id"])
+        if "enable_ssl" in self.ui_config:
+            self._patch_if_changed_bp_webserver("ENABLE_SSL", self.ui_config["enable_ssl"], False)
+            self._patch_if_changed_bp_webserver("SSL_PROTOCOLS", self.ui_config["ssl_protocols"], "")
+            self._patch_if_changed_bp_webserver("SSL_CIPHERS", self.ui_config["ssl_ciphers"], "")
+            self._patch_if_changed_bp_webserver("SSL_PREFER_SERVER_CIPHERS", self.ui_config["ssl_prefer_server_ciphers"], True)
+            self._patch_if_changed_bp_webserver("SSL_CERT_ID", self.ui_config["ssl_cert_id"], "")
         log.LOGD("Finished vars update in SSL")
 
     def _get_proxied_and_optimized_domains(self, cdn_urls):
@@ -892,10 +893,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["ENABLE_QUIC"] = False
 
         if ver <= 24 < new_ver:
-            bp["SSL_ENABLED"] = True
-            bp["SSL_PROTOCOLS"] = ""
+            bp["ENABLE_SSL"] = True
+            bp["SSL_PROTOCOLS"] = "TLSv1 TLSv1.1 TLSv1.2"
             bp["SSL_CIPHERS"] = True
-            bp["SSL_PREFER_SERVER_CIPHERS"] = ""
+            bp["SSL_PREFER_SERVER_CIPHERS"] = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
             bp["SSL_CERT_ID"] = ""
 
         bp["VERSION"] = new_ver
