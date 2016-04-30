@@ -141,8 +141,10 @@ class ConfigSSL:
         with open(files_patch + self.conf['info'], 'w+') as f: f.write(json.dumps(self.config_vars))
 
     def _create_symlink(self):
-        os.unlink(self.conf["location"] + "default")
-        os.symlink(self.conf["location"] + self.config_vars["id"] + "/", self.conf["location"] + "default")
+        files_patch = self.conf["location"] + "default"
+        if os.path.exists(files_patch):
+            os.unlink(files_patch)
+        os.symlink(self.conf["location"] + self.config_vars["id"] + "/", files_patch)
         self.log.LOGI("Created default symlink")
 
     def _remove_certs(self):
