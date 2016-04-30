@@ -8,6 +8,7 @@ import subprocess
 import sys
 from revsw.logger import RevSysLogger
 
+
 def run_cmd(cmd, logger, help=None, silent=False):
     """
     Run a shell command.
@@ -39,26 +40,32 @@ def run_cmd(cmd, logger, help=None, silent=False):
             logger.LOGE(errmsg)
         raise OSError(errmsg)
 
-class ConfigSSL:
 
+class ConfigSSL:
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.conf = {}
         self.config_vars = {}
         self.rollbacks = []
-        
+        self.status = False
+
         self._set_default_values()
         self._interpret_arguments(args)
-        self._read_config_files()
-        self._backup_certs()
-        if self.config_vars['operation'] == "update":
-            self._create_certs()
-        elif self.config_vars['operation'] == "delete":
-            self._remove_certs()
 
-        print self.conf
-        print self.config_vars
+        if self._read_config_files() != 0:
+            self.log.LOGE("Json configuration file has a problem!")
+        else:
+            self._backup_certs()
+            if self.config_vars['operation'] == "update":
+                self._create_certs()
+                if self.config_vars['cert_type'] == "shared":
+                    self._create_symlink()
+                self.status = True
+            elif self.config_vars['operation'] == "delete":
+                self.status = self._remove_certs()
 
+        self.log.LOGD("Config values: " + json.dumps(self.conf))
+        self.log.LOGD("Config vars: " + json.dumps(self.config_vars))
 
     def _set_default_values(self):
 
@@ -70,7 +77,6 @@ class ConfigSSL:
         self.conf['key'] = "private.key"
         self.conf['passphrase'] = "pass.txt"
         self.conf['info'] = "info.txt"
-
 
     def _interpret_arguments(self, args):
         # override local arguments if a value was provided from outside
@@ -87,7 +93,7 @@ class ConfigSSL:
          - 3 - unknown error case
         """
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
-        
+
         conf_full_path = self.conf["config_vars"]
         self.log.LOGD("Reading file from: " + conf_full_path)
         try:
@@ -95,13 +101,14 @@ class ConfigSSL:
                 try:
                     self.config_vars = json.load(f)
                     return 0
-                except:
+                except ValueError as e:
                     self.log.LOGE("Bad JSON format for file " + conf_full_path)
+                    self.log.LOGE(e)
                     return 1
         except:
             self.log.LOGE("Can't find file " + conf_full_path)
             return 2
-        
+
         return 3
 
     def _backup_certs(self):
@@ -109,9 +116,11 @@ class ConfigSSL:
         # make backup for this file
         try:
             self.run(
-                lambda: run_cmd("rm -Rf %srevsw-ssl-cert.tar && tar cf %srevsw-ssl-cert.tar %s" % (self.conf['tmp_location'], self.conf['tmp_location'], self.conf['location']),
-                                self.log, "Backing up existing config"),
-                lambda: run_cmd("rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (self.conf['location'], self.conf['tmp_location']), self.log, "Restoring previous config"))
+                lambda: run_cmd("rm -Rf %srevsw-ssl-cert.tar && tar cf %srevsw-ssl-cert.tar %s" % (
+                self.conf['tmp_location'], self.conf['tmp_location'], self.conf['location']),
+                                self.log, "Backing up existing certificates"),
+                lambda: run_cmd("rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (
+                self.conf['location'], self.conf['tmp_location']), self.log, "Restoring certificates directory"))
         except:
             self.log.LOGE("An error appeared while trying to backup the original files")
             raise
@@ -126,22 +135,33 @@ class ConfigSSL:
 
         with open(files_patch + self.conf['cert'], 'w+') as f: f.write(self.config_vars["public_ssl_cert"])
         with open(files_patch + self.conf['key'], 'w+') as f: f.write(self.config_vars["private_ssl_key"])
-        with open(files_patch + self.conf['passphrase'], 'w+') as f: f.write(self.config_vars["private_ssl_key_passphrase"])
+        with open(files_patch + self.conf['passphrase'], 'w+') as f: f.write(
+            self.config_vars["private_ssl_key_passphrase"])
 
         with open(files_patch + self.conf['info'], 'w+') as f: f.write(json.dumps(self.config_vars))
+
+    def _create_symlink(self):
+        os.unlink(self.conf["location"] + "default")
+        os.symlink(self.conf["location"] + self.config_vars["id"] + "/", self.conf["location"] + "default")
+        self.log.LOGI("Created default symlink")
 
     def _remove_certs(self):
         self.log.LOGI("Starting removing process " + sys._getframe().f_code.co_name)
         # remove the active configuration file
 
         files_patch = self.conf["location"] + self.config_vars["id"] + "/"
-        try:
-            if os.path.exists(files_patch):
-                # remove the directory with files
-                shutil.rmtree(files_patch)
-        except:
-            self.log.LOGE("An error appeared while removing the configuration file " + files_patch)
-            raise
+        if os.path.isdir(files_patch):
+            try:
+                if os.path.exists(files_patch):
+                    # remove the directory with files
+                    shutil.rmtree(files_patch)
+                    return True
+            except:
+                self.log.LOGE("An error appeared while removing the certificate file " + files_patch)
+                return False
+        else:
+            self.log.LOGI("Directory not found")
+            return False
 
     def _reload_nginx(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
@@ -152,6 +172,9 @@ class ConfigSSL:
 
         if p.returncode != 0:
             self.log.LOGE("Nginx configuration has a problem!")
+            run_cmd(
+                "rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (self.conf['location'], self.conf['tmp_location']),
+                self.log, "Restoring certificates directory")
             return p.returncode
 
         # nginx reload configuration if there are no errors
@@ -178,27 +201,28 @@ class ConfigSSL:
 if __name__ == "__main__":
     parser = optparse.OptionParser()
 
-    parser.add_option('-f', 
-        '--file',
-        action="store",
-        dest="config_vars",
-        help="Specify the configuration file!"
-    )
-    parser.add_option('-v', 
-        '--verbose',
-        action="store_true",
-        dest="verbose_debug",
-        help="Specify the verbose flag to print more background info!"
-    )
+    parser.add_option('-f',
+                      '--file',
+                      action="store",
+                      dest="config_vars",
+                      help="Specify the configuration file!"
+                      )
+    parser.add_option('-v',
+                      '--verbose',
+                      action="store_true",
+                      dest="verbose_debug",
+                      help="Specify the verbose flag to print more background info!"
+                      )
     options, args = parser.parse_args()
-    
-    args = { }
+
+    args = {}
     if options.config_vars:
         args["config_vars"] = options.config_vars
     if options.verbose_debug:
         args["verbose_debug"] = 1
     else:
         args["verbose_debug"] = 0
-    
+
     conf_manager = ConfigSSL(args=args)
-    conf_manager._reload_nginx()
+    if conf_manager.status:
+        conf_manager._reload_nginx()
