@@ -320,7 +320,7 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
     ssl_ws = (char *)getenv ("SSLWS");
     if (ssl_ws) {
         use_ssl = *ssl_ws - '0';
-    }
+    } // NOTE: Igor: Currently ignored: always use SSL.
 
     info.ssl_cert_filepath = NULL;
     info.ssl_private_key_filepath = NULL;
@@ -339,22 +339,29 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
     context2 = libwebsocket_create_context (&info2);
 
 
-    if (context == NULL || context2 == NULL) {
-        PCMC_LOG_ERROR ("%s: libwebsocket init failed", func_name);
+    if (context == NULL) {
+        PCMC_LOG_ERROR ("%s: libwebsocket init (#1) failed", func_name);
+    }
+    if (context2 == NULL) {
+        PCMC_LOG_ERROR ("%s: libwebsocket init (#2) failed", func_name);
     }
 
 #ifdef DEBUG_COL_BRIDGE
     PCMC_LOG_DEBUG ("%s: starting config listner...", func_name);
 #endif
-
+    if (context2 == NULL) {
+        while (true) {
+            libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        }
+    } else
     while (true) {
         libwebsocket_service (context, 0);
         libwebsocket_service (context2, 0);
     }
 
     libwebsocket_context_destroy (context);
-    libwebsocket_context_destroy (context2);
+    if (context2 != NULL)
+        libwebsocket_context_destroy (context2);
 
     return (arg);
 }
-
