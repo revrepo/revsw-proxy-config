@@ -11,19 +11,18 @@
     {% if this.DOMAINS_TO_PROXY_HTTP %}
         {% for host in this.DOMAINS_TO_PROXY_HTTP %}
             {% if has_pagespeed %}
-                {# # TODO: ModPagespeedMapProxyDomain {{ proto }}://{{ this.SERVER_NAME }}/rev-ps-http-{{ host }} http:// #}
-                {{ host }}
+                {# # TODO: ModPagespeedMapProxyDomain {{ proto }}://{{ this.SERVER_NAME }}/rev-ps-http-{{ host }} http://{{ host }} #}
             {% endif %}
             {# # Make sure absolute URLs pointing to the server go through us instead #}
             subs_filter ([\"'])(http:)?//{{ host }} $1/rev-third-party-http/{{ host }} r;
+
         {% endfor %}
     {% endif %}
 
     {% if this.DOMAINS_TO_PROXY_HTTPS %}
         {% for host in this.DOMAINS_TO_PROXY_HTTPS %}
             {% if has_pagespeed %}
-                {# # TODO: ModPagespeedMapProxyDomain {{ https_proto }}://{{ this.SERVER_NAME }}/rev-ps-https-{{ host }} #}
-                https://{{ host }}
+                {# # TODO: ModPagespeedMapProxyDomain {{ https_proto }}://{{ this.SERVER_NAME }}/rev-ps-https-{{ host }} https://{{ host }} #}
             {% endif %}
             {# # Make sure absolute URLs pointing to the server go through us instead #}
             subs_filter ([\"'])(https:)?//{{ host }} $1{{ https_url_prefix }}/rev-third-party-https/{{ host }} r;
