@@ -895,8 +895,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 24 < new_ver:
             bp["ENABLE_SSL"] = True
             bp["SSL_PROTOCOLS"] = "TLSv1 TLSv1.1 TLSv1.2"
-            bp["SSL_CIPHERS"] = True
-            bp["SSL_PREFER_SERVER_CIPHERS"] = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
+            bp["SSL_CIPHERS"] = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
+            bp["SSL_PREFER_SERVER_CIPHERS"] = True
             bp["SSL_CERT_ID"] = ""
 
         bp["VERSION"] = new_ver
