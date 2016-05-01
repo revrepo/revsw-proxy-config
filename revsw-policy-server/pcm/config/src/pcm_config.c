@@ -371,6 +371,7 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
     while (true) {
         libwebsocket_service (context, 0);
         libwebsocket_service (context2, 0);
+        usleep(100000);
     }
 
     libwebsocket_context_destroy (context);
