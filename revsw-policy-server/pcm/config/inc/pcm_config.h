@@ -27,7 +27,6 @@
 #define PCM_CONFIG_FILE_BUFLEN   256
 #define PCM_CONFIG_JSON_BUFLEN   256
 #define PCM_CONFIG_LISTNER_PORT 8000
-#define PCM_CONFIG_LISTNER_PORT_SSL 8001
 
 /* globals */
 rev_thread_mutex_t pcm_config_mutex;
