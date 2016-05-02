@@ -336,6 +336,10 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
         use_ssl = *ssl_ws - '0';
     }
 
+    info.ssl_cert_filepath = NULL;
+    info.ssl_private_key_filepath = NULL;
+
+
     if (use_ssl) {
 #ifdef DEBUG_COL_BRIDGE
         PCMC_LOG_DEBUG ("%s: pcmc using ssl", func_name);
