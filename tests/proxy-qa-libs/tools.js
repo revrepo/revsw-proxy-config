@@ -454,7 +454,6 @@ module.exports = {
     if (ciphers){
       options.ciphers = ciphers;
     }
-    console.log(options);
     return new Promise(function (response, reject) {
       var client = tls.connect(443, server, options, function (res) {
         client.on('close', function () {});

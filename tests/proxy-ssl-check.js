@@ -18,7 +18,7 @@ describe('ssl test', function () {
   this.timeout(240000);
 
 
-  it('should check step1 domain', function (done) {
+  it('should check certificate organithation and cipher', function (done) {
     tools.getTLSHostRequest(testHost, step1domain).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -27,7 +27,6 @@ describe('ssl test', function () {
       var cipher = res.getCipher();
       certificate.subject.O.should.equal('Internet Widgits Pty Ltd');
       cipher.name.should.equal('ECDHE-RSA-AES128-SHA');
-      console.log(certificate.subject.O);
       //console.log(certificate);
       //console.log(cipher);
       done();
@@ -37,7 +36,7 @@ describe('ssl test', function () {
   });
 
 
-  it('should check step2 domain', function (done) {
+  it('should check that organithation and cipher changed', function (done) {
     tools.getTLSHostRequest(testHost, step2domain).then(function (res, rej) {
       if (rej) {
         throw rej;
@@ -55,7 +54,7 @@ describe('ssl test', function () {
   });
 
 
-  it('should check step3 domain', function (done) {
+  it('should check that cipher can be changed from client', function (done) {
     tools.getTLSHostRequest(testHost, step3domain, 'AES128-SHA').then(function (res, rej) {
       if (rej) {
         throw rej;
