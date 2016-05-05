@@ -643,7 +643,7 @@
     },
     {
       "command": "group_create",
-      "description": "should create domains for ssl tests with ssl3 and specific ssl_ciphers",
+      "description": "should create domains for SSL tests with SSLv3 and specific ssl_ciphers",
       "name": "ssl-checker",
       "step": "step-1",
       "origin": "httpbin_org.revsw.net",
@@ -657,7 +657,7 @@
       }
     },{
       "command": "group_create",
-      "description": "should create domains for ssl tests without ssl3",
+      "description": "should create domains for SSL tests without SSLv3",
       "name": "ssl-checker",
       "step": "step-2",
       "origin": "httpbin_org.revsw.net",
@@ -668,7 +668,7 @@
       }
     },{
       "command": "group_create",
-      "description": "should create domains for ssl tests without ssl_cert_id",
+      "description": "should create domains for SSL tests without ssl_cert_id",
       "name": "ssl-checker",
       "step": "step-3",
       "origin": "httpbin_org.revsw.net",
