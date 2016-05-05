@@ -1,5 +1,6 @@
 'use strict';
-
+var https = require('https');
+var tls = require('tls');
 var api = require('./api.js');
 var util = require('./util.js');
 var Promise = require('bluebird');
@@ -12,7 +13,7 @@ var debug = false,
   loops = config.get('waitCount');
 
 function showDebugError(message) {
-  if(message){
+  if (message) {
     console.log("\x1b[36m");
     console.log("================ Debug ================");
     console.log(message.method);
@@ -207,7 +208,7 @@ module.exports = {
             }
             responseJson = res.body;
             if (debug) {
-              console.log('          Iteraction ' + n + ', response = ', responseJson.staging_status, ' / ' , responseJson.global_status);
+              console.log('          Iteraction ' + n + ', response = ', responseJson.staging_status, ' / ', responseJson.global_status);
             }
             if (responseJson.staging_status === 'Published' && responseJson.global_status === 'Published') {
               publishFlag = true;
@@ -321,7 +322,7 @@ module.exports = {
       api.getUsersMyself()
         .then(function (res) {
           AccountId = res.body.companyId[0];
-          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName +'\u001B[0m');
+          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
             'account_id': AccountId,
@@ -355,7 +356,7 @@ module.exports = {
       api.getUsersMyself()
         .then(function (res) {
           AccountId = res.body.companyId[0];
-          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain ' + newDomainName +'\u001B[0m');
+          console.log('    \u001b[33m♦\u001b[36m create new configuration for domain ' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
             'account_id': AccountId,
@@ -368,7 +369,7 @@ module.exports = {
         })
         .then(function (res) {
           domainConfigId = res.body.object_id;
-          console.log('    \u001b[33m♦\u001b[36m return domain config for domain ' + newDomainName +'\u001B[0m');
+          console.log('    \u001b[33m♦\u001b[36m return domain config for domain ' + newDomainName + '\u001B[0m');
           return api.getDomainConfigsById(domainConfigId);
         })
         .then(function (res) {
@@ -412,6 +413,61 @@ module.exports = {
         return response(true);
       }).catch(function (err) {
         return reject(util.getError(err));
+      });
+    });
+  },
+
+  // Get content ower SSL by url and get request with special Host
+  getSSLHostRequest: function (url, get, set, expect) {
+    expect = expect || 200;
+    var options = {
+      host: url,
+      port: 443,
+      path: get,
+      method: 'GET',
+      headers: {'Host': set}
+    };
+    return new Promise(function (response, reject) {
+      var req = https.get(options, function (res) {
+        var buf = '';
+        res.should.have.property('statusCode', expect);
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+          buf += chunk
+        });
+        res.on('error', function (err) {
+          reject(err);
+        });
+        res.on('end', function () {
+          res.data = buf
+          console.log(res.data);
+          return response(res);
+        });
+      });
+    });
+  },
+
+  // Get content ower SSL by url and get request with special Host
+  getTLSHostRequest: function (server, host, ciphers , protocol) {
+    protocol = protocol || 'TLSv1_method';
+    var options = {'servername': host, 'secureProtocol': protocol, headers: {'Host': host}};
+    if (ciphers){
+      options.ciphers = ciphers;
+    }
+    console.log(options);
+    return new Promise(function (response, reject) {
+      var client = tls.connect(443, server, options, function (res) {
+        client.on('close', function () {});
+        process.stdin.pipe(client);
+        //process.stdin.resume();
+        client.write('GET /\r\n');
+        client.write('\r\n');
+        client.setEncoding('utf8');
+        client.on('error', function (err) {
+          return reject(err);
+        });
+        client.on('data', function () {});
+        return response(client);
       });
     });
   }
