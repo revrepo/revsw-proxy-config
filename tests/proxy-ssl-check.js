@@ -13,7 +13,7 @@ var testHost = config.get('test_proxy_host'),
 
 tools.debugMode(false);
 
-describe('ssl test', function () {
+describe('SSL test', function () {
 
   this.timeout(240000);
 
@@ -36,7 +36,7 @@ describe('ssl test', function () {
   });
 
 
-  it('should check that organithation and cipher changed', function (done) {
+  it('should check that organization and cipher changed', function (done) {
     tools.getTLSHostRequest(testHost, step2domain).then(function (res, rej) {
       if (rej) {
         throw rej;
