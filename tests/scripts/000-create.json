@@ -640,6 +640,46 @@
           ]
         }
       }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domains for ssl tests with ssl3 and specific ssl_ciphers",
+      "name": "ssl-checker",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "enable_ssl": true,
+        "ssl_conf_profile": "",
+        "ssl_cert_id": "57268d245ca828141841e7e6",
+        "ssl_protocols": "SSLv3 TLSv1 TLSv1.1 TLSv1.2",
+        "ssl_ciphers": "ECDH+AES128",
+        "ssl_prefer_server_ciphers": true
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domains for ssl tests without ssl3",
+      "name": "ssl-checker",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "ssl_conf_profile": "571e9f7591dcb9f97a0c4841",
+        "ssl_cert_id": "",
+        "ssl_prefer_server_ciphers": true
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domains for ssl tests without ssl_cert_id",
+      "name": "ssl-checker",
+      "step": "step-3",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "enable_ssl": true,
+        "ssl_conf_profile": "",
+        "ssl_cert_id": "",
+        "ssl_protocols": "",
+        "ssl_ciphers": "",
+        "ssl_prefer_server_ciphers": false
+      }
     }
   ]
 }
