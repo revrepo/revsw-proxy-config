@@ -71,6 +71,7 @@ mkdir -p $FOLDERNAME/$DST/bin
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/certs
+mkdir -p $FOLDERNAME/$DST/pcm-config-certs
 mkdir -p $FOLDERNAME/$DST/log
 mkdir -p $FOLDERNAME/$DST/maxmind
 mkdir -p $FOLDERNAME/$DST/apache/generic-site
@@ -101,6 +102,7 @@ cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $FOLDERNAME/etc/
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
+cp $WORKSPACE/revsw-policy-server/certs/server.* $FOLDERNAME/$DST/pcm-config-certs/
 
 # Nginx configuration
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
