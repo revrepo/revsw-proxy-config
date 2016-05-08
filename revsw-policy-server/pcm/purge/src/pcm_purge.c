@@ -7,7 +7,7 @@
  *
  * Author: Sidde Gowda
  */
- 
+
 /* public includes */
 
 /* pcm includes */
@@ -364,6 +364,73 @@ pcm_purge_thread_main (void *arg UNUSED_PTR)
         info.ssl_cert_filepath = NULL;
         info.ssl_private_key_filepath = NULL;
     }
+
+    /* redirect logs to syslog, check /var/log */
+    lws_set_log_level (debug_level, lwsl_emit_syslog);
+
+    /* create libwebsocket context for this server */
+    context = libwebsocket_create_context (&info);
+
+    if (context == NULL) {
+        PCMP_LOG_ERROR ("%s: libwebsocket init failed", func_name);
+    }
+
+#ifdef DEBUG_COL_BRIDGE
+    PCMP_LOG_DEBUG ("%s: starting purge listner...", func_name);
+#endif
+
+    while (true) {
+        libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+    }
+
+    libwebsocket_context_destroy (context);
+
+    return (arg);
+}
+
+
+/*
+ * pcm_purge_thread_main_essl
+ */
+void *
+pcm_purge_thread_main_essl (void *arg UNUSED_PTR)
+{
+    struct libwebsocket_context      *context;
+    const char                       *iface = NULL;
+    char                             *debug = NULL;
+    struct lws_context_creation_info  info;
+    unsigned int                      opts = 0;
+    int                               debug_level = 6;
+
+    memset(&info, 0, sizeof (info));
+    memset(&purge_stats, 0, sizeof (purge_stats));
+
+    /* assign the values to info */
+    info.port = PCM_PURGE_LISTNER_PORT_SSL;
+    info.iface = iface;
+    info.protocols = protocols;
+#ifndef LWS_NO_EXTENSIONS
+    info.extensions = libwebsocket_get_internal_extensions ();
+#endif
+    info.gid = -1;
+    info.uid = -1;
+    info.options = opts;
+
+    debug = (char *)getenv ("PURGE_DEBUG");
+    if (debug) {
+        purge_stats.pps_debug = *debug - '0';
+    }
+
+    purge_stats.pps_debug = 1;
+
+    if (purge_stats.pps_debug) {
+#ifdef DEBUG_COL_BRIDGE
+        PCMP_LOG_DEBUG ("%s: enabled purge debug", func_name);
+#endif
+    }
+
+    info.ssl_cert_filepath = PCM_PURGE_LWS_SSL_CERT;
+    info.ssl_private_key_filepath = PCM_PURGE_LWS_SSL_KEY;
 
     /* redirect logs to syslog, check /var/log */
     lws_set_log_level (debug_level, lwsl_emit_syslog);
