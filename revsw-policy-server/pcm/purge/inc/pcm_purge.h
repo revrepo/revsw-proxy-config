@@ -29,6 +29,7 @@
 #define PCM_PURGE_JSON_BUFLEN         4096
 #define PCM_PURGE_CUR_VER                1
 #define PCM_PURGE_LISTNER_PORT        8002
+#define PCM_PURGE_LISTNER_PORT_SSL    8004
 
 /* globals */
 rev_thread_mutex_t pcm_purge_mutex;
@@ -54,6 +55,8 @@ typedef struct pcm_purge_stats_s {
 /* function prototypes */
 extern void *
 pcm_purge_thread_main (void *arg);
+extern void *
+pcm_purge_thread_main_essl (void *arg);
 
 #endif /* PCM_PURGE_H */
 

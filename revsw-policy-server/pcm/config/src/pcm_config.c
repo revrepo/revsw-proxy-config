@@ -320,7 +320,7 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
 
     memset(&info, 0, sizeof (info));
 
-    /* assiagn the values to info */
+    /* assign the values to info */
     info.port = PCM_CONFIG_LISTNER_PORT;
     info.iface = iface;
     info.protocols = protocols;
@@ -367,11 +367,71 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
 #ifdef DEBUG_COL_BRIDGE
     PCMC_LOG_DEBUG ("%s: starting config listner...", func_name);
 #endif
-
+    int n = 0;
     while (true) {
-        libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        n = libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        if (n != 0) {
+            PCMC_LOG_DEBUG("%s: config listner returned error: %d, skipping", func_name, n);
+        }
+    }
+    PCMC_LOG_DEBUG ("%s: stopping config listner...", func_name);
+
+    libwebsocket_context_destroy (context);
+    return (arg);
+}
+
+
+/*
+ * pcm_config_thread_main_essl
+ */
+void *
+pcm_config_thread_main_essl (void *arg UNUSED_PTR)
+{
+    struct libwebsocket_context      *context;
+    const char                       *iface = NULL;
+    struct lws_context_creation_info  info;
+    unsigned int                      opts = 0;
+    int                               debug_level = 6;
+
+    memset(&info, 0, sizeof (info));
+
+    /* assign the values to info */
+    info.port = PCM_CONFIG_LISTNER_PORT;
+    info.iface = iface;
+    info.protocols = protocols;
+#ifndef LWS_NO_EXTENSIONS
+    info.extensions = libwebsocket_get_internal_extensions ();
+#endif
+    info.gid = -1;
+    info.uid = -1;
+    info.options = opts;
+
+    info.ssl_cert_filepath = PCM_CONFIG_LWS_SSL_CERT;
+    info.ssl_private_key_filepath = PCM_CONFIG_LWS_SSL_KEY;
+    info.port = PCM_CONFIG_LISTNER_PORT_SSL;
+
+    /* redirect logs to syslog, check /var/log */
+    lws_set_log_level (debug_level, lwsl_emit_syslog);
+
+    /* create libwebsocket context for this server */
+    context = libwebsocket_create_context (&info);
+
+    if (context == NULL) {
+        PCMC_LOG_ERROR ("%s: libwebsocket init failed", func_name);
+	return;
     }
 
+#ifdef DEBUG_COL_BRIDGE
+    PCMC_LOG_DEBUG ("%s: starting config listner...", func_name);
+#endif
+    int n = 0;
+    while (true) {
+        libwebsocket_service (context, 0);
+        n = libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        if (n != 0) {
+            PCMC_LOG_DEBUG("%s: config listner returned error: %d, skipping", func_name, n);
+        }
+    }
     libwebsocket_context_destroy (context);
 
     return (arg);
