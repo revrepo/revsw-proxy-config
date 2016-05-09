@@ -49,8 +49,6 @@ typedef struct pcm_config_process_data_s {
 /* function prototypes */
 extern void *
 pcm_config_thread_main (void *arg);
-extern void *
-pcm_config_thread_main_essl (void *arg);
 
 #endif /* PCM_CONFIG_H */
 
