@@ -426,7 +426,6 @@ pcm_config_thread_main_essl (void *arg UNUSED_PTR)
 #endif
     int n = 0;
     while (true) {
-        libwebsocket_service (context, 0);
         n = libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
         if (n != 0) {
             PCMC_LOG_DEBUG("%s: config listner returned error: %d, skipping", func_name, n);
@@ -436,4 +435,3 @@ pcm_config_thread_main_essl (void *arg UNUSED_PTR)
 
     return (arg);
 }
-
