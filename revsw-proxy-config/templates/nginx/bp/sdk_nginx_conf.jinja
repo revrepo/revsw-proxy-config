@@ -15,8 +15,8 @@ server {
 
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
-    ssl_certificate /opt/revsw-config/apache/generic-site/certs/server-chained.crt;
-    ssl_certificate_key /opt/revsw-config/apache/generic-site/certs/server.key;
+    ssl_certificate /opt/revsw-config/certs/default/public.crt;
+    ssl_certificate_key /opt/revsw-config/certs/default/private.key;
     # display all the keys
 
     {% for conf in configs %}
