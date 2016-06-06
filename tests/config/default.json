@@ -5,7 +5,7 @@
   "test_proxy_ip": "192.168.4.50",
   "test_proxy_host": "testsjc20-bp01.revsw.net",
   "test_group": "55a56fa6476c10c329a90741",
-  "test_domain_start": "delete-test-API-QA-name-",
+  "test_domain_start": "delete-test-api-qa-name-",
   "test_domain_end": ".revsw.net",
   "not_existing_domain": "thisdomainshouldnotexistinproxyconfiguration.com",
   "qaUserWithAdminPerm": "api_qa_user_with_admin_perm@revsw.com",

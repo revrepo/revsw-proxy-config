@@ -58,7 +58,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
     });
   });
 
-  it('should get cds domain config', function (done) {
+  it('should get CDS domain config', function (done) {
     cds.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
@@ -88,7 +88,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
       });
   });
 
-  it('should set headers using cds', function (done) {
+  it('should set headers using CDS', function (done) {
     cdsConfig.bp_apache_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-BP $remote_addr;\n# END NGINX CONFIG';
     cdsConfig.bp_apache_fe_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-BP2  $remote_addr;\n# END NGINX CONFIG';
     cdsConfig.co_apache_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-CO  $remote_addr;\n# END NGINX CONFIG';

@@ -7,9 +7,9 @@ var tools = require('./proxy-qa-libs/tools.js');
 var util = require('./proxy-qa-libs/util.js');
 
 var testHost = config.get('test_proxy_host'),
-  step1domain = "delete-test-API-QA-name-ssl-checker-step-1.revsw.net",
-  step2domain = "delete-test-API-QA-name-ssl-checker-step-2.revsw.net",
-  step3domain = "delete-test-API-QA-name-ssl-checker-step-3.revsw.net";
+  step1domain = "delete-test-api-qa-name-ssl-checker-step-1.revsw.net",
+  step2domain = "delete-test-api-qa-name-ssl-checker-step-2.revsw.net",
+  step3domain = "delete-test-api-qa-name-ssl-checker-step-3.revsw.net";
 
 tools.debugMode(false);
 
