@@ -75,6 +75,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
         delete cdsConfig.updated_at;
         delete cdsConfig.created_by;
         delete cdsConfig.deleted;
+        delete cdsConfig.deleted_at;
         delete cdsConfig.domain_name;
         delete cdsConfig.origin_server_location_id;
         delete cdsConfig.last_published_domain_version;
