@@ -1271,6 +1271,8 @@ def _main():
                 add_or_update_domain(domain_name, _ui_config, "config")
             elif _ui_config["operation"] == "update-batch":
                 add_or_update_domain(domain_name, _ui_config, "batch")
+            elif _ui_config["operation"] == "update-force":
+                add_or_update_domain(domain_name, _ui_config, "force")
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
             else:

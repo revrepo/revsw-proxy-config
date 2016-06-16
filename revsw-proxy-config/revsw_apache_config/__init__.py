@@ -1046,7 +1046,7 @@ def configure_all(config):
                 transaction.varnish_reload_cmd = None
             transaction.webserver_reload = False
 
-        elif action == "config":
+        elif action == "config" or action == "force":
             _log.LOGD("Configuring site '%s'" % site)
 
             templates = command.get("templates")
@@ -1075,7 +1075,7 @@ def configure_all(config):
                     _log.LOGD("No changes in Varnish configuration")
 
             config_changed_vars = config["config_changed"]
-            if config_changed_vars:
+            if config_changed_vars or action == "force":
                 transaction.webserver_reload = True
             else:
                 transaction.webserver_reload = False
