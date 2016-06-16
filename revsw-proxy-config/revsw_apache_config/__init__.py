@@ -1046,7 +1046,7 @@ def configure_all(config):
                 transaction.varnish_reload_cmd = None
             transaction.webserver_reload = False
 
-        elif action == "config":
+        elif action == "config" or action == "force":
             _log.LOGD("Configuring site '%s'" % site)
 
             templates = command.get("templates")
@@ -1079,6 +1079,11 @@ def configure_all(config):
                 transaction.webserver_reload = True
             else:
                 transaction.webserver_reload = False
+
+            if action == "force":  # Forces nginx and varnish to reload
+                transaction.webserver_reload = True
+                transaction.schedule_varnish_reload()
+
             _log.LOGD("Config changed: ", transaction.webserver_reload)
 
         elif action == "certs":
