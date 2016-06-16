@@ -1075,10 +1075,15 @@ def configure_all(config):
                     _log.LOGD("No changes in Varnish configuration")
 
             config_changed_vars = config["config_changed"]
-            if config_changed_vars or action == "force":
+            if config_changed_vars:
                 transaction.webserver_reload = True
             else:
                 transaction.webserver_reload = False
+
+            if action == "force":  # Forces nginx and varnish to reload
+                transaction.webserver_reload = True
+                transaction.schedule_varnish_reload()
+
             _log.LOGD("Config changed: ", transaction.webserver_reload)
 
         elif action == "certs":
