@@ -321,7 +321,7 @@ module.exports = {
 
       api.getUsersMyself()
         .then(function (res) {
-          AccountId = res.body.companyId[0];
+          AccountId = res.body.account_id;
           console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
@@ -355,7 +355,7 @@ module.exports = {
 
       api.getUsersMyself()
         .then(function (res) {
-          AccountId = res.body.companyId[0];
+          AccountId = res.body.account_id;
           console.log('    \u001b[33m♦\u001b[36m create new configuration for domain ' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,

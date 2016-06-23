@@ -30,7 +30,7 @@ describe('Proxy loop detect checker', function () {
       if (rej) {
         throw rej;
       }
-      AccountId = res.body.companyId[0];
+      AccountId = res.body.account_id;
       done();
     }).catch(function (err) {
       done(util.getError(err));
