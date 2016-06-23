@@ -343,7 +343,7 @@
   {% if this.ENABLE_JS_SUBSTITUTE %}
     {# # Rev JS substitute and accompanying script #}
     RevJSSubstituteEnabled on; # turn on for whole context
-    RevJSDoNotCompress on;
+    RevJSDoNotCompress off;
     location /rev-js/ {
     	RevJSSubstituteEnabled off;
       root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
