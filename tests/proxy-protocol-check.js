@@ -125,6 +125,8 @@ describe('Proxy origin secure protocol checker with default configuration', func
         domainConfig = responseJson;
         delete domainConfig.cname;
         delete domainConfig.domain_name;
+        delete domainConfig.published_domain_version;
+        delete domainConfig.last_published_domain_version;
         done();
       }).catch(function (err) {
       done(util.getError(err));
