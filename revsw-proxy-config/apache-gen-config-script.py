@@ -153,8 +153,8 @@ _ignore_cookies_default = [
     r"**"
 ]
 
-_BP_CONFIG_VERSION = 25
-_CO_CONFIG_VERSION = 15
+_BP_CONFIG_VERSION = 26
+_CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
 
@@ -708,8 +708,8 @@ def generate_bp_domain_json(domain):
         "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2",
         "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",
         "SSL_PREFER_SERVER_CIPHERS": True,
-        "SSL_CERT_ID": "default"
-
+        "SSL_CERT_ID": "default",
+        "LUA_LOCATIONS": []
     }
 
     f = StringIO()
@@ -861,7 +861,8 @@ def generate_bp_ui_config_json(domain):
         "img_choice": "medium",
         "js_choice": "medium",
         "css_choice": "medium",
-        "rev_custom_json": {}
+        "rev_custom_json": {},
+        "lua": []
     }
 
 
@@ -876,13 +877,14 @@ def generate_co_ui_config_json(domain):
         "img_choice": "medium",
         "js_choice": "medium",
         "css_choice": "medium",
-        "rev_custom_json": {}
+        "rev_custom_json": {},
+        "lua": []
     }
 
 
 def generate_ui_config_json(domain):
     ui_config = {
-        "version": "1.0.5",
+        "version": "1.0.6",
         "domain_name": domain["name"],
         "origin_domain": domain["ows"],
         "operation": "config",
