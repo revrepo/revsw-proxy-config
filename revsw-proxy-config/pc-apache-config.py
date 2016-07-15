@@ -21,7 +21,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
 
 _UI_CONFIG_VERSION = "1.0.6"
 _BP_CONFIG_VERSION = 25
-_CO_CONFIG_VERSION = 15
+_CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
 
@@ -904,6 +904,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["SSL_PREFER_SERVER_CIPHERS"] = True
             bp["SSL_CERT_ID"] = ""
 
+        if ver <= 25 < new_ver:
+            bp["LUA_LOCATIONS"] = []
+
         bp["VERSION"] = new_ver
 
     if "co" in vars_:
@@ -963,6 +966,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         if ver <= 15 < new_ver:
             co["ENABLE_DECOMPRESSION"] = False
+
+        if ver <= 16 < new_ver:
+            co["LUA_LOCATIONS"] = []
 
         co["VERSION"] = new_ver
 
