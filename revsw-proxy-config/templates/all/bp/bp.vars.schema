@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 25
+            "maximum": 26
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -234,6 +234,17 @@
         },
         "SSL_CERT_ID": {
             "type": "string"
+        },
+        "LUA_LOCATIONS": {
+            "type": "array",
+            "items": {
+		        "type": "object",
+		        "properties":
+		            {
+		                "location": {"type": "string"},
+		                "code": {"type": "string"}
+		            }
+            }
         }
     },
     "required": [
