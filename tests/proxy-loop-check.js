@@ -111,6 +111,8 @@ describe('Proxy loop detect checker', function () {
         domainConfig = responseJson;
         delete domainConfig.cname;
         delete domainConfig.domain_name;
+        delete domainConfig.published_domain_version;
+        delete domainConfig.last_published_domain_version;
         done();
       }).catch(function (err) {
       done(util.getError(err));

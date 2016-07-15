@@ -376,6 +376,8 @@ module.exports = {
           var responseJson = JSON.parse(res.text);
           delete responseJson.cname;
           delete responseJson.domain_name;
+          delete responseJson.published_domain_version;
+          delete responseJson.last_published_domain_version;
           var domainConfig = {}
           domainConfig.id = domainConfigId
           domainConfig.config = responseJson
