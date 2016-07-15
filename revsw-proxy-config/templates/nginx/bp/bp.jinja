@@ -432,6 +432,18 @@
     {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
   {% endif %}
   {# # End optional user customizations in BP frontend #}
+  {# # Optional user lua locations in BP frontend #}
+  {% if this.LUA_LOCATIONS %}
+    {% for lua in this.LUA_LOCATIONS %}
+    location {{lua.location}} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+    }
+    {% endfor %}
+  {% endif %}
+  {# # End optional user lua locations in BP frontend #}
 {%- endmacro %}{# _common_frontend #}
 
 {# BEGIN: (BP-342) Common macros for headers #}
