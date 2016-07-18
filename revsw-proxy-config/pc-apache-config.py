@@ -907,7 +907,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             pass
 
         if ver <= 26 < new_ver:
-            bp["LUA_LOCATIONS"] = []
+            bp["BP_LUA_LOCATIONS"] = []
+            bp["CO_LUA_LOCATIONS"] = []
 
         bp["VERSION"] = new_ver
 
@@ -968,9 +969,6 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         if ver <= 15 < new_ver:
             co["ENABLE_DECOMPRESSION"] = False
-
-        if ver <= 16 < new_ver:
-            co["LUA_LOCATIONS"] = []
 
         co["VERSION"] = new_ver
 
