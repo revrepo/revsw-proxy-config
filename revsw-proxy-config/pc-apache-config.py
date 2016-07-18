@@ -349,10 +349,8 @@ class ConfigCommon:
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
 
-        self._patch_if_changed_bp_webserver("LUA_LOCATIONS", misc.get("lua", []))
-        self._patch_if_changed_co_webserver("LUA_LOCATIONS", co.get("lua", []))
-        log.LOGD("LUA_LOCATIONS for BP", misc.get("lua", []))
-        log.LOGD("LUA_LOCATIONS for CO", co.get("lua", []))
+        self._patch_if_changed_bp_webserver("BP_LUA_LOCATIONS", misc.get("lua", []))
+        self._patch_if_changed_bp_webserver("CO_LUA_LOCATIONS", co.get("lua", []))
 
         log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
