@@ -349,10 +349,8 @@ class ConfigCommon:
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
 
-        self._patch_if_changed_bp_webserver("LUA_LOCATIONS", misc.get("lua", []))
-        self._patch_if_changed_co_webserver("LUA_LOCATIONS", co.get("lua", []))
-        log.LOGD("LUA_LOCATIONS for BP", misc.get("lua", []))
-        log.LOGD("LUA_LOCATIONS for CO", co.get("lua", []))
+        self._patch_if_changed_bp_webserver("BP_LUA_LOCATIONS", misc.get("lua", []))
+        self._patch_if_changed_bp_webserver("CO_LUA_LOCATIONS", co.get("lua", []))
 
         log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
@@ -909,7 +907,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             pass
 
         if ver <= 26 < new_ver:
-            bp["LUA_LOCATIONS"] = []
+            bp["BP_LUA_LOCATIONS"] = []
+            bp["CO_LUA_LOCATIONS"] = []
 
         bp["VERSION"] = new_ver
 
@@ -970,9 +969,6 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         if ver <= 15 < new_ver:
             co["ENABLE_DECOMPRESSION"] = False
-
-        if ver <= 16 < new_ver:
-            co["LUA_LOCATIONS"] = []
 
         co["VERSION"] = new_ver
 
