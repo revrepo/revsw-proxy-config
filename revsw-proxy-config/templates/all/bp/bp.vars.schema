@@ -256,6 +256,10 @@
 		                "code": {"type": "string"}
 		            }
             }
+        },
+        "LUA_LOCATIONS": {
+            "type": "array",
+            "_comment": "Do not remove"
         }
     },
     "required": [
