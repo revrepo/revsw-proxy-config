@@ -471,5 +471,26 @@ module.exports = {
         return response(client);
       });
     });
+  },
+  
+  removePrivateDOmainConfigFields: function (jsonDomainConfig) {
+    delete jsonDomainConfig._id;
+    delete jsonDomainConfig.__v;
+    delete jsonDomainConfig.account_id;
+    delete jsonDomainConfig.cname;
+    delete jsonDomainConfig.created_at;
+    delete jsonDomainConfig.updated_at;
+    delete jsonDomainConfig.created_by;
+    delete jsonDomainConfig.deleted;
+    delete jsonDomainConfig.deleted_at;
+    delete jsonDomainConfig.domain_name;
+    delete jsonDomainConfig.origin_server_location_id;
+    delete jsonDomainConfig.last_published_domain_version;
+    delete jsonDomainConfig.published_domain_version;
+    delete jsonDomainConfig.serial_id;
+    delete jsonDomainConfig.tolerance;
+    delete jsonDomainConfig.proxy_config.cname;
+    delete jsonDomainConfig.proxy_config.domain_name;
+    return jsonDomainConfig;
   }
 };

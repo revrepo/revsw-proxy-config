@@ -64,24 +64,7 @@ describe('Proxy lua support check', function () {
         if (rej) {
           throw rej;
         }
-        cdsConfig = JSON.parse(res.text);
-        delete cdsConfig._id;
-        delete cdsConfig.__v;
-        delete cdsConfig.account_id;
-        delete cdsConfig.cname;
-        delete cdsConfig.created_at;
-        delete cdsConfig.updated_at;
-        delete cdsConfig.created_by;
-        delete cdsConfig.deleted;
-        delete cdsConfig.deleted_at;
-        delete cdsConfig.domain_name;
-        delete cdsConfig.origin_server_location_id;
-        delete cdsConfig.last_published_domain_version;
-        delete cdsConfig.published_domain_version;
-        delete cdsConfig.serial_id;
-        delete cdsConfig.tolerance;
-        delete cdsConfig.proxy_config.cname;
-        delete cdsConfig.proxy_config.domain_name;
+        cdsConfig = tools.removePrivateDOmainConfigFields(JSON.parse(res.text));
         done();
       });
   });
