@@ -19,7 +19,8 @@ var originServer = 'httpbin_org.revsw.net',
   domainConfig = '',
   domainConfigId = '',
   httpEnvJson = '/get?show_env=1',
-  staticEnvJson = '/static/cgi-bin/envjson.cgi';
+  staticEnvJson = '/static/cgi-bin/envjson.cgi',
+  cdsConfig;
 
 describe('Proxy origin secure protocol checker with default configuration', function () {
 
@@ -64,27 +65,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
         if (rej) {
           throw rej;
         }
-        //console.log(JSON.parse(res.text));
-        var responseJson = JSON.parse(res.text);
-        cdsConfig = responseJson;
-        delete cdsConfig._id;
-        delete cdsConfig.__v;
-        delete cdsConfig.account_id;
-        delete cdsConfig.cname;
-        delete cdsConfig.created_at;
-        delete cdsConfig.updated_at;
-        delete cdsConfig.created_by;
-        delete cdsConfig.deleted;
-        delete cdsConfig.deleted_at;
-        delete cdsConfig.domain_name;
-        delete cdsConfig.origin_server_location_id;
-        delete cdsConfig.last_published_domain_version;
-        delete cdsConfig.published_domain_version;
-        delete cdsConfig.serial_id;
-        delete cdsConfig.tolerance;
-        delete cdsConfig.proxy_config.cname;
-        delete cdsConfig.proxy_config.domain_name;
-        //console.log(cdsConfig);
+        cdsConfig = tools.removePrivateDOmainConfigFields(JSON.parse(res.text));
         done();
       });
   });
