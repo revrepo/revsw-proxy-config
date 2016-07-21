@@ -93,6 +93,12 @@ describe('Proxy lua support check', function () {
         code: 'local test = ngx.var.arg_a\nngx.say("BP: ", test)',
         enable: true,
         approve: true
+      },
+      {
+        location: '/not-approved',
+        code: 'local test = ngx.var.arg_a\nngx.say("BP: ", test)',
+        enable: true,
+        approve: false
       }
     ];
     cdsConfig.co_lua = [
@@ -101,6 +107,12 @@ describe('Proxy lua support check', function () {
         code: 'local test = ngx.var.arg_a\nngx.say("CO: ", test)',
         enable: true,
         approve: true
+      },
+      {
+        location: '/not-approved',
+        code: 'local test = ngx.var.arg_a\nngx.say("CO: ", test)',
+        enable: true,
+        approve: false
       }
     ];
     cdsConfig.bp_lua_enable_all = true;
@@ -142,6 +154,30 @@ describe('Proxy lua support check', function () {
         throw rej;
       }
       res.text.should.be.equal('CO: ' + testCOparam + '\n');
+      done();
+    }).catch(function (err) {
+      done(util.getError(err));
+    });
+  });
+
+  it('should confirm, that unapproved BP lua code does not works for ' + newDomainName, function (done) {
+    tools.getHostRequest(testBPHTTPUrl, '/not-approved?a=' + testBPparam, newDomainName, 404)
+      .then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      done();
+    }).catch(function (err) {
+      done(util.getError(err));
+    });
+  });
+
+  it('should confirm, that unapproved CO lua code does not works for' + newDomainName, function (done) {
+    tools.getHostRequest(testCOHTTPUrl, '/not-approved?a=' + testCOparam, newDomainName, 404)
+      .then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
       done();
     }).catch(function (err) {
       done(util.getError(err));
