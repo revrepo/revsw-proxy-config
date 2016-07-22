@@ -3,8 +3,7 @@
         daily
         missingok
         rotate 4
-        compress
-        delaycompress
+        nocompress
         notifempty
         create 0640 www-data adm
         sharedscripts
