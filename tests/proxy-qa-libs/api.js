@@ -403,7 +403,7 @@ module.exports = {
   getUsersMyself: function () {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
-        .get('/v1/users/myself')
+        .get('/v1/api_keys/myself')
         .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {

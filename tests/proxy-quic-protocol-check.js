@@ -22,7 +22,10 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '';
 
 function send_quic(request){
-  return JSON.parse(sh.exec("echo '" + request + "' | ./proxy-qa-cgi-bin/test_tool 2>/dev/null").stdout);
+  console.log('QUIC request = ', request);
+  var response = JSON.parse(sh.exec("echo '" + request + "' | ./proxy-qa-cgi-bin/test_tool 2>/dev/null").stdout);
+  console.log('QUIC response = ', response);
+  return response;
 }
 
 describe('Proxy QUIC protocol control', function () {
