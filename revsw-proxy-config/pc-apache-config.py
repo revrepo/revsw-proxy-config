@@ -1103,7 +1103,7 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
             "PROBE_TIMEOUT": 0
         }
 
-    if ver <= 14 < new_ver:
+    if ver <= 15 < new_ver:
         vars_["ENABLE_ESI"] = False
 
     if "URLS_REMOVE_COOKIES_REGEX" in vars_:
