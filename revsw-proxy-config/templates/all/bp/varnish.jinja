@@ -853,18 +853,17 @@ unset bereq.http.X-Rev-Longitude;
 }*/
 }
 
-sub vcl_fetch {
-{% call (site) _for_each_site("ENABLE_ESI", "req") %}
+# Block 6: Mark HTML uncacheable by caches beyond our control.
+sub vcl_backend_response {
+{{ _for_each_site_custom_vcl("backend_response", "bereq") }}
+
+{% call (site) _for_each_site("ENABLE_CACHE", "bereq") %}
+    # Add ESI setting if enabled
     {% if site.ENABLE_ESI %}
         set beresp.do_esi = true;
         set beresp.http.X-Rev-Esi = "esi";
     {% endif %}
 {%- endcall %}
-}
-
-# Block 6: Mark HTML uncacheable by caches beyond our control.
-sub vcl_backend_response {
-{{ _for_each_site_custom_vcl("backend_response", "bereq") }}
 
 # Don't cache requests with status code between 307 and 499
 if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
