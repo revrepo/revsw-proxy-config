@@ -23,7 +23,7 @@ _UI_CONFIG_VERSION = "1.0.7"
 _BP_CONFIG_VERSION = 26
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 15
+_VARNISH_CONFIG_VERSION = 16
 
 
 class ConfigCommon:
@@ -1103,7 +1103,7 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
             "PROBE_TIMEOUT": 0
         }
 
-    if ver <= 15 < new_ver:
+    if ver <= 16 < new_ver:
         vars_["ENABLE_ESI"] = False
 
     if "URLS_REMOVE_COOKIES_REGEX" in vars_:
