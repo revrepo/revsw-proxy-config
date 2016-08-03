@@ -19,7 +19,7 @@ from revsw.logger import RevSysLogger
 from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_log, VarnishConfig, \
     sorted_non_empty
 
-_UI_CONFIG_VERSION = "1.0.6"
+_UI_CONFIG_VERSION = "1.0.7"
 _BP_CONFIG_VERSION = 26
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
@@ -439,6 +439,9 @@ class ConfigCommon:
 
 
         self._patch_if_changed_bp_webserver("ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
+
+        if 'enable_esi' in self.ui_config:
+            self._patch_if_changed_bp_varnish("ENABLE_ESI", self.ui_config["enable_esi"])
 
         log.LOGD("Finished vars update in misc")
 
@@ -1099,6 +1102,9 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
             "PROBE_INTERVAL": 0,
             "PROBE_TIMEOUT": 0
         }
+
+    if ver <= 14 < new_ver:
+        vars_["ENABLE_ESI"] = False
 
     if "URLS_REMOVE_COOKIES_REGEX" in vars_:
         del vars_["URLS_REMOVE_COOKIES_REGEX"]
