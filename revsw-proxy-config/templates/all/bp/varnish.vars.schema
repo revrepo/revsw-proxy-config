@@ -9,7 +9,7 @@
     		"properties": {
 		    "VERSION": {
 			"type": "integer",
-			"minimum": 16,
+			"minimum": 15,
 			"maximum": 16
 		    },
     		    "SERVER_NAME": {
