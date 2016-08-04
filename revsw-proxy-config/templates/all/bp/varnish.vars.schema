@@ -80,9 +80,6 @@
 		    "ENABLE_ORIGIN_HEALTH_PROBE": {
 			"type": "boolean"
 		    },
-		    "ENABLE_ESI": {
-			    "type": "boolean"
-		    },
 		    "ORIGIN_HEALTH_PROBE": {
 			"type": "object",
 			"properties": {

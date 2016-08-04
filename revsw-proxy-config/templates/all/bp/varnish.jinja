@@ -251,6 +251,12 @@
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
     {% set origin_redirects = rule.origin_redirects|default({"override": False, "follow": False}) %}
 
+    # Add ESI setting if enabled
+    {% if rule.enable_esi %}
+        set beresp.do_esi = true;
+        set beresp.http.X-Rev-Esi = "esi";
+    {% endif %}
+
     # Does not cache when Set-Cookies are true
     {% if not rule.cookies.override %}
     if (beresp.http.Set-Cookie) {
@@ -856,14 +862,6 @@ unset bereq.http.X-Rev-Longitude;
 # Block 6: Mark HTML uncacheable by caches beyond our control.
 sub vcl_backend_response {
 {{ _for_each_site_custom_vcl("backend_response", "bereq") }}
-
-{% call (site) _for_each_site("ENABLE_CACHE", "bereq") %}
-    # Add ESI setting if enabled
-    {% if site.ENABLE_ESI %}
-        set beresp.do_esi = true;
-        set beresp.http.X-Rev-Esi = "esi";
-    {% endif %}
-{%- endcall %}
 
 # Don't cache requests with status code between 307 and 499
 if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
