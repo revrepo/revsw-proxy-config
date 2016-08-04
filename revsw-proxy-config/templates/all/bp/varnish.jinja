@@ -251,10 +251,12 @@
     {% set first = global_var_get("FOR_EACH_RULE_FIRST_ITEM") %}
     {% set origin_redirects = rule.origin_redirects|default({"override": False, "follow": False}) %}
 
-    # Add ESI setting if enabled
+    # do_esi if enable_esi is true
     {% if rule.enable_esi %}
-        set beresp.do_esi = true;
-        set beresp.http.X-Rev-Esi = "esi";
+        if (bereq.url ~ "{{url_re}}") {
+            set beresp.do_esi = true;
+            set beresp.http.X-Rev-Esi = "esi";
+        }
     {% endif %}
 
     # Does not cache when Set-Cookies are true
