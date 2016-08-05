@@ -64,7 +64,7 @@ describe('Proxy lua support check', function () {
         if (rej) {
           throw rej;
         }
-        cdsConfig = tools.removePrivateDOmainConfigFields(JSON.parse(res.text));
+        cdsConfig = tools.removePrivateCDSDomainConfigFields(JSON.parse(res.text));
         done();
       });
   });

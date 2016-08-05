@@ -16,9 +16,9 @@ var originServer = 'test-proxy-esi-config.revsw.net',
   testGroup = config.get('test_group'),
   AccountId = '',
   domainConfigId = '',
-  cdsConfig,
-  expectedValidESIResponse = 'Code: Secret Code from CGI\n',
-  expectedInvalidESIResponse = 'Code: <esi:include src="/cgi-bin/test.cgi"/>';
+  domainCfg,
+  expectedValidESIResponse = 'Code: Secret Code from CGI\n\n',
+  expectedInvalidESIResponse = 'Code: <esi:include src="/cgi-bin/test.cgi"/>\n';
 
 describe('Proxy edge side includes support check', function () {
 
@@ -58,18 +58,18 @@ describe('Proxy edge side includes support check', function () {
   });
 
   it('should get domain config for recently created domain', function (done) {
-    cds.getDomainConfigsById(domainConfigId)
+    api.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
         }
-        cdsConfig = tools.removePrivateDOmainConfigFields(JSON.parse(res.text));
+        domainCfg = tools.removePrivateAPIDomainConfigFields(JSON.parse(res.text));
         done();
       });
   });
 
   it('should update domain config with caching rules with ESI enabled', function (done) {
-    cdsConfig.caching_rules = [
+    domainCfg.rev_component_bp.caching_rules = [
       {
         "browser_caching": {
           "force_revalidate": false,
@@ -99,7 +99,8 @@ describe('Proxy edge side includes support check', function () {
           "enable": false,
           "while_fetching_ttl": 8,
           "origin_sick_ttl": 15
-        }
+        },
+        "enable_esi": false
       },
       {
         "version": 1,
@@ -107,7 +108,6 @@ describe('Proxy edge side includes support check', function () {
           "is_wildcard": true,
           "value": "/test-cgi-esi-include.html"
         },
-        "enable_esi": true,
         "edge_caching": {
           "new_ttl": 5,
           "override_no_cc": false,
@@ -132,11 +132,11 @@ describe('Proxy edge side includes support check', function () {
           "enable": false,
           "while_fetching_ttl": 8,
           "origin_sick_ttl": 15
-        }
+        },
+        "enable_esi": true
       }
     ];
-    cdsConfig.updated_by = 'yegor@revsw.com';
-    cds.putDomainConfigsById(domainConfigId, cdsConfig).then(function (res, rej) {
+    api.putDomainConfigsById(domainConfigId, domainCfg).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

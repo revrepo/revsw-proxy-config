@@ -61,3 +61,4 @@ revsw-policy-server/pcm/install/
 # .
 
 tests/node_modules
+tests/config/local.json
