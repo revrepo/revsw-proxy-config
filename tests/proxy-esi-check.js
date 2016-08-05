@@ -17,7 +17,8 @@ var originServer = 'test-proxy-esi-config.revsw.net',
   AccountId = '',
   domainConfigId = '',
   cdsConfig,
-  expectedESIResponse = 'Code: Secret Code from CGI\n';
+  expectedValidESIResponse = 'Code: Secret Code from CGI\n',
+  expectedInvalidESIResponse = 'Code: <esi:include src="/cgi-bin/test.cgi"/>';
 
 describe('Proxy edge side includes support check', function () {
 
@@ -67,8 +68,73 @@ describe('Proxy edge side includes support check', function () {
       });
   });
 
-  it('should update domain config with enabled ESI', function (done) {
-    cdsConfig.enable_esi = true;
+  it('should update domain config with caching rules with ESI enabled', function (done) {
+    cdsConfig.caching_rules = [
+      {
+        "browser_caching": {
+          "force_revalidate": false,
+          "new_ttl": 0,
+          "override_edge": false
+        },
+        "cookies": {
+          "ignore_all": false,
+          "keep_or_ignore_list": [],
+          "list_is_keep": false,
+          "override": false,
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        },
+        "edge_caching": {
+          "new_ttl": 0,
+          "override_no_cc": false,
+          "override_origin": false,
+          "query_string_keep_or_remove_list": []
+        },
+        "url": {
+          "is_wildcard": true,
+          "value": "**"
+        },
+        "version": 1,
+        "serve_stale": {
+          "enable": false,
+          "while_fetching_ttl": 8,
+          "origin_sick_ttl": 15
+        }
+      },
+      {
+        "version": 1,
+        "url": {
+          "is_wildcard": true,
+          "value": "/test-cgi-esi-include.html"
+        },
+        "enable_esi": true,
+        "edge_caching": {
+          "new_ttl": 5,
+          "override_no_cc": false,
+          "override_origin": false,
+          "query_string_list_is_keep": false,
+          "query_string_keep_or_remove_list": []
+        },
+        "browser_caching": {
+          "force_revalidate": false,
+          "new_ttl": 0,
+          "override_edge": true
+        },
+        "cookies": {
+          "ignore_all": false,
+          "keep_or_ignore_list": [],
+          "list_is_keep": false,
+          "override": false,
+          "remove_ignored_from_request": false,
+          "remove_ignored_from_response": false
+        },
+        "serve_stale": {
+          "enable": false,
+          "while_fetching_ttl": 8,
+          "origin_sick_ttl": 15
+        }
+      }
+    ];
     cdsConfig.updated_by = 'yegor@revsw.com';
     cds.putDomainConfigsById(domainConfigId, cdsConfig).then(function (res, rej) {
       if (rej) {
@@ -88,13 +154,25 @@ describe('Proxy edge side includes support check', function () {
     });
   });
 
+  it('should confirm, that ESI include does not work for random url on ' + newDomainName, function (done) {
+    tools.getHostRequest(testBPHTTPUrl, '/test-cgi-esi-include-no-cache.html', newDomainName).then(function (res, rej) {
+      if (rej) {
+        throw rej;
+      }
+      res.text.should.be.equal(expectedInvalidESIResponse);
+      done();
+    }).catch(function (err) {
+      done(util.getError(err));
+    });
+  });
+
 
   it('should confirm, that ESI include works for ' + newDomainName, function (done) {
     tools.getHostRequest(testBPHTTPUrl, '/test-cgi-esi-include.html', newDomainName).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
-      res.text.should.be.equal(expectedESIResponse);
+      res.text.should.be.equal(expectedValidESIResponse);
       done();
     }).catch(function (err) {
       done(util.getError(err));
