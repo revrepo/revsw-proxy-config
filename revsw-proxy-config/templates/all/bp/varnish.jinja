@@ -252,7 +252,7 @@
     {% set origin_redirects = rule.origin_redirects|default({"override": False, "follow": False}) %}
 
     # do_esi if enable_esi is true
-    {% if rule.enable_esi is defined and rule.enable_esi is True %}
+    {% if rule.enable_esi|default(False) %}
         if (bereq.url ~ "{{url_re}}") {
             set beresp.do_esi = true;
             set beresp.http.X-Rev-Esi = "esi";
