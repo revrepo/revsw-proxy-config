@@ -10,7 +10,7 @@
 		    "VERSION": {
 			"type": "integer",
 			"minimum": 15,
-			"maximum": 15
+			"maximum": 16
 		    },
     		    "SERVER_NAME": {
     			"type": "string",
