@@ -65,7 +65,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
         if (rej) {
           throw rej;
         }
-        cdsConfig = tools.removePrivateDOmainConfigFields(JSON.parse(res.text));
+        cdsConfig = tools.removePrivateCDSDomainConfigFields(JSON.parse(res.text));
         done();
       });
   });
