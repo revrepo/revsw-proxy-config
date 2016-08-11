@@ -28,7 +28,7 @@ function send_quic(request){
   return response;
 }
 
-describe('Proxy QUIC protocol control', function () {
+xdescribe('Proxy QUIC protocol control', function () {
 
   this.timeout(240000);
 
