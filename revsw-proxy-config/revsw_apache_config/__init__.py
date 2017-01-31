@@ -411,16 +411,16 @@ class PlatformWebServer:
     def __init__(self):
         global _g_webserver_name
         if not _g_webserver_name:
-            for pkg, name in (("revsw-apache2", "APACHE"), ("revsw-nginx-full", "NGINX")):
+            for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
                 try:
                     run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
                     if _g_webserver_name:
-                        raise RuntimeError("Both Nginx and Apache are installed; please check your configuration")
+                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
                     _g_webserver_name = name
                 except OSError:
                     pass
         if not _g_webserver_name:
-            raise RuntimeError("Neither Nginx nor Apache are installed; please check your configuration")
+            raise RuntimeError("Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
         self._name = _g_webserver_name
 
     def _is_nginx(self):
