@@ -167,14 +167,14 @@
       "description": "should enabled enable_cache and enable_decompression",
       "name": "enable-decompression",
       "step": "step-1",
-      "origin": "cdn.mbeans2.com"
+      "origin": "httpbin_org.revsw.net"
     },
     {
       "command": "group_create",
       "description": "should enabled enable_cache and enable_decompression",
       "name": "enable-decompression",
       "step": "step-2",
-      "origin": "cdn.mbeans2.com",
+      "origin": "httpbin_org.revsw.net",
       "set": {
         "rev_component_bp": {
           "enable_cache": true
@@ -189,7 +189,7 @@
       "description": "should disabled enable_cache and enable_decompression",
       "name": "enable-decompression",
       "step": "step-3",
-      "origin": "cdn.mbeans2.com",
+      "origin": "httpbin_org.revsw.net",
       "set": {
         "rev_component_bp": {
           "enable_cache": false

@@ -321,7 +321,7 @@ module.exports = {
 
       api.getUsersMyself()
         .then(function (res) {
-          AccountId = res.body.companyId[0];
+          AccountId = res.body.account_id;
           console.log('    \u001b[33m♦\u001b[36m create new configuration for domain' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
@@ -355,7 +355,7 @@ module.exports = {
 
       api.getUsersMyself()
         .then(function (res) {
-          AccountId = res.body.companyId[0];
+          AccountId = res.body.account_id;
           console.log('    \u001b[33m♦\u001b[36m create new configuration for domain ' + newDomainName + '\u001B[0m');
           var createDomainConfigJSON = {
             'domain_name': newDomainName,
@@ -376,6 +376,8 @@ module.exports = {
           var responseJson = JSON.parse(res.text);
           delete responseJson.cname;
           delete responseJson.domain_name;
+          delete responseJson.published_domain_version;
+          delete responseJson.last_published_domain_version;
           var domainConfig = {}
           domainConfig.id = domainConfigId
           domainConfig.config = responseJson
@@ -469,5 +471,36 @@ module.exports = {
         return response(client);
       });
     });
+  },
+
+  removePrivateCDSDomainConfigFields: function (jsonDomainConfig) {
+    delete jsonDomainConfig._id;
+    delete jsonDomainConfig.__v;
+    delete jsonDomainConfig.account_id;
+    delete jsonDomainConfig.cname;
+    delete jsonDomainConfig.created_at;
+    delete jsonDomainConfig.updated_at;
+    delete jsonDomainConfig.created_by;
+    delete jsonDomainConfig.deleted;
+    delete jsonDomainConfig.deleted_at;
+    delete jsonDomainConfig.domain_name;
+    delete jsonDomainConfig.origin_server_location_id;
+    delete jsonDomainConfig.last_published_domain_version;
+    delete jsonDomainConfig.published_domain_version;
+    delete jsonDomainConfig.serial_id;
+    delete jsonDomainConfig.tolerance;
+    delete jsonDomainConfig.proxy_config.cname;
+    delete jsonDomainConfig.proxy_config.domain_name;
+    return jsonDomainConfig;
+  },
+
+  removePrivateAPIDomainConfigFields: function (jsonDomainConfig) {
+    delete jsonDomainConfig.id;
+    delete jsonDomainConfig.cname;
+    delete jsonDomainConfig.domain_name;
+    delete jsonDomainConfig.last_published_domain_version;
+    delete jsonDomainConfig.published_domain_version;
+    delete jsonDomainConfig.updated_by;
+    return jsonDomainConfig;
   }
 };

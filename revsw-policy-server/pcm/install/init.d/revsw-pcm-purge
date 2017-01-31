@@ -14,7 +14,8 @@ DAEMON=/opt/revsw-config/bin/revsw-pcm-purge
 DAEMON_NAME=revsw-pcm-purge
 DAEMON_ARGS="10000000"
 
-export LD_LIBRARY_PATH=/opt/revsw-config/lib 
+export LD_LIBRARY_PATH=/opt/revsw-config/lib
+export SSLWS=1
 
 DAEMON_USER=root
 

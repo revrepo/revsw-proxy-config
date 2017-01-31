@@ -46,6 +46,9 @@
 		"value"
 	    ]
 	},
+	"enable_esi": {
+        "type": "boolean"
+    },
         "origin_request_headers": {
             "type": "array",
             "items": {

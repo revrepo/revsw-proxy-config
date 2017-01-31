@@ -19,7 +19,8 @@ var originServer = 'httpbin_org.revsw.net',
   domainConfig = '',
   domainConfigId = '',
   httpEnvJson = '/get?show_env=1',
-  staticEnvJson = '/static/cgi-bin/envjson.cgi';
+  staticEnvJson = '/static/cgi-bin/envjson.cgi',
+  cdsConfig;
 
 describe('Proxy origin secure protocol checker with default configuration', function () {
 
@@ -30,7 +31,7 @@ describe('Proxy origin secure protocol checker with default configuration', func
       if (rej) {
         throw rej;
       }
-      AccountId = res.body.companyId[0];
+      AccountId = res.body.account_id;
       done();
     }).catch(function (err) {
       done(util.getError(err));
@@ -58,37 +59,18 @@ describe('Proxy origin secure protocol checker with default configuration', func
     });
   });
 
-  it('should get cds domain config', function (done) {
+  it('should get CDS domain config', function (done) {
     cds.getDomainConfigsById(domainConfigId)
       .then(function (res, rej) {
         if (rej) {
           throw rej;
         }
-        //console.log(JSON.parse(res.text));
-        var responseJson = JSON.parse(res.text);
-        cdsConfig = responseJson;
-        delete cdsConfig._id;
-        delete cdsConfig.__v;
-        delete cdsConfig.account_id;
-        delete cdsConfig.cname;
-        delete cdsConfig.created_at;
-        delete cdsConfig.updated_at;
-        delete cdsConfig.created_by;
-        delete cdsConfig.deleted;
-        delete cdsConfig.domain_name;
-        delete cdsConfig.origin_server_location_id;
-        delete cdsConfig.last_published_domain_version;
-        delete cdsConfig.published_domain_version;
-        delete cdsConfig.serial_id;
-        delete cdsConfig.tolerance;
-        delete cdsConfig.proxy_config.cname;
-        delete cdsConfig.proxy_config.domain_name;
-        //console.log(cdsConfig);
+        cdsConfig = tools.removePrivateCDSDomainConfigFields(JSON.parse(res.text));
         done();
       });
   });
 
-  it('should set headers using cds', function (done) {
+  it('should set headers using CDS', function (done) {
     cdsConfig.bp_apache_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-BP $remote_addr;\n# END NGINX CONFIG';
     cdsConfig.bp_apache_fe_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-BP2  $remote_addr;\n# END NGINX CONFIG';
     cdsConfig.co_apache_custom_config = '# BEGIN NGINX CONFIG\nadd_header X-Rev-QA-CO  $remote_addr;\n# END NGINX CONFIG';
@@ -124,6 +106,8 @@ describe('Proxy origin secure protocol checker with default configuration', func
         domainConfig = responseJson;
         delete domainConfig.cname;
         delete domainConfig.domain_name;
+        delete domainConfig.published_domain_version;
+        delete domainConfig.last_published_domain_version;
         done();
       }).catch(function (err) {
       done(util.getError(err));

@@ -7,29 +7,14 @@
       "name": "enable-decompression",
       "step": "step-1",
       "command": "check",
-      "description": "should check svg file request",
+      "description": "should requesta a compressed object and confirm that returned object is not compressed",
       "delay": 0,
       "protocol": "HTTP",
-      "url": "/media/fonts/ProximaNova.svg",
+      "url": "/gzip",
       "check": {
         "header": {
-          "content-type": "image/svg+xml"
-        },
-        "content": []
-      }
-    },
-    {
-      "name": "enable-decompression",
-      "step": "step-1",
-      "command": "check",
-      "description": "should check svg file and make sure that decompression is enabled by default",
-      "delay": 0,
-      "protocol": "HTTP",
-      "url": "/media/fonts/ProximaNova.svg",
-      "check": {
-        "header": {
-          "content-length": "54445",
-          "content-type": "image/svg+xml"
+          "content-type": "application/json",
+          "transfer-encoding": "chunked"
         },
         "content": []
       }
@@ -38,29 +23,13 @@
       "name": "enable-decompression",
       "step": "step-2",
       "command": "check",
-      "description": "should check svg file request",
+      "description": "should request a compressed object and make sure that decompression is enabled",
       "delay": 0,
       "protocol": "HTTP",
-      "url": "/media/fonts/ProximaNova.svg",
+      "url": "/gzip",
       "check": {
         "header": {
-          "content-type": "image/svg+xml"
-        },
-        "content": []
-      }
-    },
-    {
-      "name": "enable-decompression",
-      "step": "step-2",
-      "command": "check",
-      "description": "should check svg file and make sure that decompression is enabled",
-      "delay": 0,
-      "protocol": "HTTPS",
-      "url": "/media/fonts/ProximaNova.svg",
-      "check": {
-        "header": {
-          "content-length": "54445",
-          "content-type": "image/svg+xml"
+          "content-type": "application/json"
         },
         "content": []
       }
@@ -69,29 +38,13 @@
       "name": "enable-decompression",
       "step": "step-3",
       "command": "check",
-      "description": "should check svg file request",
+      "description": "should request a compressed object and make sure that decompression is disabled",
       "delay": 0,
       "protocol": "HTTP",
-      "url": "/media/fonts/ProximaNova.svg",
+      "url": "/gzip",
       "check": {
         "header": {
-          "content-type": "image/svg+xml"
-        },
-        "content": []
-      }
-    },
-    {
-      "name": "enable-decompression",
-      "step": "step-3",
-      "command": "check",
-      "description": "should check svg file and make sure that decompression is disabled",
-      "delay": 0,
-      "protocol": "HTTP",
-      "url": "/media/fonts/ProximaNova.svg",
-      "check": {
-        "header": {
-          "content-length": "14305",
-          "content-type": "image/svg+xml"
+          "content-encoding": "gzip"
         },
         "content": []
       }

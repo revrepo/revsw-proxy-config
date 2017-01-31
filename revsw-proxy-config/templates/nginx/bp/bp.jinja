@@ -343,7 +343,7 @@
   {% if this.ENABLE_JS_SUBSTITUTE %}
     {# # Rev JS substitute and accompanying script #}
     RevJSSubstituteEnabled on; # turn on for whole context
-    RevJSDoNotCompress on;
+    RevJSDoNotCompress off;
     location /rev-js/ {
     	RevJSSubstituteEnabled off;
       root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
@@ -432,8 +432,19 @@
     {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
   {% endif %}
   {# # End optional user customizations in BP frontend #}
+  {# # Optional user lua locations in BP frontend #}
+  {% if this.BP_LUA_LOCATIONS %}
+    {% for lua in this.BP_LUA_LOCATIONS %}
+    location {{lua.location}} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+    }
+    {% endfor %}
+  {% endif %}
+  {# # End optional user lua locations in BP frontend #}
 {%- endmacro %}{# _common_frontend #}
-
 {# BEGIN: (BP-342) Common macros for headers #}
 {% macro _common_bp_headers(this, host_name) %}
 
@@ -565,6 +576,18 @@ server {
 {{ caller(False) }}
 {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
 {# # End optional customizations after generic BP config #}
+{# # Optional user lua locations in BP frontend #}
+  {% if this.BP_LUA_LOCATIONS %}
+    {% for lua in this.BP_LUA_LOCATIONS %}
+    location {{lua.location}} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+    }
+    {% endfor %}
+  {% endif %}
+{# # End optional user lua locations in BP frontend #}
 }
 {% endif %}{# this.ENABLE_HTTP #}
 
@@ -636,6 +659,18 @@ server {
   {{ caller(False) }}
   {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
   {# # End optional customizations after generic BP config #}
+  {# # Optional user lua locations in BP frontend #}
+  {% if this.BP_LUA_LOCATIONS %}
+    {% for lua in this.BP_LUA_LOCATIONS %}
+    location {{lua.location}} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+    }
+    {% endfor %}
+  {% endif %}
+  {# # End optional user lua locations in BP frontend #}
   }
 {% endif %}{# this.ENABLE_HTTPS #}
 
@@ -792,6 +827,18 @@ server {
         {{ this.CUSTOM_WEBSERVER_CO_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
     {% endif %}
 	{# # End optional customizations after generic options #}
+	{# # Optional user lua locations in CO frontend #}
+      {% if this.CO_LUA_LOCATIONS %}
+        {% for lua in this.CO_LUA_LOCATIONS %}
+        location {{lua.location}} {
+            default_type 'text/plain';
+            content_by_lua '
+            {{lua.code}}
+            ';
+        }
+        {% endfor %}
+      {% endif %}
+    {# # End optional user lua locations in CO frontend #}
 
     {% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
         {# # Make sure absolute URLs pointing to the origin go through us instead #}

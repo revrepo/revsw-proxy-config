@@ -15,8 +15,8 @@
 #include "pcm_inc.h"
 
 /* defines */
-#define PCM_CONFIG_LWS_SSL_CERT "/opt/revsw-config/policy/websock.crt"
-#define PCM_CONFIG_LWS_SSL_KEY  "/opt/revsw-config/policy/websock.key"
+#define PCM_CONFIG_LWS_SSL_CERT "/opt/revsw-config/pcm-config-certs/server.crt"
+#define PCM_CONFIG_LWS_SSL_KEY  "/opt/revsw-config/pcm-config-certs/server.key"
 #define PCM_CONFIG_JSON_PATH    "/opt/revsw-config/policy"
 
 #define PCM_CONFIG_DOMAIN_SCRIPT_NAME "python /opt/revsw-config/bin/pc-apache-config.py"
@@ -27,6 +27,7 @@
 #define PCM_CONFIG_FILE_BUFLEN   256
 #define PCM_CONFIG_JSON_BUFLEN   256
 #define PCM_CONFIG_LISTNER_PORT 8000
+#define PCM_CONFIG_LISTNER_PORT_SSL 8001
 
 /* globals */
 rev_thread_mutex_t pcm_config_mutex;

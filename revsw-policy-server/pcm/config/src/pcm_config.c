@@ -320,7 +320,7 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
 
     memset(&info, 0, sizeof (info));
 
-    /* assiagn the values to info */
+    /* assign the values to info */
     info.port = PCM_CONFIG_LISTNER_PORT;
     info.iface = iface;
     info.protocols = protocols;
@@ -335,6 +335,10 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
     if (ssl_ws) {
         use_ssl = *ssl_ws - '0';
     }
+
+    info.ssl_cert_filepath = NULL;
+    info.ssl_private_key_filepath = NULL;
+
 
     if (use_ssl) {
 #ifdef DEBUG_COL_BRIDGE
@@ -363,13 +367,15 @@ pcm_config_thread_main (void *arg UNUSED_PTR)
 #ifdef DEBUG_COL_BRIDGE
     PCMC_LOG_DEBUG ("%s: starting config listner...", func_name);
 #endif
-
+    int n = 0;
     while (true) {
-        libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        n = libwebsocket_service (context, PCM_SOCK_WAIT_TIME);
+        if (n != 0) {
+            PCMC_LOG_DEBUG("%s: config listner returned error: %d, skipping", func_name, n);
+        }
     }
+    PCMC_LOG_DEBUG ("%s: stopping config listner...", func_name);
 
     libwebsocket_context_destroy (context);
-
     return (arg);
 }
-

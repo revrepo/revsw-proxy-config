@@ -407,7 +407,7 @@ describe("Proxy check", function () {
         if (rej) {
           throw rej;
         }
-        AccountId = res.body.companyId[0];
+        AccountId = res.body.account_id;
       })
       .then(function () {
         api.getDomainConfigs().then(function (res, rej) {

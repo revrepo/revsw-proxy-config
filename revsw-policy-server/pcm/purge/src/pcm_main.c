@@ -26,11 +26,12 @@ pcm_global_init (void)
     rev_rc_t rev_rc = REV_RC_OK;
 
     rev_memset (&ppg, 0, sizeof(pcm_purge_global_t));
-    
+
     /* name the threads */
     rev_strncpy (ppg.ppg_thread_name, "PcmPurgeThrd", REV_THREAD_NAME_LEN);
 
     /* initialize itc */
+
     rev_rc = rev_itc_init ();
     if (rev_rc != REV_RC_OK) {
         REV_LOG_ERROR ("%s: rev_itc_init() failed (%s)",
@@ -60,8 +61,8 @@ pcm_create_threads (void)
 
     return (PCM_RC_OK);
 }
-   
-/* 
+
+/*
  * pcm_main_init()
  * - main function of pcm process
  */
@@ -71,7 +72,7 @@ pcm_main_init (void)
     pcm_rc_t pcm_rc = PCM_RC_OK;
 
     pcm_global_init ();
-    
+
     pcm_rc = pcm_create_threads ();
     if (pcm_rc != PCM_RC_OK) {
         PCMG_LOG_ERROR ("%s: %s", func_name, pcm_rc_str (pcm_rc));
@@ -84,7 +85,7 @@ pcm_main_init (void)
 }
 
 /*
- * main 
+ * main
  * - entry to pcm module
  */
 int

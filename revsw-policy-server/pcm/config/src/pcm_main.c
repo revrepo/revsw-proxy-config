@@ -26,7 +26,7 @@ pcm_global_init (void)
     rev_rc_t rev_rc = REV_RC_OK;
 
     rev_memset (&pcg, 0, sizeof(pcm_config_global_t));
-    
+
     /* name the threads */
     rev_strncpy (pcg.pcg_thread_name, "PcmCfgThrd", REV_THREAD_NAME_LEN);
 
@@ -60,8 +60,8 @@ pcm_create_threads (void)
 
     return (PCM_RC_OK);
 }
-   
-/* 
+
+/*
  * pcm_main_init()
  * - main function of pcm process
  */

@@ -20,10 +20,10 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 25
-_CO_CONFIG_VERSION = 15
+_BP_CONFIG_VERSION = 26
+_CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 15
+_VARNISH_CONFIG_VERSION = 16
 
 
 class ConfigCommon:
@@ -349,6 +349,9 @@ class ConfigCommon:
         misc = self.ui_config["rev_component_bp"]
         co = self.ui_config["rev_component_co"]
 
+        self._patch_if_changed_bp_webserver("BP_LUA_LOCATIONS", misc.get("lua", []))
+        self._patch_if_changed_bp_webserver("CO_LUA_LOCATIONS", co.get("lua", []))
+
         log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
             self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(misc))
@@ -436,6 +439,7 @@ class ConfigCommon:
 
 
         self._patch_if_changed_bp_webserver("ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
+
 
         log.LOGD("Finished vars update in misc")
 
@@ -899,6 +903,14 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["SSL_PREFER_SERVER_CIPHERS"] = True
             bp["SSL_CERT_ID"] = ""
 
+        if ver <= 25 < new_ver:
+            # There is some configs with version 25
+            pass
+
+        if ver <= 26 < new_ver:
+            bp["BP_LUA_LOCATIONS"] = []
+            bp["CO_LUA_LOCATIONS"] = []
+
         bp["VERSION"] = new_ver
 
     if "co" in vars_:
@@ -1089,6 +1101,13 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
             "PROBE_TIMEOUT": 0
         }
 
+    if ver <= 16 < new_ver:
+        # Update caching rules with ESI support option
+        for caching_rule in vars_["CACHING_RULES"]:
+            if "enable_esi" not in caching_rule:
+                caching_rule["enable_esi"] = False
+
+
     if "URLS_REMOVE_COOKIES_REGEX" in vars_:
         del vars_["URLS_REMOVE_COOKIES_REGEX"]
     if "CACHE_MAX_TIME_SEC" in vars_:
@@ -1271,6 +1290,8 @@ def _main():
                 add_or_update_domain(domain_name, _ui_config, "config")
             elif _ui_config["operation"] == "update-batch":
                 add_or_update_domain(domain_name, _ui_config, "batch")
+            elif _ui_config["operation"] == "update-force":
+                add_or_update_domain(domain_name, _ui_config, "force")
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
             else:

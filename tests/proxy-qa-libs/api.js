@@ -4,20 +4,21 @@ var Promise = require('bluebird');
 var request = require('supertest');
 var config = require('config');
 var util = require('./util.js');
-var debug = false;
+var debug = true;
 
-var apiLogin = config.get('qaUserWithAdminPerm'),
-  apiPassword = config.get('qaUserWithAdminPermPassword'),
+var apiKey = config.get('apiKey'),
   testAPIUrl = config.get('testAPIUrl');
 
+var authHeader = 'X-API-KEY ' + apiKey;
+
 function showDebugError(message) {
-  console.log("\x1b[36m");
-  console.log("================ Debug ================");
+  console.log('\x1b[36m');
+  console.log('================ Debug ================');
   console.log(message.method);
   console.log(message.status);
   console.log(message.text);
-  console.log("=======================================");
-  console.log("\x1b[0m");
+  console.log('=======================================');
+  console.log('\x1b[0m');
 }
 
 module.exports = {
@@ -33,7 +34,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -55,7 +56,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/domain_configs')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .send(body)
         .end(function (err, res) {
           if (err) {
@@ -77,7 +78,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -99,7 +100,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .put('/v1/domain_configs/' + domainID + '?options=publish')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .send(body)
         .expect(200)
         .end(function (err, res) {
@@ -123,7 +124,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .del('/v1/domain_configs/' + domainID)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -146,7 +147,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/config_status')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -168,7 +169,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/domain_configs/' + domainID + '/versions')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -192,7 +193,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -214,7 +215,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key + '/config_status')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -236,7 +237,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key + '/versions')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -258,7 +259,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/apps')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .send(body)
         .end(function (err, res) {
           if (err) {
@@ -281,7 +282,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/apps/' + key)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -303,7 +304,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .put('/v1/apps/' + key + options)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .send(body)
         .expect(200)
         .end(function (err, res) {
@@ -327,7 +328,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .del('/v1/apps/' + key)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -355,7 +356,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .post('/v1/purge')
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .send(body)
         .expect(expect)
         .end(function (err, res) {
@@ -382,7 +383,7 @@ module.exports = {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
         .get('/v1/purge/' + id)
-        .auth(apiLogin, apiPassword)
+        .set('Authorization', authHeader)
         .expect(expect)
         .end(function (err, res) {
           if (err) {
@@ -402,8 +403,8 @@ module.exports = {
   getUsersMyself: function () {
     return new Promise(function (response, reject) {
       return request(testAPIUrl)
-        .get('/v1/users/myself')
-        .auth(apiLogin, apiPassword)
+        .get('/v1/api_keys/myself')
+        .set('Authorization', authHeader)
         .expect(200)
         .end(function (err, res) {
           if (err) {
@@ -416,5 +417,4 @@ module.exports = {
         });
     });
   }
-
-}
+};

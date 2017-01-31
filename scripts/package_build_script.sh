@@ -71,6 +71,7 @@ mkdir -p $FOLDERNAME/$DST/bin
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/certs
+mkdir -p $FOLDERNAME/$DST/pcm-config-certs
 mkdir -p $FOLDERNAME/$DST/log
 mkdir -p $FOLDERNAME/$DST/maxmind
 mkdir -p $FOLDERNAME/$DST/apache/generic-site
@@ -78,6 +79,8 @@ mkdir -p $FOLDERNAME/$DST/varnish/sites
 mkdir -p $FOLDERNAME/$DST/templates/all/bp
 mkdir -p $FOLDERNAME/etc/nginx/conf.d
 mkdir -p $FOLDERNAME/etc/logrotate.d
+mkdir -p $FOLDERNAME/etc/varnish
+mkdir -p $FOLDERNAME/usr/share/wurfl
 mkdir -p $FOLDERNAME/var/www
 mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
@@ -101,12 +104,15 @@ cp -r $WORKSPACE/revsw-policy-server/pcm/install/init.d $FOLDERNAME/etc/
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-config $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/pcm/install/revsw-pcm-purge $FOLDERNAME/$DST/bin
 cp $WORKSPACE/revsw-policy-server/lib/librev_infra.so $FOLDERNAME/$DST/lib
+cp $WORKSPACE/revsw-policy-server/certs/server.* $FOLDERNAME/$DST/pcm-config-certs/
 
 # Nginx configuration
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/nginx.conf $FOLDERNAME/etc/nginx/nginx.conf.revsw
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var/www/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/logrotate_revsw-nginx $FOLDERNAME/etc/logrotate.d/revsw-nginx
+cp -r $WORKSPACE/revsw-proxy-config/configs/varnish/custom.vcl $FOLDERNAME/etc/varnish
+cp -r $WORKSPACE/revsw-proxy-config/configs/wurfl/wurfl.xml $FOLDERNAME/usr/share/wurfl/
 
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
