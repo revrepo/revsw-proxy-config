@@ -61,12 +61,17 @@
     {# # Begin ACLs #}
     {% if this.acl.acl_rules %}
       {% set countries = this.acl.acl_rules|selectattr("country_code")|list %}
-      {% if countries|length %}{# use GeoIP #}
-	{% set geoip_enabled = True %}
+        {% if countries|length %}{# use GeoIP #}
+	    {% set geoip_enabled = True %}
 	if ($geoip_city_country_code ~ "^({{ countries|map(attribute="country_code")|join("|") }})") {
-	set $is_acl_country yes;
+	    set $is_acl_country yes;
 	}
-      {% endif %}{# use GeoIP #}
+        {% endif %}{# use GeoIP #}
+
+      {% set naxsi = this.acl.acl_rules|selectattr("naxsi_rules") %}
+        {% if naxsi|length %}
+    include /etc/nginx/naxsi-rules/{{ naxsi }}.rules;
+        {% endif %}
 
       {# # Do we need rDNS support ? #}
       {% set use_rdns = global_var_set("USE_RDNS", False) %}
