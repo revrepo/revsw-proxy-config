@@ -2,7 +2,7 @@
 SecRulesEnabled;
 
 #Enable learning mode
-LearningMode;
+#LearningMode;
 
 #Define where blocked requests go
 DeniedUrl "/50x.html";
