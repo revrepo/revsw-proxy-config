@@ -103,6 +103,9 @@
             "type": "string",
             "pattern": "off|on|block|detect"
         },
+        "SECURITY_RULES": {
+            "type": "string"
+        },
         "DOMAIN_SHARDS_COUNT": {
             "type": "integer",
             "minimum": 0

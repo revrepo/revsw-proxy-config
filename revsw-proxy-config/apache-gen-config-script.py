@@ -675,6 +675,7 @@ def generate_bp_domain_json(domain):
         "REV_PROFILES_BASE_PORT_HTTP": domain["base_http_port"],
         "REV_PROFILES_BASE_PORT_HTTPS": domain["base_https_port"],
         "SECURITY_MODE": "off",
+        "SECURITY_RULES": "",
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "CUSTOM_WEBSERVER_CODE_BEFORE": "",
         "CUSTOM_WEBSERVER_CODE_AFTER": "",

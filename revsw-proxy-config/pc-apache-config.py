@@ -20,7 +20,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 26
+_BP_CONFIG_VERSION = 27
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 16
@@ -271,6 +271,7 @@ class ConfigCommon:
                 mode = "off"
 
         self._patch_if_changed_bp_webserver("SECURITY_MODE", mode)
+        self._patch_if_changed_bp_webserver("SECURITY_RULES", security.get("web_app_firewall_rules", True))
         self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
 
         self._patch_if_changed_bp_webserver("acl", security.get("acl", {
@@ -278,6 +279,7 @@ class ConfigCommon:
             "action": "allow_except",
             "acl_rules": []
         }))
+        log.LOGD("Security parameters: %s | %s" % (security, mode))
 
     def _patch_ssl_vars(self):
         if "enable_ssl" in self.ui_config:
@@ -910,6 +912,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 26 < new_ver:
             bp["BP_LUA_LOCATIONS"] = []
             bp["CO_LUA_LOCATIONS"] = []
+
+        if ver <= 27 < new_ver:
+            bp["SECURITY_RULES"] = ""
 
         bp["VERSION"] = new_ver
 

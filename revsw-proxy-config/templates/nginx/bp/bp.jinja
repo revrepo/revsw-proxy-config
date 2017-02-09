@@ -68,11 +68,6 @@
 	}
         {% endif %}{# use GeoIP #}
 
-      {% set naxsi = this.acl.acl_rules|selectattr("naxsi_rules") %}
-        {% if naxsi|length %}
-    include /etc/nginx/naxsi-rules/{{ naxsi }}.rules;
-        {% endif %}
-
       {# # Do we need rDNS support ? #}
       {% set use_rdns = global_var_set("USE_RDNS", False) %}
       {% for rule in this.acl.acl_rules %}
@@ -284,6 +279,14 @@
 
   {# # Never disable the Varnish backend, even if it has temporary problems. #}
   location / {
+    #SECURITY_MODE: {{ this.SECURITY_MODE }}
+    {% if this.SECURITY_MODE == "on" %}
+        SecRulesEnabled;
+        {% if this.SECURITY_RULES|length %}
+            {{ this.SECURITY_RULES }}
+        {% endif %}
+    {% endif %}
+
   proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }}/;
 
   {# # Wait at most for configured seconds for a reply from Varnish, then return error message. #}
@@ -748,6 +751,7 @@ server {
 	{% set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
 	{% set ows_proto = "https" if origins[0]|truncate(5, True, "") == "https" else "http" %}
 	location / {
+
 	{# # TODO: make 'lowercase_escapes' configurable - this is only useful for Metacafe now #}
 	proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes;
     {# # TODO: retry=0 {{proxy_params}} #}
@@ -761,6 +765,7 @@ server {
 	{# # Make sure the origin sees the right Host header #}
 	proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
 	{# # proxy_set_header Host {{this.ORIGIN_SERVER_NAME}}; #}
+
 
 	{% if enable_pagespeed %}
 	  # Enable PageSpeed module
