@@ -110,20 +110,23 @@ module.exports = {
   send: function (req){
     console.log('QUIC request = ', req);
     var request = JSON.parse(req)
-    var host = ""
-    var headers = ""
+    var host = " "
+    var headers = " "
+    var method = " "
+    var body = " "
+    var port = " --port=443 "
     if (request.Headers["Host"].length > 0) {
-      //host = "--host=" + request.Headers.Host[0];
+      host = "--host=" + request.Headers.Host[0];
     }
     if (request.Method) {
-      if (request.Method != "GET") {
-        throw "do not support method " + request.Method;
-      }
+      method = " --method=" + request.Method;
     }
-    port = 443
-    params = host + " " + headers + " --port=" + port + " --disable-certificate-verification " + request.Endpoint;
+    if (request.Data) {
+      body = " --body=\"" + request.Data + "\"";
+    }
+    params = host + headers + port + method + body + " --disable-certificate-verification " + request.Endpoint;
     binary = "./proxy-qa-cgi-bin/quic_client_v3 " + params;
-    console.log("Running ",  binary);
+    //console.log("Running",  binary);
 
     var output = exec(binary, {silent:true}).stdout;
     if (output == null) {
@@ -131,9 +134,7 @@ module.exports = {
     }
     //var output = getMockOutput();
 
-    console.log("Splitting")
     var lines = output.split(/\n/);
-    console.log("Got input")
     const st_need_request = 1;
     const st_need_req_headers = 2;
     const st_in_req_headers = 3;
@@ -156,7 +157,7 @@ module.exports = {
     var status = st_need_request;
 
     for (i = 0; i < lines.length; i++)  {
-      console.log("parsing", status, i, lines[i])
+      //console.log("parsing", status, i, lines[i])
       if (st_need_request == status && 0 == lines[i].indexOf("Request:")) {
         status = st_need_req_headers;
         continue;
@@ -202,7 +203,6 @@ module.exports = {
             lines[i][0] = "_";
             if (0 == lines[i].indexOf(":status")) {
               JS.Status = parseInt(lines[i].split(":", 3)[2])
-              console.log("got status otherwise", JS.Status)
             }
           }
           var hdrParts = lines[i].split(":", 2);
@@ -221,9 +221,8 @@ module.exports = {
           if (JS.Headers[hdrParts[0]] == null) {
             JS.Headers[hdrParts[0]] = [];
           }
-          console.log("saving hdr", "*"+hdrParts[0]+"*", "as", hdrParts[1])
+          //console.log("saving hdr", "*"+hdrParts[0]+"*", "as", hdrParts[1])
           JS.Headers[hdrParts[0] ].push(hdrParts[1]);
-
         }
         continue
       }
@@ -234,7 +233,7 @@ module.exports = {
         continue
       }
       if (st_in_resp_body == status) {
-        if (0 == lines[i].indexOf("Request") && lines.length - 1 == i) {
+        if (-1 != lines[i].indexOf("Request succeeded (") && lines.length - 1 == i) {
           var re = /Request.*\((\d*)\)\./;
           var st = lines[i].match(re);
           JS.Status = parseInt(st[1]);
