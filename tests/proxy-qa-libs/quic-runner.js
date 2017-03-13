@@ -222,7 +222,7 @@ module.exports = {
             JS.Headers[hdrParts[0]] = [];
           }
           console.log("saving hdr", "*"+hdrParts[0]+"*", "as", hdrParts[1])
-          JS.Headers[hdrParts[0] ].push(lines[i]);
+          JS.Headers[hdrParts[0] ].push(hdrParts[1]);
 
         }
         continue
