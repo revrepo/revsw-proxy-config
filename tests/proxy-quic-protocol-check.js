@@ -11,6 +11,7 @@ var quic = require('./proxy-qa-libs/quic-runner.js')
 var originHostHeader = 'httpbin_org.revsw.net',
   originServer = 'httpbin_org.revsw.net',
   testHTTPSUrl = config.get('test_proxy_https'),
+  origTestHTTPSUrl = testHTTPSUrl,
   newDomainName = config.get('test_domain_start') + Date.now() + config.get('test_domain_end'),
   testGroup = config.get('test_group'),
   AccountId = '',
@@ -20,6 +21,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
   testProxyIp = config.get('test_proxy_ip'),
   domainConfig = '',
   domainConfigId = '';
+var testHTTPSUrl = testHTTPSUrl.replace("https://", "").replace("http://", ""); // TODO igorastds: scheme/port info is lost now, set it somewhere
 
 describe('Proxy QUIC protocol control', function () {
 
@@ -77,7 +79,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('(smoke) should / make request by 443 port and check status code', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -88,7 +90,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make / request on 443 port and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -107,7 +109,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/5 request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/5", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/cache/5", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -127,7 +129,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/5 again request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/5", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/cache/5", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -147,7 +149,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /cache/60 request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/cache/60", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/cache/60", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -167,7 +169,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /ip request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/ip", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -182,7 +184,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /ip request with set XFF and check that proxy ignores it', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"], "X-Forwarded-For": ["'+forwardedIP+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/ip", "Headers": { "Host": ["'+testHTTPSUrl+'"], "X-Forwarded-For": ["'+forwardedIP+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -197,7 +199,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /ip request with set QUIC and check that proxy ignores it', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/ip", "Headers": { "Host": ["'+newDomainName+'"], "X-Rev-Transport": ["QUIC"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/ip", "Headers": { "Host": ["'+testHTTPSUrl+'"], "X-Rev-Transport": ["QUIC"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -212,7 +214,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /post request and check status', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/post", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "POST", "Data": "test=test" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/post", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "POST", "Data": "test=test" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -228,7 +230,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /post request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/post", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "POST", "Data": "test=test" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/post", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "POST", "Data": "test=test" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -243,7 +245,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /patch request and check status', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/patch", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PATCH" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/patch", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "PATCH" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -258,7 +260,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /patch request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/patch", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PATCH" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/patch", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "PATCH" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -273,7 +275,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /put request and check status', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/put", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PUT" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/put", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "PUT" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -288,7 +290,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /put request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/put", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "PUT" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/put", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "PUT" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -303,7 +305,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /delete request and check status', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/delete", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "DELETE" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/delete", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "DELETE" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -318,7 +320,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should make /delete request and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/delete", "Headers": { "Host": ["'+newDomainName+'"] }, "Method": "DELETE" }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/delete", "Headers": { "Host": ["'+testHTTPSUrl+'"] }, "Method": "DELETE" }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -333,7 +335,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('(smoke) should get CSS file request by 443 port', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/static/file.css", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -345,7 +347,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should get CSS file request by 443 port and check headers', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/static/file.css", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
@@ -362,7 +364,7 @@ describe('Proxy QUIC protocol control', function () {
 
   it('should get CSS file request by 443 port and check cache', function (done) {
     try {
-      var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443/static/file.css", "Headers": { "Host": ["'+newDomainName+'"] } }';
+      var httpGet = '{ "Endpoint": "'+"https://"+newDomainName+':443/static/file.css", "Headers": { "Host": ["'+testHTTPSUrl+'"] } }';
       var resp = quic.send(httpGet);
     } catch (err) {
       throw "Error: " + err;
