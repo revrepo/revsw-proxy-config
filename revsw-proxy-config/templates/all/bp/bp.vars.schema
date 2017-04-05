@@ -320,5 +320,5 @@
         "ENABLE_WAF",
         "WAF_RULES"
     ],
-   "additionalProperties": true
+   "additionalProperties": false
 }
