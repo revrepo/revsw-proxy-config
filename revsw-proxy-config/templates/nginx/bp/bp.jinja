@@ -340,7 +340,9 @@
           Don't propagate "Connection: close" from client
         #}
         proxy_set_header Connection "";
-        {{ waf_mod.get_rules(this, "/") }}
+        {% if this.ENABLE_WAF %}
+          {{ waf_mod.get_rules(this, "/") }}
+        {% endif %}
         }
       {% endfor %}{# url in this.BYPASS_CO_LOCATIONS #}
       # End CO bypass
