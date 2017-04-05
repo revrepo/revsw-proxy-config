@@ -46,6 +46,7 @@ pcm_config_process_data (struct libwebsocket        *wsi,
     char          *dn = NULL;
     char          *sdk_operation = NULL;
     char          *ssl_operation = NULL;
+    char          *waf_rule_operation = NULL;
     char          *configuration_type = NULL;
     const nx_json *json;
     const char    *status = "success";
@@ -145,6 +146,19 @@ pcm_config_process_data (struct libwebsocket        *wsi,
                 sprintf (file_path, "%s/ssl.json", PCM_CONFIG_JSON_PATH);
 
                 PCMC_LOG_DEBUG ("%s: processing config for SSL certificates", func_name);
+            } else if (strcmp(configuration_type, "waf_rule") == 0) {
+                waf_rule_operation = (char *)(nx_json_get (json, "operation")->text_value);
+
+                if (!waf_rule_operation) {
+                    pcm_rc = PCM_RC_INVALID_WAF_RULE_OPERATION;
+                    status = "input-error";
+                    goto send_reply;
+                }
+
+                sprintf (base_command, "%s", PCM_CONFIG_WAF_RULE_SCRIPT_NAME);
+                sprintf (file_path, "%s/waf_rule.json", PCM_CONFIG_JSON_PATH);
+
+                PCMC_LOG_DEBUG ("%s: processing config for WAF rule", func_name);
             } else {
                 pcm_rc = PCM_RC_INVALID_CONFIGURATION_TYPE;
                 status = "input-error";
