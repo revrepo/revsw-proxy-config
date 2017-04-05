@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 26
+            "maximum": 27
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -98,13 +98,6 @@
                 "type": "string",
                 "format": "uri"
             }
-        },
-        "SECURITY_MODE": {
-            "type": "string",
-            "pattern": "off|on|block|detect"
-        },
-        "SECURITY_RULES": {
-            "type": "string"
         },
         "DOMAIN_SHARDS_COUNT": {
             "type": "integer",
@@ -263,6 +256,12 @@
         "LUA_LOCATIONS": {
             "type": "array",
             "_comment": "Do not remove"
+        },
+        "ENABLE_WAF": {
+            "type": "boolean"
+        },
+        "WAF_RULES": {
+            "type": "array"
         }
     },
     "required": [
@@ -317,7 +316,9 @@
         "SSL_PROTOCOLS",
         "SSL_CIPHERS",
         "SSL_PREFER_SERVER_CIPHERS",
-        "SSL_CERT_ID"
+        "SSL_CERT_ID",
+        "ENABLE_WAF",
+        "WAF_RULES"
     ],
-   "additionalProperties": false
+   "additionalProperties": true
 }

@@ -153,7 +153,7 @@ _ignore_cookies_default = [
     r"**"
 ]
 
-_BP_CONFIG_VERSION = 26
+_BP_CONFIG_VERSION = 27
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 15
@@ -674,8 +674,8 @@ def generate_bp_domain_json(domain):
         "REV_PROFILES_COUNT": domain["profiles_count"],
         "REV_PROFILES_BASE_PORT_HTTP": domain["base_http_port"],
         "REV_PROFILES_BASE_PORT_HTTPS": domain["base_https_port"],
-        "SECURITY_MODE": "off",
-        "SECURITY_RULES": "",
+        "ENABLE_WAF": False,
+        "WAF_RULES": [],
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "CUSTOM_WEBSERVER_CODE_BEFORE": "",
         "CUSTOM_WEBSERVER_CODE_AFTER": "",
@@ -843,7 +843,8 @@ def generate_bp_ui_config_json(domain):
         "cdn_overlay_urls": static_servers,
         "caching_rules": domain["caching_rules"],
         "enable_security": False,
-        "web_app_firewall": "off",
+        "enable_waf": False,
+        "waf": [],
         "ssl_certificates": "rev_certs",
         "certificate_urls": [],
         "acl": {

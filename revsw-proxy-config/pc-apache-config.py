@@ -258,20 +258,8 @@ class ConfigCommon:
 
         security = self.ui_config["rev_component_bp"]
 
-        if not security["enable_security"]:
-            mode = "off"
-        else:
-            if security["web_app_firewall"] == "block_all":
-                mode = "block"
-            elif security["web_app_firewall"] == "detect":
-                mode = "detect"
-            elif security["web_app_firewall"] == "block":
-                mode = "on"
-            else:
-                mode = "off"
-
-        self._patch_if_changed_bp_webserver("SECURITY_MODE", mode)
-        self._patch_if_changed_bp_webserver("SECURITY_RULES", security.get("web_app_firewall_rules", True))
+        self._patch_if_changed_bp_webserver("ENABLE_WAF", security.get("enable_waf"))
+        self._patch_if_changed_bp_webserver("WAF_RULES", security.get("waf"))
         self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
 
         self._patch_if_changed_bp_webserver("acl", security.get("acl", {
@@ -279,7 +267,9 @@ class ConfigCommon:
             "action": "allow_except",
             "acl_rules": []
         }))
-        log.LOGD("Security parameters: %s | %s" % (security, mode))
+
+        log.LOGD("ACL parameters: %s | %s" % (security, security.get("acl")))
+        log.LOGD("WAF parameters: %s | %s" % (security, security.get("waf")))
 
     def _patch_ssl_vars(self):
         if "enable_ssl" in self.ui_config:
@@ -914,7 +904,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["CO_LUA_LOCATIONS"] = []
 
         if ver <= 27 < new_ver:
-            bp["SECURITY_RULES"] = ""
+            bp["ENABLE_WAF"] = False
+            bp["WAF_RULES"] = []
 
         bp["VERSION"] = new_ver
 

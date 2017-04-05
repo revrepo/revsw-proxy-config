@@ -3,10 +3,12 @@
 
 {% macro _do_setup_no_proxy(this, cert_dir) %}
     {% if this.SSL_CERT_ID == "" %}
-    # Disable SSLv2/3 because of SNI, which requires TLS
+    {# Disable SSLv2/3 because of SNI, which requires TLS #}
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    # No need to mitigate CRIME attack - SSL compression is off by default
-    # Use stronger ciphers, which may mitigate BEAST attacks
+    {#
+      No need to mitigate CRIME attack - SSL compression is off by default
+      Use stronger ciphers, which may mitigate BEAST attacks
+    #}
     ssl_ciphers {{ssl_ciphers}};
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
@@ -28,9 +30,9 @@
     {# # Disable SSLv2/3 because of SNI, which requires TLS #}
     proxy_ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     {#
-    # No need to mitigate CRIME attack - SSL compression is off by default
-    # Use stronger ciphers, which may mitigate BEAST attacks
-     #}
+      No need to mitigate CRIME attack - SSL compression is off by default
+      Use stronger ciphers, which may mitigate BEAST attacks
+    #}
     proxy_ssl_ciphers {{ssl_ciphers}};
     proxy_ssl_certificate /opt/revsw-config/certs/default/public.crt;
     proxy_ssl_certificate_key /opt/revsw-config/certs/default/private.key;
@@ -38,20 +40,20 @@
 {%- endmacro %}
 
 {% macro setup_no_proxy(this) %}
-    # Begin SSL setup (no proxy)
+    {# Begin SSL setup (no proxy) #}
     {{ _do_setup_no_proxy(this, site_cert_dir) }}
-    # End SSL setup
+    {# End SSL setup #}
 {%- endmacro %}
 
 {% macro setup_proxy_only(this) %}
-    # Begin SSL setup (proxy-only)
+    {# Begin SSL setup (proxy-only) #}
     {{ _do_setup_proxy_only(this, site_cert_dir) }}
-    # End SSL setup
+    {# End SSL setup #}
 {%- endmacro %}
 
 {% macro setup(this) %}
-    # Begin SSL setup
+    {# Begin SSL setup #}
     {{ _do_setup_no_proxy(this, site_cert_dir) }}
     {{ _do_setup_proxy_only(this, site_cert_dir) }}
-    # End SSL setup
+    {# End SSL setup #}
 {%- endmacro %}
