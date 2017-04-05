@@ -1,7 +1,7 @@
 {% macro get_rules(this, location) -%}
-  SecRulesEnabled;
   {% for waf in this.WAF_RULES %}
     {% if waf.location == location %}
+      SecRulesEnabled;
       {% if waf.enable_learning_mode %}
         LearningMode;
       {% endif %}
