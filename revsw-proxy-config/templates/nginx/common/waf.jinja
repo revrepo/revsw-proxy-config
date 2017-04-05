@@ -19,7 +19,7 @@
       {% for action in waf.waf_actions %}
         CheckRule "{{ action.condition }}" {{ action.action }};
       {% endfor %}
+      DeniedUrl "/50x.html";
     {% endif %}
   {% endfor %}
-  DeniedUrl "/50x.html";
 {%- endmacro %}
