@@ -14,6 +14,6 @@
   "token_with_api_scope": "sdtq34tqsdfasfdsdKJHIJHKJH656HGFhfyhgf",
   "token_with_monitor_scope": "bcverLJKHiyt8uihiu87665",
   "token_with_cdn_mngmnt_scope": "xdfihiuy87687JHGjg5fmhjjhgfHFhgfYr67YFG",
-  "waitTime": 5000,
-  "waitCount": 24
+  "waitTime": 10000,
+  "waitCount":30 
 }

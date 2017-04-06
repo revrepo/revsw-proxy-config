@@ -71,6 +71,7 @@ mkdir -p $FOLDERNAME/$DST/bin
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/certs
+mkdir -p $FOLDERNAME/$DST/waf-rules
 mkdir -p $FOLDERNAME/$DST/pcm-config-certs
 mkdir -p $FOLDERNAME/$DST/log
 mkdir -p $FOLDERNAME/$DST/maxmind

@@ -22,6 +22,7 @@
 #define PCM_CONFIG_DOMAIN_SCRIPT_NAME "python /opt/revsw-config/bin/pc-apache-config.py"
 #define PCM_CONFIG_SDK_SCRIPT_NAME    "python /opt/revsw-config/bin/revsw-sdk-nginx-gen-config.py"
 #define PCM_CONFIG_SSL_SCRIPT_NAME    "python /opt/revsw-config/bin/revsw-ssl-cert-manager.py"
+#define PCM_CONFIG_WAF_RULE_SCRIPT_NAME    "python /opt/revsw-config/bin/revsw-waf-rule-manager.py"
 
 #define PCM_CONFIG_CMD_BUFLEN    256
 #define PCM_CONFIG_FILE_BUFLEN   256
