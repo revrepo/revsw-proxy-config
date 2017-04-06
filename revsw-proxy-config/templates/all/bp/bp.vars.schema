@@ -290,6 +290,9 @@
                     }
                 }
             }
+        },
+        "SECURITY_MODE": {
+            "type": "string"
         }
     },
     "required": [
@@ -346,7 +349,8 @@
         "SSL_PREFER_SERVER_CIPHERS",
         "SSL_CERT_ID",
         "ENABLE_WAF",
-        "WAF_RULES"
+        "WAF_RULES",
+        "SECURITY_MODE"
     ],
    "additionalProperties": false
 }
