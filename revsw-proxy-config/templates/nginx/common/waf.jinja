@@ -1,25 +1,29 @@
 {% macro get_rules(this, location) -%}
   {% for waf in this.WAF_RULES %}
-    {% if waf.location == location and waf.enable_waf %}
-      SecRulesEnabled;
-      {% if waf.enable_learning_mode %}
-        LearningMode;
-      {% endif %}
-      {% if waf.enable_sql_injection_lib %}
-        LibInjectionSql;
-      {% endif %}
-      {% if waf.enable_xss_injection_lib %}
-        LibInjectionXss;
-      {% endif %}
+    {% if waf.location == location %}
+      {% if waf.enable_waf %}
+        SecRulesEnabled;
+        {% if waf.enable_learning_mode %}
+          LearningMode;
+        {% endif %}
+        {% if waf.enable_sql_injection_lib %}
+          LibInjectionSql;
+        {% endif %}
+        {% if waf.enable_xss_injection_lib %}
+          LibInjectionXss;
+        {% endif %}
 
-      {% for rule in waf.waf_rules %}
-        include /opt/revsw-config/waf-rules/{{ rule }}.rule;
-      {% endfor %}
+        {% for rule in waf.waf_rules %}
+          include /opt/revsw-config/waf-rules/{{ rule }}.rule;
+        {% endfor %}
 
-      {% for action in waf.waf_actions %}
-        CheckRule "{{ action.condition }}" {{ action.action }};
-      {% endfor %}
-      DeniedUrl "/50x.html";
+        {% for action in waf.waf_actions %}
+          CheckRule "{{ action.condition }}" {{ action.action }};
+        {% endfor %}
+        DeniedUrl "/50x.html";
+      {% else %}
+        SecRulesDisabled;
+      {% endif %}
     {% endif %}
   {% endfor %}
 {%- endmacro %}
