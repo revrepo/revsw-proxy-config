@@ -266,6 +266,9 @@
                     "location": {
                         "type": "string"
                     },
+                    "enable_waf": {
+                        "type": "boolean"
+                    },
                     "enable_learning_mode": {
                         "type": "boolean"
                     },
@@ -276,7 +279,11 @@
                         "type": "boolean"
                     },
                     "waf_rules": {
-                        "type": "array"
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^([a-zA-Z0-9]{24})$"
+                        }
                     },
                     "waf_actions": {
                         "type": "array"
