@@ -169,38 +169,37 @@
         "ENABLE_VARNISH_GEOIP_HEADERS": {
             "type": "boolean"
         },
-       "ENABLE_PROXY_BUFFERING": {
+        "ENABLE_PROXY_BUFFERING": {
             "type": "boolean"
         },
-       "END_USER_RESPONSE_HEADERS": {
+        "END_USER_RESPONSE_HEADERS": {
             "type": "array",
             "items": {
-		"type": "object",
-		"properties": 
-		{
-		    "operation": {"type": "string"},
-		    "header_name": {"type": "string"},
-		    "header_value": {"type": "string"}
-		}	    
+                "type": "object",
+                "properties": {
+                    "operation": {"type": "string"},
+                    "header_name": {"type": "string"},
+                    "header_value": {"type": "string"}
+                }
             }
         },
-       "ENABLE_RUM": {
+        "ENABLE_RUM": {
             "type": "boolean"
-       },
-       "REV_RUM_BEACON_URL": {
+        },
+        "REV_RUM_BEACON_URL": {
             "type": "string",
             "anyOf": [
                 { "format": "uri" },
                 { "pattern": "" }
             ]
         },
-       "ENABLE_OPTIMIZATION": {
+        "ENABLE_OPTIMIZATION": {
             "type": "boolean"
         },
         "ENABLE_DECOMPRESSION": {
             "type": "boolean"
         },
-       "ORIGIN_REQUEST_HEADERS": {
+        "ORIGIN_REQUEST_HEADERS": {
             "type": "array",
             "items": {
 		        "type": "object",
@@ -215,7 +214,6 @@
         "ENABLE_QUIC": {
             "type": "boolean"
         },
-
         "ENABLE_SSL": {
             "type": "boolean"
         },
@@ -261,7 +259,30 @@
             "type": "boolean"
         },
         "WAF_RULES": {
-            "type": "array"
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string"
+                    },
+                    "enable_learning_mode": {
+                        "type": "boolean"
+                    },
+                    "enable_sql_injection_lib": {
+                        "type": "boolean"
+                    },
+                    "enable_xss_injection_lib": {
+                        "type": "boolean"
+                    },
+                    "waf_rules": {
+                        "type": "array"
+                    },
+                    "waf_actions": {
+                        "type": "array"
+                    }
+                }
+            }
         }
     },
     "required": [
