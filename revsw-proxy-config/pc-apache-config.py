@@ -258,8 +258,8 @@ class ConfigCommon:
 
         security = self.ui_config["rev_component_bp"]
 
-        self._patch_if_changed_bp_webserver("ENABLE_WAF", security.get("enable_waf"))
-        self._patch_if_changed_bp_webserver("WAF_RULES", security.get("waf"))
+        self._patch_if_changed_bp_webserver("ENABLE_WAF", security.get("enable_waf", False))
+        self._patch_if_changed_bp_webserver("WAF_RULES", security.get("waf", []))
         self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
 
         self._patch_if_changed_bp_webserver("acl", security.get("acl", {
