@@ -343,7 +343,7 @@
         #}
         proxy_set_header Connection "";
         {% if this.ENABLE_WAF %}
-          {{ waf_mod.get_rules(this, "/") }}
+          {{ waf_mod.get_rules(this, rel_url) }}
         {% endif %}
         }
       {% endfor %}{# url in this.BYPASS_CO_LOCATIONS #}
@@ -372,6 +372,24 @@
       {% endif %}
     }
   {% endif %}
+
+  {# WAF rules for location not present in BYPASS #}
+  {% for waf in this.WAF_RULES %}
+    {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
+      {% if waf.location != '/' %}
+        location {{ waf.location }} {
+          proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ waf.location }};
+          proxy_ssl_server_name on;
+          proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
+          proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
+          proxy_set_header Connection "";
+          {% if this.ENABLE_WAF %}
+            {{ waf_mod.get_rules(this, waf.location) }}
+          {% endif %}
+        }
+      {% endif %}
+    {% endif %}
+  {% endfor %}
 
   {% if this.ENABLE_VARNISH %}
     {# TODO: RevProfilesMode varnish_step2 #}
