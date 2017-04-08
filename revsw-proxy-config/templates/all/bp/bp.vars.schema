@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 26
+            "maximum": 27
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -99,10 +99,6 @@
                 "format": "uri"
             }
         },
-        "SECURITY_MODE": {
-            "type": "string",
-            "pattern": "off|on|block|detect"
-        },
         "DOMAIN_SHARDS_COUNT": {
             "type": "integer",
             "minimum": 0
@@ -173,38 +169,37 @@
         "ENABLE_VARNISH_GEOIP_HEADERS": {
             "type": "boolean"
         },
-       "ENABLE_PROXY_BUFFERING": {
+        "ENABLE_PROXY_BUFFERING": {
             "type": "boolean"
         },
-       "END_USER_RESPONSE_HEADERS": {
+        "END_USER_RESPONSE_HEADERS": {
             "type": "array",
             "items": {
-		"type": "object",
-		"properties": 
-		{
-		    "operation": {"type": "string"},
-		    "header_name": {"type": "string"},
-		    "header_value": {"type": "string"}
-		}	    
+                "type": "object",
+                "properties": {
+                    "operation": {"type": "string"},
+                    "header_name": {"type": "string"},
+                    "header_value": {"type": "string"}
+                }
             }
         },
-       "ENABLE_RUM": {
+        "ENABLE_RUM": {
             "type": "boolean"
-       },
-       "REV_RUM_BEACON_URL": {
+        },
+        "REV_RUM_BEACON_URL": {
             "type": "string",
             "anyOf": [
                 { "format": "uri" },
                 { "pattern": "" }
             ]
         },
-       "ENABLE_OPTIMIZATION": {
+        "ENABLE_OPTIMIZATION": {
             "type": "boolean"
         },
         "ENABLE_DECOMPRESSION": {
             "type": "boolean"
         },
-       "ORIGIN_REQUEST_HEADERS": {
+        "ORIGIN_REQUEST_HEADERS": {
             "type": "array",
             "items": {
 		        "type": "object",
@@ -219,7 +214,6 @@
         "ENABLE_QUIC": {
             "type": "boolean"
         },
-
         "ENABLE_SSL": {
             "type": "boolean"
         },
@@ -260,6 +254,45 @@
         "LUA_LOCATIONS": {
             "type": "array",
             "_comment": "Do not remove"
+        },
+        "ENABLE_WAF": {
+            "type": "boolean"
+        },
+        "WAF_RULES": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string"
+                    },
+                    "enable_waf": {
+                        "type": "boolean"
+                    },
+                    "enable_learning_mode": {
+                        "type": "boolean"
+                    },
+                    "enable_sql_injection_lib": {
+                        "type": "boolean"
+                    },
+                    "enable_xss_injection_lib": {
+                        "type": "boolean"
+                    },
+                    "waf_rules": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^([a-zA-Z0-9]{24})$"
+                        }
+                    },
+                    "waf_actions": {
+                        "type": "array"
+                    }
+                }
+            }
+        },
+        "SECURITY_MODE": {
+            "type": "string"
         }
     },
     "required": [
@@ -314,7 +347,9 @@
         "SSL_PROTOCOLS",
         "SSL_CIPHERS",
         "SSL_PREFER_SERVER_CIPHERS",
-        "SSL_CERT_ID"
+        "SSL_CERT_ID",
+        "ENABLE_WAF",
+        "WAF_RULES"
     ],
    "additionalProperties": false
 }

@@ -124,8 +124,15 @@ class ConfigWAF:
         if not os.path.exists(self.conf["location"]):
             os.makedirs(self.conf["location"])
 
+        body = ""
+        for x in self.config_vars["rule_body"].split('\n'):
+            rule = x.strip()
+            if rule[0] != "#":
+                body += "BasicRule "
+            body += '%s\n' % rule
+
         with open(self.conf["location"] + self.config_vars["id"] + '.rule', 'w+') as \
-                f: f.write(self.config_vars["rule_body"])
+                f: f.write(body)
 
     def _remove_rules(self):
         self.log.LOGI("Starting removing process " + sys._getframe().f_code.co_name)
