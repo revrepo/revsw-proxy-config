@@ -25,7 +25,7 @@ var testHTTPSUrl = testHTTPSUrl.replace("https://", "").replace("http://", ""); 
 
 describe('Proxy QUIC protocol control', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)

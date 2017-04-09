@@ -15,7 +15,7 @@ tools.debugMode(false);
 
 describe('SSL test', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
 
   it('should check certificate organithation and cipher', function (done) {

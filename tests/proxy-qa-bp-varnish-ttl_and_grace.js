@@ -112,7 +112,7 @@ function test_cache_time(sleep_time, generic_object)
 }
 
 describe('Headers Manipulation Test - check specific timing related headers and the normal flow (no backend problems)', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_normalflow=" + random_number.toString();
@@ -264,7 +264,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 });
 
 describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 404 status codes', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
@@ -323,7 +323,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 });
 
 describe('Headers Manipulation Test - check specific timing related headers and the backend responds just with 500 status codes', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
@@ -370,7 +370,7 @@ describe('Headers Manipulation Test - check specific timing related headers and 
 });
 
 describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 404 status codes', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404half_flow=" + random_number.toString();
@@ -609,7 +609,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 });
 
 describe('Headers Manipulation Test - check specific timing related headers on intermitent responses with 500 status codes', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500half_flow=" + random_number.toString();
@@ -895,7 +895,7 @@ describe('Headers Manipulation Test - check specific timing related headers on i
 });
 
 describe('Headers Manipulation Test - check grace value in normal circumstances for test resource', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/fictive_resource_for_grace.html';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_grace_normal_flow=" + random_number.toString();

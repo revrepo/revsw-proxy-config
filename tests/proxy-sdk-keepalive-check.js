@@ -17,7 +17,7 @@ var originHostHeader = 'httpbin_org.revsw.net',
 
 describe('Proxy X-Forwarded-For check', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 //1
   it('(smoke) should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {

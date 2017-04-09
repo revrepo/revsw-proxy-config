@@ -105,7 +105,7 @@ function check_varnish_headers(generic_object)
 // add a new domain and continue
 
 describe('Headers Manipulation Test - Varnish specific resource - specific headers', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 
 	var base_path_cgi = '/cgi-bin/envtest.cgi';
 	var base_path_text = '/test_generic_txt.txt';
