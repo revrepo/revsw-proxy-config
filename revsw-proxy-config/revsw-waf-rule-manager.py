@@ -127,8 +127,9 @@ class ConfigWAF:
         body = ""
         for x in self.config_vars["rule_body"].split('\n'):
             rule = x.strip()
-            if rule[0] != "#":
-                body += "BasicRule "
+            if len(rule) > 5:
+                if rule[0] != "#":
+                    body += "BasicRule "
             body += '%s\n' % rule
 
         with open(self.conf["location"] + self.config_vars["id"] + '.rule', 'w+') as \

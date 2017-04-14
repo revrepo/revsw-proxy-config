@@ -322,12 +322,14 @@
           {{ waf_mod.get_rules(this, "/") }}
         {% endif %}
     }
-    {% if this.BYPASS_CO_LOCATIONS %}{# the balancer is defined in balancer_mod.define_bp_ows_balancer() #}
-      {% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
-      {% set ows_proto = "https://" if origins[0]|truncate(5, True, "") == "https" else "http://" %}
-      {% for url in this.BYPASS_CO_LOCATIONS %}
-        {% set rel_url = url if url[0] != "/" else url[1:] %}
-        location /{{rel_url}} {
+  {% endif %}
+
+  {% if this.BYPASS_CO_LOCATIONS %}{# the balancer is defined in balancer_mod.define_bp_ows_balancer() #}
+    {% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
+    {% set ows_proto = "https://" if origins[0]|truncate(5, True, "") == "https" else "http://" %}
+    {% for url in this.BYPASS_CO_LOCATIONS %}
+      {% set rel_url = url if url[0] != "/" else url[1:] %}
+      location /{{rel_url}} {
         proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}/{{ rel_url }};
         {#
           TODO: RevProfilesMode off
@@ -335,7 +337,6 @@
         #}
         proxy_ssl_server_name on;
         proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-        {# if this.BYPASS_CO_LOCATIONS #}
         proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
         {#
           if this.BYPASS_CO_LOCATIONS
@@ -343,35 +344,11 @@
         #}
         proxy_set_header Connection "";
         {% if this.ENABLE_WAF %}
-          {{ waf_mod.get_rules(this, rel_url) }}
+          {{ waf_mod.get_rules(this, url) }}
         {% endif %}
-        }
-      {% endfor %}{# url in this.BYPASS_CO_LOCATIONS #}
-      # End CO bypass
-    {% endif %}{# this.BYPASS_CO_LOCATIONS #}
-  {% else %}
-    {% set origins = this.ORIGIN_SERVERS_HTTPS if is_https else this.ORIGIN_SERVERS_HTTP %}
-    {% set ows_proto = "https://" if origins[0]|truncate(5, True, "") == "https" else "http://" %}
-    location / {
-      proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}/;
-      {#
-        TODO: RevProfilesMode off
-        Make sure the origin sees the right Host header
-      #}
-      proxy_ssl_server_name on;
-      proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-      {# if this.BYPASS_CO_LOCATIONS #}
-      proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
-      {#
-        if this.BYPASS_CO_LOCATIONS
-        Don't propagate "Connection: close" from client
-      #}
-      proxy_set_header Connection "";
-      {% if this.ENABLE_WAF %}
-        {{ waf_mod.get_rules(this, "/") }}
-      {% endif %}
-    }
-  {% endif %}
+      }
+    {% endfor %}
+  {% endif %}{# this.BYPASS_CO_LOCATIONS #}
 
   {# WAF rules for location not present in BYPASS #}
   {% for waf in this.WAF_RULES %}
@@ -390,6 +367,12 @@
       {% endif %}
     {% endif %}
   {% endfor %}
+
+  {% if this.ENABLE_WAF %}
+    location = /50x.html {
+      return 418;
+    }
+  {% endif %}
 
   {% if this.ENABLE_VARNISH %}
     {# TODO: RevProfilesMode varnish_step2 #}
