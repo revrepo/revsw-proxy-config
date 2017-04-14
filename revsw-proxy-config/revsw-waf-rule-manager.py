@@ -127,7 +127,7 @@ class ConfigWAF:
         body = ""
         for x in self.config_vars["rule_body"].split('\n'):
             rule = x.strip()
-            if len(rule) > 5:
+            if len(rule) > 0:
                 if rule[0] != "#":
                     body += "BasicRule "
             body += '%s\n' % rule
