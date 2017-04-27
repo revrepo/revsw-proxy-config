@@ -318,7 +318,7 @@
   {% if not '/' in this.BYPASS_CO_LOCATIONS %}
     location / {
         {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
-        {% if this.ENABLE_WAF %}
+        {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, "/") }}
         {% endif %}
     }
@@ -344,7 +344,7 @@
           Don't propagate "Connection: close" from client
         #}
         proxy_set_header Connection "";
-        {% if this.ENABLE_WAF %}
+        {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, url) }}
         {% endif %}
       }
@@ -352,24 +352,24 @@
   {% endif %}{# this.BYPASS_CO_LOCATIONS #}
 
   {# WAF rules for location not present in BYPASS #}
-  {% for waf in this.WAF_RULES %}
-    {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
-      {% if waf.location != '/' %}
-        location {{ waf.location }} {
-          proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ waf.location }};
-          proxy_ssl_server_name on;
-          proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-          proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
-          proxy_set_header Connection "";
-          {% if this.ENABLE_WAF %}
-            {{ waf_mod.get_rules(this, waf.location) }}
-          {% endif %}
-        }
+  {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
+    {% for waf in this.WAF_RULES %}
+      {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
+        {% if waf.location != '/' %}
+          location {{ waf.location }} {
+            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ waf.location }};
+            proxy_ssl_server_name on;
+            proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
+            proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
+            proxy_set_header Connection "";
+            {% if this.ENABLE_WAF %}
+              {{ waf_mod.get_rules(this, waf.location) }}
+            {% endif %}
+          }
+        {% endif %}
       {% endif %}
-    {% endif %}
-  {% endfor %}
+    {% endfor %}
 
-  {% if this.ENABLE_WAF %}
     location = /50x.html {
       return 418;
     }
@@ -388,8 +388,9 @@
   {#
     Save client address:
     local QUIC proxy requests come from $remote_addr 127.0.0.1 but the QUIC proxy always sets
-    X-Forwarded-For header for real end user IP address.
+    X-Forwarded-For header for real end user IP address
     Nginx log should use $clientip variable to report "clientip" attribute
+    X-Real-IP header for real end user IP address for Naxsi module.
   #}
   set $clientip $remote_addr;
   if ($http_x_rev_transport = "QUIC") {
@@ -399,6 +400,7 @@
     set  $clientip $remote_addr;
   }
   proxy_set_header X-Forwarded-For $clientip;
+  proxy_set_header X-Real-IP $clientip;
 
   {# Optional user customizations in BP frontend #}
   {% if this.CUSTOM_WEBSERVER_CODE_BEFORE %}
