@@ -11,6 +11,8 @@
     #}
     ssl_ciphers {{ssl_ciphers}};
     ssl_prefer_server_ciphers on;
+    ssl_stapling on;
+    ssl_stapling_verify on;
     ssl_session_cache shared:SSL:10m;
     ssl_certificate {{ cert_dir }}default/public.crt;
     ssl_certificate_key {{ cert_dir }}default/private.key;
@@ -20,6 +22,8 @@
     {% if this.SSL_CIPHERS %}ssl_ciphers {{ this.SSL_CIPHERS }};{% endif %}
 
     ssl_prefer_server_ciphers {% if this.SSL_PREFER_SERVER_CIPHERS %}on{% else %}off{% endif %};
+    ssl_stapling {% if this.SSL_STAPLING %}on{% else %}off{% endif %};
+    ssl_stapling_verify {% if this.SSL_STAPLING_VERIFY %}on{% else %}off{% endif %};
     ssl_certificate {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/public.crt;
     ssl_certificate_key {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/private.key;
     {% endif %}

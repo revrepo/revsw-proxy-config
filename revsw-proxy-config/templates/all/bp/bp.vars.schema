@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 27
+            "maximum": 28
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -226,6 +226,12 @@
         "SSL_PREFER_SERVER_CIPHERS": {
             "type": "boolean"
         },
+        "SSL_STAPLING": {
+            "type": "boolean"
+        },
+        "SSL_STAPLING_VERIFY": {
+            "type": "boolean"
+        },
         "SSL_CERT_ID": {
             "type": "string"
         },
@@ -347,6 +353,8 @@
         "SSL_PROTOCOLS",
         "SSL_CIPHERS",
         "SSL_PREFER_SERVER_CIPHERS",
+        "SSL_STAPLING",
+        "SSL_STAPLING_VERIFY",
         "SSL_CERT_ID",
         "ENABLE_WAF",
         "WAF_RULES"
