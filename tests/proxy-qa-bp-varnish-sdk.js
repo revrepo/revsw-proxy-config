@@ -28,7 +28,7 @@ var hostname_internal = '0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net';
 var x_rev_hostname_internal = 'test-proxy-nodejs-server-status-frontend-control.revsw.net';
 
 var hostname_external = '0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net';
-var x_rev_hostname_external = 'httpbin.org';
+var x_rev_hostname_external = 'httpbin_org.revsw.net';
 
 function custom_sleep(time) {
 	var stop = new Date().getTime();
@@ -331,10 +331,10 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(0, {
@@ -356,10 +356,10 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(1000, {
@@ -381,10 +381,10 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 
@@ -415,10 +415,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(0, {
@@ -440,10 +440,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(1000, {
@@ -465,10 +465,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 
