@@ -709,6 +709,8 @@ def generate_bp_domain_json(domain):
         "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2",
         "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",
         "SSL_PREFER_SERVER_CIPHERS": True,
+        "SSL_STAPLING": True,
+        "SSL_STAPLING_VERIFY": True,
         "SSL_CERT_ID": "default",
         "BP_LUA_LOCATIONS": [],
         "CO_LUA_LOCATIONS": []
