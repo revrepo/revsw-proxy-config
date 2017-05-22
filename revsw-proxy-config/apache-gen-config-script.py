@@ -156,7 +156,7 @@ _ignore_cookies_default = [
 _BP_CONFIG_VERSION = 27
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 15
+_VARNISH_CONFIG_VERSION = 16
 
 
 # noinspection PyClassHasNoInit
@@ -545,6 +545,7 @@ def fixup_domain(domain):
         for ign_cookie in domain["ignore_cookies"]:
             remove_cookies_rule = {
                 "version": 1,
+                "enable_esi": False,
                 "url": {
                     "is_wildcard": True,
                     "value": ign_cookie

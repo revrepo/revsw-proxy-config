@@ -982,6 +982,7 @@ def _check_and_get_attr(command, attr):
 
 
 def configure_all(config):
+    _log.LOGD(u"Input CONFIG is: ", json.dumps(config))
     if "version" not in config:
         raise AttributeError("No version info in configuration")
     if config["version"] != API_VERSION:
