@@ -156,7 +156,7 @@ _ignore_cookies_default = [
 _BP_CONFIG_VERSION = 27
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 16
+_VARNISH_CONFIG_VERSION = 17
 
 
 # noinspection PyClassHasNoInit
@@ -550,10 +550,16 @@ def fixup_domain(domain):
                     "is_wildcard": True,
                     "value": ign_cookie
                 },
+                "serve_stale": {
+                    "enable": False,
+                    "while_fetching_ttl": 8,
+                    "origin_sick_ttl": 15
+                },
                 "edge_caching": {
                     "override_origin": False,
                     "override_no_cc": False,
-                    "new_ttl": 0
+                    "new_ttl": 0,
+                    "query_string_keep_or_remove_list": []
                 },
                 "browser_caching": {
                     "override_edge": False,
