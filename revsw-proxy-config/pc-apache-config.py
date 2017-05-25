@@ -23,7 +23,7 @@ _UI_CONFIG_VERSION = "1.0.6"
 _BP_CONFIG_VERSION = 27
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 16
+_VARNISH_CONFIG_VERSION = 17
 
 
 class ConfigCommon:
@@ -1103,6 +1103,16 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
             if "enable_esi" not in caching_rule:
                 caching_rule["enable_esi"] = False
 
+    if ver <= 17 < new_ver:
+        for caching_rule in vars_["CACHING_RULES"]:
+            if "serve_stale" not in caching_rule:
+                caching_rule["serve_stale"] = {
+                  "enable": False,
+                  "while_fetching_ttl": 8,
+                  "origin_sick_ttl": 15
+                }
+            if "query_string_keep_or_remove_list" not in caching_rule["edge_caching"]:
+                caching_rule["edge_caching"]["query_string_keep_or_remove_list"] = []
 
     if "URLS_REMOVE_COOKIES_REGEX" in vars_:
         del vars_["URLS_REMOVE_COOKIES_REGEX"]
