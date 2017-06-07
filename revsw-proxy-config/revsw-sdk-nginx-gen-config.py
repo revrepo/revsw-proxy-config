@@ -4,6 +4,9 @@
 This module is used by the revws-pcm-config daemon to change and refresh Nginx server configuration.
 Usage of script with possible options:
     $ rewsw-sdk-nginx-gen-config -f <JSON configuration file> -t <Jinja template file>
+
+TODO:
+    1. Write Unit test for module
 """
 import json
 import optparse
@@ -176,10 +179,8 @@ class NginxConfigSDK:
         return p.returncode
 
     def refresh_configuration(self):
-        """Refreshes Nginx configuration based on Jinja template found in
-        /opt/revsw-config/templates/all/bp and JSON configuration from
-        /opt/revsw-config/policy. Template or configuration can be specified
-        at runtime of the script.
+        """Refreshes Nginx configuration based on Jinja template and JSON found in
+        jinja_template and jinja_conf_vars class variables
         """
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
 
