@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+"""This module provides a command line interface to update the Nginx configuration file.
 
-# Script used by revws-pfm-config daemon to change and refresh Nginx server configuration.
-# Usage of script with possible options:
-# $ rewsw-sdk-nginx-gen-config -f <JSON configuration file> -t <Jinja template file>
-
+This module is used by the revws-pcm-config daemon to change and refresh Nginx server configuration.
+Usage of script with possible options:
+    $ rewsw-sdk-nginx-gen-config -f <JSON configuration file> -t <Jinja template file>
+"""
 import json
 import optparse
 import os
@@ -20,9 +21,14 @@ from revsw.logger import RevSysLogger
 # Defines config structure version
 SDK_VERSION = 1
 
-# NginxConfigSDK Class changes Nginx Server configuration
 class NginxConfigSDK:
-    # Constructor sets default values and interprets arguments given in the command line
+    """NginxConfigSDK refreshes the configuration of the Nginx server based on
+    default or given values.
+
+    Args:
+        args (dict, optional): A dictionary of configuration parameters to
+        overide default action of class. Default is empty.
+    """
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.nginx_conf = {}
@@ -170,8 +176,7 @@ class NginxConfigSDK:
         return p.returncode
 
     def refresh_configuration(self):
-        """
-        Refreshes Nginx configuration based on Jinja template found in
+        """Refreshes Nginx configuration based on Jinja template found in
         /opt/revsw-config/templates/all/bp and JSON configuration from
         /opt/revsw-config/policy. Template or configuration can be specified
         at runtime of the script.
