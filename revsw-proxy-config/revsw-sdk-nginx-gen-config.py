@@ -31,6 +31,11 @@ class NginxConfigSDK:
     Args:
         args (dict, optional): A dictionary of configuration parameters to
         overide default action of class. Default is empty.
+
+    Attributes:
+        log (instance): Logging utility.
+        nginx_conf (dict): Configuration parameter dictionary.
+        env (instance): Jinja Sandbox enivornment.
     """
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
@@ -75,7 +80,8 @@ class NginxConfigSDK:
     # Read JSON file and save them into class instance's config_vars variable
     def _read_sdk_config_files(self):
         """
-        input: reads the content of the configuration json file
+        input: reads the content of the configuration json file in
+            class variable nginx_conf["jinja_conf_vars"]
         output: returns a status code and populates self.config_vars if everything is ok
          - 0 - if no problems have been encountered
          - 1 - if the provided file is not in the correct json file

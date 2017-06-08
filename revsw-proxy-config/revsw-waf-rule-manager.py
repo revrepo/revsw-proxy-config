@@ -11,9 +11,13 @@ from revsw.logger import RevSysLogger
 
 
 def run_cmd(cmd, logger, help=None, silent=False):
-    """
-    Run a shell command.
-    logger is either RevStdLogger of RevSysLogger
+    """Run a shell command.
+
+    Args:
+        cmd (str): Shell command to run.
+        logger (instance): Logger instance. Logger is either RevStdLogger of RevSysLogger.
+        help (str, optional): Help info to show. Defaults to None.
+        silent (boolean, optional): Show more info when running if true. Defaults to false.
     """
     errmsg = None
     try:
@@ -43,6 +47,21 @@ def run_cmd(cmd, logger, help=None, silent=False):
 
 
 class ConfigWAF:
+    """Class that sets up Nginx server waf rules.
+
+    Args:
+        args (dict, optional): Optional External argument to overide defualt
+            configuration file. Defualt is empty.
+
+    Attributes:
+        log (instance): Logging utility
+        conf (dict): Configuration settings such as location, temp location and
+            operation type.
+        config_vars (dict): JSON file of configuration variables.
+        rollback (list): List of roll back functions.
+        status (bool): True if configuration settings are correct. False
+            otherwise
+    """
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.conf = {}
@@ -171,12 +190,21 @@ class ConfigWAF:
         p.communicate()
 
         return p.returncode
-
     def rollback(self):
+        """Executes rollback functions stored in instance variable rollbacks
+        """
         while self.rollbacks:
             self.rollbacks.pop()()
 
     def run(self, cmd_func, rollback_func=None):
+        """Runs command and adds rollback function to rollbacks instance variable
+
+        Args:
+            cmd_func (function): Function to run. In this module we use the
+                run_cmd function access shell.
+            rollback_func(function, optional): Rollback function to add to
+                rollbacks instance variable. Defaults to none.
+        """
         try:
             cmd_func()
             if rollback_func:
