@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """This module provides a command line interface to update the Nginx configuration file.
 
-This module is used by the revws-pcm-config daemon to change and refresh Nginx server configuration.
+This module is used by the revws-pcm-config daemon to change and refresh Nginx
+server configuration on edge server.
 Usage of script with possible options:
     $ rewsw-sdk-nginx-gen-config -f <JSON configuration file> -t <Jinja template file>
 

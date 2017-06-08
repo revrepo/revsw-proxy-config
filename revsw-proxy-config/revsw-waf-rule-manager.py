@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""This module provides a command line interface to update the WAF rules for Nginx.
+
+This module is used by the revws-pcm-config daemon to change and refresh Nginx
+server WAF configuration.
+Usage of script with possible options:
+    $ rewsw-waf-rule-manager -f <JSON configuration file>
+
+TODO:
+    1. Write Unit test for module
+"""
 
 import json
 import optparse
@@ -14,7 +24,7 @@ def run_cmd(cmd, logger, help=None, silent=False):
     """Run a shell command.
 
     Args:
-        cmd (str): Shell command to run.
+        cmd (str): Shell command to run on server.
         logger (instance): Logger instance. Logger is either RevStdLogger of RevSysLogger.
         help (str, optional): Help info to show. Defaults to None.
         silent (boolean, optional): Show more info when running if true. Defaults to false.
@@ -200,8 +210,8 @@ class ConfigWAF:
         """Runs command and adds rollback function to rollbacks instance variable
 
         Args:
-            cmd_func (function): Function to run. In this module we use the
-                run_cmd function access shell.
+            cmd_func (function): Function to run on system. In this module we use the
+                run_cmd function access shell on edge server.
             rollback_func(function, optional): Rollback function to add to
                 rollbacks instance variable. Defaults to none.
         """
