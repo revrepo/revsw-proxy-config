@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""This module provides a command line interface to update the WAF rules for Nginx.
+"""This module provides a command line interface to update the WAF rules
+for Nginx edge server.
 
 This module is used by the revws-pcm-config daemon to change and refresh Nginx
 server WAF configuration on edge server.
@@ -26,7 +27,7 @@ def run_cmd(cmd, logger, help=None, silent=False):
 
     Args:
         cmd (str): Shell command to run on server.
-        logger (instance): Logger instance. Logger is either RevStdLogger of RevSysLogger.
+        logger (instance): Logger instance. Logger is either RevStdLogger or RevSysLogger.
         help (str, optional): Help info to show. Defaults to None.
         silent (boolean, optional): Show more info when running if true. Defaults to false.
     """
