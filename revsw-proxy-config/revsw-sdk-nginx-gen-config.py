@@ -8,6 +8,7 @@ Usage of script with possible options:
 
 TODO:
     1. Write Unit test for module
+    2. Switch optparse for argparse due to depreciation of optparse
 """
 import json
 import optparse
