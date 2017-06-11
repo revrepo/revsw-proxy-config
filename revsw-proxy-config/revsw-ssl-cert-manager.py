@@ -3,7 +3,7 @@
 for Nginx edge server.
 
 This module is used by the revws-pcm-config daemon to change and refresh Nginx
-server WAF configuration on edge server.
+server ssl certs configuration on edge server.
 Usage of script with possible options:
     $ rewsw-ssl-cert-manager -f <JSON configuration file>
 
@@ -222,8 +222,7 @@ class ConfigSSL:
         return p.returncode
 
     def rollback(self):
-        """Executes rollback functions stored in instance variable rollbacks
-        """
+        """Executes rollback functions stored in instance variable rollbacks"""
         while self.rollbacks:
             self.rollbacks.pop()()
 

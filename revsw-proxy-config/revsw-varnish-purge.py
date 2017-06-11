@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""This module is purges objects that are set by the user in the revAPM portal.
+
+TODO:
+    1. Take the main functionality of the script and place it inside a function.
+    2. Insert command line options like in ssl cert or WAF rules manager.
+"""
 import argparse
 import fnmatch
 import json
@@ -19,7 +25,17 @@ admin = VarnishAdmin()
 
 _UI_PURGE_VERSION = 1
 
-def json_validator(jsonfile, schemafile):#returns stiring with error code if any
+def json_validator(jsonfile, schemafile):
+    """Function used to validate a JSON purge file with the schema provided.
+
+    Args:
+        jsonfile (str): Location of json file.
+        schemafile (str): Location of schema file that will be used to validate
+            the json provided by jsonfile.
+
+    Returns:
+        str: Returns "Pass" if no errors. Returns error code if there is a problem.
+    """
     json1 = open(jsonfile).read()
     schema1 = open(schemafile).read()
     jdata = json.loads(json1)
@@ -46,7 +62,7 @@ def json_validator(jsonfile, schemafile):#returns stiring with error code if any
 def fatal(msg):
     log.LOGE(msg)
     sys.exit(1)
-        
+
 status = json_validator("/opt/revsw-config/policy/ui-purge.json","/opt/revsw-config/varnish/ui-purge.vars.schema")#test file here
 if status != "Pass":
     print "json validation failed [%s]" % status
@@ -66,6 +82,6 @@ for rule in urls:
     else:
         print "This rule received regex"
         regex = expression
-    
+
     command = "obj.http.X-Rev-Host == %s && obj.http.X-Rev-Url ~ %s" % (domain, regex)
     admin.ban(command)
