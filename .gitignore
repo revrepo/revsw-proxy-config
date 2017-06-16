@@ -48,6 +48,10 @@ tags
 *.so
 obj
 
+# Temporary test files #
+###############
+temporary_testing_files/
+
 # pyCharm workspaces
 .idea
 *~

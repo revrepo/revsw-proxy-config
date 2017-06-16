@@ -648,6 +648,7 @@ class NginxConfig(WebServerConfig):
 
     @_webserver_write_command
     def remove_site(self):
+        # TODO: we need to replace path to NGINX to variable outside this class
         self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-enabled/%s.conf" % self.site_name, _log,
                                              "Disabling site '%s' if it exists" % self.site_name))
         self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-available/%s.conf" % self.site_name, _log,
@@ -707,6 +708,7 @@ class NginxConfig(WebServerConfig):
             cfg = cfg.replace('\n\n', '\n')
             cfg = cfg.replace('\n\n', '\n')
 
+            #TODO: we need to replace path to NGINX to variable outside this class
             conf_file_name = "/etc/nginx/sites-available/%s.conf" % self.site_name
 
             with open(conf_file_name + ".tmp", "w") as f:
@@ -860,6 +862,7 @@ class VarnishConfig:
             sites = []
 
             _log.LOGI("Loading input vars from JSON")
+            # TODO: we need to replace path to variable outside this class
             fnames = sorted(["/opt/revsw-config/varnish/sites/%s.json" % _(dom) for dom in
                              NginxConfig.get_all_active_domains()])
             _log.LOGI("  -> files: ", fnames)
