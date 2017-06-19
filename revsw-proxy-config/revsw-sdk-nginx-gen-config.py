@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-"""This module provides a command line interface to update the Nginx configuration file.
+"""This module provides a command line interface to update the Nginx 
+revsw-apps.conf configuration file in /etc/nginx/conf.d/ which provisions 
+mobile app SDK keys provided by apps.json 
 
 This module is used by the revws-pcm-config daemon to change and refresh Nginx
 server configuration on edge server.
@@ -126,7 +128,8 @@ class NginxConfigSDK:
         shutil.copy2(self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"],
             self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
 
-    # Backs up the current Nginx Configuration
+    # Backs up the current Nginx apps Configuration found in 
+    # /etc/nginx/conf.d/revsw-apps.conf on edge server.
     def _backup_active_sdk_nginx_config(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
         # make backup for this file
@@ -168,7 +171,7 @@ class NginxConfigSDK:
             self.log.LOGE("An error appeared while trying to get backup file! Stop processing")
             raise
 
-    # Opens new Nginx process with active SDK config
+    # Reloads the running Nginx process 
     def _load_new_configuration(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
 
