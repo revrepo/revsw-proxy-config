@@ -2,8 +2,10 @@
 """This module provides a command line interface to update the SSL certs
 for Nginx edge server.
 
-This module is used by the revws-pcm-config daemon to change and refresh Nginx
-server ssl certs configuration on edge server.
+This module is used by the revsw-pcm-config daemon to change and refresh Nginx
+server ssl certs configuration on edge server. The files updated are public.crt, 
+private.key, pass.txt, and info.txt. On the server they are located in
+/opt/revsw-config/certs/<Domain ID>/.
 Usage of script with possible options:
     $ rewsw-ssl-cert-manager -f <JSON configuration file>
 
