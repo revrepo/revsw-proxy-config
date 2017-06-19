@@ -2,8 +2,8 @@
 """This module provides a command line interface to update the WAF rules
 for Nginx edge server.
 
-This module is used by the revws-pcm-config daemon to change and refresh Nginx
-server WAF configuration on edge server.
+This module is used by the revsw-pcm-config daemon to change and refresh Nginx
+server WAF configuration on edge server in location /opt/revsw-config/waf-rules/.
 Usage of script with possible options:
     $ rewsw-waf-rule-manager -f <JSON configuration file>
 
