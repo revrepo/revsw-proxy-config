@@ -1,0 +1,29 @@
+{
+    "title": "Optimization profile - Fewer requests",
+    "type": "object",
+    "properties": {
+        "VERSION": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 2
+        },
+        "REV_OPTIMIZATION_LEVEL": {
+        	"type": "string",
+        	"pattern": "min|med|max|adaptive|custom|none"
+        },
+        "REV_CUSTOM_IMG_LEVEL": {
+        	"type": "string",
+        	"pattern": "low|medium|high|none"
+        },
+        "REV_CUSTOM_JS_LEVEL": {
+        	"type": "string",
+        	"pattern": "low|medium|high|none"
+        },
+        "REV_CUSTOM_CSS_LEVEL": {
+        	"type": "string",
+        	"pattern": "low|medium|high|none"
+        }
+    },
+    "required": ["VERSION", "REV_OPTIMIZATION_LEVEL", "REV_CUSTOM_IMG_LEVEL", "REV_CUSTOM_JS_LEVEL", "REV_CUSTOM_CSS_LEVEL"],
+    "additionalProperties": false
+}

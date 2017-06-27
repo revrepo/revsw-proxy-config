@@ -1,0 +1,48 @@
+{
+  "CONTENT_OPTIMIZERS_HTTP": [
+    "e", 
+    "s", 
+    "t", 
+    "t"
+  ], 
+  "CACHING_RULES_MODE": "best", 
+  "CONTENT_OPTIMIZERS_HTTPS": [], 
+  "DOMAINS_TO_PROXY_HTTP": [
+    "test1", 
+    "test2"
+  ], 
+  "SERVER_NAME": "test_domain", 
+  "BYPASS_CO_LOCATIONS": [], 
+  "CLIENT_RESPONSE_TIMEOUT": 600, 
+  "CACHE_PS_HTML": false, 
+  "INCLUDE_USER_AGENT": false, 
+  "ENABLE_GEOIP_HEADERS": false, 
+  "DEBUG_MODE": false, 
+  "CUSTOM_VCL": {
+    "hash": "", 
+    "deliver": "", 
+    "backend_error": "", 
+    "pass": "", 
+    "hit": "", 
+    "backend_fetch": "", 
+    "purge": "", 
+    "recv": "", 
+    "miss": "", 
+    "pipe": "", 
+    "backends": [], 
+    "synth": "", 
+    "backend_response": ""
+  }, 
+  "ENABLE_CACHE": true, 
+  "VERSION": 17, 
+  "ENABLE_ORIGIN_HEALTH_PROBE": false, 
+  "CUSTOM_VCL_ENABLED": false, 
+  "CACHE_IGNORE_AUTH": false, 
+  "CACHING_RULES": "123", 
+  "ORIGIN_HEALTH_PROBE": {
+    "HTTP_REQUEST": "", 
+    "PROBE_TIMEOUT": 0, 
+    "PROBE_INTERVAL": 0, 
+    "HTTP_STATUS": 0
+  }
+}

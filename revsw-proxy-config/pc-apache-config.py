@@ -1309,5 +1309,7 @@ def _main():
         # raise
         sys.exit(-1)
 
-# Main function
-_main()
+
+if __name__ == "__main__":
+    # Main function
+    _main()
