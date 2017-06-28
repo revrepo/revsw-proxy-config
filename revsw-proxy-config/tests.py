@@ -10,7 +10,7 @@ from pyclbr import Class
 import revsw_apache_config
 
 from mock import Mock, patch
-
+import script_configs
 from revsw.logger import RevSysLogger
 
 apache_gen_config_script = importlib.import_module("apache-gen-config-script")
@@ -24,6 +24,10 @@ pc_apache_config = importlib.import_module("pc-apache-config")
 # from . import NginxConfigSDK
 
 # from .pc_apache_config import ConfigCommon
+
+
+# global log
+pc_apache_config.log = RevSysLogger(True)
 
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files")
@@ -59,18 +63,50 @@ class TestNginxConfigSDK(unittest.TestCase):
 class TestConfigCommon(unittest.TestCase):
 
     def setUp(self):
+        script_configs.APACHE_PATH = TEST_CONFIG_DIR
         self.webserver_config_vars = {
-            "bp": True,
+            "bp": {
+                "ENABLE_OPTIMIZATION": True,
+                "SERVER_NAME": "name",
+            },
+            "co": {
+                "ENABLE_OPTIMIZATION": True,
+
+            }
+        }
+        self.varnish_config_vars = {
             "co": True
         }
-        self.varnish_config_vars = {}
-        self.ui_config = {}
+        self.ui_config = {
+            "enable_ssl" : False,
+            "ssl_protocols": 1,
+            "ssl_ciphers":  1,
+            "ssl_prefer_server_ciphers": 1,
+            "ssl_cert_id": 1,
+            "rev_component_co": {
+                "enable_optimization": True,
+                "mode": "least",
+                "img_choice": 1,
+                "js_choice": 1,
+                "css_choice": 1,
+            },
+            "rev_component_bp": {
+                "enable_cache": True,
+                "include_user_agent": True,
+                "cache_ps_html": True,
+                "cache_ignore_auth": True,
+                "cache_bypass_locations": True,
+                "caching_rules_mode": True,
+                "cdn_overlay_urls": ["http://url1.com", "http://url2.com"],
+            },
+        }
 
     def test_patch_config(self):
-        config_common = pc_apache_config.ConfigCommon(1,1,1)
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
         templates = config_common.patch_config()
         self.assertTrue(templates)
-
 
     def test_must_ban_html(self):
         config_common = pc_apache_config.ConfigCommon(
@@ -78,6 +114,46 @@ class TestConfigCommon(unittest.TestCase):
         )
         must_ban = config_common.must_ban_html()
         self.assertFalse(must_ban)
+
+    def test_patch_content_vars(self):
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
+        config_common._patch_content_vars()
+        must_ban = config_common.must_ban_html()
+        self.assertTrue(must_ban)
+
+    def test_patch_cache_vars(self):
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
+        config_common._patch_cache_vars()
+        must_ban = config_common.must_ban_html()
+        self.assertFalse(must_ban)
+
+    def test_patch_security_vars(self):
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
+        config_common._patch_security_vars()
+        must_ban = config_common.must_ban_html()
+        self.assertFalse(must_ban)
+
+    def test_patch_misc_vars(self):
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
+        config_common._patch_misc_vars()
+        must_ban = config_common.must_ban_html()
+        self.assertTrue(must_ban)
+
+    def test__patch_ssl_vars(self):
+        config_common = pc_apache_config.ConfigCommon(
+            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
+        )
+        config_common._patch_ssl_vars()
+        must_ban = config_common.must_ban_html()
+        self.assertTrue(must_ban)
 
     def test_can_config_bp(self):
         config_common = pc_apache_config.ConfigCommon(
@@ -106,6 +182,17 @@ class TestConfigCommon(unittest.TestCase):
         )
         can_config = config_common.varnish_changed()
         self.assertFalse(can_config)
+
+    def test_gen_initial_domain_config(self):
+        config_common = pc_apache_config._gen_initial_domain_config(
+            "test_domain", self.ui_config,
+        )
+        can_config = config_common.varnish_changed()
+        self.assertFalse(can_config)
+
+    def test_get_domain_mapping(self):
+        config_common = pc_apache_config._get_domain_mapping("test_domain",)
+        self.assertEqual(config_common, {})
 
 
 class objdict:
@@ -158,13 +245,13 @@ class TestApacheGenConfigScript(unittest.TestCase):
 
     # def test_generate_config_sh(self):
     #     apache_gen_config_script.generate_config_sh()
-    #     # conf_manager = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
-    #     #     "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
-    #     #     "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
-    #     #     "verbose_debug":1
-    #     # })
-    #     # templates = conf_manager.refresh_configuration()
-    #     # self.assertTrue(templates)
+    #     conf_manager = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
+    #         "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+    #         "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+    #         "verbose_debug":1
+    #         })
+    #     templates = conf_manager.refresh_configuration()
+    #     self.assertTrue(templates)
 
     def test_generate_bp(self):
         apache_gen_config_script.generate_bp(self.domain)
