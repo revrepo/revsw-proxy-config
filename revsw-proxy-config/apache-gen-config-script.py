@@ -941,7 +941,7 @@ def generate_ui_configs():
 def print_configure_sh(txt):
     print txt
 
-
+#TODO: try to understand for what so strange way to write to file
 def generate_config_sh():
     global _bps
     global _cos

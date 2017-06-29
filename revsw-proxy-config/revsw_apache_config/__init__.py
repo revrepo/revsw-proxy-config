@@ -11,7 +11,10 @@ import os
 from cStringIO import StringIO
 import socket
 from revsw.misc import dict_raise_on_duplicates, base64_string_gzip_to_file, select_file_path, run_cmd
+import script_configs
 
+
+#TODO: maybe we must rplace all this code to other file
 # Defines config structure version
 API_VERSION = 5
 
@@ -648,11 +651,10 @@ class NginxConfig(WebServerConfig):
 
     @_webserver_write_command
     def remove_site(self):
-        # TODO: we need to replace path to NGINX to variable outside this class
-        self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-enabled/%s.conf" % self.site_name, _log,
-                                             "Disabling site '%s' if it exists" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-available/%s.conf" % self.site_name, _log,
-                                             "Removing site '%s' if it exists" % self.site_name))
+        self.transaction.run(lambda: run_cmd("rm -f %ssites-enabled/%s.conf" % (script_configs.NGINX_PATH, self.site_name),
+                                             _log, "Disabling site '%s' if it exists" % self.site_name))
+        self.transaction.run(lambda: run_cmd("rm -f %ssites-available/%s.conf" % (script_configs.NGINX_PATH, self.site_name),
+                                             _log, "Removing site '%s' if it exists" % self.site_name))
         self.transaction.run(lambda: run_cmd("rm -Rf %s" % jinja_config_webserver_dir(self.site_name), _log,
                                              "Removing site '%s' templates, if they exist" % self.site_name))
 
@@ -709,7 +711,7 @@ class NginxConfig(WebServerConfig):
             cfg = cfg.replace('\n\n', '\n')
 
             #TODO: we need to replace path to NGINX to variable outside this class
-            conf_file_name = "/etc/nginx/sites-available/%s.conf" % self.site_name
+            conf_file_name = "%ssites-available/%s.conf" % (script_configs.NGINX_PATH, self.site_name)
 
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)
@@ -863,7 +865,7 @@ class VarnishConfig:
 
             _log.LOGI("Loading input vars from JSON")
             # TODO: we need to replace path to variable outside this class
-            fnames = sorted(["/opt/revsw-config/varnish/sites/%s.json" % _(dom) for dom in
+            fnames = sorted(["%ssites/%s.json" % (script_configs.VARNISH_PATH, _(dom)) for dom in
                              NginxConfig.get_all_active_domains()])
             _log.LOGI("  -> files: ", fnames)
 
@@ -905,7 +907,7 @@ class VarnishConfig:
     def site_config_path(self):
         if not self.site_name:
             raise AssertionError("'site_config_path' requires the site name but the object is global")
-        return "/opt/revsw-config/varnish/sites/%s.json" % self.site_name
+        return "%ssites/%s.json" % (script_configs.VARNISH_PATH,self.site_name)
 
     def remove_site(self):
         self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))

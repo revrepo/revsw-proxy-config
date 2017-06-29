@@ -241,17 +241,21 @@ class TestApacheGenConfigScript(unittest.TestCase):
             "certs": False,
             "bps": ["test1", "test2"],
             "configured_cos": ["test1", "test2"],
+            "profiles_disabled": True,
+            "caching_rules_file": False,
+            "ignore_cookies": [],
+
         }
 
     # def test_generate_config_sh(self):
-    #     apache_gen_config_script.generate_config_sh()
-    #     conf_manager = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
-    #         "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
-    #         "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
-    #         "verbose_debug":1
-    #         })
-    #     templates = conf_manager.refresh_configuration()
-    #     self.assertTrue(templates)
+        # apache_gen_config_script.generate_config_sh()
+        # conf_manager = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
+        #     "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+        #     "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+        #     "verbose_debug":1
+        #     })
+        # templates = conf_manager.refresh_configuration()
+        # self.assertTrue(templates)
 
     def test_generate_bp(self):
         apache_gen_config_script.generate_bp(self.domain)
@@ -265,6 +269,15 @@ class TestApacheGenConfigScript(unittest.TestCase):
             json.loads(open("bp-varnish-test_domain.json").read()),
             json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-varnish-test_domain.json")).read()),
         )
+
+    def test_generate_ui_configs(self):
+        apache_gen_config_script._domains = [self.domain]
+        apache_gen_config_script.generate_ui_configs()
+        self.assertTrue(os.path.exists("ui-config-test_domain.json"))
+
+    def test_fixup_domain(self):
+        apache_gen_config_script.fixup_domain(self.domain)
+        self.assertTrue(os.path.exists("ui-config-test_domain.json"))
 
     def test_generate_bp_varnish_domain_json(self):
         test_json = {

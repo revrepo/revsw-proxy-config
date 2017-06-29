@@ -5,10 +5,12 @@ import itertools
 
 
 from mock import Mock, patch
-
-import . as revsw
+import revsw_apache_config
+# import . as revsw
+import script_configs
 from revsw.logger import RevSysLogger
-from . import WebServerConfig, ConfigTransaction, PlatformWebServer, VarnishConfig, NginxConfig, jinja_config_webserver_base_dir, _g_webserver_name
+from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer, VarnishConfig, NginxConfig, \
+    jinja_config_webserver_base_dir
 
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files")
@@ -16,7 +18,9 @@ TEST_CONFIG_DIR = os.path.join(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
 )
 
-_log = RevSysLogger()
+revsw_apache_config._g_webserver_name = 'fdsdfsdfsd'
+revsw_apache_config._log = RevSysLogger()
+
 
 
 def redirect_to_test_dir(*args, **kwargs):
@@ -54,7 +58,7 @@ class TestAbstractConfig(unittest.TestCase):
                             itertools.product(self.search_dirs_base, self.subdirs)]
         self.platform = PlatformWebServer()
         self.platform.etc_dir = Mock(TEST_DIR)
-        jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
         patch('revsw_apache_config._webserver_write_command', lambda x: x).start()
         self.testing_class.jinja_config_webserver_dir = Mock(return_value=TEST_DIR)
 
@@ -64,17 +68,22 @@ class TestWebServerConfig(TestAbstractConfig):
     testing_class = WebServerConfig('test_site', transaction=transaction)
 
     def test_gather_template_files(self):
-        global _g_webserver_name
-        _g_webserver_name = 'fdsdfsdfsd'
+
         templates = self.testing_class.gather_template_files('bp', self.search_dirs)
         self.assertTrue(templates)
 
     def test_write_template_files(self):
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
         self.testing_class.write_template_files({'test_template.json': 'testing data'})
         self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_site/test_template.json")))
 
     def test_write_certs(self):
-        cert = "fashdfahfff234123jkkhr1j="
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
+        cert = """-----BEGIN CERTIFICATE-----
+test_cert
+khbAidhAa0VTdw==
+-----END CERTIFICATE-----
+"""
         self.testing_class.write_certs(cert, cert, cert)
         self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_site/certs/server.crt")))
         self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_site/server.key")))
@@ -126,19 +135,33 @@ class TestVarnishConfig(TestAbstractConfig):
 
     def test_site_config_path(self):
         config_path = self.testing_class.site_config_path()
-        self.assertEqual(config_path, '/opt/revsw-config/varnish/sites/test_site.json')
+        self.assertEqual(config_path, '%s/test_config.json' % TEST_CONFIG_DIR)
 
 
-class TestNginxConfig(unittest.TestCase):
+class TestNginxConfig(TestAbstractConfig):
     transaction = TestConfigTransaction()
     testing_class = NginxConfig('test_site', transaction=transaction)
 
-    # TODO: first we need to refactor hardcoded  path to nginx
-    # def test_configure_site(self):
-    #     self.nginx_config.configure_site(self.search_dirs)
-    #
-    # def test_remove_site(self):
-    #     self.nginx_config.remove_site(self.search_dirs)
+    def test_configure_site(self):
+        self.testing_class.configure_site({})
+
+    def test_remove_site(self):
+        script_configs.NGINX_PATH = TEST_DIR
+        if not os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")):
+            os.mkdir("%s/sites-available" % TEST_DIR)
+            with open("%s/sites-available/test_site.conf" % TEST_DIR, "wb") as f:
+                f.write("test")
+        if not os.path.exists(os.path.join(TEST_DIR, "sites-enabled/test_site.conf")):
+            os.mkdir("%s/sites-enabled" % TEST_DIR)
+            with open("%s/sites-enabled/test_site.conf" % TEST_DIR, "wb") as f:
+                f.write("test")
+        if not os.path.exists(os.path.join(TEST_DIR, "test_site")):
+            os.mkdir("%s/test_site" % TEST_DIR)
+
+        self.testing_class.remove_site()
+        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")))
+        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "sites-enabled/test_site.conf")))
+        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "test_site")))
 
 
 if __name__ == '__main__':
