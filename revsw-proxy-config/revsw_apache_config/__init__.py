@@ -1,3 +1,10 @@
+"""This module provides tools that can change the state of the Nginx and Varnish
+on the local edge caching server. We use jinja2 templates to generate the 
+configuration from the given JSON data. 
+
+TODO:
+    1. Write Unit tests for public modules.
+"""
 import subprocess
 from urlparse import urlparse
 import dns.resolver
@@ -21,6 +28,8 @@ _domain_name = ""
 
 # Must be called by importing module !
 def set_log(alog):
+    """Set global logging module
+    """
     global _log
     _log = alog
 
@@ -28,9 +37,16 @@ def set_log(alog):
 def _(s):
     return s.replace(".", "_")
 
-
-# Flatten a list of items or lists to a set - Jinja2 filter
 def flatten_to_set(lst, aset=None):
+    """Custom Jinja2 Filter - Flatten a list of items or lists to a set
+
+    Args:
+        lst (list): Incoming list to flatten
+        aset (set, optional): A set to add to if provided. Default to None.
+
+    Returns:
+        Flattened set from list provided.
+    """
     if aset is None:
         aset = set()
     for k in lst:
@@ -40,9 +56,22 @@ def flatten_to_set(lst, aset=None):
             aset.add(k)
     return aset
 
-
-# Split a URL into its protocol, hostname, port and path - Jinja2 filter
 def parse_url(url):
+    """Custom Jinja2 Filter - Split a URL into its protocol, hostname, port and path
+
+    Args:
+        url (str): URL to parse. 
+
+    Returns:
+        Tuple:
+            scheme (str, Index 0): URL scheme specifier
+            hostname (str, Index 1): Host name 
+            port (int, Index 2): Port number
+            path (str, Index 3): Hierarchical Path
+
+    Raises:
+        AttributeError: If url has invalid URL scheme this exception gets raised. 
+    """
     uri = urlparse(url, "http")
     if uri.port:
         port = uri.port
@@ -54,13 +83,34 @@ def parse_url(url):
         raise AttributeError("Invalid URL scheme '%s'" % uri.scheme)
     return uri.scheme, uri.hostname, port, uri.path
 
-
-# Convert a_b-c.ex.com into a___b__c_ex_com - Jinja2 filter
 def underscore_url(url):
+    """Custom Jinja2 Filter - Convert to Underscore Url
+
+    Args:
+        url (str): URL to convert
+
+    Returns:
+        str: Converted URL
+
+    Example:
+        Convert a_b-c.ex.com into a___b__c_ex_com
+            >>> underscore_url("a_b-c.ex.com")
+            "a___b__c_ex_com"
+    """
     return url.replace("_", "___").replace("-", "__").replace(".", "_")
 
-# Return a list of all the IP addresses associated with a domain name - Jinja2 filter
 def dns_query(hostname):
+    """Custom Jinja2 Filter - Return a list of all the IP addresses associated with a domain name
+
+    Args:
+        hostname (str): Host Name
+
+    Returns:
+        list: list of all IP addresses associated with the domain name
+
+    Raises:
+        LookupError: This is raised if we cannot reslove hostname
+    """
     try:
         answer = dns.resolver.query(hostname, "A")
         ips = []
@@ -70,9 +120,18 @@ def dns_query(hostname):
     except:
         raise LookupError("Can't resolve hostname '%s'" % hostname)
 
-
-# Convert a wildcard expression into a regular expression - Jinja2 filter
 def wildcard_to_regex(expr):
+    """Custom Jinja2 Filter - Convert a wildcard expression into a regular expression
+
+    Args:
+        expr (str): Wildcard expression to convert to a regular expression.
+
+    Returns:
+        str: The convered regular expression.
+
+    Raises:
+        SyntaxError: If there the wildcard expression is invalid we raise this exception.
+    """
     out = StringIO()
     in_brackets = False
     in_curlies = 0
@@ -144,18 +203,36 @@ def wildcard_to_regex(expr):
     out.write('$')
     return out.getvalue()
 
-
-# Check if an expression is a valid IPv4 address - Jinja2 filter
 def is_ipv4(expr):
+    """Custom Jinja2 Filter - Check if an expression is a valid IPv4 address
+
+    Args:
+        expr (str): IP address to check for validity.
+
+    Returns:
+        True: For valid IP addresses
+        False: for invalid IP addresses
+
+    """
     try:
         socket.inet_aton(expr)
         return True
     except socket.error:
         return False
 
-
-# Convert a netmask in 255.255.255.0 format to bit count (e.g. 24) - Jinja2 filter
 def netmask_bits(mask):
+    """Custom Jinja2 Filter - Convert a netmask to bit count
+
+    Args:
+        mask (str): Netmask to be converted.
+
+    Returns:
+        str: Bit count in string format.
+
+    Example:
+        >>> netmask_bits("255.255.255.0")
+        "24"
+    """
     try:
         # /xx representation
         return str(int(mask))
@@ -167,9 +244,19 @@ def netmask_bits(mask):
             binary_str += bin(int(octet))[2:].zfill(8)
         return str(len(binary_str.rstrip('0')))
 
-
-# Replace "foo" with "becustom_<site_name>_foo" - Jinja2 filter
 def custom_backend_name(name, site, as_director=False):
+    """Custom Jinja2 Filter - Rename Backend
+
+    Args:
+        name (str): A name that will be used to generate custom backend name
+        site (dict): Dictionary that contains site information. Usually a loaded json file.
+        as_director (bool, optional): Changes site name if True
+
+    Example:
+        >>> custom_backend_name("foo", "facebook", True)
+        "dircustom_facebook_foo"
+
+    """
     site_name = underscore_url(site["SERVER_NAME"])
 
     dyn_backends = set()
@@ -179,9 +266,17 @@ def custom_backend_name(name, site, as_director=False):
 
     return "%scustom_%s_%s" % ("dir" if as_director and name in dyn_backends else "be", site_name, name)
 
-
-# Replace "REV_BACKEND(foo)" occurrences with "becustom_<site_name>_foo" - Jinja2 filter
 def process_custom_vcl(vcl, site):
+    """Custom Jinja2 Filter - Replace REV_BACKEND occurences in custom VCL code.
+
+    Args:
+        vcl (str): Custom VCL code
+        site (dict): JSON object with site information.
+
+    Example:
+        >>> process_custom_vcl("REV_BACKEND(foo)")
+        "becustom_<site_name>_foo"
+    """
     site_name = underscore_url(site["SERVER_NAME"])
 
     dyn_backends = set()
@@ -199,32 +294,35 @@ def process_custom_vcl(vcl, site):
     return re.sub(r"REV_BACKEND\(([^)]+)\)", sub_backend, vcl)
 
 
-# Extract Apache or Nginx-specific directives from 'code' or return an error comment if not found - Jinja2 filter
 def extract_custom_webserver_code(code, which_webserver):
-    '''
-    We support two syntaxes:
-     1. Legacy
-     # Apache comment
-     Apache statement
-     Another apache statement
-     # BEGIN NGINX CONFIG
-     ## Nginx comment
-     #Nginx statement
-     #Another Nginx statement
-     # END NGINX CONFIG
+    """Custom Jinja2 filter - Extract Apache or Nginx-specific directives from 'code' or return an error comment if not found
+    
+    TODO:
+        1. Finish Commenting this function
 
-     2. New
-     # BEGIN APACHE CONFIG
-     # Apache comment
-     Apache statement
-     Another apache statement
-     # END APACHE CONFIG
-     # BEGIN NGINX CONFIG
-     # Nginx comment
-     Nginx statement
-     Another Nginx statement
-     # END NGINX CONFIG
-    '''
+    We support two syntaxes:
+         1. Legacy
+         # Apache comment
+         Apache statement
+         Another apache statement
+         # BEGIN NGINX CONFIG
+         ## Nginx comment
+         #Nginx statement
+         #Another Nginx statement
+         # END NGINX CONFIG
+
+         2. New
+         # BEGIN APACHE CONFIG
+         # Apache comment
+         Apache statement
+         Another apache statement
+         # END APACHE CONFIG
+         # BEGIN NGINX CONFIG
+         # Nginx comment
+         Nginx statement
+         Another Nginx statement
+         # END NGINX CONFIG
+    """
     begin_re = re.compile(r"^\s*#\s*BEGIN\s+(APACHE|NGINX)\s+CONFIG\s*$")
     end_re = re.compile(r"^\s*#\s*END\s+(APACHE|NGINX)\s+CONFIG\s*$")
 
@@ -280,22 +378,37 @@ def extract_custom_webserver_code(code, which_webserver):
         print >>out, cmd
     return out.getvalue()
 
-
-# Sets the value of a global Jinja2 variable and returns the value
-# Usage: set local_var = global_var_set("MY_VAR_NAME", "Hello World!")
 def global_var_set(name, value):
+    """Sets the value of a global Jinja2 variable and returns the value
+
+    Args:
+        name (str): Name of global variable
+        value (value): Value to set global variable
+
+    Example:
+        local_var = global_var_set("MY_VAR_NAME", "Hello World!")
+    """
     _jinja2_globals[name] = value
     return value
 
-
-# Gets the value of a global Jinja2 variable
-# Usage: set local_var = global_var_get("MY_VAR_NAME")
 def global_var_get(name):
+    """Gets the value of a global Jinja2 Variable
+
+    Args:
+        name (str): Name of global variable
+
+    Example:
+        local_var = global_var_get("MY_VAR_NAME")
+    """
     return _jinja2_globals.get(name)
 
 
-# Return a list of all the nameservers used by the local machine
 def dns_servers():
+    """Returns a list of all the nameservers used by the local machine
+
+    Raises:
+        LookupError: Cannot get the name servers of the local machine
+    """
     try:
         resolver = dns.resolver.Resolver()
         return resolver.nameservers
@@ -304,6 +417,14 @@ def dns_servers():
 
 
 def sorted_non_empty(lst):
+    """Removes empty parts from list and sorts them
+
+    Args:
+        lst (list): List to be sorted and cleared of empty parts.
+
+    Returns:
+        list: List after sorting and removal of empty entries.
+    """
     if not lst:
         return []
     nonempty = []
@@ -347,14 +468,17 @@ def _generate_jinja_hierarchy(jinja_name, search_dirs, file_list, alt_name=None)
 
 
 def jinja_config_webserver_base_dir():
+    """Returns jinja config webserver base directory"""
     return "/opt/revsw-config/apache"
 
 
 def jinja_config_webserver_dir(site_name):
+    """Returns path of sitename"""
     return os.path.join(jinja_config_webserver_base_dir(), site_name)
 
 
 def jinja_config_varnish_base_dir():
+    """Returns path of varnish config"""
     return "/opt/revsw-config/varnish"
 
 
@@ -408,6 +532,13 @@ _g_webserver_name = None
 
 
 class PlatformWebServer:
+    """Finds the currently installed webserver, either full or naxsi, and 
+    provides methods to access the webserver information.
+
+    Raises:
+        RuntimeError: If either both or neither variation of the Nginx server 
+        are installed this error is raised.
+    """
     def __init__(self):
         global _g_webserver_name
         if not _g_webserver_name:
@@ -427,12 +558,18 @@ class PlatformWebServer:
         return self._name == "NGINX"
 
     def name(self):
+        """Returns name of the webserver.
+        """
         return self._name
 
     def service_name(self):
+        """Returns Service Name
+        """
         return "revsw-nginx"
 
     def etc_dir(self):
+        """Returns etc directory.
+        """
         return "/etc/nginx"
 
     def config_class(self):
@@ -445,9 +582,18 @@ class ConfigException(Exception):
 
 
 class ConfigTransaction:
-    """
-    Runs commands one by one and saves a rollback for each (if applicable).
+    """Runs commands one by one and saves a rollback for each (if applicable).
     If there's an error, it executes the rollback commands in reverse order.
+
+    Attributes:
+        rollbacks (list): List of rollback functions to perform if error occurs.
+        webserver_reload (bool): If true the web server will reload when the
+            finalize method is called.
+        varnish_reload_cmd (str): Varnish command to run. Will start either
+            reload or start varnish on server.
+        curr_id (int): The current file_id of the class.
+        file_idx (int): Class attribute that keeps track of how many
+            ConfigTransaction classes are created. 
     """
 
     backup_file = "/var/cache/revsw-apache-old-config.tar"
@@ -494,6 +640,14 @@ class ConfigTransaction:
         self.varnish_reload_cmd = "reload"
 
     def finalize(self):
+        """Finishes the transaction by reloading either varnish or webserver
+        if either is nessesary. Also backs up previous config in 
+        "/var/cache/revsw-apache-old-config.tar" of local server.
+
+        Raises:
+            ConfigException: If varnish fails to reload or start it will raise
+                this exception.
+        """
         if self.webserver_reload:
             reload_func = NginxConfig.reload_or_start
             self.run(reload_func)
@@ -561,6 +715,12 @@ def _get_hostname_short_and_full():
 
 
 class WebServerConfig:
+    """A base class to change the configuration of a webserver.
+
+    Args and Attributes:
+        site_name (str): The name of the site config to change.
+        transaction (instance, optional): ConfigTransaction Instance
+    """
     def __init__(self, site_name, transaction=None):
         self.site_name = site_name
         self.transaction = transaction
@@ -641,13 +801,24 @@ class WebServerConfig:
         return m.group(4)
 
 class NginxConfig(WebServerConfig):
+    """Configuration Class for Nginx.
+
+    Inherited from WebServerConfig:
+        Args and Attributes:
+            site_name (str): The name of the site config to change.
+            transaction (instance, optional): ConfigTransaction Instance
+    """
     @_webserver_write_command
     def disable_all_sites(self):
+        """Disables all sites by removing all sites from /etc/nginx/sites-enabled"""
         self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-enabled/*", _log, "Disabling all sites"))
         #self.transaction.run(lambda: run_cmd("a2ensite 000-catch-all || true", _log, "Enabling catch-all error site"))
 
     @_webserver_write_command
     def remove_site(self):
+        """Removes current working site pointed to by self.site_name by removing all 
+        Nginx .conf files and jinja templates if they exist
+        """
         self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-enabled/%s.conf" % self.site_name, _log,
                                              "Disabling site '%s' if it exists" % self.site_name))
         self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-available/%s.conf" % self.site_name, _log,
@@ -657,6 +828,12 @@ class NginxConfig(WebServerConfig):
 
     @_webserver_write_command
     def configure_site(self, input_vars):
+        """Configure site by generating .conf files into /etc/nginx/sites-enabled,
+        adding default certs and enabling site if nessiary.
+
+        Args:
+            input_vars (dict): Configuration variables provided by JSON
+        """
         def do_write():
             search_dirs = [jinja_config_webserver_dir(self.site_name)]
             template_file_no_ext = self._template_file_no_ext()
@@ -733,6 +910,7 @@ class NginxConfig(WebServerConfig):
 
     @staticmethod
     def get_error_domains(stderr):
+        """Return domain's that have errors in configuration set up."""
         err_domains = set()
         line_domain_re = re.compile(r"Syntax error on line (\d+) of ([^:]+):")
         server_name_re = re.compile("^\s*ServerName\s+((?!-)[A-Z\d-]{1,63}(?<!-)(\.(?!-)[A-Z\d-]{1,63}(?<!-))*)\s*$",
@@ -752,6 +930,7 @@ class NginxConfig(WebServerConfig):
 
     @staticmethod
     def get_all_active_domains():
+        """Return list of active domains"""
         domains = []
         base_dir = "/opt/revsw-config/apache/"
         paths = os.listdir(base_dir)
@@ -789,6 +968,13 @@ class NginxConfig(WebServerConfig):
 
 
 class VarnishConfig:
+    """Configuration of Varnish server is done through this class.
+
+    Args and Attributes:
+        site_name (str): The name of the site config to change.
+        transaction (instance, optional): ConfigTransaction Instance
+        search_path (list): List of already searched paths.
+    """
     def __init__(self, site_name=None, transaction=None):
         self.site_name = site_name
         self.transaction = transaction
@@ -852,8 +1038,7 @@ class VarnishConfig:
 
     @_varnish_write_command
     def write_config_file(self, search_path=None):
-        """
-        Read all JSON config files in /etc/varnish/sites, merge them into a large JSON and
+        """Read all JSON config files in /etc/varnish/sites, merge them into a large JSON and
         regenerate the Varnish VCL from a template, then tell Varnish to reload the config.
         """
         def do_write():
@@ -895,6 +1080,7 @@ class VarnishConfig:
         self.transaction.run(do_write)
 
     def load_site_config(self):
+        """Loads varnish site configuration in JSON object"""
         with open(self.site_config_path()) as f:
             site = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
         return site
@@ -982,6 +1168,12 @@ def _check_and_get_attr(command, attr):
 
 
 def configure_all(config):
+    """Run all configuration actions described in the config provided. Will only
+    run needed utilities if they are changed.
+
+    Args:
+        config (dict): Configuration parameters.
+    """
     _log.LOGD(u"Input CONFIG is: ", json.dumps(config))
     if "version" not in config:
         raise AttributeError("No version info in configuration")
