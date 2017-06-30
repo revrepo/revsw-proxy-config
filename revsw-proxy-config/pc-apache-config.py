@@ -1,10 +1,18 @@
 #!/usr/bin/env python
-"""This script is used for the following purposes:
-    1. To parse the JSON configuration file from /opt/revsw-config/policy.
-    2. Adds, updates, deletes configuration files for nginx located in 
-        /etc/nginx/sites-enabled and /etc/nginx/sites-availible. Reloads
-        server if nessisary. 
-    3. Adds, updates, deletes configuration files in /etc/varnish/revsw.vcl.
+"""This script is used for the following purposes, usually started by the 
+revsw-pcm-config:
+    1. To parse the JSON configuration file from /opt/revsw-config/policy/.
+        JSON file is in format "ui-config-<Domain name>.json".
+    2. Adds, updates, deletes configuration files for nginx located in:
+        1. /etc/nginx/sites-enabled/
+        2. /etc/nginx/sites-availible/, and 
+        3. /opt/revsw-config/apache/. 
+        Reloads Nginx server if nessisary. 
+    3. Adds, updates, deletes Varnish configuration for the following files
+        and directories:
+            1. /etc/varnish/revsw.vcl
+            2. /opt/revsw-config/varnish/sites/
+        Reloads Varnish if nessary 
 """
 import argparse
 import copy
@@ -712,7 +720,7 @@ def add_or_update_domain(domain_name, ui_config, type):
 
     Args:
         domain_name (str): Domain to add or update.
-        ui_config (dict): JSON loaded from /opt/revsw-config/policy on server
+        ui_config (dict): JSON loaded from /opt/revsw-config/policy/ on server
         type (str): The different types you can have for your configure options.
             Some types are, "flush", "varnish_template", "mlogc_template", "delete",
             "batch", "force", "certs"

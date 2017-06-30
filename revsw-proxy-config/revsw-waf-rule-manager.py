@@ -4,9 +4,9 @@ for Nginx edge server.
 
 This module is used by the revsw-pcm-config daemon to change and refresh Nginx
 server WAF configuration on edge server in location /opt/revsw-config/waf-rules/.
-Usage of script with possible options:
-    $ rewsw-waf-rule-manager -f <JSON configuration file>
-
+JSON Configuration file is located in /opt/revsw-config/policy/waf_rule.json
+Usage of script:
+    $ rewsw-waf-rule-manager -f /opt/revsw-config/policy/waf_rule.json
 TODO:
     1. Write Unit test for module
     2. Switch optparse for argparse due to depreciation of optparse

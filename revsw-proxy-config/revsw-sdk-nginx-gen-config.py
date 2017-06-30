@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """This module provides a command line interface to update the Nginx 
 revsw-apps.conf configuration file in /etc/nginx/conf.d/ which provisions 
-mobile app SDK keys provided by apps.json 
+mobile app SDK keys provided by apps.json located in /opt/revsw-config/policy/
+on server. 
 
 This module is used by the revws-pcm-config daemon to change and refresh Nginx
 server configuration on edge server.
