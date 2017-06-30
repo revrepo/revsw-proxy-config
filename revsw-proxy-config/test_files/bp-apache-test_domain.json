@@ -39,7 +39,7 @@
     ], 
     "ENABLE_HTTPS": false, 
     "ORIGIN_REUSE_CONNS": true, 
-    "REV_PROFILES_BASE_PORT_HTTPS": 80, 
+    "REV_PROFILES_BASE_PORT_HTTPS": 443, 
     "BLOCK_CRAWLERS": true, 
     "SERVER_NAME": "test_domain", 
     "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2", 

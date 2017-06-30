@@ -38,7 +38,7 @@
   "ENABLE_ORIGIN_HEALTH_PROBE": false, 
   "CUSTOM_VCL_ENABLED": false, 
   "CACHE_IGNORE_AUTH": false, 
-  "CACHING_RULES": "123", 
+  "CACHING_RULES": [], 
   "ORIGIN_HEALTH_PROBE": {
     "HTTP_REQUEST": "", 
     "PROBE_TIMEOUT": 0, 

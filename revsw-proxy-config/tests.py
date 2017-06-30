@@ -1,3 +1,21 @@
+"""*************************************************************************
+*
+* NUU:BIT CONFIDENTIAL
+*
+* [2013] - [2015] nuu:bit, Inc.
+* All Rights Reserved.
+*
+* NOTICE:  All information contained herein is, and remains
+* the property of nuu:bit, Inc. and its suppliers,
+* if any.  The intellectual and technical concepts contained
+* herein are proprietary to nuu:bit, Inc.
+* and its suppliers and may be covered by U.S. and Foreign Patents,
+* patents in process, and are protected by trade secret or copyright law.
+* Dissemination of this information or reproduction of this material
+* is strictly forbidden unless prior written permission is obtained
+* from nuu:bit, Inc.
+*
+"""
 import importlib
 import json
 import os
@@ -30,9 +48,9 @@ pc_apache_config = importlib.import_module("pc-apache-config")
 pc_apache_config.log = RevSysLogger(True)
 
 
-TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files")
+TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")
 TEST_CONFIG_DIR = os.path.join(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
+    os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files/"
 )
 
 revsw_apache_config._g_webserver_name = 'fdsdfsdfsd'
@@ -47,17 +65,59 @@ class TestNginxConfigSDK(unittest.TestCase):
     testing_class = None
 
     def setUp(self):
-        self.nginx_config_sdk = revsw_sdk_nginx_gen_config.NginxConfigSDK()
-
-
-    def test_refresh_configuration(self):
-        conf_manager = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
+        self.nginx_config_sdk = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
             "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
             "verbose_debug":1
         })
-        templates = conf_manager.refresh_configuration()
-        self.assertTrue(templates)
+        self.nginx_config_sdk.nginx_conf = {
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "conf_name": "revsw-apps.conf",
+            "tmp_location": "/tmp/",
+            "final_location": TEST_DIR,
+            "backup_location": os.path.join(TEST_DIR, "backup/")}
+        self.nginx_config_sdk._load_new_configuration = Mock(return_value=0)
+
+    def tearDown(self):
+        if os.path.exists(os.path.join(TEST_DIR, "backup/revsw-apps.conf")):
+            os.remove((os.path.join(TEST_DIR, "backup/revsw-apps.conf")))
+        if os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")):
+            os.remove(os.path.join(TEST_DIR, "revsw-apps.conf"))
+
+    def test_read_jinja_template(self):
+        self.nginx_config_sdk._read_jinja_template()
+        self.assertTrue(self.nginx_config_sdk.string_template)
+
+    def test_read_sdk_config_files(self):
+        result = self.nginx_config_sdk._read_sdk_config_files()
+        self.assertEqual(result, 0)
+
+    def test_read_sdk_config_files_no_file(self):
+        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(TEST_CONFIG_DIR, "nofile.jinja")
+        result = self.nginx_config_sdk._read_sdk_config_files()
+        self.assertEqual(result, 2)
+
+    def test_read_sdk_config_files_wrong_format(self):
+        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_json.jinja")
+        result = self.nginx_config_sdk._read_sdk_config_files()
+        self.assertEqual(result, 1)
+
+    def test_restore_sdk_nginx_from_backup(self):
+        self.nginx_config_sdk.refresh_configuration()
+        self.nginx_config_sdk._restore_sdk_nginx_from_backup()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_remove_active_sdk_nginx_config(self):
+        self.nginx_config_sdk.refresh_configuration()
+        self.nginx_config_sdk._remove_active_sdk_nginx_config()
+        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_refresh_configuration(self):
+        self.nginx_config_sdk.refresh_configuration()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "backup/revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
 
 
 class TestConfigCommon(unittest.TestCase):
@@ -106,7 +166,6 @@ class TestConfigCommon(unittest.TestCase):
             self.webserver_config_vars, self.varnish_config_vars, self.ui_config
         )
         templates = config_common.patch_config()
-        self.assertTrue(templates)
 
     def test_must_ban_html(self):
         config_common = pc_apache_config.ConfigCommon(
@@ -281,27 +340,52 @@ class TestApacheGenConfigScript(unittest.TestCase):
 
     def test_generate_bp_varnish_domain_json(self):
         test_json = {
-            'CONTENT_OPTIMIZERS_HTTP': ['e', 's', 't', 't'],
-            'CACHING_RULES_MODE': 'best',
-            'CONTENT_OPTIMIZERS_HTTPS': [],
-            'DOMAINS_TO_PROXY_HTTP': ['test1', 'test2'],
-            'SERVER_NAME': 'test_domain',
-            'BYPASS_CO_LOCATIONS': [],
-            'CLIENT_RESPONSE_TIMEOUT': 600,
-            'CACHE_PS_HTML': False,
-            'INCLUDE_USER_AGENT': False,
-            'ENABLE_GEOIP_HEADERS': False,
-            'DEBUG_MODE': False,
-            'CUSTOM_VCL': {
-                'hash': '', 'deliver': '', 'backend_error': '', 'pass': '', 'hit': '', 'backend_fetch': '',
-                'purge': '', 'recv': '', 'miss': '', 'pipe': '', 'backends': [], 'synth': '', 'backend_response': ''
-            }, 'ENABLE_CACHE': True,
-            'VERSION': 17,
-            'ENABLE_ORIGIN_HEALTH_PROBE': False,
-            'CUSTOM_VCL_ENABLED': False,
-            'CACHE_IGNORE_AUTH': False,
-            'CACHING_RULES': '123',
-            'ORIGIN_HEALTH_PROBE': {'HTTP_REQUEST': '', 'PROBE_TIMEOUT': 0, 'PROBE_INTERVAL': 0, 'HTTP_STATUS': 0}
+          "CONTENT_OPTIMIZERS_HTTP": [
+            "e",
+            "s",
+            "t",
+            "t"
+          ],
+          "CACHING_RULES_MODE": "best",
+          "CONTENT_OPTIMIZERS_HTTPS": [],
+          "DOMAINS_TO_PROXY_HTTP": [
+            "test1",
+            "test2"
+          ],
+          "SERVER_NAME": "test_domain",
+          "BYPASS_CO_LOCATIONS": [],
+          "CLIENT_RESPONSE_TIMEOUT": 600,
+          "CACHE_PS_HTML": False,
+          "INCLUDE_USER_AGENT": False,
+          "ENABLE_GEOIP_HEADERS": False,
+          "DEBUG_MODE": False,
+          "CUSTOM_VCL": {
+            "hash": "",
+            "deliver": "",
+            "backend_error": "",
+            "pass": "",
+            "hit": "",
+            "backend_fetch": "",
+            "purge": "",
+            "recv": "",
+            "miss": "",
+            "pipe": "",
+            "backends": [],
+            "synth": "",
+            "backend_response": ""
+          },
+          "ENABLE_CACHE": True,
+          "VERSION": 17,
+          "ENABLE_ORIGIN_HEALTH_PROBE": False,
+          "CUSTOM_VCL_ENABLED": False,
+          "CACHE_IGNORE_AUTH": False,
+          "CACHING_RULES": [],
+          "ORIGIN_HEALTH_PROBE": {
+            "HTTP_REQUEST": "",
+            "PROBE_TIMEOUT": 0,
+            "PROBE_INTERVAL": 0,
+            "HTTP_STATUS": 0
+          }
         }
         result_string = apache_gen_config_script.generate_bp_varnish_domain_json(self.domain)
         self.assertEqual(json.loads(result_string), test_json)
@@ -309,31 +393,66 @@ class TestApacheGenConfigScript(unittest.TestCase):
     def test_generate_bp_domain_json(self):
         test_json = {
             u'co_profiles': {
-                u'REV_OPTIMIZATION_LEVEL': u'custom', u'REV_CUSTOM_IMG_LEVEL': u'medium',
-                u'VERSION': 2, u'REV_CUSTOM_CSS_LEVEL': u'medium', u'REV_CUSTOM_JS_LEVEL': u'medium'
+                u'REV_OPTIMIZATION_LEVEL': u'custom',
+                u'REV_CUSTOM_IMG_LEVEL': u'medium',
+                u'VERSION': 2,
+                u'REV_CUSTOM_CSS_LEVEL': u'medium',
+                u'REV_CUSTOM_JS_LEVEL': u'medium'
             },
             u'bp': {
-                u'REV_PROFILES_BASE_PORT_HTTP': 80, u'ENABLE_VARNISH_GEOIP_HEADERS': False,
-                u'ENABLE_HTML_SUBSTITUTE': True, u'DOMAINS_TO_OPTIMIZE_HTTPS': [u'test1', u'test2'],
-                u'BYPASS_CO_LOCATIONS': [], u'BP_LUA_LOCATIONS': [], u'PROXY_TIMEOUT': 5, u'ENABLE_HTTPS': False,
-                u'ORIGIN_REUSE_CONNS': True, u'CONTENT_OPTIMIZERS_HTTPS': [], u'BLOCK_CRAWLERS': True,
-                u'ENABLE_OPTIMIZATION': True, u'ENABLE_SPDY': True, u'ORIGIN_SECURE_PROTOCOL': u'use_end_user_protocol',
-                u'SERVER_NAME': u'test_domain', u'ORIGIN_SERVERS_HTTPS': [], u'CO_LUA_LOCATIONS': [],
-                u'SSL_PROTOCOLS': u'TLSv1 TLSv1.1 TLSv1.2', u'SERVER_REGEX_ALIAS': u'',
-                u'REV_RUM_BEACON_URL': u'http://rum-02-prod-sjc.revsw.net/service', u'REV_PROFILES_COUNT': 1,
-                u'CUSTOM_WEBSERVER_CO_CODE_AFTER': u'', u'REV_PROFILES_BASE_PORT_HTTPS': 80,
-                u'DOMAINS_TO_PROXY_HTTP': [u'test1', u'test2'], u'ENABLE_QUIC': False,
-                u'END_USER_RESPONSE_HEADERS': [], u'BYPASS_VARNISH_LOCATIONS': [], u'ENABLE_WAF': False, u'ssl': {},
-                u'CONTENT_OPTIMIZERS_HTTP': [u'http://e', u'http://s', u'http://t', u'http://t'], u'VERSION': 27,
-                u'ORIGIN_SERVER_NAME': u'test', u'SSL_CERT_ID': u'default', u'ENABLE_JS_SUBSTITUTE': True,
-                u'SERVER_ALIASES': [], u'ENABLE_VARNISH': True, u'DOMAINS_TO_OPTIMIZE_HTTP': [u'test1', u'test2'],
-                u'ENABLE_DECOMPRESSION': True, u'ENABLE_RUM': False, u'ORIGIN_IDLE_TIMEOUT': 80,
-                u'ENABLE_PROXY_BUFFERING': False, u'DOMAIN_SHARDS_COUNT': 1, u'CUSTOM_WEBSERVER_CODE_BEFORE': u'',
+                u'REV_PROFILES_BASE_PORT_HTTP': 80,
+                u'ENABLE_VARNISH_GEOIP_HEADERS': False,
+                u'ENABLE_HTML_SUBSTITUTE': True,
+                u'DOMAINS_TO_OPTIMIZE_HTTPS': [u'test1', u'test2'],
+                u'BYPASS_CO_LOCATIONS': [],
+                u'BP_LUA_LOCATIONS': [],
+                u'PROXY_TIMEOUT': 5,
+                u'ENABLE_HTTPS': False,
+                u'ORIGIN_REUSE_CONNS': True,
+                u'CONTENT_OPTIMIZERS_HTTPS': [],
+                u'BLOCK_CRAWLERS': True,
+                u'ENABLE_OPTIMIZATION': True,
+                u'ENABLE_SPDY': True,
+                u'ORIGIN_SECURE_PROTOCOL': u'use_end_user_protocol',
+                u'SERVER_NAME': u'test_domain',
+                u'ORIGIN_SERVERS_HTTPS': [],
+                u'CO_LUA_LOCATIONS': [],
+                u'SSL_PROTOCOLS': u'TLSv1 TLSv1.1 TLSv1.2',
+                u'SERVER_REGEX_ALIAS': u'',
+                u'REV_RUM_BEACON_URL': u'http://rum-02-prod-sjc.revsw.net/service',
+                u'REV_PROFILES_COUNT': 1,
+                u'CUSTOM_WEBSERVER_CO_CODE_AFTER': u'',
+                u'REV_PROFILES_BASE_PORT_HTTPS': 443,
+                u'DOMAINS_TO_PROXY_HTTP': [u'test1', u'test2'],
+                u'ENABLE_QUIC': False,
+                u'END_USER_RESPONSE_HEADERS': [],
+                u'BYPASS_VARNISH_LOCATIONS': [],
+                u'ENABLE_WAF': False, u'ssl': {},
+                u'CONTENT_OPTIMIZERS_HTTP': [u'http://e', u'http://s', u'http://t', u'http://t'],
+                u'VERSION': 27,
+                u'ORIGIN_SERVER_NAME': u'test',
+                u'SSL_CERT_ID': u'default',
+                u'ENABLE_JS_SUBSTITUTE': True,
+                u'SERVER_ALIASES': [],
+                u'ENABLE_VARNISH': True,
+                u'DOMAINS_TO_OPTIMIZE_HTTP': [u'test1', u'test2'],
+                u'ENABLE_DECOMPRESSION': True,
+                u'ENABLE_RUM': False,
+                u'ORIGIN_IDLE_TIMEOUT': 80,
+                u'ENABLE_PROXY_BUFFERING': False,
+                u'DOMAIN_SHARDS_COUNT': 1,
+                u'CUSTOM_WEBSERVER_CODE_BEFORE': u'',
                 u'SSL_CIPHERS': u'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS',
-                u'ORIGIN_SERVERS_HTTP': [u'http://test'], u'WAF_RULES': [], u'CUSTOM_WEBSERVER_CODE_AFTER': u'',
-                u'ENABLE_HTTP2': True, u'acl': {u'action': u'allow_except', u'enabled': False, u'acl_rules': []},
-                u'ENABLE_SSL': True, u'DEBUG_MODE': False, u'ORIGIN_REQUEST_HEADERS': [],
-                u'SSL_PREFER_SERVER_CIPHERS': True, u'ENABLE_HTTP': True,
+                u'ORIGIN_SERVERS_HTTP': [u'http://test'],
+                u'WAF_RULES': [],
+                u'CUSTOM_WEBSERVER_CODE_AFTER': u'',
+                u'ENABLE_HTTP2': True,
+                u'acl': {u'action': u'allow_except', u'enabled': False, u'acl_rules': []},
+                u'ENABLE_SSL': True,
+                u'DEBUG_MODE': False,
+                u'ORIGIN_REQUEST_HEADERS': [],
+                u'SSL_PREFER_SERVER_CIPHERS': True,
+                u'ENABLE_HTTP': True,
                 u'DOMAINS_TO_PROXY_HTTPS': [u'test1', u'test2']
             }
         }
@@ -380,7 +499,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 'acl': {'action': 'allow_except', 'enabled': False, 'acl_rules': []},
                 'enable_waf': False,
                 'img_choice': 'medium',
-                'caching_rules': '123',
+                'caching_rules': [],
                 'ssl_certificates': 'rev_certs',
                 'enable_decompression': True,
                 'enable_rum': True
@@ -391,14 +510,24 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'version': '1.0.6',
             'origin_domain': 'test',
             'rev_component_co': {
-                'css_choice': 'medium', 'rev_custom_json': {}, 'js_choice': 'medium',
-                'co_apache_custom_config': '', 'enable_optimization': True,
-                'rum_beacon_url': 'http://rum-02-prod-sjc.revsw.net/service', 'lua': [],
-                'img_choice': 'medium', 'mode': 'custom', 'enable_decompression': True, 'enable_rum': True
+                'css_choice': 'medium',
+                'rev_custom_json': {},
+                'js_choice': 'medium',
+                'co_apache_custom_config': '',
+                'enable_optimization': True,
+                'rum_beacon_url': 'http://rum-02-prod-sjc.revsw.net/service',
+                'lua': [],
+                'img_choice': 'medium',
+                'mode': 'custom',
+                'enable_decompression': True,
+                'enable_rum': True
             },
             'rev_traffic_mgr': {
-                'tier': 'SILVER', 'overage': 30, 'transfer_size': '160 TB',
-                'page_views': '40M', 'apdex_threshold_ms': 2000
+                'tier': 'SILVER',
+                'overage': 30,
+                'transfer_size': '160 TB',
+                'page_views': '40M',
+                'apdex_threshold_ms': 2000
             }
         }
         result_string = apache_gen_config_script.generate_ui_config_json(self.domain)
@@ -445,7 +574,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'acl': {'action': 'allow_except', 'enabled': False, 'acl_rules': []},
             'enable_waf': False,
             'img_choice': 'medium',
-            'caching_rules': '123',
+            'caching_rules': [],
             'ssl_certificates': 'rev_certs',
             'enable_decompression': True,
             'enable_rum': True
