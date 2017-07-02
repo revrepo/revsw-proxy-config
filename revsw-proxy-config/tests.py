@@ -35,6 +35,8 @@ apache_gen_config_script = importlib.import_module("apache-gen-config-script")
 
 revsw_sdk_nginx_gen_config = importlib.import_module("revsw-sdk-nginx-gen-config")
 pc_apache_config = importlib.import_module("pc-apache-config")
+revsw_waf_rule_manager = importlib.import_module("revsw-waf-rule-manager")
+revsw_ssl_cert_manager = importlib.import_module("revsw-ssl-cert-manager")
 
 
 # revsw_sdk_nginx_gen_config = __import__()
@@ -589,6 +591,118 @@ class TestApacheGenConfigScript(unittest.TestCase):
         )
         self.assertEqual(result_count, 1)
 
+
+class TestConfigWAF(unittest.TestCase):
+
+    testing_class = None
+
+    def setUp(self):
+        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
+        script_configs.WAF_RULES = os.path.join(TEST_DIR, "waf-rules/")
+        # revsw_waf_rule_manager.ConfigWAF.run = Mock(return_value=0)
+        self.configwaf = revsw_waf_rule_manager.ConfigWAF(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "waf_conf.jinja"),
+        })
+
+    def tearDown(self):
+        pass
+
+    def test_read_config_files(self):
+        status = self.configwaf._read_config_files()
+        self.assertEqual(status, 0)
+
+    def test_read_config_files_wrong_json(self):
+        self.configwaf.conf["config_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_waf_conf.jinja")
+        status = self.configwaf._read_config_files()
+        self.assertEqual(status, 1)
+
+    def test_read_config_files_no_file(self):
+        self.configwaf.conf["config_vars"] =  os.path.join(TEST_CONFIG_DIR, "no_waf_conf.jinja")
+        status = self.configwaf._read_config_files()
+        self.assertEqual(status, 2)
+
+    def test_backup_rules(self):
+        self.configwaf._backup_rules()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_create_rules(self):
+        self.configwaf._create_rules()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_remove_rules(self):
+        result = self.configwaf._remove_rules()
+        self.assertTrue(result)
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_remove_rules_no_file(self):
+        result = self.configwaf._remove_rules()
+        self.assertFalse(result)
+
+
+class TestConfigSSL(unittest.TestCase):
+
+    testing_class = None
+
+    def setUp(self):
+        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
+        script_configs.WAF_RULES = os.path.join(TEST_DIR, "waf-rules/")
+        # revsw_waf_rule_manager.ConfigWAF.run = Mock(return_value=0)
+        self.configssl = revsw_ssl_cert_manager.ConfigSSL(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf.jinja"),
+        })
+
+    def tearDown(self):
+        pass
+
+    def test_read_config_files(self):
+        status = self.configssl._read_config_files()
+        self.assertEqual(status, 0)
+
+    def test_read_config_files_wrong_json(self):
+        self.configssl.conf["config_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_ssl_conf.jinja")
+        status = self.configssl._read_config_files()
+        self.assertEqual(status, 1)
+
+    def test_read_config_files_no_file(self):
+        self.configssl.conf["config_vars"] =  os.path.join(TEST_CONFIG_DIR, "no_ssl_conf.jinja")
+        status = self.configssl._read_config_files()
+        self.assertEqual(status, 2)
+
+    def test_backup_certs(self):
+        self.configssl._backup_certs()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_create_certs(self):
+        self.configssl._create_certs()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_remove_certs(self):
+        result = self.configssl._remove_certs()
+        self.assertTrue(result)
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+
+    def test_remove_certs_no_file(self):
+        result = self.configssl._remove_certs()
+        self.assertFalse(result)
+
+    def test_create_symlink(self):
+        self.configssl._create_symlink()
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
 
 
 if __name__ == '__main__':
