@@ -1,0 +1,9 @@
+{
+    "title": "OWS balancer config",
+    "type": "object",
+    "properties": {
+    },
+    "additionalProperties": false,
+    "configs": [{"sdk_domain_name": "test"}],
+
+}

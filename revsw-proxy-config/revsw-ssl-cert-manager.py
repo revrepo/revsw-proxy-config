@@ -6,6 +6,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import script_configs
 from revsw.logger import RevSysLogger
 
 
@@ -69,8 +70,8 @@ class ConfigSSL:
 
     def _set_default_values(self):
 
-        self.conf['location'] = "/opt/revsw-config/certs/"
-        self.conf['tmp_location'] = "/tmp/"
+        self.conf['location'] = script_configs.CERTS_FOLDER
+        self.conf['tmp_location'] = script_configs.TMP_PATH
         self.conf['operation'] = None
 
         self.conf['cert'] = "public.crt"

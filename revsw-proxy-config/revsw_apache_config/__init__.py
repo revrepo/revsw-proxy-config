@@ -757,7 +757,7 @@ class NginxConfig(WebServerConfig):
     @staticmethod
     def get_all_active_domains():
         domains = []
-        base_dir = "/opt/revsw-config/apache/"
+        base_dir = script_configs.APACHE_PATH
         paths = os.listdir(base_dir)
         for name in paths:
             if name.endswith("generic-site") or name.endswith("co-certs"):

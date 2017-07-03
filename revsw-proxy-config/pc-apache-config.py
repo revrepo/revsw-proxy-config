@@ -639,7 +639,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open( os.path.join(script_configs.APACHE_PATH, "generic-site/bp.json")) as j:
+        with open( os.path.join(script_configs.APACHE_GENERIC_SITE, "bp.json")) as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -720,6 +720,7 @@ def add_or_update_domain(domain_name, ui_config, type):
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": API_VERSION,
+            #TODO: rename type variable
             "type": type,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
