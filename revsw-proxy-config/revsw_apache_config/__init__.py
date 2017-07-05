@@ -865,7 +865,7 @@ class VarnishConfig:
 
             _log.LOGI("Loading input vars from JSON")
             # TODO: we need to replace path to variable outside this class
-            fnames = sorted(["%ssites/%s.json" % (script_configs.VARNISH_PATH, _(dom)) for dom in
+            fnames = sorted(["%ssites/%s.json" % (script_configs.VARNISH_PATH_CONFIG, _(dom)) for dom in
                              NginxConfig.get_all_active_domains()])
             _log.LOGI("  -> files: ", fnames)
 
@@ -887,14 +887,19 @@ class VarnishConfig:
             cfg = cfg.replace('\n\n', '\n')
             cfg = cfg.replace('\n\n', '\n')
 
-            conf_file_name = "/etc/varnish/revsw.vcl"
+            conf_file_name = "%s/revsw.vcl" % script_configs.VARNISH_PATH
 
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)
 
             # re-formatting Varnish config file:
-            run_cmd("cat %(INPUT)s.tmp | /opt/revsw-config/bin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp /tmp/" % \
-                    {"INPUT": conf_file_name, "OUTPUT": conf_file_name}, _log, "re-formatting %s file" % conf_file_name)
+            run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
+                    {
+                        "INPUT": conf_file_name, "OUTPUT": conf_file_name,
+                        "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
+                    },
+                    _log, "re-formatting %s file" % conf_file_name
+                    )
             # .
 
         self.transaction.run(do_write)
@@ -907,7 +912,7 @@ class VarnishConfig:
     def site_config_path(self):
         if not self.site_name:
             raise AssertionError("'site_config_path' requires the site name but the object is global")
-        return "%ssites/%s.json" % (script_configs.VARNISH_PATH,self.site_name)
+        return "%ssites/%s.json" % (script_configs.VARNISH_PATH_CONFIG, self.site_name)
 
     def remove_site(self):
         self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
@@ -926,7 +931,7 @@ class VarnishConfig:
     @staticmethod
     def _extract_domain_locations_from_vcl():
         domain_locations = []
-        with open("/etc/varnish/revsw.vcl", "rt") as f:
+        with open("%srevsw.vcl" % script_configs.VARNISH_PATH, "rt") as f:
             begin_re = re.compile(r"^\s*# BEGIN SITE\s+'(.+)'$")
             end_re = re.compile(r"^\s*# END SITE\s+'(.+)'$")
 

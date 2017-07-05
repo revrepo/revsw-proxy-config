@@ -94,7 +94,7 @@ class TestWebServerConfig(TestAbstractConfig):
     testing_class = WebServerConfig('test_site', transaction=transaction)
 
     def test_gather_template_files(self):
-        subdirs = ("all/bp/",)
+        subdirs = ("all/bp",)
         search_dirs = [os.path.join(base, subdir) for (base, subdir) in
                             itertools.product(self.search_dirs_base, subdirs)]
         templates = self.testing_class.gather_template_files('bp', search_dirs)
@@ -147,9 +147,10 @@ class TestVarnishConfig(TestAbstractConfig):
     transaction = TestConfigTransaction()
     testing_class = VarnishConfig('test_site', transaction=transaction)
 
-    # TODO: first we need to refactor hardcoded  path
-    # def test_write_config_file(self):
-    #     self.varnish_config.write_config_file(self.search_dirs)
+    def test_write_config_file(self):
+        script_configs.VARNISH_PATH = TEST_DIR
+        script_configs.CONFIG_PATH = TEST_DIR
+        self.testing_class.write_config_file(self.search_dirs)
 
     def test_gather_template_files(self):
         templates = self.testing_class.gather_template_files(self.search_dirs)
@@ -190,18 +191,23 @@ class TestVarnishConfig(TestAbstractConfig):
         config_path = self.testing_class.site_config_path()
         self.assertEqual(config_path, '%s/test_config.json' % TEST_CONFIG_DIR)
 
+    def test_extract_domain_locations_from_vcl(self):
+        script_configs.VARNISH_PATH = TEST_CONFIG_DIR
+        config_path = self.testing_class._extract_domain_locations_from_vcl()
+        self.assertEqual(config_path, [])
+
 
 class TestNginxConfig(TestAbstractConfig):
     transaction = TestConfigTransaction()
     testing_class = NginxConfig('test_site', transaction=transaction)
 
-    # def test_configure_site(self):
-    #     # create folder for tests and copy files for test
-    #     os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
-    #     os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
-    #     os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
-    #
-    #     self.testing_class.configure_site({})
+    def test_configure_site(self):
+        # create folder for tests and copy files for test
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
+
+        self.testing_class.configure_site({})
 
     def test_remove_site(self):
         script_configs.NGINX_PATH = TEST_DIR
