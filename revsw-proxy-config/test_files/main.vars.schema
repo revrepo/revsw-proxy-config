@@ -2,8 +2,18 @@
     "title": "OWS balancer config",
     "type": "object",
     "properties": {
+        "configs": {
+		    "type": "array",
+            "items": {
+                "sdk_domain_name": "string"
+            },
+		    "additionalProperties": true
+		},
+		"bpname": {
+		    "type": "string"
+		    }
     },
-    "additionalProperties": false,
-    "configs": [{"sdk_domain_name": "test"}],
+    "required": ["configs"],
+    "additionalProperties": false
 
 }

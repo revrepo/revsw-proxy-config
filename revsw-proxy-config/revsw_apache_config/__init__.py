@@ -894,8 +894,9 @@ class NginxConfig(WebServerConfig):
                 f.write(cfg)
 
             # re-formatting Nginx config file:
-            run_cmd("cat %(INPUT)s.tmp | /opt/revsw-config/bin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp /tmp/" % \
-                    {"INPUT": conf_file_name, "OUTPUT": conf_file_name}, _log, "re-formatting %s file" % conf_file_name)
+            run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp /tmp/" % \
+                    {"INPUT": conf_file_name, "OUTPUT": conf_file_name, "CONFIG_PATH": script_configs.CONFIG_PATH},
+                    _log, "re-formatting %s file" % conf_file_name)
             # .
 
             _log.LOGD("Generated Nginx config file")
@@ -903,7 +904,8 @@ class NginxConfig(WebServerConfig):
             # Make sure the site has at least the default certs
             self._fixup_certs()
 
-            run_cmd("cd /etc/nginx/sites-enabled && ln -sf /etc/nginx/sites-available/%s.conf" % self.site_name,
+            run_cmd("cd %(NGINX_PATH)ssites-enabled && ln -sf %(NGINX_PATH)ssites-available/%(SITE_NAME)s.conf" % \
+                    {"NGINX_PATH": script_configs.NGINX_PATH, "SITE_NAME": self.site_name},
                     _log, "Enabling site '%s' if necessary" % self.site_name)
 
             _log.LOGD("Saving input vars")
@@ -1072,7 +1074,7 @@ class VarnishConfig:
             cfg = cfg.replace('\n\n', '\n')
             cfg = cfg.replace('\n\n', '\n')
 
-            conf_file_name = "%s/revsw.vcl" % script_configs.VARNISH_PATH
+            conf_file_name = os.path.join(script_configs.VARNISH_PATH, "revsw.vcl")
 
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)

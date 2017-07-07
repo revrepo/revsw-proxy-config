@@ -21,6 +21,7 @@ import json
 import os
 import unittest
 import itertools
+import revsw
 
 
 from mock import Mock, patch
@@ -150,6 +151,25 @@ class TestVarnishConfig(TestAbstractConfig):
     def test_write_config_file(self):
         script_configs.VARNISH_PATH = TEST_DIR
         script_configs.CONFIG_PATH = TEST_DIR
+        script_configs.VARNISH_PATH_CONFIG = TEST_DIR
+        # create folder for tests and copy files for test
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites/'))
+
+        os.system("cp %s %s" % (
+            os.path.join(os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/conf_files_formatter.sh"
+            ),
+            os.path.join(TEST_DIR, 'bin/')
+        ))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'bin/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test_site.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test_domain.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
+
+
         self.testing_class.write_config_file(self.search_dirs)
 
     def test_gather_template_files(self):
@@ -201,13 +221,35 @@ class TestNginxConfig(TestAbstractConfig):
     transaction = TestConfigTransaction()
     testing_class = NginxConfig('test_site', transaction=transaction)
 
-    def test_configure_site(self):
+    @patch('revsw-proxy-config.revsw.misc.run_cmd')
+    def test_configure_site(self, mocked):
+        mocked.return_value = None
+        script_configs.NGINX_PATH = TEST_DIR
+        script_configs.CONFIG_PATH = TEST_DIR
         # create folder for tests and copy files for test
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-available/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-enabled/'))
+
+
+        os.path.join(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
+        )
+        os.system("cp %s %s" % (
+            os.path.join(os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/conf_files_formatter.sh"
+            ),
+            os.path.join(TEST_DIR, 'bin/')
+        ))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
 
-        self.testing_class.configure_site({})
+        self.testing_class.configure_site({
+            "configs": [{"sdk_domain_name": "test"}],
+            "bpname": "test"
+        })
+        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")))
 
     def test_remove_site(self):
         script_configs.NGINX_PATH = TEST_DIR
