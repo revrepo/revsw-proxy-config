@@ -8,6 +8,8 @@ from cStringIO import StringIO
 import json
 import shlex
 
+import unittest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
 
@@ -939,7 +941,7 @@ def generate_ui_configs():
 def print_configure_sh(txt):
     print txt
 
-
+#TODO: try to understand for what so strange way to write to file
 def generate_config_sh():
     global _bps
     global _cos
@@ -1016,26 +1018,33 @@ def main():
 # ##################################################################################
 # MAIN
 # ##################################################################################
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate configuration and/or configure web server and Varnish.",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--manual", help="Display the usage manual",
+                        action="store_true")
+    parser.add_argument("--no-bp", help="Don't generate BP configuration commands",
+                        action="store_true")
+    parser.add_argument("--no-flush", help="Don't generate flush commands (obsolete, unused)",
+                        action="store_true")
+    parser.add_argument("--flush", help="Flush existing sites before configuring",
+                        action="store_true")
+    parser.add_argument("--no-send", help="Don't send configuration",
+                        action="store_true")
+    parser.add_argument("--copy-to", help="Copy generated configuration to file name")
+    parser.add_argument("--ui-config", help="Generate 'ui-config-<domain>.json' instead of 'configure.sh'",
+                        action="store_true")
+    parser.add_argument("--run_test", help="Run unit test for this module",
+                        action="store_true")
+    args = parser.parse_args()
 
-parser = argparse.ArgumentParser(description="Generate configuration and/or configure web server and Varnish.",
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--manual", help="Display the usage manual",
-                    action="store_true")
-parser.add_argument("--no-bp", help="Don't generate BP configuration commands",
-                    action="store_true")
-parser.add_argument("--no-flush", help="Don't generate flush commands (obsolete, unused)",
-                    action="store_true")
-parser.add_argument("--flush", help="Flush existing sites before configuring",
-                    action="store_true")
-parser.add_argument("--no-send", help="Don't send configuration",
-                    action="store_true")
-parser.add_argument("--copy-to", help="Copy generated configuration to file name")
-parser.add_argument("--ui-config", help="Generate 'ui-config-<domain>.json' instead of 'configure.sh'",
-                    action="store_true")
-args = parser.parse_args()
 
-if args.manual:
-    print help_str
-    sys.exit(0)
 
-main()
+    if args.manual:
+        print help_str
+        sys.exit(0)
+    elif args.run_test:
+        unittest.main()
+        sys.exit(0)
+
+    main()

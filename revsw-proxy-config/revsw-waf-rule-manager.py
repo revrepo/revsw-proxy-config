@@ -19,6 +19,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import script_configs
 from revsw.logger import RevSysLogger
 
 
@@ -98,8 +99,8 @@ class ConfigWAF:
         self.log.LOGD("Config vars: " + json.dumps(self.config_vars))
 
     def _set_default_values(self):
-        self.conf['location'] = "/opt/revsw-config/waf-rules/"
-        self.conf['tmp_location'] = "/tmp/"
+        self.conf['location'] = script_configs.WAF_RULES
+        self.conf['tmp_location'] = script_configs.TMP_PATH
         self.conf['operation'] = None
 
     def _interpret_arguments(self, args):

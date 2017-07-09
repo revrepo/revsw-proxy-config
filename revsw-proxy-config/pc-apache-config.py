@@ -26,6 +26,7 @@ import traceback
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 
+import script_configs
 from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_dir, jinja_config_webserver_dir, \
     ConfigTransaction, dns_query, is_ipv4, ConfigException, PlatformWebServer, NginxConfig
 from revsw_apache_config.varnishadmin import VarnishAdmin
@@ -625,7 +626,7 @@ def _get_content_optimizers(ui_config):
 def _get_domain_mapping(domain_name):
     mapping = {}
     try:
-        with open("/opt/revsw-config/apache/site-mappings.json") as j:
+        with open(os.path.join(script_configs.APACHE_PATH, "site-mappings.json")) as j:
             mappings = json.load(j)
         mapping = mappings.get(domain_name, {})
     except IOError as e:  # file doesn't exist
@@ -668,7 +669,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open("/opt/revsw-config/apache/generic-site/bp.json") as j:
+        with open( os.path.join(script_configs.APACHE_GENERIC_SITE, "bp.json")) as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -762,6 +763,7 @@ def add_or_update_domain(domain_name, ui_config, type):
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": API_VERSION,
+            #TODO: rename type variable
             "type": type,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
@@ -1354,5 +1356,7 @@ def _main():
         # raise
         sys.exit(-1)
 
-# Main function
-_main()
+
+if __name__ == "__main__":
+    # Main function
+    _main()
