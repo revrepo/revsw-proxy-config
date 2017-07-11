@@ -1119,7 +1119,7 @@ class VarnishConfig:
     @staticmethod
     def _extract_domain_locations_from_vcl():
         domain_locations = []
-        with open("%srevsw.vcl" % script_configs.VARNISH_PATH, "rt") as f:
+        with open(os.path.join(script_configs.VARNISH_PATH, "revsw.vcl"), "rt") as f:
             begin_re = re.compile(r"^\s*# BEGIN SITE\s+'(.+)'$")
             end_re = re.compile(r"^\s*# END SITE\s+'(.+)'$")
 
