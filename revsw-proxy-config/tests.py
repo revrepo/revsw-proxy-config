@@ -288,7 +288,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
     testing_class = None
     domain = {
             "name": 'test_domain',
-            "bp_template": "test_name",
+            "bp_template": None,
             "ows_domain": "test",
             "ows_http": True,
             "ows_https":False,
@@ -347,15 +347,22 @@ class TestApacheGenConfigScript(unittest.TestCase):
             json.loads(open("bp-varnish-test_domain.json").read()),
             json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-varnish-test_domain.json")).read()),
         )
+        os.system("rm bp-varnish-test_domain.json")
+        os.system("rm bp-apache-test_domain.json")
+
+    def test_fixup_domain(self):
+        apache_gen_config_script.fixup_domain(self.domain)
+        self.assertTrue(os.path.exists("bp-test_domain.jinja"))
+        self.assertTrue(os.path.exists("bp-test_domain.vars.schema"))
+        os.system("rm  bp-test_domain.jinja")
+        os.system("rm bp-test_domain.vars.schema")
+
 
     def test_generate_ui_configs(self):
         apache_gen_config_script._domains = [self.domain]
         apache_gen_config_script.generate_ui_configs()
         self.assertTrue(os.path.exists("ui-config-test_domain.json"))
-
-    def test_fixup_domain(self):
-        apache_gen_config_script.fixup_domain(self.domain)
-        self.assertTrue(os.path.exists("ui-config-test_domain.json"))
+        os.system("rm ui-config-test_domain.json")
 
     def test_generate_bp_varnish_domain_json(self):
         test_json = {
