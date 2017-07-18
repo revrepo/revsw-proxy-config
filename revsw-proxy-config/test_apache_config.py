@@ -155,7 +155,10 @@ class TestVarnishConfig(TestAbstractConfig):
         # create folder for tests and copy files for test
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites/'))
-
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
+        TEST_CONFIG_DIR = os.path.join(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
+        )
         os.system("cp %s %s" % (
             os.path.join(os.path.dirname(
                 os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/conf_files_formatter.sh"
@@ -163,6 +166,7 @@ class TestVarnishConfig(TestAbstractConfig):
             os.path.join(TEST_DIR, 'bin/')
         ))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'test_site/')))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'bin/')))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'sites/')))
         os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test_site.json"), os.path.join(TEST_DIR, 'sites/')))
