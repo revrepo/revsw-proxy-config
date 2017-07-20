@@ -67,6 +67,8 @@ class TestNginxConfigSDK(unittest.TestCase):
     testing_class = None
 
     def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
         # create folder for tests
         os.system("mkdir %s && mkdir %s" % (TEST_DIR, os.path.join(TEST_DIR, "backup/")))
 
@@ -127,6 +129,8 @@ class TestNginxConfigSDK(unittest.TestCase):
 class TestConfigCommon(unittest.TestCase):
 
     def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
         # create folder for tests
         os.system("mkdir %s" % TEST_DIR)
         script_configs.APACHE_PATH = TEST_CONFIG_DIR
@@ -318,6 +322,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
         }
 
     def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
         # create folder for tests
         os.system("mkdir %s" % TEST_DIR)
 
@@ -621,6 +627,8 @@ class TestConfigWAF(unittest.TestCase):
     testing_class = None
 
     def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
         script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
         script_configs.WAF_RULES = os.path.join(TEST_DIR, "waf-rules/")
 
@@ -671,6 +679,8 @@ class TestConfigSSL(unittest.TestCase):
     testing_class = None
 
     def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
         script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
         script_configs.CERTS_FOLDER = os.path.join(TEST_DIR, "crt_folder/")
 
