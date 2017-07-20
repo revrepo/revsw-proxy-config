@@ -71,6 +71,10 @@ class TestAbstractConfig(unittest.TestCase):
     testing_class = None
 
     def setUp(self):
+
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
+
         # create folder for tests
         os.system("mkdir %s" % TEST_DIR)
         self.search_dirs_base = [os.path.join(
