@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#
+# This file is managed by Rev Puppet service as described on Wiki
+# page https://revwiki.atlassian.net/wiki/display/OP/Puppet+Centralized+Configuration+Management+System
+# Please don't modify the file on the Puppet client server since your changes will be overwritten on the next
+# Puppet agent run on the server.
+#
+
+export CONF=/etc/nginx/conf.d/revsw-json-access-log-nginx.conf
+
+if [ -f /etc/nginx/conf.d/000-revsw-json-access-log-nginx.conf ]; then
+        export CONF=/etc/nginx/conf.d/000-revsw-json-access-log-nginx.conf
+fi
+
+
+
+if [ -z "$NGXTOP" ] ; then
+        echo "ERROR: ngxtop tool was not found - aborting."
+        exit 1
+fi
+
+python rtop_co.py -c $CONF -n 20 -g http_host $*
