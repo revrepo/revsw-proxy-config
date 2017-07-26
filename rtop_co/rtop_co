@@ -14,7 +14,7 @@ if [ -f /etc/nginx/conf.d/000-revsw-json-access-log-nginx.conf ]; then
 fi
 
 
-
+NGXTOP=`which ngxtop`
 if [ -z "$NGXTOP" ] ; then
         echo "ERROR: ngxtop tool was not found - aborting."
         exit 1
