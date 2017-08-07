@@ -56,17 +56,17 @@
 {%- endmacro %}{# _for_each_rule(site) #}
 
 {% macro _for_each_site(cond_var, req_obj) -%}
-{% set first=True %}
-{% for site in sites %}
-{% if site[cond_var] %}
-    # BEGIN SITE '{{site.SERVER_NAME}}'
-    {{ "if" if first else "elsif" }} ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
-    {{ caller(site) }}
-    }
-    {% set first=False %}
-    # END SITE '{{site.SERVER_NAME}}'
-{% endif %}{# site[cond_var] #}
-{% endfor %}
+  {% set first=True %}
+  {% for site in sites %}
+    {% if site[cond_var] %}
+      # BEGIN SITE '{{site.SERVER_NAME}}'
+      {{ "if" if first else "elsif" }} ({{req_obj}}.http.host == "{{site.SERVER_NAME}}") {
+      {{ caller(site) }}
+      }
+      {% set first=False %}
+      # END SITE '{{site.SERVER_NAME}}'
+    {% endif %}{# site[cond_var] #}
+  {% endfor %}
 {%- endmacro %}{# _for_each_site(cond_var) #}
 
 
@@ -395,18 +395,18 @@ backend behttps_all {
 
 # Begin custom VCL backends
 {% for site in sites %}
-    {% if site.CUSTOM_VCL_ENABLED and site.CUSTOM_VCL.backends %}
+  {% if site.CUSTOM_VCL_ENABLED and site.CUSTOM_VCL.backends %}
     # BEGIN SITE '{{site.SERVER_NAME}}'
     {% for be in site.CUSTOM_VCL.backends %}
-        backend {{be.name|custom_backend_name(site) }} {
-        .host = "{{be.host}}";
-        .port = "{{be.port}}";
-        .preresolve_dns = {{"0" if be.dynamic else "1"}};
-        {{ be.vcl|process_custom_vcl(site)|indent(2, true) }}
-        }
+      backend {{be.name|custom_backend_name(site) }} {
+      .host = "{{be.host}}";
+      .port = "{{be.port}}";
+      .preresolve_dns = {{"0" if be.dynamic else "1"}};
+      {{ be.vcl|process_custom_vcl(site)|indent(2, true) }}
+      }
     {% endfor %}
     # END SITE '{{site.SERVER_NAME}}'
-    {% endif %}
+  {% endif %}
 {% endfor %}
 # End custom VCL backends
 
@@ -865,210 +865,210 @@ unset bereq.http.X-Rev-Longitude;
 
 # Block 6: Mark HTML uncacheable by caches beyond our control.
 sub vcl_backend_response {
-    {{ _for_each_site_custom_vcl("backend_response", "bereq") }}
+{{ _for_each_site_custom_vcl("backend_response", "bereq") }}
 
-    # Don't cache requests with status code between 307 and 499
-    if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
-    set beresp.ttl = 0s;
-    {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
-      chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
-      call save_backend_chromelogger;
-    {%- endcall %}
-    return (deliver);
-    }
+# Don't cache requests with status code between 307 and 499
+if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
+set beresp.ttl = 0s;
+{% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
+  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
+  call save_backend_chromelogger;
+{%- endcall %}
+return (deliver);
+}
 
-    # Serve stale object if problem with backend
-    if (beresp.status >= 500 && beresp.status != 508) {
-    set beresp.ttl = 0s;
-    {% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
-      chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
-      call save_backend_chromelogger;
-    {%- endcall %}
-    return (retry);
-    }
+# Serve stale object if problem with backend
+if (beresp.status >= 500 && beresp.status != 508) {
+set beresp.ttl = 0s;
+{% call (site) _for_each_site("DEBUG_MODE", "bereq") %}
+  chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
+  call save_backend_chromelogger;
+{%- endcall %}
+return (retry);
+}
 
-    # This can happen if a backend responds with a redirect and Content Encoding (which Varnish returns a 503 for)
-    if (beresp.http.Content-Encoding ~ "gzip" ) {
-    if (beresp.http.Content-Length == "0") {
-    unset beresp.http.Content-Encoding;
-    }
-    }
+# This can happen if a backend responds with a redirect and Content Encoding (which Varnish returns a 503 for)
+if (beresp.http.Content-Encoding ~ "gzip" ) {
+if (beresp.http.Content-Length == "0") {
+unset beresp.http.Content-Encoding;
+}
+}
 
-    # Remove headers set by upstream Varnish instances.
-    unset beresp.http.X-Cache;
-    unset beresp.http.X-Cache-Hits;
+# Remove headers set by upstream Varnish instances.
+unset beresp.http.X-Cache;
+unset beresp.http.X-Cache-Hits;
 
-    if (beresp.http.Cache-Control || beresp.http.Expires) {
-    # We need this var later on
-    revvar.set_bool({{VAR_BERESP}}, {{_var_idx("has_cc")}}, true);
+if (beresp.http.Cache-Control || beresp.http.Expires) {
+# We need this var later on
+revvar.set_bool({{VAR_BERESP}}, {{_var_idx("has_cc")}}, true);
 
-    # The Expires header is confusing and causes wrong misses.
-    # Max-Age takes precedence, so eliminate the confusion.
-    if (beresp.http.Cache-Control ~ "max-age") {
-    unset beresp.http.Expires;
-    }
-    }
+# The Expires header is confusing and causes wrong misses.
+# Max-Age takes precedence, so eliminate the confusion.
+if (beresp.http.Cache-Control ~ "max-age") {
+unset beresp.http.Expires;
+}
+}
 
-    # Domain-specific configuration
-    {% call (site) _for_each_site("ENABLE_CACHE", "bereq") %}
-      {% if site.DEBUG_MODE %}
-        chromelogger.log("backend_response " + bereq.xid + ": " + bereq.method + " " + bereq.url);
+# Domain-specific configuration
+{% call (site) _for_each_site("ENABLE_CACHE", "bereq") %}
+  {% if site.DEBUG_MODE %}
+    chromelogger.log("backend_response " + bereq.xid + ": " + bereq.method + " " + bereq.url);
 
-        if (revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}})) {
-        chromelogger.log("backend_response " + bereq.xid + ": saved " + revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}}));
-        }
-        chromelogger.log("backend_response " + bereq.xid + ": initial beresp.ttl=" + beresp.ttl);
-      {% endif %}
-
-      # Don't allow browser to cache PageSpeed-optimized HTML.
-      if (beresp.http.X-Mod-Pagespeed) {
-      {% if not site.CACHE_PS_HTML %}
-        if (beresp.http.Content-Type ~ "text/html") {
-        # Mark as "Hit-For-Pass" for the next 2 minutes
-        set beresp.ttl = 120 s;
-        set beresp.http.X-Rev-Hit-For-Pass = "YES";
-        {% if site.DEBUG_MODE %}
-          chromelogger.log("backend_response " + bereq.xid + ": HTML response was optimized by PageSpeed; return HIT_FOR_PASS");
-        {% endif %}
-        set beresp.uncacheable = true;
-        return (deliver);
-        }
-      {% endif %}
-
-      # Don't pass this header to the users; they don't have to know we use PS
-      unset beresp.http.X-Mod-Pagespeed;
-      }
-
-      # Domain-specific configuration
-      call start_cookies_backend_response;
-
-      {{ _site_backend_response(site)}}
-
-      if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("follow_redirects")}}) && # follow origin redirects
-      (beresp.status == 301 || beresp.status == 302 || beresp.status == 303 || beresp.status == 307)) # redirect
-      {
-      {% if site.DEBUG_MODE %}
-        chromelogger.log("backend_response " + bereq.xid + ": Got redirect, fetching from " + beresp.http.Location);
-      {% endif %}
-      # The request following a 303 must be GET (RFC2616)
-      if (beresp.status == 303) {
-      set bereq.method = "GET";
-      }
-
-      # Refetch the object from the specified location, using the Apache forward proxy
-      set bereq.backend = befwproxy;
-      set bereq.url = beresp.http.Location;
-      return (retry);
-      }
-      else if (beresp.status != 200) { # don't follow origin redirects
-      set beresp.http.Cache-Control = "max-age=0, no-cache, no-store";
-      set beresp.ttl = 0s;
-      {% if site.DEBUG_MODE %}
-        chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is not 200; don't cache; return DELIVER");
-        call save_backend_chromelogger;
-      {% endif %}
-      return (deliver);
-      }
-
-      {% if site.DEBUG_MODE %}
-        chromelogger.log("backend_response " + bereq.xid + ": delreq_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delreq_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": delrsp_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delrsp_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": ignall_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("ignall_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": ignoreq_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("ignoreq_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": keepreq_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("keepreq_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": rgxdelrsp_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("delreq_cook")}}));
-        chromelogger.log("backend_response " + bereq.xid + ": grace=" + revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}));
-
-        chromelogger.log("backend_response " + bereq.xid + ": final beresp.ttl=" + beresp.ttl);
-      {% endif %}
-
-      # Taken from default VCL, but without the Set-Cookie part.
-      if (beresp.ttl <= 0s ||
-      beresp.http.Vary == "*") {
-      # Mark as "Hit-For-Pass" for the next 2 minutes
-      set beresp.ttl = 120s;
-      set beresp.http.X-Rev-Hit-For-Pass = "YES";
-      {% if site.DEBUG_MODE %}
-        if (beresp.ttl <= 0s) {
-        chromelogger.log("backend_response " + bereq.xid + ": Uncacheable (beresp.ttl<=0); return HIT_FOR_PASS");
-        } else {
-        chromelogger.log("backend_response " + bereq.xid + ": Has 'Vary: *'; return HIT_FOR_PASS");
-        }
-        call save_backend_chromelogger;
-      {% endif %}
-      set beresp.uncacheable = true;
-      return (deliver);
-      }
-
-      {% if site.DEBUG_MODE %}
-        call save_backend_chromelogger;
-      {% endif %}
-    {%- endcall %}{# _for_each_site("ENABLE_CACHE") #}
-
-    # Add in vcl_backend_response support for *.revsdk.net
-    # a problem will appear in case no domains are defined
-    elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
-      revvar.set_duration(false, 18, 60s);
-
-      if (beresp.status != 200) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
-
-      set beresp.http.X-Rev-SDK = "1";
-
-    }
-    else {
-      if (beresp.status != 200) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
-
-      if (bereq.method != "GET" && bereq.method != "HEAD") {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
-
-      if (beresp.http.Set-Cookie) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
-
-      revvar.set_duration(false, 18, 60s);
-      set beresp.http.X-Rev-Default = "1";
-    }
-
-    set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
-    set beresp.http.X-Rev-beresp-grace = revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}});
-
-    # Save original host and URL for smart ban.
-    set beresp.http.X-Rev-Host = bereq.http.Host;
-    set beresp.http.X-Rev-Url = bereq.url;
-
-    # Compress objects stored in the cache, if not already compressed by backend
-    if (beresp.http.Content-Type ~ "(image|audio|video|pdf|flash)") {
-    set beresp.do_gzip = false;
-    } else {
-    set beresp.do_gzip = true;
-    }
-
-    # We can't use backend revvars in vcl_deliver, so we have to set headers instead
-    if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delay_age")}}) && beresp.http.Age) {
-    set beresp.http.rev-orig-age = beresp.http.Age;
-    set beresp.ttl = beresp.ttl + std.duration(beresp.http.Age + "s", 0s);
-    }
-    if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("del_age")}}) && beresp.http.Age) {
-    set beresp.http.rev-del-age = 1;
-    }
     if (revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}})) {
-    set beresp.http.rev-FROUTEID = revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}});
+    chromelogger.log("backend_response " + bereq.xid + ": saved " + revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}}));
     }
-    # Grace is set through caching rules
-    if (revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}) > 0s) {
-    set beresp.grace = revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}});
-    }
+    chromelogger.log("backend_response " + bereq.xid + ": initial beresp.ttl=" + beresp.ttl);
+  {% endif %}
 
+  # Don't allow browser to cache PageSpeed-optimized HTML.
+  if (beresp.http.X-Mod-Pagespeed) {
+  {% if not site.CACHE_PS_HTML %}
+    if (beresp.http.Content-Type ~ "text/html") {
+    # Mark as "Hit-For-Pass" for the next 2 minutes
+    set beresp.ttl = 120 s;
+    set beresp.http.X-Rev-Hit-For-Pass = "YES";
+    {% if site.DEBUG_MODE %}
+      chromelogger.log("backend_response " + bereq.xid + ": HTML response was optimized by PageSpeed; return HIT_FOR_PASS");
+    {% endif %}
+    set beresp.uncacheable = true;
     return (deliver);
+    }
+  {% endif %}
+
+  # Don't pass this header to the users; they don't have to know we use PS
+  unset beresp.http.X-Mod-Pagespeed;
+  }
+
+  # Domain-specific configuration
+  call start_cookies_backend_response;
+
+  {{ _site_backend_response(site)}}
+
+  if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("follow_redirects")}}) && # follow origin redirects
+  (beresp.status == 301 || beresp.status == 302 || beresp.status == 303 || beresp.status == 307)) # redirect
+  {
+  {% if site.DEBUG_MODE %}
+    chromelogger.log("backend_response " + bereq.xid + ": Got redirect, fetching from " + beresp.http.Location);
+  {% endif %}
+  # The request following a 303 must be GET (RFC2616)
+  if (beresp.status == 303) {
+  set bereq.method = "GET";
+  }
+
+  # Refetch the object from the specified location, using the Apache forward proxy
+  set bereq.backend = befwproxy;
+  set bereq.url = beresp.http.Location;
+  return (retry);
+  }
+  else if (beresp.status != 200) { # don't follow origin redirects
+  set beresp.http.Cache-Control = "max-age=0, no-cache, no-store";
+  set beresp.ttl = 0s;
+  {% if site.DEBUG_MODE %}
+    chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is not 200; don't cache; return DELIVER");
+    call save_backend_chromelogger;
+  {% endif %}
+  return (deliver);
+  }
+
+  {% if site.DEBUG_MODE %}
+    chromelogger.log("backend_response " + bereq.xid + ": delreq_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delreq_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": delrsp_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delrsp_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": ignall_cook=" + revvar.get_bool({{VAR_BERESP}}, {{_var_idx("ignall_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": ignoreq_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("ignoreq_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": keepreq_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("keepreq_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": rgxdelrsp_cook=" + revvar.get_string({{VAR_BERESP}}, {{_var_idx("delreq_cook")}}));
+    chromelogger.log("backend_response " + bereq.xid + ": grace=" + revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}));
+
+    chromelogger.log("backend_response " + bereq.xid + ": final beresp.ttl=" + beresp.ttl);
+  {% endif %}
+
+  # Taken from default VCL, but without the Set-Cookie part.
+  if (beresp.ttl <= 0s ||
+  beresp.http.Vary == "*") {
+  # Mark as "Hit-For-Pass" for the next 2 minutes
+  set beresp.ttl = 120s;
+  set beresp.http.X-Rev-Hit-For-Pass = "YES";
+  {% if site.DEBUG_MODE %}
+    if (beresp.ttl <= 0s) {
+    chromelogger.log("backend_response " + bereq.xid + ": Uncacheable (beresp.ttl<=0); return HIT_FOR_PASS");
+    } else {
+    chromelogger.log("backend_response " + bereq.xid + ": Has 'Vary: *'; return HIT_FOR_PASS");
+    }
+    call save_backend_chromelogger;
+  {% endif %}
+  set beresp.uncacheable = true;
+  return (deliver);
+  }
+
+  {% if site.DEBUG_MODE %}
+    call save_backend_chromelogger;
+  {% endif %}
+{%- endcall %}{# _for_each_site("ENABLE_CACHE") #}
+
+# Add in vcl_backend_response support for *.revsdk.net
+# a problem will appear in case no domains are defined
+elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
+  revvar.set_duration(false, 18, 60s);
+
+  if (beresp.status != 200) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  set beresp.http.X-Rev-SDK = "1";
+
+}
+else {
+  if (beresp.status != 200) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  if (bereq.method != "GET" && bereq.method != "HEAD") {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  if (beresp.http.Set-Cookie) {
+    set beresp.ttl = 0s;
+    return (deliver);
+  }
+
+  revvar.set_duration(false, 18, 60s);
+  set beresp.http.X-Rev-Default = "1";
+}
+
+set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
+set beresp.http.X-Rev-beresp-grace = revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}});
+
+# Save original host and URL for smart ban.
+set beresp.http.X-Rev-Host = bereq.http.Host;
+set beresp.http.X-Rev-Url = bereq.url;
+
+# Compress objects stored in the cache, if not already compressed by backend
+if (beresp.http.Content-Type ~ "(image|audio|video|pdf|flash)") {
+set beresp.do_gzip = false;
+} else {
+set beresp.do_gzip = true;
+}
+
+# We can't use backend revvars in vcl_deliver, so we have to set headers instead
+if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("delay_age")}}) && beresp.http.Age) {
+set beresp.http.rev-orig-age = beresp.http.Age;
+set beresp.ttl = beresp.ttl + std.duration(beresp.http.Age + "s", 0s);
+}
+if (revvar.get_bool({{VAR_BERESP}}, {{_var_idx("del_age")}}) && beresp.http.Age) {
+set beresp.http.rev-del-age = 1;
+}
+if (revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}})) {
+set beresp.http.rev-FROUTEID = revvar.get_string({{VAR_BERESP}}, {{_var_idx("FROUTEID")}});
+}
+# Grace is set through caching rules
+if (revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}}) > 0s) {
+set beresp.grace = revvar.get_duration({{VAR_BERESP}}, {{_var_idx("grace_beresp")}});
+}
+
+return (deliver);
 }
 
 sub vcl_backend_error {
@@ -1077,72 +1077,72 @@ sub vcl_backend_error {
 
 # WARNING: we can't use backend revvars in vcl_deliver !
 sub vcl_deliver {
-    # In Varnish 4 we can't rely on obj.hits, instead we must check if X-Rev-Id has more than one id.
-    # See 'https://www.varnish-cache.org/trac/ticket/1492' and 'http://foshttpcache.readthedocs.org/en/latest/varnish-configuration.html'.
-    if (revvar.get_bool({{VAR_REQ}}, {{_var_idx("was_hit")}})) {
-    set resp.http.X-Rev-Cache = "HIT";
-    set resp.http.X-Rev-Cache-Hits = obj.hits;
-    set resp.http.X-Rev-obj-ttl = req.http.X-Rev-obj-ttl;
-    #set resp.http.X-Rev-obj-grace = req.http.X-Rev-obj-grace;
+# In Varnish 4 we can't rely on obj.hits, instead we must check if X-Rev-Id has more than one id.
+# See 'https://www.varnish-cache.org/trac/ticket/1492' and 'http://foshttpcache.readthedocs.org/en/latest/varnish-configuration.html'.
+if (revvar.get_bool({{VAR_REQ}}, {{_var_idx("was_hit")}})) {
+set resp.http.X-Rev-Cache = "HIT";
+set resp.http.X-Rev-Cache-Hits = obj.hits;
+set resp.http.X-Rev-obj-ttl = req.http.X-Rev-obj-ttl;
+#set resp.http.X-Rev-obj-grace = req.http.X-Rev-obj-grace;
 
-    # Since we can't remove headers from 'obj' after 'vcl_backend_response', we'll just have to
-    # remove the cached ones from the response itself, since they are not relevant for this request
-    # because they were generated while the resource was fetched following a MISS.
-    unset resp.http.rev-FROUTEID;
-    unset resp.http.X-Chromelogger-BE;
-    } else {
-    set resp.http.X-Rev-Cache = "MISS";
+# Since we can't remove headers from 'obj' after 'vcl_backend_response', we'll just have to
+# remove the cached ones from the response itself, since they are not relevant for this request
+# because they were generated while the resource was fetched following a MISS.
+unset resp.http.rev-FROUTEID;
+unset resp.http.X-Chromelogger-BE;
+} else {
+set resp.http.X-Rev-Cache = "MISS";
 
-    # Restore the fetched ROUTEID cookie
-    if (resp.http.rev-FROUTEID) {
-    header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
-    unset resp.http.rev-FROUTEID;
-    {% call (site) _for_each_site("DEBUG_MODE", "req") %}
-      chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
-    {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
-    }
-    }
+# Restore the fetched ROUTEID cookie
+if (resp.http.rev-FROUTEID) {
+header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
+unset resp.http.rev-FROUTEID;
+{% call (site) _for_each_site("DEBUG_MODE", "req") %}
+  chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
+{%- endcall %}{# _for_each_site("DEBUG_MODE") #}
+}
+}
 
-    {{ _for_each_site_custom_vcl("deliver", "req") }}
+{{ _for_each_site_custom_vcl("deliver", "req") }}
 
-    if (resp.http.rev-del-age) {
-    # We are overriding the browser Cache-Control in vcl_backend_response.
-    # The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
-    set resp.http.Age = 0;
-    unset resp.http.rev-del-age;
-    {% call (site) _for_each_site("DEBUG_MODE", "req") %}
-      chromelogger.log("deliver " + req.xid + ": forcing Age=0");
-    {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
-    } else if (resp.http.rev-orig-age) {
-        # Assume the object came from the origin with an Age header of 'origin_age' seconds.
-        # We can't reset Age to 0 after vcl_backend_response (Varnish limitation), so the age will keep increasing
-        # (let's call it 'real_age').
-        # We are caching the object for 'new_ttl' seconds from 'origin_age' onward, which means that, from
-        # the browser's perspective, Cache-Control='new_ttl' and Age='real_age - origin_age'.
-        {% call (site) _for_each_site("DEBUG_MODE", "req") %}
-          chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
-        {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
-        set resp.http.Age = std.integer(resp.http.Age, 0) - std.integer(resp.http.rev-orig-age, 0);
-        unset resp.http.rev-orig-age;
-    }
+if (resp.http.rev-del-age) {
+# We are overriding the browser Cache-Control in vcl_backend_response.
+# The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
+set resp.http.Age = 0;
+unset resp.http.rev-del-age;
+{% call (site) _for_each_site("DEBUG_MODE", "req") %}
+  chromelogger.log("deliver " + req.xid + ": forcing Age=0");
+{%- endcall %}{# _for_each_site("DEBUG_MODE") #}
+} else if (resp.http.rev-orig-age) {
+# Assume the object came from the origin with an Age header of 'origin_age' seconds.
+# We can't reset Age to 0 after vcl_backend_response (Varnish limitation), so the age will keep increasing
+# (let's call it 'real_age').
+# We are caching the object for 'new_ttl' seconds from 'origin_age' onward, which means that, from
+# the browser's perspective, Cache-Control='new_ttl' and Age='real_age - origin_age'.
+{% call (site) _for_each_site("DEBUG_MODE", "req") %}
+  chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
+{%- endcall %}{# _for_each_site("DEBUG_MODE") #}
+set resp.http.Age = std.integer(resp.http.Age, 0) - std.integer(resp.http.rev-orig-age, 0);
+unset resp.http.rev-orig-age;
+}
 
-        # All times in microseconds.
-        # Time from "request received and sent to a backend" to "first byte of response received from backend".
-        set resp.http.X-Rev-Cache-BE-1st-Byte-Time = timers.req_response_time();
-        # Backend compatibility (DEPRECATED).
-        set resp.http.X-Rev-BE-1st-Byte-Time = resp.http.X-Rev-Cache-BE-1st-Byte-Time;
-        # Time from "request received" to now (i.e. total processing time).
-        set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
+# All times in microseconds.
+# Time from "request received and sent to a backend" to "first byte of response received from backend".
+set resp.http.X-Rev-Cache-BE-1st-Byte-Time = timers.req_response_time();
+# Backend compatibility (DEPRECATED).
+set resp.http.X-Rev-BE-1st-Byte-Time = resp.http.X-Rev-Cache-BE-1st-Byte-Time;
+# Time from "request received" to now (i.e. total processing time).
+set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
 
-    {% call (site) _for_each_site("DEBUG_MODE", "req") %}
-        # Collect and encode all log entries
-              #revvar.global_set_int({{VAR_REQ}}, {{_var_idx("objcnt")}}, revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}}) + 1);
-              #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}}));
-              chromelogger.log("deliver " + req.xid + ": Done");
-              set resp.http.X-ChromeLogger-Data = chromelogger.collect(resp.http.X-Chromelogger-BE);
-              unset resp.http.X-Chromelogger-BE;
-              #set resp.http.X-Rev-Count = revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}});
-    {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
+{% call (site) _for_each_site("DEBUG_MODE", "req") %}
+  # Collect and encode all log entries
+  #revvar.global_set_int({{VAR_REQ}}, {{_var_idx("objcnt")}}, revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}}) + 1);
+  #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}}));
+  chromelogger.log("deliver " + req.xid + ": Done");
+  set resp.http.X-ChromeLogger-Data = chromelogger.collect(resp.http.X-Chromelogger-BE);
+  unset resp.http.X-Chromelogger-BE;
+  #set resp.http.X-Rev-Count = revvar.global_get_int({{VAR_REQ}}, {{_var_idx("objcnt")}});
+{%- endcall %}{# _for_each_site("DEBUG_MODE") #}
 }
 
 sub vcl_synth {
