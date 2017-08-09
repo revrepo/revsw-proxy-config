@@ -37,8 +37,8 @@ include "/etc/varnish/custom.vcl";
 
 # Transparent forward proxy for redirects (30x)
 backend befwproxy {
-.host = "127.0.0.1";
-.port = "9081";
+    .host = "127.0.0.1";
+    .port = "9081";
 }
 
 # revsdk support
@@ -62,137 +62,137 @@ backend behttps_all {
 }
 
 # Begin custom VCL backends
-    # BEGIN SITE '32112312'
-        backend becustom_32112312_aaa {
-        .host = "url.com";
-        .port = "80";
-        .preresolve_dns = 0;
-          test
-        }
-    # END SITE '32112312'
+# BEGIN SITE '32112312'
+backend becustom_32112312_aaa {
+	.host = "url.com";
+	.port = "80";
+	.preresolve_dns = 0;
+	  test
+}
+# END SITE '32112312'
 # End custom VCL backends
 
 # Block 2: Define a key based on the User-Agent which can be used for hashing.
 # Also set the PS-CapabilityList header for PageSpeed server to respect.
 sub generate_user_agent_based_key {
-# Define placeholder PS-CapabilityList header values for large and small
-# screens with no UA dependent optimizations. Note that these placeholder
-# values should not contain any of ll, ii, dj, jw or ws, since these
-# codes will end up representing optimizations to be supported for the
-# request.
-set req.http.default_ps_capability_list_for_large_screens = "LargeScreen.SkipUADependentOptimizations:";
-set req.http.default_ps_capability_list_for_small_screens = "TinyScreen.SkipUADependentOptimizations:";
+    # Define placeholder PS-CapabilityList header values for large and small
+    # screens with no UA dependent optimizations. Note that these placeholder
+    # values should not contain any of ll, ii, dj, jw or ws, since these
+    # codes will end up representing optimizations to be supported for the
+    # request.
+    set req.http.default_ps_capability_list_for_large_screens = "LargeScreen.SkipUADependentOptimizations:";
+    set req.http.default_ps_capability_list_for_small_screens = "TinyScreen.SkipUADependentOptimizations:";
 
-# As a fallback, the PS-CapabilityList header that is sent to the upstream
-# PageSpeed server should be for a large screen device with no browser
-# specific optimizations.
-set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_large_screens;
+    # As a fallback, the PS-CapabilityList header that is sent to the upstream
+    # PageSpeed server should be for a large screen device with no browser
+    # specific optimizations.
+    set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_large_screens;
 
-# Cache-fragment 1: Desktop User-Agents that support lazyload_images (ll),
-# inline_images (ii) and defer_javascript (dj).
-# Note: Wget is added for testing purposes only.
-if (req.http.User-Agent ~ "(?i)Chrome/|Firefox/|MSIE |Safari|Wget") {
-set req.http.PS-CapabilityList = "ll,ii,dj:";
-}
-# Cache-fragment 2: Desktop User-Agents that support lazyload_images (ll),
-# inline_images (ii), defer_javascript (dj), webp (jw) and lossless_webp
-# (ws).
-if (req.http.User-Agent ~
-"(?i)Chrome/[2][3-9]+\.|Chrome/[[3-9][0-9]+\.|Chrome/[0-9]{3,}\.") {
-set req.http.PS-CapabilityList = "ll,ii,dj,jw,ws:";
-}
-# Cache-fragment 3: This fragment contains (a) Desktop User-Agents that
-# match fragments 1 or 2 but should not because they represent older
-# versions of certain browsers or bots and (b) Tablet User-Agents that
-# on all browsers and use image compression qualities applicable to large
-# screens. Note that even Tablets that are capable of supporting inline or
-# webp images, e.g. Android 4.1.2, will not get these advanced
-# optimizations.
-if (req.http.User-Agent ~ "(?i)Firefox/[1-2]\.|MSIE [5-8]\.|bot|Yahoo!|Ruby|RPT-HTTPClient|(Google \(\+https\:\/\/developers\.google\.com\/\+\/web\/snippet\/\))|Android|iPad|TouchPad|Silk-Accelerated|Kindle Fire") {
-set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_large_screens;
-}
-# Cache-fragment 4: Mobiles and small screen Tablets will use image compression
-# qualities applicable to small screens, but all other optimizations will be
-# those that work on all browsers.
-if (req.http.User-Agent ~ "(?i)Mozilla.*Android.*Mobile*|iPhone|BlackBerry|Opera Mobi|Opera Mini|SymbianOS|UP.Browser|J-PHONE|Profile/MIDP|portalmmm|DoCoMo|Obigo|Galaxy Nexus|GT-I9300|GT-N7100|HTC One|Nexus [4|7|S]|Xoom|XT907") {
-set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_small_screens;
-}
-# Remove placeholder header values.
-unset req.http.default_ps_capability_list_for_large_screens;
-unset req.http.default_ps_capability_list_for_large_screens;
+    # Cache-fragment 1: Desktop User-Agents that support lazyload_images (ll),
+    # inline_images (ii) and defer_javascript (dj).
+    # Note: Wget is added for testing purposes only.
+    if (req.http.User-Agent ~ "(?i)Chrome/|Firefox/|MSIE |Safari|Wget") {
+        set req.http.PS-CapabilityList = "ll,ii,dj:";
+    }
+    # Cache-fragment 2: Desktop User-Agents that support lazyload_images (ll),
+    # inline_images (ii), defer_javascript (dj), webp (jw) and lossless_webp
+    # (ws).
+    if (req.http.User-Agent ~
+        "(?i)Chrome/[2][3-9]+\.|Chrome/[[3-9][0-9]+\.|Chrome/[0-9]{3,}\.") {
+    set req.http.PS-CapabilityList = "ll,ii,dj,jw,ws:";
+    }
+    # Cache-fragment 3: This fragment contains (a) Desktop User-Agents that
+    # match fragments 1 or 2 but should not because they represent older
+    # versions of certain browsers or bots and (b) Tablet User-Agents that
+    # on all browsers and use image compression qualities applicable to large
+    # screens. Note that even Tablets that are capable of supporting inline or
+    # webp images, e.g. Android 4.1.2, will not get these advanced
+    # optimizations.
+    if (req.http.User-Agent ~ "(?i)Firefox/[1-2]\.|MSIE [5-8]\.|bot|Yahoo!|Ruby|RPT-HTTPClient|(Google \(\+https\:\/\/developers\.google\.com\/\+\/web\/snippet\/\))|Android|iPad|TouchPad|Silk-Accelerated|Kindle Fire") {
+        set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_large_screens;
+    }
+    # Cache-fragment 4: Mobiles and small screen Tablets will use image compression
+    # qualities applicable to small screens, but all other optimizations will be
+    # those that work on all browsers.
+    if (req.http.User-Agent ~ "(?i)Mozilla.*Android.*Mobile*|iPhone|BlackBerry|Opera Mobi|Opera Mini|SymbianOS|UP.Browser|J-PHONE|Profile/MIDP|portalmmm|DoCoMo|Obigo|Galaxy Nexus|GT-I9300|GT-N7100|HTC One|Nexus [4|7|S]|Xoom|XT907") {
+        set req.http.PS-CapabilityList = req.http.default_ps_capability_list_for_small_screens;
+    }
+    # Remove placeholder header values.
+    unset req.http.default_ps_capability_list_for_large_screens;
+    unset req.http.default_ps_capability_list_for_large_screens;
 }
 
 
 sub save_backend_chromelogger {
-  set beresp.http.X-Chromelogger-BE = chromelogger.collect_partial();
-  }
+    set beresp.http.X-Chromelogger-BE = chromelogger.collect_partial();
+}
 sub vcl_init {
-timers.unit("microseconds");
+    timers.unit("microseconds");
 
-# Custom VCL backends
+    # Custom VCL backends
     # BEGIN SITE '32112312'
-      new dircustom_32112312_aaa = directors.rev_dns();
-      if (dircustom_32112312_aaa.set_backend(becustom_32112312_aaa)) {}
+    new dircustom_32112312_aaa = directors.rev_dns();
+    if (dircustom_32112312_aaa.set_backend(becustom_32112312_aaa)) {}
     # END SITE '32112312'
-# End custom VCL backends
+    # End custom VCL backends
 }
 
 sub vcl_hash {
 
-# add support for the *.revsdk.net
-# use the following to hash the data
-# 1. Host
-# 2. X-Rev-Host
-# 3. Url
-if (req.http.host ~ "(?i)\.revsdk\.net$") {
-    hash_data(std.tolower(req.http.host + ":" + req.http.X-Rev-Host + ":" + req.http.url));
-}
+    # add support for the *.revsdk.net
+    # use the following to hash the data
+    # 1. Host
+    # 2. X-Rev-Host
+    # 3. Url
+    if (req.http.host ~ "(?i)\.revsdk\.net$") {
+        hash_data(std.tolower(req.http.host + ":" + req.http.X-Rev-Host + ":" + req.http.url));
+    }
 
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
     # END SITE '32112312'
 
 
-# Include User-Agent in hash if set
+    # Include User-Agent in hash if set
 
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-      hash_data(req.http.PS-CapabilityList);
+        hash_data(req.http.PS-CapabilityList);
     }
     # END SITE '32112312'
 
-# Hash selected optimization profile
-hash_data(req.http.X-RevSw-Profile);
+    # Hash selected optimization profile
+    hash_data(req.http.X-RevSw-Profile);
 
-# Hash per-domain caching rules
-hash_data(req.http.X-Rev-Rules-Hash);
+    # Hash per-domain caching rules
+    hash_data(req.http.X-Rev-Rules-Hash);
 
-# Hash cookies if allowed.
-if (req.http.X-Rev-Cookie-Hash) {
-hash_data(req.http.X-Rev-Cookie-Hash);
-}
+    # Hash cookies if allowed.
+    if (req.http.X-Rev-Cookie-Hash) {
+        hash_data(req.http.X-Rev-Cookie-Hash);
+    }
 
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-      chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
+        chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
 
-  # Log hash cookies (see above)
-  if (req.http.X-Rev-Cookie-Hash) {
-  chromelogger.log("hash " + req.xid + ": X-Rev-Cookie-Hash: " + req.http.X-Rev-Cookie-Hash);
-  }
+    # Log hash cookies (see above)
+    if (req.http.X-Rev-Cookie-Hash) {
+        chromelogger.log("hash " + req.xid + ": X-Rev-Cookie-Hash: " + req.http.X-Rev-Cookie-Hash);
+    }
 
-  # Log default VCL hash strings
-  chromelogger.log("hash " + req.xid + ": req.url: " + req.url);
-  if (req.http.host) {
-  chromelogger.log("hash " + req.xid + ": req.http.host: " + req.http.host);
-  } else {
-  chromelogger.log("hash " + req.xid + ": server.ip: " + server.ip);
-  }
-  if (req.http.host ~ "(?i)\.revsdk\.net$") {
-  chromelogger.log("revsdk data - hash: " + req.xid + "; host: " + req.http.host + "; X-Rev-Host: " + req.http.X-Rev-Host + "; url: " + req.url);
-  }
+    # Log default VCL hash strings
+    chromelogger.log("hash " + req.xid + ": req.url: " + req.url);
+    if (req.http.host) {
+        chromelogger.log("hash " + req.xid + ": req.http.host: " + req.http.host);
+    } else {
+        chromelogger.log("hash " + req.xid + ": server.ip: " + server.ip);
+    }
+    if (req.http.host ~ "(?i)\.revsdk\.net$") {
+        chromelogger.log("revsdk data - hash: " + req.xid + "; host: " + req.http.host + "; X-Rev-Host: " + req.http.X-Rev-Host + "; url: " + req.url);
+    }
     }
     # END SITE '32112312'
 }
@@ -221,56 +221,56 @@ acl purgehttps_all {
 
 # Block 3b: Issue purge when there is a cache hit for the purge request.
 sub vcl_hit {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
     # END SITE '32112312'
 
 
-set req.http.X-Rev-obj-ttl = obj.ttl;
-#set req.http.X-Rev-obj-grace = obj.grace;
+    set req.http.X-Rev-obj-ttl = obj.ttl;
+    #set req.http.X-Rev-obj-grace = obj.grace;
 
-revvar.set_bool(true, 14, true);
+    revvar.set_bool(true, 14, true);
 
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-      chromelogger.log("hit " + req.xid);
+        chromelogger.log("hit " + req.xid);
     }
     # END SITE '32112312'
 
-if (obj.ttl >= 0s) {
-# A pure unadultered hit, deliver it
-return (deliver);
-}
+    if (obj.ttl >= 0s) {
+        # A pure unadultered hit, deliver it
+        return (deliver);
+    }
 
-# We have no fresh fish. Lets look at the stale ones.
-if (std.healthy(req.backend_hint)) {
-# Backend is healthy. Limit age to value set by caching rules.
-if (obj.ttl + revvar.get_duration(true, 17) > 0s) {
-return (deliver);
-} else {
-# No candidate for grace. Fetch a fresh object.
-return(fetch);
-}
-} else {
-# backend is sick - use full grace
-if (obj.ttl + obj.grace > 0s) {
-return (deliver);
-} else {
-# no graced object.
-return (fetch);
-}
-}
+    # We have no fresh fish. Lets look at the stale ones.
+    if (std.healthy(req.backend_hint)) {
+        # Backend is healthy. Limit age to value set by caching rules.
+        if (obj.ttl + revvar.get_duration(true, 17) > 0s) {
+            return (deliver);
+        } else {
+            # No candidate for grace. Fetch a fresh object.
+            return(fetch);
+        }
+    } else {
+        # backend is sick - use full grace
+        if (obj.ttl + obj.grace > 0s) {
+            return (deliver);
+        } else {
+            # no graced object.
+            return (fetch);
+        }
+    }
 
-# Not reachable
-return (fetch);
+    # Not reachable
+    return (fetch);
 }
 
 # Block 3c: Issue a no-op purge when there is a cache miss for the purge
 # request.
 sub vcl_miss {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
@@ -279,7 +279,7 @@ sub vcl_miss {
 
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-      chromelogger.log("miss " + req.xid);
+        chromelogger.log("miss " + req.xid);
     }
     # END SITE '32112312'
 }
@@ -287,90 +287,90 @@ sub vcl_miss {
 # Block 4: In vcl_recv, on receiving a request, call the method responsible for
 # generating the User-Agent based key for hashing into the cache.
 sub vcl_recv {
-# Initialize the variable store.
-revvar.init_var_count(19);
-revvar.set_duration(true, 17, 10s);
+    # Initialize the variable store.
+    revvar.init_var_count(19);
+    revvar.set_duration(true, 17, 10s);
 
-# Varnish has added the Apache address to X-Forwarded-For. Revert this.
-set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "^([^,]+),?.*$", "\1");
+    # Varnish has added the Apache address to X-Forwarded-For. Revert this.
+    set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "^([^,]+),?.*$", "\1");
 
-# Remove shards from hostname
-set req.http.Host = regsub(req.http.Host, "^s\d+-", "");
+    # Remove shards from hostname
+    set req.http.Host = regsub(req.http.Host, "^s\d+-", "");
 
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
     # END SITE '32112312'
 
 
-call generate_user_agent_based_key;
+    call generate_user_agent_based_key;
 
-# Parse Cookie header into individual cookies.
-cookie.parse(req.http.Cookie);
+    # Parse Cookie header into individual cookies.
+    cookie.parse(req.http.Cookie);
 
-# Save the ROUTEID cookie; we need it for CO load balancing
-revvar.set_string_allow_null(true, 10, cookie.get("ROUTEID"));
+    # Save the ROUTEID cookie; we need it for CO load balancing
+    revvar.set_string_allow_null(true, 10, cookie.get("ROUTEID"));
 
-# Domain-specific configuration
+    # Domain-specific configuration
 
-# Add in vcl_recv support for *.revsdk.net
-# a problem will appear in case no domains are defined
-if (req.http.host ~ "(?i)\.revsdk\.net$") {
-  if (std.port(server.ip) == 8080) {
-    set req.backend_hint = behttp_all_revsdk_net;
-  } else {
-    set req.backend_hint = behttps_all_revsdk_net;
-  }
+    # Add in vcl_recv support for *.revsdk.net
+    # a problem will appear in case no domains are defined
+    if (req.http.host ~ "(?i)\.revsdk\.net$") {
+        if (std.port(server.ip) == 8080) {
+            set req.backend_hint = behttp_all_revsdk_net;
+        } else {
+            set req.backend_hint = behttps_all_revsdk_net;
+        }
 
-  if (req.method == "PURGE") {
-    if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all_revsdk_net) ||
-  (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all_revsdk_net)) {
-      return (synth(405, "Not allowed."));
+        if (req.method == "PURGE") {
+            if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all_revsdk_net) ||
+                (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all_revsdk_net)) {
+                  return (synth(405, "Not allowed."));
+            }
+            return (purge);
+        }
+
+        if (req.method != "GET" && req.method != "HEAD") {
+            # We only deal with GET and HEAD by default
+            return (pass);
+        }
     }
-    return (purge);
-  }
 
-  if (req.method != "GET" && req.method != "HEAD") {
-    # We only deal with GET and HEAD by default
-    return (pass);
-  }
-}
+    # Add in vcl_recv support for *.revsw.net
+    else {
+        if (std.port(server.ip) == 8080) {
+            set req.backend_hint = behttp_all;
+        } else {
+            set req.backend_hint = behttps_all;
+        }
 
-# Add in vcl_recv support for *.revsw.net
-else {
-  if (std.port(server.ip) == 8080) {
-    set req.backend_hint = behttp_all;
-  } else {
-    set req.backend_hint = behttps_all;
-  }
+        if (req.method == "PURGE") {
+            if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all) ||
+            (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all)) {
+                return (synth(405, "Not allowed."));
+            }
+            return (purge);
+        }
 
-  if (req.method == "PURGE") {
-    if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_all) ||
-  (std.port(server.ip) == 8443 && client.ip !~ purgehttps_all)) {
-      return (synth(405, "Not allowed."));
+        if (req.method != "GET" && req.method != "HEAD") {
+            # We only deal with GET and HEAD by default
+            return (pass);
+        }
     }
-    return (purge);
-  }
 
-  if (req.method != "GET" && req.method != "HEAD") {
-    # We only deal with GET and HEAD by default
-    return (pass);
-  }
-}
+    if (revvar.get_string(true, 12)) {
+        set req.url = querystring.filter_except_csv(req.url, revvar.get_string(true, 12));
+    }
+    else if (revvar.get_string(true, 13)) {
+        set req.url = querystring.filter_csv(req.url, revvar.get_string(true, 13));
+    }
 
-if (revvar.get_string(true, 12)) {
-set req.url = querystring.filter_except_csv(req.url, revvar.get_string(true, 12));
-}
-else if (revvar.get_string(true, 13)) {
-set req.url = querystring.filter_csv(req.url, revvar.get_string(true, 13));
-}
-
-return (hash);
+    return (hash);
 }
 
 sub vcl_pass {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
@@ -379,7 +379,7 @@ sub vcl_pass {
 }
 
 sub vcl_pipe {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
@@ -388,7 +388,7 @@ sub vcl_pipe {
 }
 
 sub vcl_purge {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
@@ -397,21 +397,21 @@ sub vcl_purge {
 }
 
 sub vcl_backend_fetch {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (bereq.http.host == "32112312") {
             test
     }
     # END SITE '32112312'
 
 
-/* The backend shouldn't get the GeoIP information from us
-if (bereq.http.X-Rev-CountryCode) {
-unset bereq.http.X-Rev-CountryCode;
-unset bereq.http.X-Rev-CountryName;
-unset bereq.http.X-Rev-CityName;
-unset bereq.http.X-Rev-Latitude;
-unset bereq.http.X-Rev-Longitude;
-}*/
+    /* The backend shouldn't get the GeoIP information from us
+    if (bereq.http.X-Rev-CountryCode) {
+    unset bereq.http.X-Rev-CountryCode;
+    unset bereq.http.X-Rev-CountryName;
+    unset bereq.http.X-Rev-CityName;
+    unset bereq.http.X-Rev-Latitude;
+    unset bereq.http.X-Rev-Longitude;
+    }*/
 }
 
 # Block 6: Mark HTML uncacheable by caches beyond our control.
@@ -425,33 +425,33 @@ sub vcl_backend_response {
 
     # Don't cache requests with status code between 307 and 499
     if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
-    set beresp.ttl = 0s;
+        set beresp.ttl = 0s;
     # BEGIN SITE '32112312'
     if (bereq.http.host == "32112312") {
-          chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
-      call save_backend_chromelogger;
+            chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
+        call save_backend_chromelogger;
     }
     # END SITE '32112312'
-    return (deliver);
+        return (deliver);
     }
 
     # Serve stale object if problem with backend
     if (beresp.status >= 500 && beresp.status != 508) {
-    set beresp.ttl = 0s;
+        set beresp.ttl = 0s;
     # BEGIN SITE '32112312'
     if (bereq.http.host == "32112312") {
-          chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
-      call save_backend_chromelogger;
+            chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
+        call save_backend_chromelogger;
     }
     # END SITE '32112312'
-    return (retry);
+        return (retry);
     }
 
     # This can happen if a backend responds with a redirect and Content Encoding (which Varnish returns a 503 for)
     if (beresp.http.Content-Encoding ~ "gzip" ) {
-    if (beresp.http.Content-Length == "0") {
-    unset beresp.http.Content-Encoding;
-    }
+        if (beresp.http.Content-Length == "0") {
+            unset beresp.http.Content-Encoding;
+        }
     }
 
     # Remove headers set by upstream Varnish instances.
@@ -459,14 +459,14 @@ sub vcl_backend_response {
     unset beresp.http.X-Cache-Hits;
 
     if (beresp.http.Cache-Control || beresp.http.Expires) {
-    # We need this var later on
-    revvar.set_bool(false, 4, true);
+        # We need this var later on
+        revvar.set_bool(false, 4, true);
 
-    # The Expires header is confusing and causes wrong misses.
-    # Max-Age takes precedence, so eliminate the confusion.
-    if (beresp.http.Cache-Control ~ "max-age") {
-    unset beresp.http.Expires;
-    }
+        # The Expires header is confusing and causes wrong misses.
+        # Max-Age takes precedence, so eliminate the confusion.
+        if (beresp.http.Cache-Control ~ "max-age") {
+            unset beresp.http.Expires;
+        }
     }
 
     # Domain-specific configuration
@@ -474,34 +474,34 @@ sub vcl_backend_response {
     # Add in vcl_backend_response support for *.revsdk.net
     # a problem will appear in case no domains are defined
     elseif (bereq.http.host ~ "(?i)\.revsdk\.net$") {
-      revvar.set_duration(false, 18, 60s);
+        revvar.set_duration(false, 18, 60s);
 
-      if (beresp.status != 200) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
+        if (beresp.status != 200) {
+            set beresp.ttl = 0s;
+            return (deliver);
+        }
 
-      set beresp.http.X-Rev-SDK = "1";
+        set beresp.http.X-Rev-SDK = "1";
 
     }
     else {
-      if (beresp.status != 200) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
+        if (beresp.status != 200) {
+            set beresp.ttl = 0s;
+            return (deliver);
+        }
 
-      if (bereq.method != "GET" && bereq.method != "HEAD") {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
+        if (bereq.method != "GET" && bereq.method != "HEAD") {
+            set beresp.ttl = 0s;
+            return (deliver);
+        }
 
-      if (beresp.http.Set-Cookie) {
-        set beresp.ttl = 0s;
-        return (deliver);
-      }
+        if (beresp.http.Set-Cookie) {
+            set beresp.ttl = 0s;
+            return (deliver);
+        }
 
-      revvar.set_duration(false, 18, 60s);
-      set beresp.http.X-Rev-Default = "1";
+        revvar.set_duration(false, 18, 60s);
+        set beresp.http.X-Rev-Default = "1";
     }
 
     set beresp.http.X-Rev-beresp-ttl = beresp.ttl;
@@ -513,32 +513,32 @@ sub vcl_backend_response {
 
     # Compress objects stored in the cache, if not already compressed by backend
     if (beresp.http.Content-Type ~ "(image|audio|video|pdf|flash)") {
-    set beresp.do_gzip = false;
+        set beresp.do_gzip = false;
     } else {
-    set beresp.do_gzip = true;
+        set beresp.do_gzip = true;
     }
 
     # We can't use backend revvars in vcl_deliver, so we have to set headers instead
     if (revvar.get_bool(false, 15) && beresp.http.Age) {
-    set beresp.http.rev-orig-age = beresp.http.Age;
-    set beresp.ttl = beresp.ttl + std.duration(beresp.http.Age + "s", 0s);
+        set beresp.http.rev-orig-age = beresp.http.Age;
+        set beresp.ttl = beresp.ttl + std.duration(beresp.http.Age + "s", 0s);
     }
     if (revvar.get_bool(false, 0) && beresp.http.Age) {
-    set beresp.http.rev-del-age = 1;
+        set beresp.http.rev-del-age = 1;
     }
     if (revvar.get_string(false, 3)) {
-    set beresp.http.rev-FROUTEID = revvar.get_string(false, 3);
+        set beresp.http.rev-FROUTEID = revvar.get_string(false, 3);
     }
     # Grace is set through caching rules
     if (revvar.get_duration(false, 18) > 0s) {
-    set beresp.grace = revvar.get_duration(false, 18);
+        set beresp.grace = revvar.get_duration(false, 18);
     }
 
     return (deliver);
 }
 
 sub vcl_backend_error {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (bereq.http.host == "32112312") {
             test
     }
@@ -550,30 +550,30 @@ sub vcl_backend_error {
 sub vcl_deliver {
     # In Varnish 4 we can't rely on obj.hits, instead we must check if X-Rev-Id has more than one id.
     # See 'https://www.varnish-cache.org/trac/ticket/1492' and 'http://foshttpcache.readthedocs.org/en/latest/varnish-configuration.html'.
-    if (revvar.get_bool(true, 14)) {
-    set resp.http.X-Rev-Cache = "HIT";
-    set resp.http.X-Rev-Cache-Hits = obj.hits;
-    set resp.http.X-Rev-obj-ttl = req.http.X-Rev-obj-ttl;
-    #set resp.http.X-Rev-obj-grace = req.http.X-Rev-obj-grace;
+        if (revvar.get_bool(true, 14)) {
+        set resp.http.X-Rev-Cache = "HIT";
+        set resp.http.X-Rev-Cache-Hits = obj.hits;
+        set resp.http.X-Rev-obj-ttl = req.http.X-Rev-obj-ttl;
+        #set resp.http.X-Rev-obj-grace = req.http.X-Rev-obj-grace;
 
-    # Since we can't remove headers from 'obj' after 'vcl_backend_response', we'll just have to
-    # remove the cached ones from the response itself, since they are not relevant for this request
-    # because they were generated while the resource was fetched following a MISS.
-    unset resp.http.rev-FROUTEID;
-    unset resp.http.X-Chromelogger-BE;
+        # Since we can't remove headers from 'obj' after 'vcl_backend_response', we'll just have to
+        # remove the cached ones from the response itself, since they are not relevant for this request
+        # because they were generated while the resource was fetched following a MISS.
+        unset resp.http.rev-FROUTEID;
+        unset resp.http.X-Chromelogger-BE;
     } else {
-    set resp.http.X-Rev-Cache = "MISS";
+        set resp.http.X-Rev-Cache = "MISS";
 
-    # Restore the fetched ROUTEID cookie
-    if (resp.http.rev-FROUTEID) {
-    header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
-    unset resp.http.rev-FROUTEID;
+        # Restore the fetched ROUTEID cookie
+        if (resp.http.rev-FROUTEID) {
+            header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
+            unset resp.http.rev-FROUTEID;
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-          chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
+                chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
     }
     # END SITE '32112312'
-    }
+        }
     }
 
         # BEGIN SITE '32112312'
@@ -584,13 +584,13 @@ sub vcl_deliver {
 
 
     if (resp.http.rev-del-age) {
-    # We are overriding the browser Cache-Control in vcl_backend_response.
-    # The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
-    set resp.http.Age = 0;
-    unset resp.http.rev-del-age;
+        # We are overriding the browser Cache-Control in vcl_backend_response.
+        # The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
+        set resp.http.Age = 0;
+        unset resp.http.rev-del-age;
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-          chromelogger.log("deliver " + req.xid + ": forcing Age=0");
+            chromelogger.log("deliver " + req.xid + ": forcing Age=0");
     }
     # END SITE '32112312'
     } else if (resp.http.rev-orig-age) {
@@ -601,36 +601,36 @@ sub vcl_deliver {
         # the browser's perspective, Cache-Control='new_ttl' and Age='real_age - origin_age'.
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-              chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
+            chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
     }
     # END SITE '32112312'
         set resp.http.Age = std.integer(resp.http.Age, 0) - std.integer(resp.http.rev-orig-age, 0);
         unset resp.http.rev-orig-age;
     }
 
-        # All times in microseconds.
-        # Time from "request received and sent to a backend" to "first byte of response received from backend".
-        set resp.http.X-Rev-Cache-BE-1st-Byte-Time = timers.req_response_time();
-        # Backend compatibility (DEPRECATED).
-        set resp.http.X-Rev-BE-1st-Byte-Time = resp.http.X-Rev-Cache-BE-1st-Byte-Time;
-        # Time from "request received" to now (i.e. total processing time).
-        set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
+    # All times in microseconds.
+    # Time from "request received and sent to a backend" to "first byte of response received from backend".
+    set resp.http.X-Rev-Cache-BE-1st-Byte-Time = timers.req_response_time();
+    # Backend compatibility (DEPRECATED).
+    set resp.http.X-Rev-BE-1st-Byte-Time = resp.http.X-Rev-Cache-BE-1st-Byte-Time;
+    # Time from "request received" to now (i.e. total processing time).
+    set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
 
     # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
-            # Collect and encode all log entries
-              #revvar.global_set_int(true, ERROR, invalid variable "objcnt", revvar.global_get_int(true, ERROR, invalid variable "objcnt") + 1);
-              #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int(true, ERROR, invalid variable "objcnt"));
-              chromelogger.log("deliver " + req.xid + ": Done");
-              set resp.http.X-ChromeLogger-Data = chromelogger.collect(resp.http.X-Chromelogger-BE);
-              unset resp.http.X-Chromelogger-BE;
-              #set resp.http.X-Rev-Count = revvar.global_get_int(true, ERROR, invalid variable "objcnt");
+        # Collect and encode all log entries
+    #revvar.global_set_int(true, ERROR, invalid variable "objcnt", revvar.global_get_int(true, ERROR, invalid variable "objcnt") + 1);
+    #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int(true, ERROR, invalid variable "objcnt"));
+    chromelogger.log("deliver " + req.xid + ": Done");
+    set resp.http.X-ChromeLogger-Data = chromelogger.collect(resp.http.X-Chromelogger-BE);
+    unset resp.http.X-Chromelogger-BE;
+    #set resp.http.X-Rev-Count = revvar.global_get_int(true, ERROR, invalid variable "objcnt");
     }
     # END SITE '32112312'
 }
 
 sub vcl_synth {
-    # BEGIN SITE '32112312'
+        # BEGIN SITE '32112312'
     if (req.http.host == "32112312") {
             test
     }
