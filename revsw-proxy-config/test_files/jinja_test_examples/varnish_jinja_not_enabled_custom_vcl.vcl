@@ -34,15 +34,15 @@ include "/etc/varnish/custom.vcl";
 # END: (BP-259)
 
 # Location of BP.
-# BEGIN SITE '32112312'
-backend behttp_32112312 {
+# BEGIN SITE 'test_server_1'
+backend behttp_test___server___1 {
     .host = "127.0.0.1";
     .port = "9080";
     .probe = {
         .request =
-        "test"
+        "test-request"
         "Connection: close"
-        "Host: 32112312";
+        "Host: test_server_1";
         .expected_response = 1;
         .interval = 1s;
         .timeout = 1s;
@@ -51,14 +51,14 @@ backend behttp_32112312 {
     }
 
 }
-backend behttps_32112312 {
+backend behttps_test___server___1 {
     .host = "127.0.0.1";
     .port = "9443";
     .probe = {
         .request =
-        "test"
+        "test-request"
         "Connection: close"
-        "Host: 32112312";
+        "Host: test_server_1";
         .expected_response = 1;
         .interval = 1s;
         .timeout = 1s;
@@ -67,7 +67,7 @@ backend behttps_32112312 {
     }
 
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 
 # Transparent forward proxy for redirects (30x)
 backend befwproxy {
@@ -234,11 +234,11 @@ sub vcl_hash {
 
     # Include User-Agent in hash if set
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         hash_data(req.http.PS-CapabilityList);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Hash selected optimization profile
     hash_data(req.http.X-RevSw-Profile);
@@ -251,8 +251,8 @@ sub vcl_hash {
         hash_data(req.http.X-Rev-Cookie-Hash);
     }
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
 
     # Log hash cookies (see above)
@@ -271,24 +271,24 @@ sub vcl_hash {
         chromelogger.log("revsdk data - hash: " + req.xid + "; host: " + req.http.host + "; X-Rev-Host: " + req.http.X-Rev-Host + "; url: " + req.url);
     }
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 # Block 3a: Define ACL for purge requests
-# BEGIN SITE '32112312'
-acl purgehttp_32112312 {
+# BEGIN SITE 'test_server_1'
+acl purgehttp_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "url.com";
+      "test-optimizer-http-url.com";
 }
-acl purgehttps_32112312 {
+acl purgehttps_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "url.com";
+      "test-optimizer-https-url.com";
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 
 # Implement local purging support for *.revsdk.net
 acl purgehttp_all_revsdk_net {
@@ -319,11 +319,11 @@ sub vcl_hit {
 
     revvar.set_bool(true, 14, true);
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("hit " + req.xid);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     if (obj.ttl >= 0s) {
         # A pure unadultered hit, deliver it
@@ -358,11 +358,11 @@ sub vcl_hit {
 sub vcl_miss {
     
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("miss " + req.xid);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 # Block 4: In vcl_recv, on receiving a request, call the method responsible for
@@ -389,16 +389,16 @@ sub vcl_recv {
     revvar.set_string_allow_null(true, 10, cookie.get("ROUTEID"));
 
     # Domain-specific configuration
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("recv " + req.xid + ": " + req.method + " " + req.url);
     chromelogger.log("recv " + req.xid + ": saved ROUTEID=" + revvar.get_string(true, 10));
 
     if (std.port(server.ip) == 8080) {
-        set req.backend_hint = behttp_32112312;
+        set req.backend_hint = behttp_test___server___1;
     }
     else {
-        set req.backend_hint = behttps_32112312;
+        set req.backend_hint = behttps_test___server___1;
     }
 
     # Adapt the default VCL logic: allow caching with cookies, don't add X-Forwarded-For.
@@ -425,8 +425,8 @@ sub vcl_recv {
 
     # Block 3d: Verify the ACL for an incoming purge request and handle it.
     if (req.method == "PURGE") {
-        if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_32112312) ||
-            (std.port(server.ip) == 8443 && client.ip !~ purgehttps_32112312)) {
+        if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_test_server_1) ||
+            (std.port(server.ip) == 8443 && client.ip !~ purgehttps_test_server_1)) {
             return (synth(405, "Not allowed."));
         }
         return (purge);
@@ -435,7 +435,7 @@ sub vcl_recv {
     call start_cookies_recv;
 
     #################### Cookies and query string plus per-domain rules hash handling ####################
-    if (req.http.X-Orig-Host == "url.com" || req.http.X-Orig-Host ~ "^12313$") {
+    if (req.http.X-Orig-Host == "test-url.com" || req.http.X-Orig-Host ~ "^12313$") {
 
           
         # BEGIN: (BP-344) Check for bypass cookies
@@ -446,11 +446,11 @@ sub vcl_recv {
   
         if (req.url ~ "^test$") {
   
-            set req.http.test = "fsdfdf";
+            set req.http.test-header = "fsdfdf";
   
             revvar.set_duration(true, 17, 1s);
   
-            set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":OR1OO1-1-1testOE-1-1C1111test";
+            set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":OR1OO1-1-1test-keep-or-removeOE-1-1C1111test-ignore";
   
             # Should we remove ignored cookies from request/response ?
             revvar.set_bool(true, 1, true);
@@ -462,7 +462,7 @@ sub vcl_recv {
             revvar.unset(true, 9);
   
             # Ignore all query string parameters EXCEPT these.
-            revvar.set_string_literal(true, 12, "test");
+            revvar.set_string_literal(true, 12, "test-keep-or-remove");
             revvar.unset(true, 13);
       }
 
@@ -477,7 +477,7 @@ sub vcl_recv {
 
     call end_cookies_recv;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Add in vcl_recv support for *.revsdk.net
     # a problem will appear in case no domains are defined
@@ -566,24 +566,24 @@ sub vcl_backend_response {
     # Don't cache requests with status code between 307 and 499
     if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
         set beresp.ttl = 0s;
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
             chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
         call save_backend_chromelogger;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         return (deliver);
     }
 
     # Serve stale object if problem with backend
     if (beresp.status >= 500 && beresp.status != 508) {
         set beresp.ttl = 0s;
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
             chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
         call save_backend_chromelogger;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         return (retry);
     }
 
@@ -610,8 +610,8 @@ sub vcl_backend_response {
     }
 
     # Domain-specific configuration
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
         chromelogger.log("backend_response " + bereq.xid + ": " + bereq.method + " " + bereq.url);
 
     if (revvar.get_string(false, 3)) {
@@ -634,7 +634,7 @@ sub vcl_backend_response {
     revvar.set_duration(false, 18, 0s);
     revvar.set_duration(false, 8, 0s);
 
-    if (bereq.http.X-Orig-Host == "url.com" || bereq.http.X-Orig-Host ~ "^12313$") {
+    if (bereq.http.X-Orig-Host == "test-url.com" || bereq.http.X-Orig-Host ~ "^12313$") {
 
           
         # do_esi if enable_esi is true
@@ -718,7 +718,7 @@ sub vcl_backend_response {
     call save_backend_chromelogger;
 
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Add in vcl_backend_response support for *.revsdk.net
     # a problem will appear in case no domains are defined
@@ -812,11 +812,11 @@ sub vcl_deliver {
         if (resp.http.rev-FROUTEID) {
             header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
             unset resp.http.rev-FROUTEID;
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
                 chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         }
     }
 
@@ -827,22 +827,22 @@ sub vcl_deliver {
         # The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
         set resp.http.Age = 0;
         unset resp.http.rev-del-age;
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
             chromelogger.log("deliver " + req.xid + ": forcing Age=0");
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
     } else if (resp.http.rev-orig-age) {
         # Assume the object came from the origin with an Age header of 'origin_age' seconds.
         # We can't reset Age to 0 after vcl_backend_response (Varnish limitation), so the age will keep increasing
         # (let's call it 'real_age').
         # We are caching the object for 'new_ttl' seconds from 'origin_age' onward, which means that, from
         # the browser's perspective, Cache-Control='new_ttl' and Age='real_age - origin_age'.
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
             chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         set resp.http.Age = std.integer(resp.http.Age, 0) - std.integer(resp.http.rev-orig-age, 0);
         unset resp.http.rev-orig-age;
     }
@@ -855,8 +855,8 @@ sub vcl_deliver {
     # Time from "request received" to now (i.e. total processing time).
     set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         # Collect and encode all log entries
     #revvar.global_set_int(true, ERROR, invalid variable "objcnt", revvar.global_get_int(true, ERROR, invalid variable "objcnt") + 1);
     #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int(true, ERROR, invalid variable "objcnt"));
@@ -865,7 +865,7 @@ sub vcl_deliver {
     unset resp.http.X-Chromelogger-BE;
     #set resp.http.X-Rev-Count = revvar.global_get_int(true, ERROR, invalid variable "objcnt");
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 sub vcl_synth {

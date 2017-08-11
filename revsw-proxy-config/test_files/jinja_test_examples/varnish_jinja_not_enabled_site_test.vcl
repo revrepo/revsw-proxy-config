@@ -62,14 +62,14 @@ backend behttps_all {
 }
 
 # Begin custom VCL backends
-# BEGIN SITE '32112312'
-backend becustom_32112312_aaa {
-	.host = "url.com";
+# BEGIN SITE 'test_server_1'
+backend becustom_test___server___1_test_bakend {
+	.host = "test-backends-url.com";
 	.port = "80";
 	.preresolve_dns = 0;
 	  test
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 # End custom VCL backends
 
 # Block 2: Define a key based on the User-Agent which can be used for hashing.
@@ -130,10 +130,10 @@ sub vcl_init {
     timers.unit("microseconds");
 
     # Custom VCL backends
-    # BEGIN SITE '32112312'
-    new dircustom_32112312_aaa = directors.rev_dns();
-    if (dircustom_32112312_aaa.set_backend(becustom_32112312_aaa)) {}
-    # END SITE '32112312'
+    # BEGIN SITE 'test_server_1'
+    new dircustom_test___server___1_test_bakend = directors.rev_dns();
+    if (dircustom_test___server___1_test_bakend.set_backend(becustom_test___server___1_test_bakend)) {}
+    # END SITE 'test_server_1'
     # End custom VCL backends
 }
 
@@ -148,20 +148,20 @@ sub vcl_hash {
         hash_data(std.tolower(req.http.host + ":" + req.http.X-Rev-Host + ":" + req.http.url));
     }
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-hash
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     # Include User-Agent in hash if set
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         hash_data(req.http.PS-CapabilityList);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Hash selected optimization profile
     hash_data(req.http.X-RevSw-Profile);
@@ -174,8 +174,8 @@ sub vcl_hash {
         hash_data(req.http.X-Rev-Cookie-Hash);
     }
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("hash " + req.xid + ": PS-CapabilityList: " + req.http.PS-CapabilityList);
 
     # Log hash cookies (see above)
@@ -194,7 +194,7 @@ sub vcl_hash {
         chromelogger.log("revsdk data - hash: " + req.xid + "; host: " + req.http.host + "; X-Rev-Host: " + req.http.X-Rev-Host + "; url: " + req.url);
     }
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 # Block 3a: Define ACL for purge requests
@@ -221,11 +221,11 @@ acl purgehttps_all {
 
 # Block 3b: Issue purge when there is a cache hit for the purge request.
 sub vcl_hit {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-hit
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     set req.http.X-Rev-obj-ttl = obj.ttl;
@@ -233,11 +233,11 @@ sub vcl_hit {
 
     revvar.set_bool(true, 14, true);
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("hit " + req.xid);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     if (obj.ttl >= 0s) {
         # A pure unadultered hit, deliver it
@@ -270,18 +270,18 @@ sub vcl_hit {
 # Block 3c: Issue a no-op purge when there is a cache miss for the purge
 # request.
 sub vcl_miss {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-miss
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         chromelogger.log("miss " + req.xid);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 # Block 4: In vcl_recv, on receiving a request, call the method responsible for
@@ -297,11 +297,11 @@ sub vcl_recv {
     # Remove shards from hostname
     set req.http.Host = regsub(req.http.Host, "^s\d+-", "");
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-recv
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     call generate_user_agent_based_key;
@@ -370,38 +370,38 @@ sub vcl_recv {
 }
 
 sub vcl_pass {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-pass
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_pipe {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-pipe
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_purge {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-purge
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_backend_fetch {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_fetch
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     /* The backend shouldn't get the GeoIP information from us
@@ -416,34 +416,34 @@ sub vcl_backend_fetch {
 
 # Block 6: Mark HTML uncacheable by caches beyond our control.
 sub vcl_backend_response {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_response
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     # Don't cache requests with status code between 307 and 499
     if (beresp.status > 307 && beresp.status <= 499 && beresp.status == 508) {
         set beresp.ttl = 0s;
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
             chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is between 307 and 499; don't cache; return DELIVER");
         call save_backend_chromelogger;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         return (deliver);
     }
 
     # Serve stale object if problem with backend
     if (beresp.status >= 500 && beresp.status != 508) {
         set beresp.ttl = 0s;
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
             chromelogger.log("backend_response " + bereq.xid + ": Status " + beresp.status + " is greater than 500; don't cache; return stale object if available and rety to get good object from the backend");
         call save_backend_chromelogger;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         return (retry);
     }
 
@@ -538,11 +538,11 @@ sub vcl_backend_response {
 }
 
 sub vcl_backend_error {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_error
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
@@ -568,19 +568,19 @@ sub vcl_deliver {
         if (resp.http.rev-FROUTEID) {
             header.append(resp.http.Set-Cookie, resp.http.rev-FROUTEID);
             unset resp.http.rev-FROUTEID;
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
                 chromelogger.log("deliver " + req.xid + ": restored ROUTEID=" + resp.http.rev-FROUTEID);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         }
     }
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-deliver
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     if (resp.http.rev-del-age) {
@@ -588,22 +588,22 @@ sub vcl_deliver {
         # The browser must always cache for 'new_ttl' seconds from now, so make Age 0.
         set resp.http.Age = 0;
         unset resp.http.rev-del-age;
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
             chromelogger.log("deliver " + req.xid + ": forcing Age=0");
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
     } else if (resp.http.rev-orig-age) {
         # Assume the object came from the origin with an Age header of 'origin_age' seconds.
         # We can't reset Age to 0 after vcl_backend_response (Varnish limitation), so the age will keep increasing
         # (let's call it 'real_age').
         # We are caching the object for 'new_ttl' seconds from 'origin_age' onward, which means that, from
         # the browser's perspective, Cache-Control='new_ttl' and Age='real_age - origin_age'.
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
             chromelogger.log("deliver " + req.xid + ": subtracting " + resp.http.rev-orig-age + " from Age " + resp.http.Age);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
         set resp.http.Age = std.integer(resp.http.Age, 0) - std.integer(resp.http.rev-orig-age, 0);
         unset resp.http.rev-orig-age;
     }
@@ -616,8 +616,8 @@ sub vcl_deliver {
     # Time from "request received" to now (i.e. total processing time).
     set resp.http.X-Rev-Cache-Total-Time = timers.req_processing_time();
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         # Collect and encode all log entries
     #revvar.global_set_int(true, ERROR, invalid variable "objcnt", revvar.global_get_int(true, ERROR, invalid variable "objcnt") + 1);
     #chromelogger.log("deliver " + req.xid + ": Done, obj_count=" + revvar.global_get_int(true, ERROR, invalid variable "objcnt"));
@@ -626,14 +626,14 @@ sub vcl_deliver {
     unset resp.http.X-Chromelogger-BE;
     #set resp.http.X-Rev-Count = revvar.global_get_int(true, ERROR, invalid variable "objcnt");
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 }
 
 sub vcl_synth {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-synth
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }

@@ -34,15 +34,15 @@ include "/etc/varnish/custom.vcl";
 # END: (BP-259)
 
 # Location of BP.
-# BEGIN SITE '32112312'
-backend behttp_32112312 {
+# BEGIN SITE 'test_server_1'
+backend behttp_test___server___1 {
     .host = "127.0.0.1";
     .port = "9080";
     .probe = {
         .request =
-        "test"
+        "test-request"
         "Connection: close"
-        "Host: 32112312";
+        "Host: test_server_1";
         .expected_response = 1;
         .interval = 1s;
         .timeout = 1s;
@@ -51,14 +51,14 @@ backend behttp_32112312 {
     }
 
 }
-backend behttps_32112312 {
+backend behttps_test___server___1 {
     .host = "127.0.0.1";
     .port = "9443";
     .probe = {
         .request =
-        "test"
+        "test-request"
         "Connection: close"
-        "Host: 32112312";
+        "Host: test_server_1";
         .expected_response = 1;
         .interval = 1s;
         .timeout = 1s;
@@ -67,7 +67,7 @@ backend behttps_32112312 {
     }
 
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 
 # Transparent forward proxy for redirects (30x)
 backend befwproxy {
@@ -96,14 +96,14 @@ backend behttps_all {
 }
 
 # Begin custom VCL backends
-# BEGIN SITE '32112312'
-backend becustom_32112312_aaa {
-	.host = "url.com";
+# BEGIN SITE 'test_server_1'
+backend becustom_test___server___1_test_bakend {
+	.host = "test-backends-url.com";
 	.port = "80";
 	.preresolve_dns = 0;
 	  test
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 # End custom VCL backends
 
 # Block 2: Define a key based on the User-Agent which can be used for hashing.
@@ -222,10 +222,10 @@ sub vcl_init {
     timers.unit("microseconds");
 
     # Custom VCL backends
-    # BEGIN SITE '32112312'
-    new dircustom_32112312_aaa = directors.rev_dns();
-    if (dircustom_32112312_aaa.set_backend(becustom_32112312_aaa)) {}
-    # END SITE '32112312'
+    # BEGIN SITE 'test_server_1'
+    new dircustom_test___server___1_test_bakend = directors.rev_dns();
+    if (dircustom_test___server___1_test_bakend.set_backend(becustom_test___server___1_test_bakend)) {}
+    # END SITE 'test_server_1'
     # End custom VCL backends
 }
 
@@ -240,20 +240,20 @@ sub vcl_hash {
         hash_data(std.tolower(req.http.host + ":" + req.http.X-Rev-Host + ":" + req.http.url));
     }
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-hash
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     # Include User-Agent in hash if set
 
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
         hash_data(req.http.PS-CapabilityList);
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Hash selected optimization profile
     hash_data(req.http.X-RevSw-Profile);
@@ -269,20 +269,20 @@ sub vcl_hash {
 }
 
 # Block 3a: Define ACL for purge requests
-# BEGIN SITE '32112312'
-acl purgehttp_32112312 {
+# BEGIN SITE 'test_server_1'
+acl purgehttp_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "url.com";
+      "test-optimizer-http-url.com";
 }
-acl purgehttps_32112312 {
+acl purgehttps_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "url.com";
+      "test-optimizer-https-url.com";
 }
-# END SITE '32112312'
+# END SITE 'test_server_1'
 
 # Implement local purging support for *.revsdk.net
 acl purgehttp_all_revsdk_net {
@@ -306,11 +306,11 @@ acl purgehttps_all {
 
 # Block 3b: Issue purge when there is a cache hit for the purge request.
 sub vcl_hit {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-hit
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     set req.http.X-Rev-obj-ttl = obj.ttl;
@@ -350,11 +350,11 @@ sub vcl_hit {
 # Block 3c: Issue a no-op purge when there is a cache miss for the purge
 # request.
 sub vcl_miss {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-miss
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
 }
@@ -372,11 +372,11 @@ sub vcl_recv {
     # Remove shards from hostname
     set req.http.Host = regsub(req.http.Host, "^s\d+-", "");
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-recv
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     call generate_user_agent_based_key;
@@ -388,14 +388,14 @@ sub vcl_recv {
     revvar.set_string_allow_null(true, 10, cookie.get("ROUTEID"));
 
     # Domain-specific configuration
-    # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
     
     if (std.port(server.ip) == 8080) {
-        set req.backend_hint = behttp_32112312;
+        set req.backend_hint = behttp_test___server___1;
     }
     else {
-        set req.backend_hint = behttps_32112312;
+        set req.backend_hint = behttps_test___server___1;
     }
 
     # Adapt the default VCL logic: allow caching with cookies, don't add X-Forwarded-For.
@@ -416,8 +416,8 @@ sub vcl_recv {
 
     # Block 3d: Verify the ACL for an incoming purge request and handle it.
     if (req.method == "PURGE") {
-        if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_32112312) ||
-            (std.port(server.ip) == 8443 && client.ip !~ purgehttps_32112312)) {
+        if ((std.port(server.ip) == 8080 && client.ip !~ purgehttp_test_server_1) ||
+            (std.port(server.ip) == 8443 && client.ip !~ purgehttps_test_server_1)) {
             return (synth(405, "Not allowed."));
         }
         return (purge);
@@ -426,7 +426,7 @@ sub vcl_recv {
     call start_cookies_recv;
 
     #################### Cookies and query string plus per-domain rules hash handling ####################
-    if (req.http.X-Orig-Host == "url.com" || req.http.X-Orig-Host ~ "^12313$") {
+    if (req.http.X-Orig-Host == "test-url.com" || req.http.X-Orig-Host ~ "^12313$") {
 
           
         # BEGIN: (BP-344) Check for bypass cookies
@@ -437,11 +437,11 @@ sub vcl_recv {
   
         if (req.url ~ "^test$") {
   
-            set req.http.test = "fsdfdf";
+            set req.http.test-header = "fsdfdf";
   
             revvar.set_duration(true, 17, 1s);
   
-            set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":OR1OO1-1-1testOE-1-1C1111test";
+            set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":OR1OO1-1-1test-keep-or-removeOE-1-1C1111test-ignore";
   
             # Should we remove ignored cookies from request/response ?
             revvar.set_bool(true, 1, true);
@@ -453,7 +453,7 @@ sub vcl_recv {
             revvar.unset(true, 9);
   
             # Ignore all query string parameters EXCEPT these.
-            revvar.set_string_literal(true, 12, "test");
+            revvar.set_string_literal(true, 12, "test-keep-or-remove");
             revvar.unset(true, 13);
       }
 
@@ -462,7 +462,7 @@ sub vcl_recv {
 
     call end_cookies_recv;
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Add in vcl_recv support for *.revsdk.net
     # a problem will appear in case no domains are defined
@@ -520,38 +520,38 @@ sub vcl_recv {
 }
 
 sub vcl_pass {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-pass
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_pipe {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-pipe
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_purge {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-purge
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
 sub vcl_backend_fetch {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_fetch
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     /* The backend shouldn't get the GeoIP information from us
@@ -566,11 +566,11 @@ sub vcl_backend_fetch {
 
 # Block 6: Mark HTML uncacheable by caches beyond our control.
 sub vcl_backend_response {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_response
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     # Don't cache requests with status code between 307 and 499
@@ -608,8 +608,8 @@ sub vcl_backend_response {
     }
 
     # Domain-specific configuration
-    # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
+    # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
     
     # Don't allow browser to cache PageSpeed-optimized HTML.
     if (beresp.http.X-Mod-Pagespeed) {
@@ -625,7 +625,7 @@ sub vcl_backend_response {
     revvar.set_bool(false, 0, false);
     revvar.set_duration(false, 18, 0s);
 
-    if (bereq.http.X-Orig-Host == "url.com" || bereq.http.X-Orig-Host ~ "^12313$") {
+    if (bereq.http.X-Orig-Host == "test-url.com" || bereq.http.X-Orig-Host ~ "^12313$") {
 
           
         # do_esi if enable_esi is true
@@ -685,7 +685,7 @@ sub vcl_backend_response {
 
 
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
     # Add in vcl_backend_response support for *.revsdk.net
     # a problem will appear in case no domains are defined
@@ -754,11 +754,11 @@ sub vcl_backend_response {
 }
 
 sub vcl_backend_error {
-        # BEGIN SITE '32112312'
-    if (bereq.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (bereq.http.host == "test_server_1") {
+            test-backend_error
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }
 
@@ -787,11 +787,11 @@ sub vcl_deliver {
         }
     }
 
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-deliver
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 
     if (resp.http.rev-del-age) {
@@ -820,10 +820,10 @@ sub vcl_deliver {
 }
 
 sub vcl_synth {
-        # BEGIN SITE '32112312'
-    if (req.http.host == "32112312") {
-            test
+        # BEGIN SITE 'test_server_1'
+    if (req.http.host == "test_server_1") {
+            test-synth
     }
-    # END SITE '32112312'
+    # END SITE 'test_server_1'
 
 }

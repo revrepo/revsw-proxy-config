@@ -28,6 +28,7 @@ from copy import deepcopy
 import jsonschema as jsch
 
 from jinja2 import Environment, FileSystemLoader, PackageLoader
+from ConfigParser import ConfigParser
 import revsw_apache_config
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/templates")
@@ -35,6 +36,7 @@ TEST_JINJA_FILES = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "revsw-proxy-config/test_files/jinja_test_examples"
 )
+TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")
 
 
 def dict_raise_on_duplicates(ordered_pairs):
@@ -49,6 +51,7 @@ def dict_raise_on_duplicates(ordered_pairs):
             d[k] = v
     return d
 
+
 class TestAbstractConfig(unittest.TestCase):
     testing_class = None
 
@@ -57,21 +60,21 @@ class TestAbstractConfig(unittest.TestCase):
         # print name of running test
         print("RUN_TEST %s" % self._testMethodName)
 
-
+        os.system("mkdir %s" % TEST_DIR)
         loader = FileSystemLoader(TEMPLATES_DIR)
         self.env = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
 
 
-    # def tearDown(self):
-    #     # remove all temporary test files
-    #     os.system("rm -r %s" % TEST_DIR)
+    def tearDown(self):
+        # remove all temporary test files
+        os.system("rm -r %s" % TEST_DIR)
 
     def validate_schema(self, data, schema_file_location, schema_file_name):
         schema = self.generate_schema(schema_file_name, schema_file_location)
         try:
             jsch.validate(data, json.loads(schema, object_pairs_hook=dict_raise_on_duplicates), format_checker=jsch.FormatChecker())
         except jsch.ValidationError as e:
-            print  e.message
+            print e.message
             return False
         return True
 
@@ -117,21 +120,21 @@ class TestVarnishJinja(TestAbstractConfig):
 
     test_site = {
         "VERSION":16,
-        "SERVER_NAME": "32112312",
+        "SERVER_NAME": "test_server_1",
         "ENABLE_CACHE": True,
         "INCLUDE_USER_AGENT": True,
         "CACHE_PS_HTML": True,
         "CACHE_IGNORE_AUTH": True,
-        "CONTENT_OPTIMIZERS_HTTP": ['url.com', ],
-        "CONTENT_OPTIMIZERS_HTTPS": ['url.com', ],
-        "DOMAINS_TO_PROXY_HTTP": ['url.com', ],
-        "CACHING_RULES_MODE": "test",
+        "CONTENT_OPTIMIZERS_HTTP": ['test-optimizer-http-url.com', ],
+        "CONTENT_OPTIMIZERS_HTTPS": ['test-optimizer-https-url.com', ],
+        "DOMAINS_TO_PROXY_HTTP": ['test-domains-url.com', ],
+        "CACHING_RULES_MODE": "first",
         "CACHING_RULES":  [
             {
                 "version": 1,
                 "target_domains": {
                     "include": True,
-                    "include_or_exclude_domains": ['url.com', ],
+                    "include_or_exclude_domains": ['test-url.com', ],
                     "include_or_exclude_wildcard": "12313",
                 },
                 "url": {
@@ -141,7 +144,7 @@ class TestVarnishJinja(TestAbstractConfig):
                 "enable_esi": True,
                 "origin_request_headers": [{
                     "operation": 'add',
-                    "header_name": "test",
+                    "header_name": "test-header",
                     "header_value": 'fsdfdf',
                 }],
                 "end_user_response_headers": [
@@ -164,7 +167,7 @@ class TestVarnishJinja(TestAbstractConfig):
                     "override_origin": True,
                     "override_no_cc": True,
                     "new_ttl": 1,
-                    "query_string_keep_or_remove_list": ["test", ],
+                    "query_string_keep_or_remove_list": ["test-keep-or-remove", ],
                     "query_string_list_is_keep": True
                 },
                 "browser_caching": {
@@ -175,7 +178,7 @@ class TestVarnishJinja(TestAbstractConfig):
                 "cookies": {
                     "override": True,
                     "ignore_all": True,
-                    "keep_or_ignore_list": ["test", ],
+                    "keep_or_ignore_list": ["test-ignore", ],
                     "list_is_keep": True,
                     "remove_ignored_from_request": True,
                     "remove_ignored_from_response": True,
@@ -187,37 +190,37 @@ class TestVarnishJinja(TestAbstractConfig):
             }
         ],
         "DEBUG_MODE": True,
-        "BYPASS_CO_LOCATIONS": ['url.com', ],
+        "BYPASS_CO_LOCATIONS": ['test-bypass-url.com', ],
         "CUSTOM_VCL_ENABLED": True,
         "CUSTOM_VCL": {
             "backends": [
                 {
-                    "name": 'aaa',
-                    "host": "url.com",
+                    "name": 'test_bakend',
+                    "host": "test-backends-url.com",
                     "port": 80,
                     "dynamic": True,
                     "vcl": 'test',
                 },
             ],
-            "recv": 'test',
-            "hash": 'test',
-            "pipe": 'test',
-            "purge": 'test',
-            "hit": 'test',
-            "miss": 'test',
-            "pass": 'test',
-            "deliver": 'test',
-            "synth": 'test',
-            "backend_fetch": 'test',
-            "backend_response": 'test',
-            "backend_error": 'test',
+            "recv": 'test-recv',
+            "hash": 'test-hash',
+            "pipe": 'test-pipe',
+            "purge": 'test-purge',
+            "hit": 'test-hit',
+            "miss": 'test-miss',
+            "pass": 'test-pass',
+            "deliver": 'test-deliver',
+            "synth": 'test-synth',
+            "backend_fetch": 'test-backend_fetch',
+            "backend_response": 'test-backend_response',
+            "backend_error": 'test-backend_error',
         },
         "ENABLE_GEOIP_HEADERS": True,
         "CLIENT_RESPONSE_TIMEOUT": 1,
         "ENABLE_ORIGIN_HEALTH_PROBE": True,
 
         "ORIGIN_HEALTH_PROBE": {
-            "HTTP_REQUEST": 'test',
+            "HTTP_REQUEST": 'test-request',
             "HTTP_STATUS": 1,
             "PROBE_INTERVAL": 1,
             "PROBE_TIMEOUT": 1
@@ -230,6 +233,8 @@ class TestVarnishJinja(TestAbstractConfig):
 
     def setUp(self):
         super(TestVarnishJinja, self).setUp()
+
+        # add custom filters for template
         self.env.filters["flatten_to_set"] = revsw_apache_config.flatten_to_set
         self.env.filters["parse_url"] = revsw_apache_config.parse_url
         self.env.filters["dns_query"] = revsw_apache_config.dns_query
@@ -249,10 +254,8 @@ class TestVarnishJinja(TestAbstractConfig):
 
         self.env.globals["bypass_location_root"] = False
 
-
-
-
     def test_varnish_schema(self):
+        # smoke testing of varnish schema
         validation_result = self.validate_schema(self.initial_data, self.schema_file_location, self.schema_file_name)
         self.assertTrue(validation_result)
 
@@ -270,6 +273,7 @@ class TestVarnishJinja(TestAbstractConfig):
         self.assertFalse(validation_result)
 
     def test_varnish_jinja(self):
+        # smoke testing of template
         template = self.env.get_template('all/bp/varnish.jinja')
         result = template.render(**self.initial_data)
         with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_normal_test.vcl'), 'rb') as f:
@@ -330,7 +334,3 @@ class TestVarnishJinja(TestAbstractConfig):
         with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_debug_mode.vcl'), 'rb') as f:
             test_data = f.read()
         self.assertEqual(result, test_data)
-        #
-        #
-        # with open('test_files/jinja_test_examples/varnish_jinja_debug_mode.vcl', "w") as f:
-        #     f.write(result)
