@@ -334,3 +334,7 @@ class TestVarnishJinja(TestAbstractConfig):
         with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_debug_mode.vcl'), 'rb') as f:
             test_data = f.read()
         self.assertEqual(result, test_data)
+
+
+if __name__ == '__main__':
+    unittest.main()
