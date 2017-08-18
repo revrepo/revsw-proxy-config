@@ -20,7 +20,7 @@ describe('Proxy test on open HTTP/QUIC proxy', function () {
 
   this.timeout(500000);
 
-  it('should make request on 443 port by quic protocol and receive status 503', function (done) {
+  xit('should make request on 443 port by quic protocol and receive status 503', function (done) {
     try {
       var httpGet = '{ "Endpoint": "'+testHTTPSUrl+':443", "Headers": { "Host": ["'+newDomainName+'"] } }';
       var resp = send_quic(httpGet);
