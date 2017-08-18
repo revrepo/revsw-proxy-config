@@ -1,0 +1,5 @@
+{% import "default_customer_profiles.jinja" as co_profiles_mod %}
+{% import "bp.jinja" as bp_mod %}
+
+{% call(before) bp_mod.setup(bp, co_profiles_mod, co_profiles) %}
+{% endcall %}

@@ -54,6 +54,7 @@ def dict_raise_on_duplicates(ordered_pairs):
 
 class TestAbstractConfig(unittest.TestCase):
     testing_class = None
+    loader = FileSystemLoader(TEMPLATES_DIR)
 
     def setUp(self):
 
@@ -61,8 +62,8 @@ class TestAbstractConfig(unittest.TestCase):
         print("RUN_TEST %s" % self._testMethodName)
 
         os.system("mkdir %s" % TEST_DIR)
-        loader = FileSystemLoader(TEMPLATES_DIR)
-        self.env = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
+
+        self.env = Environment(loader=self.loader, trim_blocks=True, lstrip_blocks=True)
 
 
     def tearDown(self):
@@ -336,5 +337,370 @@ class TestVarnishJinja(TestAbstractConfig):
         self.assertEqual(result, test_data)
 
 
+class TestSdkNginxConfJinja(TestAbstractConfig):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all/bp')
+    schema_file_name = 'varnish'
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/sdk_nginx_conf.jinja')
+
+    test_site = {}
+
+    initial_data = {
+
+        "configs": [
+            {
+                "sdk_domain_name": "test_domain_1",
+            },
+            {
+                "sdk_domain_name": "test_domain_2",
+            },
+        ],
+        "bpname": "test_bpname",
+    }
+
+    def test_nginx_conf_jinja(self):
+        initial_data = deepcopy(self.initial_data)
+        # initial_data['sites'][0]['CACHE_IGNORE_AUTH'] = False
+        template = self.env.get_template('nginx/bp/sdk_nginx_conf.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'nginx_conf_.vcl'), 'w') as f:
+            f.write(result)
+        import nginx
+        c = nginx.loadf(os.path.join(TEST_DIR, 'nginx_conf_.vcl'))
+        a = c.children
+        b = c.server.children
+        print 1
+        # with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_cache_ignore_auth.vcl'), 'rb') as f:
+        #     test_data = f.read()
+        # self.assertEqual(result, test_data)
+
+
+class TestAbstractBpJinja(TestAbstractConfig):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    test_site = {}
+
+    bp_initial_data = {
+        "VERSION": 27,
+        "ssl": {},
+        "acl": {
+            "enabled": True,
+            "action": "allow_except",
+            "acl_rules": [
+                {
+                    "host_name": "test-host-name",
+                    "subnet_mask": "222.222.222.222",
+                    "country_code": "US",
+                    "header_name": "test-header-name",
+                    "header_value": "test-header-value"
+                },
+            ],
+        },
+        "SERVER_NAME": "test-server-name",
+        "SERVER_ALIASES": ["test-alias",],
+        "SERVER_REGEX_ALIAS": '1',
+        "ORIGIN_SERVER_NAME": "test-server-name",
+        "ENABLE_VARNISH": True,
+        "REV_PROFILES_COUNT": 3,
+        "ENABLE_HTTP": True,
+        "ENABLE_HTTPS": True,
+        "ENABLE_SPDY": True,
+        "ENABLE_HTTP2": True,
+        "REV_PROFILES_BASE_PORT_HTTP": 50000,
+        "REV_PROFILES_BASE_PORT_HTTPS": 50000,
+        "CONTENT_OPTIMIZERS_HTTP": ["test-url.com"],
+        "CONTENT_OPTIMIZERS_HTTPS": ["test-url.com"],
+        "DOMAINS_TO_PROXY_HTTP": ["test-url.com"],
+        "DOMAINS_TO_PROXY_HTTPS": ["test-url.com"],
+        "DOMAINS_TO_OPTIMIZE_HTTP": ["test-url.com"],
+        "DOMAINS_TO_OPTIMIZE_HTTPS": ["test-url.com"],
+        "DOMAIN_SHARDS_COUNT": 1,
+        "CUSTOM_WEBSERVER_CODE_BEFORE": "test",
+        "CUSTOM_WEBSERVER_CODE_AFTER": "test",
+        "CUSTOM_WEBSERVER_CO_CODE_AFTER": "test",
+        "BLOCK_CRAWLERS": True,
+        "ENABLE_JS_SUBSTITUTE": True,
+        "ENABLE_HTML_SUBSTITUTE": True,
+        "DEBUG_MODE": True,
+        "BYPASS_VARNISH_LOCATIONS": ["test-url.com"],
+        "BYPASS_CO_LOCATIONS": ["test-url.com"],
+        "PROXY_TIMEOUT": 1,
+        "ORIGIN_SERVERS_HTTP": ["test-url.com"],
+        "ORIGIN_SERVERS_HTTPS": ["test-url.com"],
+        "ORIGIN_SECURE_PROTOCOL": "test",
+        "ORIGIN_IDLE_TIMEOUT": 12,
+        "ORIGIN_REUSE_CONNS": True,
+        "ENABLE_VARNISH_GEOIP_HEADERS": True,
+        "ENABLE_PROXY_BUFFERING": True,
+        "END_USER_RESPONSE_HEADERS": [
+            {
+                "operation": "test",
+                "header_name": "test",
+                "header_value": "test",
+            },
+        ],
+        "ENABLE_RUM": True,
+        "REV_RUM_BEACON_URL": "test-url.com",
+        "ENABLE_OPTIMIZATION": True,
+        "ENABLE_DECOMPRESSION": True,
+        "ORIGIN_REQUEST_HEADERS": [
+            {
+                "operation": "test",
+                "header_name": "test",
+                "header_value": "test",
+            },
+        ],
+        "ENABLE_QUIC": True,
+        "ENABLE_SSL": True,
+        "SSL_PROTOCOLS": "test-ssl-protocol",
+        "SSL_CIPHERS": "test-chiper",
+        "SSL_PREFER_SERVER_CIPHERS": True,
+        "SSL_CERT_ID": 'test-ssl-id',
+        "BP_LUA_LOCATIONS": [
+            {
+                "location":"test-location",
+                "code": 'test-code'
+            },
+        ],
+        "CO_LUA_LOCATIONS": [
+            {
+                "location":"test-location",
+                "code": 'test-code'
+            },
+        ],
+        "LUA_LOCATIONS": ["location", ],
+        "ENABLE_WAF": True,
+        "WAF_RULES": [
+            {
+                "location": 'test-location',
+                "enable_waf": True,
+                "enable_learning_mode": True,
+                "enable_sql_injection_lib": True,
+                "enable_xss_injection_lib": True,
+                "waf_rules": ["testruletestruletestrule",],
+                "waf_actions": ['test-waf-action',],
+            },
+        ],
+        "SECURITY_MODE":'test-security-mode',
+    }
+
+    co_profiles_data = {
+        "VERSION": 2,
+        "REV_OPTIMIZATION_LEVEL": 'min',  # min|med|max|adaptive|custom|none
+        "REV_CUSTOM_IMG_LEVEL": "low",  # low|medium|high|none"
+        "REV_CUSTOM_JS_LEVEL": "low",  # low|medium|high|none
+        "REV_CUSTOM_CSS_LEVEL": "low",  # low|medium|high|none
+    }
+
+    initial_data = {
+       "bp": bp_initial_data,
+       "co_profiles": co_profiles_data
+    }
+
+    def setUp(self):
+        super(TestAbstractBpJinja, self).setUp()
+
+        os.system("cp %s %s" % (
+            os.path.join(TEMPLATES_DIR, "nginx/co/standard_profiles/default_customer_profiles.jinja"),
+            os.path.join(TEST_DIR, "default_customer_profiles.jinja")
+        ))
+        os.system("cp %s %s" % (
+            os.path.join(TEST_JINJA_FILES, "bp_test.jinja"),
+            os.path.join(TEST_DIR, "bp_test.jinja")
+        ))
+        os.system("cp %s %s" % (
+            self.template_file,
+            os.path.join(TEST_DIR, "bp.jinja")
+        ))
+        # os.system("mkdir %s" % os.path.join(TEST_DIR, "common"))
+        os.system("cp -r %s %s" % (os.path.join(TEMPLATES_DIR, "nginx/common"), TEST_DIR))
+        # add custom filters for template
+        self.env.filters["flatten_to_set"] = revsw_apache_config.flatten_to_set
+        self.env.filters["parse_url"] = revsw_apache_config.parse_url
+        self.env.filters["dns_query"] = revsw_apache_config.dns_query
+        self.env.filters["underscore_url"] = revsw_apache_config.underscore_url
+        self.env.filters["is_ipv4"] = revsw_apache_config.is_ipv4
+        self.env.filters["wildcard_to_regex"] = revsw_apache_config.wildcard_to_regex
+        self.env.filters["extract_custom_webserver_code"] = revsw_apache_config.extract_custom_webserver_code
+        self.env.filters["netmask_bits"] = revsw_apache_config.netmask_bits
+        self.env.filters["custom_backend_name"] = revsw_apache_config.custom_backend_name
+        self.env.filters["process_custom_vcl"] = revsw_apache_config.process_custom_vcl
+        self.env.globals["global_var_get"] = revsw_apache_config.global_var_get
+        self.env.globals["global_var_set"] = revsw_apache_config.global_var_set
+        self.env.globals["GLOBAL_SITE_NAME"] = 'test'
+        self.env.globals["HOSTNAME_FULL"] = 'test'
+        self.env.globals["HOSTNAME_SHORT"] = 'test'
+        self.env.globals["DNS_SERVERS"] = ['test', ]
+
+        self.env.globals["bypass_location_root"] = False
+
+
+class TestBpJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_bp_schema(self):
+        # smoke testing of bp schema
+        validation_result = self.validate_schema(self.bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertTrue(validation_result)
+
+    def test_wrong_varnish_schema(self):
+        # add unexepted parameter
+        bp_initial_data = deepcopy(self.bp_initial_data)
+        bp_initial_data['wrong_param'] = 'test'
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_acl_action_schema(self):
+        #change acl action
+        bp_initial_data = deepcopy(self.bp_initial_data)
+        bp_initial_data['acl']['action'] = 'deny_except'
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertTrue(validation_result)
+
+    def test_wrong_acl_action_schema(self):
+        # add wrong acl action
+        bp_initial_data = deepcopy(self.bp_initial_data)
+        bp_initial_data['acl']['action'] = 'wrong action'
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_wrong_version(self):
+        # add wrong version
+        bp_initial_data = deepcopy(self.bp_initial_data)
+        bp_initial_data['VERSION'] = -1
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+        bp_initial_data['VERSION'] = 28
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_wrong_url_format(self):
+        # add wrong url_format
+        wrong_url = 'wrong url'
+        bp_initial_data = deepcopy(self.bp_initial_data)
+        bp_initial_data['CONTENT_OPTIMIZERS_HTTPS'] = wrong_url
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+        bp_initial_data['CONTENT_OPTIMIZERS_HTTP'] = wrong_url
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+        bp_initial_data['DOMAINS_TO_PROXY_HTTPS'] = wrong_url
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+        bp_initial_data['DOMAINS_TO_PROXY_HTTP'] = wrong_url
+        validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+
+    def test_varnish_jinja_cache_ignore_auth(self):
+        initial_data = deepcopy(self.initial_data)
+        # initial_data['sites'][0]['CACHE_IGNORE_AUTH'] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_JINJA_FILES, 'nginx_conf_.vcl'), 'w') as f:
+            f.write(result)
+
+        import nginx
+        c = nginx.loadf(os.path.join(TEST_DIR, 'nginx_conf_.vcl'))
+        print 1
+        # with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_cache_ignore_auth.vcl'), 'rb') as f:
+        #     test_data = f.read()
+        # self.assertEqual(result, test_data)
+
+
+class TestDefaultProfilesJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all/co/standard_profiles')
+    schema_file_name = 'default_customer_profiles'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_profile_schema(self):
+        # smoke testing of bp schema
+        validation_result = self.validate_schema(self.co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertTrue(validation_result)
+
+    def test_wrong_profile_schema(self):
+        # add unexepted parameter
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        co_profiles_data['wrong_param'] = 'test'
+        validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_rev_optimisation_level_patterns_schema(self):
+        #test all patterns
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        for pattern in ['min', 'med', 'max', 'adaptive', 'custom', 'none']:
+            co_profiles_data['REV_OPTIMIZATION_LEVEL'] = pattern
+            validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+            self.assertTrue(validation_result)
+
+    def test_wrong_rev_optimisation_level_patterns_schema(self):
+        #test wrong pattern
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        co_profiles_data['REV_OPTIMIZATION_LEVEL'] = 'wrong'
+        validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_rev_custom_img_level_patterns_schema(self):
+        #test all patterns
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        for pattern in ['low', 'medium', 'high', 'none']:
+            co_profiles_data['REV_CUSTOM_IMG_LEVEL'] = pattern
+            validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+            self.assertTrue(validation_result)
+
+    def test_wrong_rev_custom_img_level_patterns_schema(self):
+        #test wrong pattern
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        co_profiles_data['REV_CUSTOM_IMG_LEVEL'] = 'wrong'
+        validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_rev_custom_js_level_patterns_schema(self):
+        #test all patterns
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        for pattern in ['low', 'medium', 'high', 'none']:
+            co_profiles_data['REV_CUSTOM_JS_LEVEL'] = pattern
+            validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+            self.assertTrue(validation_result)
+
+    def test_wrong_rev_custom_js_level_patterns_schema(self):
+        #test wrong pattern
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        co_profiles_data['REV_CUSTOM_IMG_LEVEL'] = 'wrong'
+        validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+    def test_rev_custom_css_level_patterns_schema(self):
+        #test all patterns
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        for pattern in ['low', 'medium', 'high', 'none']:
+            co_profiles_data['REV_CUSTOM_CSS_LEVEL'] = pattern
+            validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+            self.assertTrue(validation_result)
+
+    def test_wrong_rev_custom_css_level_patterns_schema(self):
+        #test wrong pattern
+        co_profiles_data = deepcopy(self.co_profiles_data)
+        co_profiles_data['REV_CUSTOM_CSS_LEVEL'] = 'wrong'
+        validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
+        self.assertFalse(validation_result)
+
+
 if __name__ == '__main__':
     unittest.main()
+
+
+
+
+
+
