@@ -374,13 +374,13 @@ acl purgehttp_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "test-optimizer-http-url.com";
+      "http://test-optimizer-http-url.com";
 }
 acl purgehttps_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "test-optimizer-https-url.com";
+      "https://test-optimizer-https-url.com";
 }
 # END SITE 'test_server_1'
 # BEGIN SITE 'test_server_1'
@@ -388,13 +388,13 @@ acl purgehttp_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "test-optimizer-http-url.com";
+      "http://test-optimizer-http-url.com";
 }
 acl purgehttps_test_server_1 {
     # Purge requests are only allowed from localhost.
     "localhost";
     "127.0.0.1";
-      "test-optimizer-https-url.com";
+      "https://test-optimizer-https-url.com";
 }
 # END SITE 'test_server_1'
 

@@ -71,6 +71,8 @@ class VCLParser():
 
         while True:
             line = self.get_line()
+            if line.endswith('}'):
+                break
             if line.startswith('if') or line.startswith('elif'):
                 if not line.endswith("{") or not line.endswith(')'):
                     self.last_line = line
@@ -127,8 +129,3 @@ class VCLParser():
             elif line.endswith('}'):
                 break
         return acl
-
-
-
-parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja_debug_mode.vcl'))
-parsed = parse.parse_object()

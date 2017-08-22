@@ -22,12 +22,14 @@ import os
 import re
 import unittest
 import itertools
+import nginx
 from StringIO import StringIO
 from copy import deepcopy
 
 import jsonschema as jsch
 
 from jinja2 import Environment, FileSystemLoader, PackageLoader
+from utilites_test import VCLParser
 from ConfigParser import ConfigParser
 import revsw_apache_config
 
@@ -126,8 +128,8 @@ class TestVarnishJinja(TestAbstractConfig):
         "INCLUDE_USER_AGENT": True,
         "CACHE_PS_HTML": True,
         "CACHE_IGNORE_AUTH": True,
-        "CONTENT_OPTIMIZERS_HTTP": ['test-optimizer-http-url.com', ],
-        "CONTENT_OPTIMIZERS_HTTPS": ['test-optimizer-https-url.com', ],
+        "CONTENT_OPTIMIZERS_HTTP": ['http://test-optimizer-http-url.com', ],
+        "CONTENT_OPTIMIZERS_HTTPS": ['https://test-optimizer-https-url.com', ],
         "DOMAINS_TO_PROXY_HTTP": ['test-domains-url.com', ],
         "CACHING_RULES_MODE": "first",
         "CACHING_RULES":  [
@@ -336,6 +338,50 @@ class TestVarnishJinja(TestAbstractConfig):
             test_data = f.read()
         self.assertEqual(result, test_data)
 
+    def test_varnish_jinja_enabled_sites_count(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = True
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertFalse(parsed['acl'].get('purgehttp_test_server_1'))
+
+    def test_varnish_jinja_enabled_sites_counts_0(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertFalse(parsed['data'].get('start_cookies_recv'))
+
+    def test_varnish_jinja_vcl_init(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertFalse(parsed['data'].get('vcl_init'))
+
+    def test_varnish_jinja_purgehttps(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertFalse(parsed['acl'].get('purgehttps_test_server_1'))
+
 
 class TestSdkNginxConfJinja(TestAbstractConfig):
     schema_file_location = os.path.join(TEMPLATES_DIR, 'all/bp')
@@ -365,14 +411,14 @@ class TestSdkNginxConfJinja(TestAbstractConfig):
         result = template.render(**initial_data)
         with open(os.path.join(TEST_DIR, 'nginx_conf_.vcl'), 'w') as f:
             f.write(result)
-        import nginx
-        c = nginx.loadf(os.path.join(TEST_DIR, 'nginx_conf_.vcl'))
-        a = c.children
-        b = c.server.children
-        print 1
-        # with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_cache_ignore_auth.vcl'), 'rb') as f:
-        #     test_data = f.read()
-        # self.assertEqual(result, test_data)
+        find_servers = False
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'nginx_conf_.vcl'))
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '443 ssl http2':
+                for line in server.as_dict['server']:
+                    if line.get('server_name') == 'test_domain_1':
+                        find_servers = True
+        self.assertTrue(find_servers)
 
 
 class TestAbstractBpJinja(TestAbstractConfig):
@@ -392,11 +438,11 @@ class TestAbstractBpJinja(TestAbstractConfig):
             "action": "allow_except",
             "acl_rules": [
                 {
-                    "host_name": "test-host-name",
+                    "host_name": "test-acl-host-name",
                     "subnet_mask": "222.222.222.222",
                     "country_code": "US",
-                    "header_name": "test-header-name",
-                    "header_value": "test-header-value"
+                    "header_name": "test-acl-header-name",
+                    "header_value": "test-acl-header-value"
                 },
             ],
         },
@@ -407,15 +453,15 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "ENABLE_VARNISH": True,
         "REV_PROFILES_COUNT": 3,
         "ENABLE_HTTP": True,
-        "ENABLE_HTTPS": True,
+        "ENABLE_HTTPS": False,
         "ENABLE_SPDY": True,
         "ENABLE_HTTP2": True,
         "REV_PROFILES_BASE_PORT_HTTP": 50000,
         "REV_PROFILES_BASE_PORT_HTTPS": 50000,
         "CONTENT_OPTIMIZERS_HTTP": ["test-url.com"],
         "CONTENT_OPTIMIZERS_HTTPS": ["test-url.com"],
-        "DOMAINS_TO_PROXY_HTTP": ["test-url.com"],
-        "DOMAINS_TO_PROXY_HTTPS": ["test-url.com"],
+        "DOMAINS_TO_PROXY_HTTP": ["http://proxy-test-url.com"],
+        "DOMAINS_TO_PROXY_HTTPS": ["https://proxy-test-url.com"],
         "DOMAINS_TO_OPTIMIZE_HTTP": ["test-url.com"],
         "DOMAINS_TO_OPTIMIZE_HTTPS": ["test-url.com"],
         "DOMAIN_SHARDS_COUNT": 1,
@@ -429,8 +475,8 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "BYPASS_VARNISH_LOCATIONS": ["test-url.com"],
         "BYPASS_CO_LOCATIONS": ["test-url.com"],
         "PROXY_TIMEOUT": 1,
-        "ORIGIN_SERVERS_HTTP": ["test-url.com"],
-        "ORIGIN_SERVERS_HTTPS": ["test-url.com"],
+        "ORIGIN_SERVERS_HTTP": ["https://127.0.0.1:8000/path",],
+        "ORIGIN_SERVERS_HTTPS": ["https://127.0.0.1:8000/path",],
         "ORIGIN_SECURE_PROTOCOL": "test",
         "ORIGIN_IDLE_TIMEOUT": 12,
         "ORIGIN_REUSE_CONNS": True,
@@ -458,7 +504,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "ENABLE_SSL": True,
         "SSL_PROTOCOLS": "test-ssl-protocol",
         "SSL_CIPHERS": "test-chiper",
-        "SSL_PREFER_SERVER_CIPHERS": True,
+        "SSL_PREFER_SERVER_CIPHERS": False,
         "SSL_CERT_ID": 'test-ssl-id',
         "BP_LUA_LOCATIONS": [
             {
@@ -599,21 +645,160 @@ class TestBpJinja(TestAbstractBpJinja):
         validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
         self.assertFalse(validation_result)
 
-
-    def test_varnish_jinja_cache_ignore_auth(self):
+    def test_bp_jinja_acl_enabled(self):
         initial_data = deepcopy(self.initial_data)
-        # initial_data['sites'][0]['CACHE_IGNORE_AUTH'] = False
+        initial_data['bp']['acl']['enabled'] = True
         template = self.env.get_template('bp_test.jinja')
         result = template.render(**initial_data)
-        with open(os.path.join(TEST_JINJA_FILES, 'nginx_conf_.vcl'), 'w') as f:
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
             f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
 
-        import nginx
-        c = nginx.loadf(os.path.join(TEST_DIR, 'nginx_conf_.vcl'))
-        print 1
-        # with open(os.path.join(TEST_JINJA_FILES, 'varnish_jinja_cache_ignore_auth.vcl'), 'rb') as f:
-        #     test_data = f.read()
-        # self.assertEqual(result, test_data)
+    def test_bp_jinja_macro_setup_enabled_http(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTP'] = True
+        initial_data['bp']['ENABLE_QUIC'] = True
+        initial_data['bp']['ENABLE_VARNISH'] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        right_header_exist = False
+        more_header_exist = False
+        varnish_server = False
+        # try to find required lines in conf file
+        for line in nginx_conf.server.as_dict['server']:
+            if line.get('add_header') == 'Alt-Svc \'quic=":443"; p="1"; ma=120\'':
+                right_header_exist = True
+            if line.get('more_set_headers') == "Alternate-Protocol:443:quic,p=1":
+                more_header_exist = True
+
+        #try to find varnish server conf
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '127.0.0.1:9080':
+                varnish_server = True
+
+        self.assertTrue(more_header_exist)
+        self.assertTrue(right_header_exist)
+        self.assertTrue(varnish_server)
+
+    def test_bp_jinja_macro_setup_enabled_http_disabled_quic(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTP'] = True
+        initial_data['bp']['ENABLE_QUIC'] = False
+        initial_data['bp']['ENABLE_VARNISH'] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        right_header_exist = False
+        more_header_exist = False
+        # try to find required lines in conf file
+        for line in nginx_conf.server.as_dict['server']:
+            if line.get('add_header') == 'Alt-Svc \'quic=":443"; p="1"; ma=120\'':
+                right_header_exist = True
+            if line.get('more_set_headers') == "Alternate-Protocol:443:quic,p=1":
+                more_header_exist = True
+        self.assertFalse(right_header_exist)
+
+    def test_bp_jinja_macro_setup_enabled_http_disabled_varhish(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTP'] = True
+        initial_data['bp']['ENABLE_QUIC'] = True
+        initial_data['bp']['ENABLE_VARNISH'] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+
+        more_header_exist = False
+        varnish_server = False
+        # try to find required lines in conf file
+        for line in nginx_conf.server.as_dict['server']:
+            if line.get('set') == "$clientip$remote_addr":
+                more_header_exist = True
+
+        # try to find varnish server conf
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '127.0.0.1:9080':
+                varnish_server = True
+        self.assertFalse(more_header_exist)
+        self.assertFalse(varnish_server)
+
+    def test_bp_jinja_macro_setup_enabled_https(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTPS'] = True
+        initial_data['bp']['ENABLE_HTTP'] = False
+        initial_data['bp']['ENABLE_QUIC'] = True
+        initial_data['bp']['ENABLE_VARNISH'] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        right_header_exist = False
+        more_header_exist = False
+        varnish_server = False
+
+        #try to find varnish server conf
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '443 ssl http2':
+                # try to find required lines in conf file
+                for line in server.as_dict['server']:
+                    if line.get('add_header') == 'Alt-Svc \'quic=":443"; p="1"; ma=120\'':
+                        right_header_exist = True
+                    if line.get('more_set_headers') == "Alternate-Protocol:443:quic,p=1":
+                        more_header_exist = True
+                varnish_server = True
+
+        self.assertTrue(more_header_exist)
+        self.assertTrue(right_header_exist)
+        self.assertTrue(varnish_server)
+
+    def test_bp_jinja_macro_setup_enabled_https_disabled_quic(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTPS'] = True
+        initial_data['bp']['ENABLE_HTTP'] = False
+        initial_data['bp']['ENABLE_QUIC'] = False
+        initial_data['bp']['ENABLE_VARNISH'] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        right_header_exist = False
+        more_header_exist = False
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '443 ssl http2':
+                for line in server.as_dict['server']:
+                    if line.get('add_header') == 'Alt-Svc \'quic=":443"; p="1"; ma=120\'':
+                        right_header_exist = True
+                    if line.get('more_set_headers') == "Alternate-Protocol:443:quic,p=1":
+                        more_header_exist = True
+        self.assertFalse(right_header_exist)
+
+    def test_bp_jinja_macro_setup_enabled_https_disabled_varhish(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']['ENABLE_HTTPS'] = True
+        initial_data['bp']['ENABLE_HTTP'] = False
+        initial_data['bp']['ENABLE_QUIC'] = True
+        initial_data['bp']['ENABLE_VARNISH'] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+
+        varnish_server = False
+        # try to find varnish server conf
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '443 ssl http2':
+                varnish_server = True
+        self.assertTrue(varnish_server)
+
 
 
 class TestDefaultProfilesJinja(TestAbstractBpJinja):
@@ -695,12 +880,217 @@ class TestDefaultProfilesJinja(TestAbstractBpJinja):
         validation_result = self.validate_schema(co_profiles_data, self.schema_file_location, self.schema_file_name)
         self.assertFalse(validation_result)
 
+    def test_profile_jinja_macro_custom_js_optimizations_medium_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_OPTIMIZATION_LEVEL"] = 'med'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom JS optimizations - medium':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters extend_cache_scripts':
+                        find_optimistion_lines = True
+
+        self.assertTrue(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_js_optimizations_low_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_OPTIMIZATION_LEVEL"] = 'low'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom JS optimizations - low':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters extend_cache_scripts':
+                        find_optimistion_lines = True
+
+        self.assertTrue(find_optimistion_lines)
+
+
+    def test_profile_jinja_macro_custom_img_optimizations_medium_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_IMG_LEVEL"] = 'medium'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom IMG optimizations - medium':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters sprite_images':
+                        find_optimistion_lines = True
+
+        self.assertTrue(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_img_optimizations_high_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_IMG_LEVEL"] = 'high'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom IMG optimizations - high':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters convert_png_to_jpeg':
+                        find_optimistion_lines = True
+
+        self.assertFalse(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_js_optimizations_medium_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_JS_LEVEL"] = 'medium'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom JS optimizations - medium':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters extend_cache_scripts':
+                        find_optimistion_lines = True
+
+        self.assertTrue(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_js_optimizations_high_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_JS_LEVEL"] = 'high'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom JS optimizations - high':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters defer_javascript':
+                        find_optimistion_lines = True
+
+        self.assertFalse(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_css_optimizations_medium_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_CSS_LEVEL"] = 'medium'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom CSS optimizations - medium':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters extend_cache_css':
+                        find_optimistion_lines = True
+
+        self.assertTrue(find_optimistion_lines)
+
+    def test_profile_jinja_macro_custom_css_optimizations_high_level(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['co_profiles']["REV_CUSTOM_CSS_LEVEL"] = 'high'
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_optimistion_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '50002':
+                for line in server.as_dict['server']:
+                    if line.get('#') == 'Begin custom CSS optimizations - high':
+                        find_optimistion_lines = True
+
+                    if line.get('pagespeed') == 'EnableFilters prioritize_critical_css':
+                        find_optimistion_lines = True
+
+        self.assertFalse(find_optimistion_lines)
+
+
+class TestSSLJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+
+    def test_ssl_jinja_macro__do_setup_no_proxy_no_ssl_cert_id(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["SSL_CERT_ID"] = ''
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_ssl_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '127.0.0.1:9080':
+                for line in server.as_dict['server']:
+                    if line.get('proxy_ssl_protocols') == 'TLSv1 TLSv1.1 TLSv1.2':
+                        find_ssl_lines = True
+        self.assertTrue(find_ssl_lines)
+
+    def test_ssl_jinja_macro__do_setup_no_proxy(self):
+        initial_data = deepcopy(self.initial_data)
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_ssl_lines = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            if server.as_dict['server'][0]['listen'] == '127.0.0.1:9080':
+                for line in server.as_dict['server']:
+                    if line.get('proxy_ssl_protocols') == 'TLSv1 TLSv1.1 TLSv1.2':
+                        find_ssl_lines = True
+        self.assertTrue(find_ssl_lines)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-
-
