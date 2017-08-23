@@ -3,5 +3,4 @@ jinja2==2.9.6
 jsonschema==2.6.0
 coverage==4.4.1
 mock==2.0.0
-
-python-nginx
+python-nginx==1.1
