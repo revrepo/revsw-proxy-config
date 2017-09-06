@@ -38,9 +38,6 @@ if [ -f /opt/revsw-config/apache/GeoLite2-City.mmdb ]; then
     rm /opt/revsw-config/apache/GeoLite2-City.mmdb
 fi
 
-echo "Remove old lua files"
-rm -rf /etc/nginx/lua/
-
 echo "postinst procedures: end"
 echo "#"
 echo "# Please manually run '/opt/revsw-config/bin/pc-apache-config.py -U' if there was a change in proxy template files or schema"
