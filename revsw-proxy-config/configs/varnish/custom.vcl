@@ -11,7 +11,9 @@ wurfl.set_root("/usr/share/wurfl/wurfl.xml");
 #wurfl.add_patch("...");
 
 #wurfl.set_engine_target_high_performance();
-wurfl.set_engine_target_high_accuracy();
+# Removed on Steve's request 8/2/2017
+#wurfl.set_engine_target_high_accuracy();
+
 
 wurfl.set_useragent_priority_override_sideloaded_browser_useragent();
 #wurfl.set_useragent_priority_use_plain_useragent();
@@ -38,6 +40,12 @@ wurfl.add_requested_capability("can_assign_phone_number");
 wurfl.add_requested_capability("marketing_name");
 wurfl.add_requested_capability("model_name");
 wurfl.add_requested_capability("mobile_browser_version");
+# Added on Steve's request 8/2/2017
+wurfl.add_requested_capability("physical_screen_width");
+wurfl.add_requested_capability("physical_screen_height");
+wurfl.add_requested_capability("jpeg_xr");
+wurfl.add_requested_capability("jpeg_2000");
+
 
 # Optional WURFL Capabilities to be loaded
 wurfl.add_requested_capability("max_image_width");
