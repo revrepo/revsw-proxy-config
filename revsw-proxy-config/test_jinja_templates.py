@@ -38,7 +38,7 @@ TEST_JINJA_FILES = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "revsw-proxy-config/test_files/jinja_test_examples"
 )
-TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")
+TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/templates/temporary_testing_files/")
 
 
 def dict_raise_on_duplicates(ordered_pairs):
@@ -469,7 +469,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "CUSTOM_WEBSERVER_CODE_AFTER": "test",
         "CUSTOM_WEBSERVER_CO_CODE_AFTER": "test",
         "BLOCK_CRAWLERS": True,
-        "ENABLE_JS_SUBSTITUTE": True,
+        "ENABLE_JS_SUBSTITUTE": False,
         "ENABLE_HTML_SUBSTITUTE": True,
         "DEBUG_MODE": True,
         "BYPASS_VARNISH_LOCATIONS": ["test-url.com"],
@@ -1090,6 +1090,401 @@ class TestSSLJinja(TestAbstractBpJinja):
                     if line.get('proxy_ssl_protocols') == 'TLSv1 TLSv1.1 TLSv1.2':
                         find_ssl_lines = True
         self.assertTrue(find_ssl_lines)
+
+
+class TestWAFJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+
+    def test_waf_jinja_locations(self):
+        initial_data = deepcopy(self.initial_data)
+        test_locations = ['test-location', 'test-location2']
+        rules = [
+            {
+                "location": 'test-location',
+                "enable_waf": True,
+                "enable_learning_mode": True,
+                "enable_sql_injection_lib": True,
+                "enable_xss_injection_lib": True,
+                "waf_rules": ["testruletestruletestrul2",],
+                "waf_actions": ['test-waf-action',],
+            },
+            {
+                "location": 'test-location2',
+                "enable_waf": True,
+                "enable_learning_mode": True,
+                "enable_sql_injection_lib": True,
+                "enable_xss_injection_lib": True,
+                "waf_rules": ["testruletestruletestrule", ],
+                "waf_actions": ['test-waf-action', ],
+            },
+        ]
+        initial_data['bp']["WAF_RULES"] = rules
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_waf_locations = set()
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                if location.value in test_locations:
+                    find_waf_locations.add(location.value)
+        self.assertTrue(len(find_waf_locations) == 2)
+
+    def test_waf_jinja_rules(self):
+        initial_data = deepcopy(self.initial_data)
+        test_locations = ['test-waf-location']
+        test_rules = ['/opt/revsw-config/waf-rules/testrule1.rule', '/opt/revsw-config/waf-rules/testrule2.rule'],
+        rules = [
+            {
+                "location": 'test-waf-location',
+                "enable_waf": True,
+                "enable_learning_mode": False,
+                "enable_sql_injection_lib": False,
+                "enable_xss_injection_lib": False,
+                "waf_rules": ["testrule1", "testrule2"],
+                "waf_actions": ['test-waf-action',],
+            },
+        ]
+        initial_data['bp']["WAF_RULES"] = rules
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_waf_rules = set()
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                if location.value in test_locations:
+                    for row in location.as_list[2]:
+                        if row[0] == 'include':
+                            find_waf_rules.add(row[1])
+        self.assertTrue(len(find_waf_rules) == 2)
+
+    def test_waf_jinja_actions(self):
+        initial_data = deepcopy(self.initial_data)
+        test_locations = ['test-waf-location']
+        test_rules = ['/opt/revsw-config/waf-rules/testrule1.rule', '/opt/revsw-config/waf-rules/testrule2.rule'],
+        rules = [
+            {
+                "location": 'test-waf-location',
+                "enable_waf": True,
+                "enable_learning_mode": False,
+                "enable_sql_injection_lib": False,
+                "enable_xss_injection_lib": False,
+                "waf_rules": ["testrule1", "testrule2"],
+                "waf_actions": [
+                    {'action':'test-waf-action1', 'condition': 'test'},
+                    {'action':'test-waf-action2', 'condition': 'test'}
+                ],
+            },
+        ]
+        initial_data['bp']["WAF_RULES"] = rules
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_waf_actions = set()
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                if location.value in test_locations:
+                    for row in location.as_list[2]:
+                        if row[0] == 'CheckRule':
+                            find_waf_actions.add(row[1])
+        self.assertTrue(len(find_waf_actions) == 2)
+
+
+    def test_waf_jinja_learning_mode(self):
+        initial_data = deepcopy(self.initial_data)
+        test_locations = ['test-waf-location']
+        test_rules = ['/opt/revsw-config/waf-rules/testrule1.rule', '/opt/revsw-config/waf-rules/testrule2.rule'],
+        rules = [
+            {
+                "location": 'test-waf-location',
+                "enable_waf": True,
+                "enable_learning_mode": True,
+                "enable_sql_injection_lib": True,
+                "enable_xss_injection_lib": True,
+                "waf_rules": ["testrule1", "testrule2"],
+                "waf_actions": [
+                    {'action':'test-waf-action1', 'condition': 'test'},
+                    {'action':'test-waf-action2', 'condition': 'test'}
+                ],
+            },
+        ]
+        initial_data['bp']["WAF_RULES"] = rules
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_waf_actions = set()
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                if location.value in test_locations:
+                    for row in location.as_list[2]:
+                        if row[0] == 'CheckRule':
+                            print location.as_dict
+                            find_waf_actions.add(row[1])
+        self.assertTrue(len(find_waf_actions) == 2)
+
+
+
+class TestThirdPartyJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_third_party_jinja_js_substitute(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_JS_SUBSTITUTE"] = True
+        initial_data['bp']["DOMAIN_SHARDS_COUNT"] = 10
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        test_str = "<head([^>]*)> \"<head$1><script>var revJSSubst={nshards:1,domains:{'test-url.com':1},keep_https:0};</script><script src='/rev-js/rev-js-substitute.min.js'></script>\" r"
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_header = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                for line in location.as_list[2]:
+                    if line[0] == 'subs_filter': # and line['subs_filter'] == test_str:
+                        find_header = True
+        self.assertTrue(find_header)
+
+    def test_third_party_jinja_js_substitute_fale(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_JS_SUBSTITUTE"] = False
+        initial_data['bp']["DOMAIN_SHARDS_COUNT"] = 10
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        test_str = "<head([^>]*)> \"<head$1><script>var revJSSubst={nshards:1,domains:{'test-url.com':1},keep_https:0};</script><script src='/rev-js/rev-js-substitute.min.js'></script>\" r"
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_header = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for line in server.as_dict['server']:
+                if line.get('subs_filter') and line['subs_filter'] == test_str:
+                    find_header = True
+        self.assertFalse(find_header)
+
+    def test_third_party_jinja_js_substitute_t(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_JS_SUBSTITUTE"] = True
+        initial_data['bp']["DOMAINS_TO_PROXY_HTTPS"] = ["https://proxy-test-url.com", "https://proxy-test2-url.com"]
+        initial_data['bp']["DOMAIN_SHARDS_COUNT"] = 10
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        test_str = '([\\"\'])(https:)?//https://proxy-test2-url.com $1/rev-third-party-https/https://proxy-test2-url.com r'
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_header = False
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                for line in location.as_list[2]:
+                    if line[0] == 'subs_filter' and line[1] == test_str:
+                        find_header = True
+        self.assertTrue(find_header)
+
+
+class TestBalancerJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_balancer_jinja_bypass_co_ows(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = ['coloc1', 'coloc2']
+        test_str = "co_ows_test__server__name_http"
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_line = False
+        # try to find required lines in conf file
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('upstream %s' % test_str):
+                    find_line = True
+        self.assertTrue(find_line)
+
+
+    def test_balancer_jinja_bypass_no_bypass_locations(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = []
+        test_str = "bp_ows_test__server__name_http"
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_line = False
+        # try to find required lines in conf file
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('upstream %s' % test_str):
+                    find_line = True
+        self.assertFalse(find_line)
+
+    def test_balancer_jinja_bypass_bypass_locations_exist(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = ['coloc1', 'coloc2']
+        test_str = "bp_ows_test__server__name_http"
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_line = False
+        # try to find required lines in conf file
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('upstream %s' % test_str):
+                find_line = True
+        self.assertTrue(find_line)
+
+    def test_balancer_jinja_bypass_bypass_locations(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = ['coloc1', 'coloc2']
+        initial_data['bp']["ORIGIN_SERVERS_HTTP"] = ["https://127.0.0.1:8001/path", "https://127.0.0.1:8002/path",]
+        test_str = "bp_ows_test__server__name_http"
+        test_data = [
+            {'dynamic_resolve': 'fallback=stale fail_timeout=30s'},
+            {'keepalive': '32'},
+            {'server': '127.0.0.1:8001 max_fails=0 fail_timeout=0'},
+            {'server': '127.0.0.1:8002 max_fails=0 fail_timeout=0'}
+        ]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_list = []
+        # try to find required lines in conf file
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('upstream %s' % test_str):
+                find_list = conf['upstream %s' % test_str]
+        self.assertEqual(find_list, test_data)
+
+
+class TestLoopDetectJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_balancer_jinja_bypass_co_ows(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_VARNISH"] = True
+        initial_data['bp']["ENABLE_HTTP"] = True
+        test_answ = [
+            {'return': '508 "A CO redirection loop was detected on \'test\'. Please review the server configuration."'}
+        ]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_answer = []
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for line in server.as_dict['server']:
+                if line.get("if ($http_x_rev_co_nodes ~ test)"):
+                    find_answer = line["if ($http_x_rev_co_nodes ~ test)"]
+        self.assertEqual(test_answ, find_answer)
+
+    def test_balancer_jinja_bypass_bp_ows(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_VARNISH"] = True
+        initial_data['bp']["ENABLE_HTTP"] = True
+        test_answ = [
+            {'return': '508 "A BP redirection loop was detected on \'test\'. Please review the server configuration."'}
+        ]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_answer = []
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for line in server.as_dict['server']:
+                if line.get("if ($http_x_rev_bp_nodes ~ test)"):
+                    find_answer = line["if ($http_x_rev_bp_nodes ~ test)"]
+        self.assertEqual(test_answ, find_answer)
+
+    def test_balancer_jinja_bypass_co_ows_debug(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_VARNISH"] = True
+        initial_data['bp']["ENABLE_HTTP"] = True
+        initial_data['bp']["DEBUG_MODE"] = True
+        required_lines = ["if ($http_x_rev_co_nodes ~ test)",  'proxy_set_header']
+        test_answ = {
+            "if ($http_x_rev_co_nodes ~ test)": [
+                {'return': '508 "A CO redirection loop was detected on \'test\'. Please review the server configuration."'}
+            ],
+            'proxy_set_header': 'Connection ""'
+        }
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_answer = {}
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for line in server.as_dict['server']:
+                if required_lines and line.get(required_lines[0]):
+                    find_answer[required_lines[0]] = line[required_lines[0]]
+                    required_lines.pop(0)
+
+        self.assertEqual(test_answ, find_answer)
+
+    def test_balancer_jinja_bypass_bp_ows_debug(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_VARNISH"] = True
+        initial_data['bp']["ENABLE_HTTP"] = True
+        required_lines = ["if ($http_x_rev_bp_nodes ~ test)", 'proxy_set_header']
+        test_answ = {
+            "if ($http_x_rev_bp_nodes ~ test)": [
+                {
+                    'return': '508 "A BP redirection loop was detected on \'test\'. Please review the server configuration."'}
+            ],
+            'proxy_set_header': 'X-Rev-ContinentCode $geoip_city_continent_code'
+        }
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        find_answer = {}
+        # try to find required lines in conf file
+        for server in nginx_conf.servers:
+            for line in server.as_dict['server']:
+                if required_lines and line.get(required_lines[0]):
+                    find_answer[required_lines[0]] = line[required_lines[0]]
+                    required_lines.pop(0)
+
+        self.assertEqual(test_answ, find_answer)
 
 
 if __name__ == '__main__':
