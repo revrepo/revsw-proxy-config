@@ -952,6 +952,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
             bp["ENABLE_WAF"] = False
             bp["WAF_RULES"] = []
 
+        if ver <= 28 < new_ver:
+            bp["SSL_STAPLING"] = True
+            bp["SSL_STAPLING_VERIFY"] = True
+
         bp["VERSION"] = new_ver
 
     if "co" in vars_:

@@ -2,27 +2,21 @@
 {% set ssl_ciphers = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS" %}
 
 {% macro _do_setup_no_proxy(this, cert_dir) %}
-    {% if this.SSL_CERT_ID == "" %}
     {# Disable SSLv2/3 because of SNI, which requires TLS #}
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     {#
       No need to mitigate CRIME attack - SSL compression is off by default
       Use stronger ciphers, which may mitigate BEAST attacks
     #}
-    ssl_ciphers {{ssl_ciphers}};
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_certificate {{ cert_dir }}default/public.crt;
-    ssl_certificate_key {{ cert_dir }}default/private.key;
-    {% else %}
+
+    ssl_certificate {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/public.crt;
+    ssl_certificate_key {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/private.key;
     {% if this.SSL_PROTOCOLS %}ssl_protocols {{ this.SSL_PROTOCOLS }};{% endif %}
 
     {% if this.SSL_CIPHERS %}ssl_ciphers {{ this.SSL_CIPHERS }};{% endif %}
 
     ssl_prefer_server_ciphers {% if this.SSL_PREFER_SERVER_CIPHERS %}on{% else %}off{% endif %};
-    ssl_certificate {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/public.crt;
-    ssl_certificate_key {{ cert_dir }}{% if this.SSL_CERT_ID %}{{ this.SSL_CERT_ID }}{% endif %}/private.key;
-    {% endif %}
+    ssl_stapling {% if this.SSL_STAPLING %}on{% else %}off{% endif %};
+    ssl_stapling_verify {% if this.SSL_STAPLING_VERIFY %}on{% else %}off{% endif %};
     ssl_session_cache shared:SSL:10m;
 {%- endmacro %}
 

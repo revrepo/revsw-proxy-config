@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 27
+            "maximum": 28
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -224,6 +224,12 @@
             "type": "string"
         },
         "SSL_PREFER_SERVER_CIPHERS": {
+            "type": "boolean"
+        },
+        "SSL_STAPLING": {
+            "type": "boolean"
+        },
+        "SSL_STAPLING_VERIFY": {
             "type": "boolean"
         },
         "SSL_CERT_ID": {
