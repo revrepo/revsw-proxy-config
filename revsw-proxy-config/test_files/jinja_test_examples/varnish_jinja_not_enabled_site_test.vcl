@@ -28,6 +28,7 @@ import chromelogger;
 import querystring;
 import wurfl;
 import var;
+import digest;
 
 # BEGIN: (BP-259) including custom.vcl file
 include "/etc/varnish/custom.vcl";

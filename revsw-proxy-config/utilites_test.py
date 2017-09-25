@@ -16,6 +16,7 @@
 * from nuu:bit, Inc.
 *
 """
+import re
 
 
 class VCLParser():
@@ -34,10 +35,20 @@ class VCLParser():
             line = self.file.readline()
             if line is None:
                 raise Exception
+        if not line:
+            return None
         line = line.strip()
-        line = line.strip('*/')
+        # line = line.strip('*/')
         # skip blank lines and comments
-        if not line or line.startswith('#') or line.startswith('/*'):
+        if not line or line.startswith('#'):
+            line = self.get_line()
+        elif line.startswith('/*'):
+            end_comment = False
+            while not end_comment:
+                line = self.file.readline()
+                line = line.strip()
+                if line.endswith('*/'):
+                    end_comment = True
             line = self.get_line()
         return line
 
@@ -45,99 +56,112 @@ class VCLParser():
         data = {}
         data_if = []
         acl = {}
+        sub = {}
         backends = {}
         try:
             while True:
-
                 line = self.get_line()
                 if line == None: break
+                if re.search(r'acl ([a-zA-Z_0-9]*) {', line):
+                    splited_line = line.split(' ')
+                    acl[splited_line[1]] = self.parse_acl()
+
+                elif re.search(r'backend ([a-zA-Z_0-9]*) {', line):
+                    splited_line = line.split(' ')
+                    backends[splited_line[1]] = self.parse_acl()
+
+                elif re.search(r'sub ([a-zA-Z_0-9]*) {', line):
+                    splited_line = line.split(' ')
+                    sub[splited_line[1]] = self.parse_sub()
 
 
-
-                if line.endswith('{'):
-                    if line.startswith('acl'):
-                        splited_line = line.split(' ')
-                        acl[splited_line[1]] = self.parse_acl()
-
-                    # if line.startswith('sub'):
-                    #     splited_line = line.split(' ')
-                    #     acl[splited_line[1]] = self.parse_acl()
-                    #
-                    # if line.startswith('set'):
-                    #     splited_line = line.split(' ')
-                    #     acl[splited_line[1]] = self.parse_acl()
-                    # find all
-                    elif line.startswith('if'):
-                        self.last_line = line
-                        data_if.append(self.parse_if())
-
-                    elif line.startswith('backend'):
-                        splited_line = line.split(' ')
-                        backends[splited_line[1]] = self.parse_acl()
+                elif re.search(r'if \(([a-zA-Z_0-9 ]*)', line):
+                    splited_line = self.parse_if_conditions(line)
+                    if line.endswith('}'):
+                        data_if += {splited_line : ''}
                     else:
-
-                        splited_line = line.split(' ')
-                        data[splited_line[0]] = self.parse_object()
+                        data_if += self.parse_if(splited_line)
+                else:
+                    splited_line = line.split(' ')
         except Exception as e:
             print e.message
 
-        return {'data_if': data_if, 'data': data, 'acl': acl}
+        return {'data_if': data_if, 'data': data, 'acl': acl, 'sub': sub, 'backends': backends}
 
+    def parse_if_conditions(self, line, condition=''):
+        condition += line
+        if line.endswith('{') or line.endswith('}'):
+            return condition
+        line = self.get_line()
+        return self.parse_if_conditions(line, condition)
 
-    def parse_if(self):
+    def parse_if(self, condition):
+        if_data = {}
         statements = {}
-
+        first_iteration = True
         while True:
             line = self.get_line()
-            if line.endswith('}'):
-                break
-            if line.startswith('if') or line.startswith('elif'):
-                if not line.endswith("{") or not line.endswith(')'):
-                    self.last_line = line
-                    condition = self._parse_conditions()
+            if first_iteration:
+                if_data[condition] = self._parse_statement()
+                first_iteration = False
+
+            if 'else' in line:
+                if_data['else'] = self._parse_statement()
+            elif line.startswith('elsif'):
+                condition = self.parse_if_conditions(line)
+                if_data[condition] = self._parse_statement()
+            elif line.startswith('if'):
+                condition_if = self.parse_if_conditions(line)
+                if line.endswith('}'):
+                    if_data[line] += {condition_if: ''}
                 else:
-                    condition = line
-                statements[condition] = self._parse_statement()
-            if line.startswith('else'):
-                statements['else'] = self._parse_statement()
+                    if_data[line] = self.parse_if(condition_if)
+            elif line.endswith('}'):
+                # if_data[condition] = statements
+                return if_data
             else:
-                self.last_line = line
-                break
-        return statements
+                if_data[condition] = line
+            return {'if_data': if_data, 'statements': statements}
 
     def _parse_statement(self):
         lines = []
+        if_statements = []
         while True:
             line = self.get_line()
-            if line.endswith('}'):
+            if line.startswith('if'):
+                condition_if = self.parse_if_conditions(line)
+                if line.endswith('}'):
+                    if_statements += {condition_if: ''}
+                else:
+                    if_statements += self.parse_if(condition_if)
+            elif line.endswith('}'):
+                self.last_line = line
                 break
             else:
                 lines.append(line)
 
         return lines
 
-    def _parse_conditions(self):
-        condition = ''
+    def parse_sub(self):
+        sub_data = []
+        if_statements = []
         while True:
             line = self.get_line()
-            condition += line
-            if line.endswith(')'):
-                line = self.get_line()
-                if line == '{':
-                    break
-                else:
-                    self.last_line = line
-            if line.endswith('{'):
+            if line.endswith('}'):
                 break
-        return condition
+            if line.startswith('if'):
+                # self.last_line = line
+                condition = self.parse_if_conditions(line)
+                if_statements.append(self.parse_if(condition))
+            else:
+                sub_data.append(line)
 
-
-    def parse_sub(self):
-        data_if = {}
+        return {'data': sub_data, 'if_data': if_statements}
 
 
     def parse_acl(self):
         acl = []
+        if_statements = []
         while True:
             line = self.get_line()
             if line.endswith(';'):
@@ -146,4 +170,6 @@ class VCLParser():
 
             elif line.endswith('}'):
                 break
+            else:
+                acl.append(line)
         return acl

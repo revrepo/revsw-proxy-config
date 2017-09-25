@@ -257,6 +257,34 @@ class TestVarnishJinja(TestAbstractConfig):
 
         self.env.globals["bypass_location_root"] = False
 
+
+    def test_varnish_jinja_test(self):
+        # smoke testing of template
+        test_site1 = deepcopy(self.test_site)
+        test_site2 = deepcopy(self.test_site)
+        test_site2["SERVER_NAME"] = "test_server_2"
+
+        test_site2["CUSTOM_VCL"]["backends"] = [{
+                    "name": 'test_bakend13123',
+                    "host": "test-backends-url.com13123",
+                    "port": 80,
+                    "dynamic": 1,
+                    "vcl": "REV_BACKEND(test_bakend13123)"
+                    # "vcl": {'234':1231,
+                    #         "1312321":312321},
+                }]
+        initial_data = {
+            "sites": [test_site1, test_site2]
+        }
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEMPLATES_DIR, 'varnish_jinja_normal_test.vcl'), 'w') as f:
+            test_data = f.write(result)
+        parse = VCLParser(os.path.join(TEMPLATES_DIR, 'varnish_jinja_normal_test.vcl'))
+        parsed = parse.parse_object()
+        self.assertTrue(parsed['acl'].get('purgehttps_test_server_1'))
+
+
     def test_varnish_schema(self):
         # smoke testing of varnish schema
         validation_result = self.validate_schema(self.initial_data, self.schema_file_location, self.schema_file_name)
@@ -347,7 +375,7 @@ class TestVarnishJinja(TestAbstractConfig):
             f.write(result)
         parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
         parsed = parse.parse_object()
-        self.assertFalse(parsed['acl'].get('purgehttp_test_server_1'))
+        self.assertTrue(parsed['acl'].get('purgehttp_test_server_1'))
 
     def test_varnish_jinja_enabled_sites_counts_0(self):
         initial_data = deepcopy(self.initial_data)
@@ -358,7 +386,7 @@ class TestVarnishJinja(TestAbstractConfig):
             f.write(result)
         parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
         parsed = parse.parse_object()
-        self.assertFalse(parsed['data'].get('start_cookies_recv'))
+        self.assertFalse(parsed['data'].get('purgehttp_test_server_1'))
 
     def test_varnish_jinja_vcl_init(self):
         initial_data = deepcopy(self.initial_data)
@@ -369,7 +397,7 @@ class TestVarnishJinja(TestAbstractConfig):
             f.write(result)
         parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
         parsed = parse.parse_object()
-        self.assertFalse(parsed['data'].get('vcl_init'))
+        self.assertTrue(parsed['sub'].get('vcl_init'))
 
     def test_varnish_jinja_purgehttps(self):
         initial_data = deepcopy(self.initial_data)
@@ -381,6 +409,108 @@ class TestVarnishJinja(TestAbstractConfig):
         parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
         parsed = parse.parse_object()
         self.assertFalse(parsed['acl'].get('purgehttps_test_server_1'))
+
+    def test_varnish_jinja_purgehttp_enabled_cache(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = True
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertTrue(parsed['acl'].get('purgehttp_test_server_1'))
+
+    def test_varnish_jinja_purgehttp_disabled_cache(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        self.assertFalse(parsed['acl'].get('purgehttp_test_server_1'))
+
+    def test_varnish_jinja_purgehttp_optimizers(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_CACHE'] = True
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        acl = parsed['acl'].get('purgehttp_test_server_1')
+        self.assertTrue(acl)
+        self.assertTrue('"http://test-optimizer-http-url.com";' in acl)
+
+    def test_varnish_jinja_var_idx(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_IGNORE_AUTH'] = True
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        acl = parsed['sub'].get('start_cookies_backend_response')
+        self.assertTrue(acl)
+        self.assertTrue('revvar.unset(false, 0);' in acl['data'])
+
+    def test_varnish_jinja_var_idx_site_backend_health_probe(self):
+        test_bakend_data = [
+            '.host = "127.0.0.1";',
+            '.port = "9443";',
+            '.probe = {',
+            '.request =',
+            '"test-request"',
+            '"Connection: close"',
+            '"Host: test_server_1";',
+            '.expected_response = 1;',
+            '.interval = 1s;',
+            '.timeout = 1s;',
+            '.window = 4; # If 2 out of the last 4 polls succeeded the backend is considered healthy, otherwise it will be marked as sick',
+            '.threshold = 2;'
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_ORIGIN_HEALTH_PROBE'] = True
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        backend = parsed['backends'].get('behttps_test___server___1')
+        self.assertTrue(backend)
+        self.assertEqual(test_bakend_data, backend)
+
+    def test_varnish_jinja_var_idx_site_backend_health_probe_false(self):
+        test_bakend_data = [
+            '.host = "127.0.0.1";',
+            '.port = "9443";',
+            '.probe = {',
+            '.request =',
+            '"test-request"',
+            '"Connection: close"',
+            '"Host: test_server_1";',
+            '.expected_response = 1;',
+            '.interval = 1s;',
+            '.timeout = 1s;',
+            '.window = 4; # If 2 out of the last 4 polls succeeded the backend is considered healthy, otherwise it will be marked as sick',
+            '.threshold = 2;'
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['ENABLE_ORIGIN_HEALTH_PROBE'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        backend = parsed['backends'].get('behttps_test___server___1')
+        self.assertTrue(backend)
+        self.assertNotEqual(test_bakend_data, backend)
 
 
 class TestSdkNginxConfJinja(TestAbstractConfig):
