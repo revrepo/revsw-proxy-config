@@ -1079,16 +1079,24 @@ class VarnishConfig:
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)
 
-            # re-formatting Varnish config file:
-            run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
-                    {
-                        "INPUT": conf_file_name, "OUTPUT": conf_file_name,
-                        "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
-                    },
-                    _log, "re-formatting %s file" % conf_file_name
-                    )
-            # .
-
+            # # re-formatting Varnish config file:
+            # run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
+            #         {
+            #             "INPUT": conf_file_name, "OUTPUT": conf_file_name,
+            #             "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
+            #         },
+            #         _log, "re-formatting %s file" % conf_file_name
+            #         )
+            # # .
+            # TODO: remove it after test
+            run_cmd(
+                "cp %(INPUT)s.tmp %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
+                        {
+                            "INPUT": conf_file_name, "OUTPUT": conf_file_name,
+                            "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
+                        },
+                        _log, "re-formatting %s file" % conf_file_name
+                        )
         self.transaction.run(do_write)
 
     def load_site_config(self):
