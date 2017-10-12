@@ -109,6 +109,7 @@ cp $WORKSPACE/revsw-policy-server/certs/server.* $FOLDERNAME/$DST/pcm-config-cer
 
 # Nginx configuration
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/conf.d/* $FOLDERNAME/etc/nginx/conf.d/
+cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/lua $FOLDERNAME/etc/nginx/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/nginx.conf $FOLDERNAME/etc/nginx/nginx.conf.revsw
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var/www/
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/logrotate_revsw-nginx $FOLDERNAME/etc/logrotate.d/revsw-nginx
