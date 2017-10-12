@@ -14,7 +14,7 @@ var testDomain = 'waf-test.revsw.net.revqa.net',
 
 describe('Proxy WAF control', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
   it('should make http request', function (done) {
     tools.getHostRequest(testHTTPUrl, '/?a=<>', testDomain).then(function (res, rej) {
       if (rej) {
@@ -41,7 +41,7 @@ describe('Proxy WAF control', function () {
     });
   });
 
-    this.timeout(240000);
+    this.timeout(500000);
   it('should make http request', function (done) {
     tools.getHostRequest(testHTTPUrl, '/test_waf?a=<>', testDomain).then(function (res, rej) {
       if (rej) {

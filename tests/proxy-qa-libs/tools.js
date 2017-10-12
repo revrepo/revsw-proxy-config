@@ -489,6 +489,7 @@ module.exports = {
     delete jsonDomainConfig.published_domain_version;
     delete jsonDomainConfig.serial_id;
     delete jsonDomainConfig.tolerance;
+    delete jsonDomainConfig.cname_domain;
     delete jsonDomainConfig.proxy_config.cname;
     delete jsonDomainConfig.proxy_config.domain_name;
     return jsonDomainConfig;

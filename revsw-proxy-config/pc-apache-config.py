@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+"""This script is used for the following purposes, usually started by the 
+revsw-pcm-config:
+    1. To parse the JSON configuration file from /opt/revsw-config/policy/.
+        JSON file is in format "ui-config-<Domain name>.json".
+    2. Adds, updates, deletes configuration files for nginx located in:
+        1. /etc/nginx/sites-enabled/
+        2. /etc/nginx/sites-availible/, and 
+        3. /opt/revsw-config/apache/. 
+        Reloads Nginx server if nessisary. 
+    3. Adds, updates, deletes Varnish configuration for the following files
+        and directories:
+            1. /etc/varnish/revsw.vcl
+            2. /opt/revsw-config/varnish/sites/
+        Reloads Varnish if nessary 
+"""
 import argparse
 import copy
 import json
@@ -11,6 +26,7 @@ import traceback
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 
+import script_configs
 from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_dir, jinja_config_webserver_dir, \
     ConfigTransaction, dns_query, is_ipv4, ConfigException, PlatformWebServer, NginxConfig
 from revsw_apache_config.varnishadmin import VarnishAdmin
@@ -27,6 +43,19 @@ _VARNISH_CONFIG_VERSION = 17
 
 
 class ConfigCommon:
+    """Common Configuration that checks if anything has changed with the server or varnish
+    after loading a new configuration.
+    
+    Args and Attributes:
+        webserver_config_vars (dict): Loaded JSON configuration file from NginxConfig.
+            Object will change after running patch_config.
+        varnish_config_vars (dict): Loaded JSON configuration file from VarnishConfig.
+            Object will change after running patch_config.
+        ui_config (dict): Loaded JSON configuration file from command line
+            argument in main function call.
+
+
+    """
     def __init__(self, webserver_config_vars, varnish_config_vars, ui_config):
         self.webserver_config_vars = webserver_config_vars
         self.varnish_config_vars = varnish_config_vars
@@ -437,9 +466,11 @@ class ConfigCommon:
 
 
     def can_config_bp(self):
+        """Browser proxy"""
         return "bp" in self.webserver_config_vars and self.cmd_opts["config_bp"]
 
     def can_config_co(self):
+        """Content optimization"""
         return "co" in self.webserver_config_vars and self.cmd_opts["config_co"]
 
     def config_changed(self):
@@ -595,7 +626,7 @@ def _get_content_optimizers(ui_config):
 def _get_domain_mapping(domain_name):
     mapping = {}
     try:
-        with open("/opt/revsw-config/apache/site-mappings.json") as j:
+        with open(os.path.join(script_configs.APACHE_PATH, "site-mappings.json")) as j:
             mappings = json.load(j)
         mapping = mappings.get(domain_name, {})
     except IOError as e:  # file doesn't exist
@@ -638,7 +669,7 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open("/opt/revsw-config/apache/generic-site/bp.json") as j:
+        with open( os.path.join(script_configs.APACHE_GENERIC_SITE, "bp.json")) as j:
             config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
             config_str = re.sub(r"ows-generic-domain_1234", _(ows_domain_name), config_str)
             config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
@@ -664,6 +695,10 @@ def _gen_initial_domain_config(domain_name, ui_config):
 
 
 def delete_domain(domain_name):
+    """Deletes domain
+
+    Args:
+        domain_name (str): Domain to be deleted"""
     log.LOGI("Deleting domain '%s'" % domain_name)
 
     configure_all({
@@ -682,6 +717,15 @@ def delete_domain(domain_name):
 
 
 def add_or_update_domain(domain_name, ui_config, type):
+    """Adds a new domain to the server or updates one if it already exists. 
+
+    Args:
+        domain_name (str): Domain to add or update.
+        ui_config (dict): JSON loaded from /opt/revsw-config/policy/ on server
+        type (str): The different types you can have for your configure options.
+            Some types are, "flush", "varnish_template", "mlogc_template", "delete",
+            "batch", "force", "certs"
+    """
     site_name = _(domain_name)
     acfg = NginxConfig(site_name)
     if not acfg.exists():
@@ -719,6 +763,7 @@ def add_or_update_domain(domain_name, ui_config, type):
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": API_VERSION,
+            #TODO: rename type variable
             "type": type,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
@@ -994,8 +1039,8 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
 
 def _upgrade_varnish_site_config(vars_, new_vars_for_version):
-    """
-    Upgrade Varnish site config vars up to the version of the structure in 'new_vars_for_version'
+    """Upgrade Varnish site config vars up to the version of the structure in 
+    'new_vars_for_version'
     """
     ver = vars_.setdefault("VERSION", 1)
 
@@ -1214,6 +1259,8 @@ def _upgrade_domain_config(domain_name):
 
 
 def upgrade_all_domains():
+    """Changes the schemas of all the domain configurations to the
+    latest version."""
     log.LOGI("Upgrading all active domains")
 
     active_domains = PlatformWebServer().config_class().get_all_active_domains()
@@ -1309,5 +1356,7 @@ def _main():
         # raise
         sys.exit(-1)
 
-# Main function
-_main()
+
+if __name__ == "__main__":
+    # Main function
+    _main()

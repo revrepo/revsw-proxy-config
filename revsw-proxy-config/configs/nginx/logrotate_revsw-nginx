@@ -1,8 +1,8 @@
-/var/log/nginx/error.log
-/var/log/nginx/revsw_nginx_access_json*.log  {
+# Rotate Nginx error and access log files
+/var/log/nginx/error.log /var/log/nginx/revsw_nginx_access_json*.log  {
         daily
         missingok
-        rotate 4
+        rotate 3
         nocompress
         notifempty
         create 0640 www-data adm

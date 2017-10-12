@@ -1,0 +1,6 @@
+[run]
+plugins =
+    jinja_coverage
+
+[jinja_coverage]
+template_directory = templates

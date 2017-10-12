@@ -31,7 +31,7 @@ tools.debugMode(false);
 
 describe('Proxy X-Forwarded-For check', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
   it('(smoke) should get system IP', function (done) {
     tools.getRequest('http://' + originServer, '/ip').then(function (res, rej) {

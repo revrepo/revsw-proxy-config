@@ -28,7 +28,7 @@ var hostname_internal = '0efbbd35-a131-4419-b330-00de5eb3696a.revsdk.net';
 var x_rev_hostname_internal = 'test-proxy-nodejs-server-status-frontend-control.revsw.net';
 
 var hostname_external = '0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net';
-var x_rev_hostname_external = 'httpbin.org';
+var x_rev_hostname_external = 'httpbin_org.revsw.net';
 
 function custom_sleep(time) {
 	var stop = new Date().getTime();
@@ -136,7 +136,7 @@ function test_cache_time(sleep_time, generic_object)
 }
 
 describe('SDK external test - basic header and ttl & grace', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/cache/30';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_basic=" + random_number.toString();
@@ -207,7 +207,7 @@ describe('SDK external test - basic header and ttl & grace', function() {
 });
 
 describe('SKD external test - check response for 404 revsdk requests', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/status/404';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_404flow=" + random_number.toString();
@@ -257,7 +257,7 @@ describe('SKD external test - check response for 404 revsdk requests', function(
 });
 
 describe('SDK external test - check headers for 500 status code for the revsdk component', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/status/500';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_500flow=" + random_number.toString();
@@ -307,7 +307,7 @@ describe('SDK external test - check headers for 500 status code for the revsdk c
 });
 
 describe('SDK external test - check http proto over https', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/get';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
@@ -331,10 +331,10 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(0, {
@@ -356,10 +356,10 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(1000, {
@@ -381,17 +381,17 @@ describe('SDK external test - check http proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "http://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "http://' + x_rev_hostname_external + '/get'
 		]
 	});
 
 });
 
 describe('SDK external test - check https proto over https', function() {
-  this.timeout(240000);
+  this.timeout(500000);
 	var fr = '/get';
 	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_version_proto=" + random_number.toString();
@@ -415,10 +415,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(0, {
@@ -440,10 +440,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ }
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 	test_cache_time(1000, {
@@ -465,10 +465,10 @@ describe('SDK external test - check https proto over https', function() {
 			{ 'k': 'x-rev-beresp-grace', 'v': /60.000/ },
 		],
 		'response_body': [
-			'"Host": "httpbin.org",',
+			'"Host": "' + x_rev_hostname_external + '",',
 			'"X-Orig-Host": "0efbbd35-a131-4419-b330-00de5eb3696b.revsdk.net",',
-			'"X-Rev-Host": "httpbin.org",',
-			'"url": "https://httpbin.org/get'
+			'"X-Rev-Host": "' + x_rev_hostname_external + '",',
+			'"url": "https://' + x_rev_hostname_external + '/get'
 		]
 	});
 
@@ -476,7 +476,7 @@ describe('SDK external test - check https proto over https', function() {
 
 // Internal tests
 describe('SDK internal test - basic header and ttl & grace', function() {
-  this.timeout(240000);
+  this.timeout(500000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
  	var test_obj_1 = fr + "?rand_internal_version_basic=" + random_number.toString();
@@ -556,7 +556,7 @@ describe('SDK internal test - basic header and ttl & grace', function() {
 });
 
 describe('SDK internal test - check headers for 404 status code for the revsdk component', function() {
-  this.timeout(240000);
+  this.timeout(500000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_internal_version_404flow=" + random_number.toString();
@@ -609,7 +609,7 @@ describe('SDK internal test - check headers for 404 status code for the revsdk c
 });
 
 describe('SDK internal test - check headers for 500 status code for the revsdk component', function() {
-  this.timeout(240000);
+  this.timeout(500000);
  	var fr = '/fictive_resource.html';
  	var random_number = Math.floor(Math.random() * 100000 + 1000);
 	var test_obj_1 = fr + "?rand_internal_version_500flow=" + random_number.toString();

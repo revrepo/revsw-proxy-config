@@ -14,7 +14,7 @@ var domains = [];
 tools.debugMode(false);
 
 describe('Proxy cleaner', function () {
-  this.timeout(240000);
+  this.timeout(500000);
 
   it('should find don\'t use domains', function (done) {
     api.getDomainConfigs().then(function (res, rej) {
