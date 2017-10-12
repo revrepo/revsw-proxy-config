@@ -2,7 +2,7 @@ local nginx_ss = {}
 
 local _redis_host = "127.0.0.1";
 local _redis_port = 6379;
-local _redis_auth_required = false;
+local _redis_auth_required = true;
 local _redis_auth_pass = "5345sdfgdgdfgHKHKHjh";
 local _redis_pool_size = 100;
 local _redis_max_idle_time  = 100;
