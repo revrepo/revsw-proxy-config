@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 27
+            "maximum": 28
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -291,6 +291,38 @@
                 }
             }
         },
+        "ENABLE_BOT_PROTECTION": {
+            "type": "boolean"
+        },
+        "BOT_PROTECTION": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string"
+                    },
+                    "mode": {
+                        "type": "string",
+                        "pattern": "disable|monitor|active_protection"
+                    },
+                    "call_type": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 6
+                    },
+                    "username_cookie_name": {
+                        "type": "string"
+                    },
+                    "sessionid_cookie_name": {
+                        "type": "string"
+                    },
+                    "bot_protection_id": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "SECURITY_MODE": {
             "type": "string"
         }
@@ -349,7 +381,9 @@
         "SSL_PREFER_SERVER_CIPHERS",
         "SSL_CERT_ID",
         "ENABLE_WAF",
-        "WAF_RULES"
+        "WAF_RULES",
+        "ENABLE_BOT_PROTECTION",
+        "BOT_PROTECTION"
     ],
    "additionalProperties": false
 }
