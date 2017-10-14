@@ -9,7 +9,7 @@ var newDomainName = config.get('test_domain_start') + Date.now() + config.get('t
 
 describe('Proxy PURGE check ', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
   it('should send bad purge request', function (done) {
     var jsonPurge = {

@@ -43,7 +43,7 @@ describe('Proxy domain_aliases tests', function() {
 
   //  Version was removed as the new API code did not support version
   //    "version": 1,
-  this.timeout(240000);
+  this.timeout(500000);
 
   it('Test for the base domain_aliases - sdf1.robotech.com', function(done) {
     request(url).get(test_object_js_1).set('Host', domain_sdf1).expect('Content-Type', /javascript/).end(function(err, res) {

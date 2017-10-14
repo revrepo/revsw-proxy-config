@@ -23,9 +23,9 @@ var originHostHeader = 'httpbin_org.revsw.net',
   domainConfigId = '';
 var testHTTPSUrl = testHTTPSUrl.replace("https://", "").replace("http://", ""); // TODO igorastds: scheme/port info is lost now, set it somewhere
 
-describe('Proxy QUIC protocol control', function () {
+xdescribe('Proxy QUIC protocol control', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
   before(function (done) {
     tools.beforeSetDomain(newDomainName, originServer)

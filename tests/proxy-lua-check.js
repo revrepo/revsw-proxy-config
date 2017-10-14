@@ -23,7 +23,7 @@ var originServer = 'httpbin_org.revsw.net',
 
 describe('Proxy lua support check', function () {
 
-  this.timeout(240000);
+  this.timeout(500000);
 
   it('should return AccountId', function (done) {
     api.getUsersMyself().then(function (res, rej) {

@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+"""This module provides a command line interface to update the SSL certs
+for Nginx edge server.
+
+This module is used by the revsw-pcm-config daemon to change and refresh Nginx
+server ssl certs configuration on edge server. The files updated are public.crt, 
+private.key, pass.txt, and info.txt. On the server they are located in
+/opt/revsw-config/certs/<Cert ID>/. 
+Usage of script:
+    $ python rewsw-ssl-cert-manager -f /opt/revsw-config/policy/ssl.json
+
+TODO:
+    1. Write Unit test for module
+    2. Switch optparse for argparse due to depreciation of optparse
+"""
 import json
 import optparse
 import os
@@ -6,13 +20,23 @@ import shutil
 import socket
 import subprocess
 import sys
+import script_configs
 from revsw.logger import RevSysLogger
 
 
 def run_cmd(cmd, logger, help=None, silent=False):
-    """
-    Run a shell command.
-    logger is either RevStdLogger of RevSysLogger
+    """Run a shell command.
+
+    Args:
+        cmd (str): Shell command to run on server.
+        logger (instance): Logger instance. Logger is either RevStdLogger or
+            RevSysLogger.
+        help (str, optional): Help info to show. Defaults to None.
+        silent (boolean, optional): Show more info when running if true. Defaults to false.
+
+    Todo:
+        Move this function to another module and import it, as this is defined
+            in multiple files.
     """
     errmsg = None
     try:
@@ -42,6 +66,21 @@ def run_cmd(cmd, logger, help=None, silent=False):
 
 
 class ConfigSSL:
+    """Class that sets up Nginx server SSL certs.
+
+    Args:
+        args (dict, optional): Optional External argument to overide defualt
+            configuration file. Defualt is empty.
+
+    Attributes:
+        log (instance): Logging utility
+        conf (dict): Configuration settings such as location, temp location and
+            operation type.
+        config_vars (dict): JSON file of configuration variables.
+        rollback (list): List of roll back functions.
+        status (bool): True if configuration settings are correct. False
+            otherwise
+    """
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.conf = {}
@@ -69,8 +108,8 @@ class ConfigSSL:
 
     def _set_default_values(self):
 
-        self.conf['location'] = "/opt/revsw-config/certs/"
-        self.conf['tmp_location'] = "/tmp/"
+        self.conf['location'] = script_configs.CERTS_FOLDER
+        self.conf['tmp_location'] = script_configs.TMP_PATH
         self.conf['operation'] = None
 
         self.conf['cert'] = "public.crt"
@@ -186,10 +225,19 @@ class ConfigSSL:
         return p.returncode
 
     def rollback(self):
+        """Executes rollback functions stored in instance variable rollbacks"""
         while self.rollbacks:
             self.rollbacks.pop()()
 
     def run(self, cmd_func, rollback_func=None):
+        """Runs command and adds rollback function to rollbacks instance variable
+
+        Args:
+            cmd_func (function): Function to run on system. In this module we use the
+                run_cmd function access shell on edge server.
+            rollback_func(function, optional): Rollback function to add to
+                rollbacks instance variable. Defaults to none.
+        """
         try:
             cmd_func()
             if rollback_func:
