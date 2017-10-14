@@ -153,7 +153,7 @@ _ignore_cookies_default = [
     r"**"
 ]
 
-_BP_CONFIG_VERSION = 27
+_BP_CONFIG_VERSION = 28
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 17
@@ -683,6 +683,8 @@ def generate_bp_domain_json(domain):
         "REV_PROFILES_BASE_PORT_HTTPS": domain["base_https_port"],
         "ENABLE_WAF": False,
         "WAF_RULES": [],
+        "ENABLE_BOT_PROTECTION": False,
+        "BOT_PROTECTION": [],
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "CUSTOM_WEBSERVER_CODE_BEFORE": "",
         "CUSTOM_WEBSERVER_CODE_AFTER": "",
@@ -852,6 +854,8 @@ def generate_bp_ui_config_json(domain):
         "enable_security": False,
         "enable_waf": False,
         "waf": [],
+        "enable_bot_protection": False,
+        "bot_protection": [],
         "ssl_certificates": "rev_certs",
         "certificate_urls": [],
         "acl": {
@@ -859,9 +863,7 @@ def generate_bp_ui_config_json(domain):
             "action": "allow_except",
             "acl_rules": []
         },
-        "rev_custom_json": {},
         "end_user_response_headers": [],
-
         "co_apache_custom_config": "",
         "enable_rum": True,
         "rum_beacon_url": RUM_BEACON_URL,
