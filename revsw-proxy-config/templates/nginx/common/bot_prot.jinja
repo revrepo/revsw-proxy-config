@@ -1,10 +1,14 @@
 {% macro get_rules(this, location) -%}
   {% if this.ENABLE_BOT_PROTECTION %}
     {% for bot_prot in this.BOT_PROTECTION %}
-      {% if bot_prot.location == location %}
+      {% if bot_prot.location == location and bot_prot.mode != "disable" %}
         set $shieldsquare_calltype {{ bot_prot.call_type }};
         set $shieldsquare_username '{{ bot_prot.username_cookie_name }}';
-        set $shieldsquare_mode '{{ bot_prot.mode }}';
+        {% if bot_prot.mode == "monitor" %}
+        set $shieldsquare_mode 'monitor';
+        {% elif bot_prot.mode == "active_protection" %}
+        set $shieldsquare_mode 'active';
+        {% endif %}
         set $shieldsquare_sid '{{ bot_prot.bot_protection_id }}';
         set $shieldsquare_sessionid '{{ bot_prot.sessionid_cookie_name }}';
         access_by_lua 'require("nginx_ss").validateRequest()';

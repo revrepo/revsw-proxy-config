@@ -198,7 +198,7 @@
   {% set proto_prefix = "http://" if content_optimizers[0]|truncate(7, True, "") == "http://" else "https://" %}
   {# proto_prefix = {{proto_prefix}} #}
   {% set co_base_url = proto_prefix + balancer_mod.balancer_name(this, is_https, balancer_name) %}{# the balancer is defined in _common_upstream_block_co() #}
-  proxy_pass {{ co_base_url }}{{ rel_url }};
+  proxy_pass {{ co_base_url }};
   {#
     Wait at most for configured seconds for a reply from CO, then return error message.
     This will make recovery from CO failure quicker.
@@ -272,7 +272,7 @@
     {% for url in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-        {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, url)|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+        {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
         {{ bot_prot.get_rules(this, url) }}
       {# TODO: RevProfilesMode full #}
       }
@@ -285,7 +285,7 @@
       {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
       {% if url.location != "/" %}
         location {{url.location}} {
-          {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, url.location)|indent(4) }}
+          {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}
           {{ bot_prot.get_rules(this, url.location) }}
         }
       {% endif %}
@@ -354,7 +354,7 @@
           {{ bot_prot.get_rules(this, url) }}
         {% endif %}
 
-        proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}/{{ rel_url }};
+        proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
         {#
           TODO: RevProfilesMode off
           Make sure the origin sees the right Host header
@@ -379,7 +379,7 @@
       {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
         {% if botp.location != '/' %}
           location {{ botp.location }} {
-            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ botp.location }};
+            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
             proxy_ssl_server_name on;
             proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
             proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
@@ -397,7 +397,7 @@
       {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
         {% if waf.location != '/' %}
           location {{ waf.location }} {
-            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ waf.location }};
+            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
             proxy_ssl_server_name on;
             proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
             proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
