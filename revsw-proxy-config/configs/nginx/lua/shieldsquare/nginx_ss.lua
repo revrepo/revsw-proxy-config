@@ -194,7 +194,7 @@ function nginx_ss.validateRequest()
     
     -- Set this parameter as 'true' to enable ShieldSquare CAPTCHA service
     -- In Monitor mode, this parameter should be 'false'
-    local _ss_captcha_enabled = false;
+    local _ss_captcha_enabled = true;
     
     -- Set this parameter as 'true' to enable ShieldSquare block service
     -- In Monitor mode, this parameter should be 'false'
@@ -207,9 +207,10 @@ function nginx_ss.validateRequest()
     
     -- Set this parameter as 'true', if you want to enable SSL for ShieldSquare Captcha and block pages, else 'false'
     -- In monitor mode, kindly ignore this parameter
-    local _enable_ssl = false;
+    local _enable_ssl = true;
 
     local _calltype = 1;
+
     local _username = "";
     
     ----------------------CUSTOM SETTING ENDs--------------------------------
