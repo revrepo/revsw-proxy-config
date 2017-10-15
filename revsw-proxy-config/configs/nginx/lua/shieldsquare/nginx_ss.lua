@@ -145,7 +145,7 @@ function nginx_ss.validateRequest()
     local _sid  = "16b2c2c4-de4c-4469-a656-599591c660d1";
     
     -- _mode (set Active as 'true', Monitor as 'false')
-    local _mode = false;
+    local _mode = true;
     
     -- Set the session key, if there is any.
     local _sessid = '';
