@@ -461,7 +461,10 @@
 {# BEGIN: (BP-342) Common macros for headers #}
 {% macro _common_bp_headers(this, host_name) %}
   {# Don't propagate "Connection: close" from client #}
-  proxy_set_header Connection "";
+  proxy_set_header Connection "bp";
+  {% if this.END_USER_RESPONSE_HEADERS %}
+  proxy_set_header Connection "recp";
+  {% endif %}
   {# _common_bp_headers for {{host_name}} #}
   proxy_set_header Host {{host_name}};
   {# _common_bp_headers #}

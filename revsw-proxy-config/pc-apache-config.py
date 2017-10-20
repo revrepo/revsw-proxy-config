@@ -418,8 +418,15 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
 
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
-        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
+        caching_rules = misc.get("caching_rules", [])
+        responce_headers = []
+        if caching_rules:
+            for rule in caching_rules:
+                for r in rule.get("end_user_response_headers", []):
+                    responce_headers.append(r)
+
+        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", responce_headers)
         self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
         self._patch_if_changed_bp_webserver("ENABLE_QUIC", misc.get("enable_quic", False))
 
