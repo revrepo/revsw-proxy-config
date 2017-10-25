@@ -285,7 +285,8 @@
       {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
       {% if url.location != "/" %}
         location {{url.location}} {
-          {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}
+          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
           {{ bot_prot.get_rules(this, url.location) }}
         }
       {% endif %}
@@ -379,11 +380,7 @@
       {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
         {% if botp.location != '/' %}
           location {{ botp.location }} {
-            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
-            proxy_ssl_server_name on;
-            proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Connection "";
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
             {{ bot_prot.get_rules(this, botp.location) }}
           }
         {% endif %}
@@ -397,11 +394,7 @@
       {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
         {% if waf.location != '/' %}
           location {{ waf.location }} {
-            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
-            proxy_ssl_server_name on;
-            proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Connection "";
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
             {{ waf_mod.get_rules(this, waf.location) }}
           }
         {% endif %}
