@@ -78,9 +78,9 @@ class VCLParser():
                 elif re.search(r'if \(([a-zA-Z_0-9 ]*)', line):
                     splited_line = self.parse_if_conditions(line)
                     if line.endswith('}'):
-                        data_if += {splited_line : ''}
+                        data_if.append({splited_line : ''})
                     else:
-                        data_if += self.parse_if(splited_line)
+                        data_if.append(self.parse_if(splited_line))
                 else:
                     splited_line = line.split(' ')
         except Exception as e:
@@ -117,11 +117,12 @@ class VCLParser():
                 else:
                     if_data[line] = self.parse_if(condition_if)
             elif line.endswith('}'):
-                # if_data[condition] = statements
-                return if_data
+                self.last_line = self.get_line()
+                if not 'els' in self.last_line:
+                    break
             else:
                 if_data[condition] = line
-            return {'if_data': if_data, 'statements': statements}
+        return {'if_data': if_data, 'statements': statements}
 
     def _parse_statement(self):
         lines = []
@@ -148,6 +149,9 @@ class VCLParser():
         while True:
             line = self.get_line()
             if line.endswith('}'):
+                break
+            elif line.startswith('sub'):
+                self.last_line = line
                 break
             if line.startswith('if'):
                 # self.last_line = line

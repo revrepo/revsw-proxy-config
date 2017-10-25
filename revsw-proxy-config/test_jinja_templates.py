@@ -512,6 +512,140 @@ class TestVarnishJinja(TestAbstractConfig):
         self.assertTrue(backend)
         self.assertNotEqual(test_bakend_data, backend)
 
+    def test_varnish_jinja_cache_ps_html_false(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_backend_response')
+        self.assertTrue(sub)
+
+    def test_varnish_jinja_vcl_synth(self):
+        test_sub_data = [{'statements': {}, 'if_data': {'if (req.http.host == "test_server_1") {': 'test-synth'}}]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_synth')
+        self.assertTrue(sub)
+        self.assertEqual(test_sub_data, sub['if_data'])
+
+    def test_varnish_jinja_site_cookies_querystr_and_per_domain_rules_hash_recv(self):
+        test_sub_data = [
+            {
+                'statements': {},
+                'if_data': {'if (req.http.host == "test_server_1") {': 'test-recv'}},
+            {
+                'statements': {},
+                'if_data': {
+                    'if (req.http.host == "test_server_1") {': 'chromelogger.log("recv " + req.xid + ": " + req.method + " " + req.url);'
+                }
+            }
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_recv')
+        self.assertTrue(sub)
+        self.assertEqual(test_sub_data, sub['if_data'])
+
+    def test_varnish_jinja_vcl_recv(self):
+        required_data = ['revvar.init_var_count(19);', 'revvar.set_duration(true, 17, 10s);',]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_recv')
+        self.assertTrue(sub)
+        for i in required_data:
+            self.assertIn(i, sub['data'])
+
+    def test_varnish_jinja_vcl_miss(self):
+        required_data = [
+            {
+                'statements': {},
+                'if_data': {'if (req.http.host == "test_server_1") {': 'test-miss'}},
+            {
+                'statements': {},
+                'if_data': {'if (req.http.host == "test_server_1") {': 'chromelogger.log("miss " + req.xid);'}
+            }
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_miss')
+        self.assertTrue(sub)
+        self.assertEqual(required_data, sub['if_data'])
+
+    def test_varnish_jinja_vcl_purge(self):
+        required_data = [{'statements': {}, 'if_data': {'if (req.http.host == "test_server_1") {': 'test-purge'}}]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_purge')
+        self.assertTrue(sub)
+        self.assertEqual(required_data, sub['if_data'])
+
+
+    def test_varnish_jinja_vcl_backend_fetch(self):
+        required_data = [
+            {'statements': {}, 'if_data': {'if (bereq.http.host == "test_server_1") {': 'test-backend_fetch'}}
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_backend_fetch')
+        self.assertTrue(sub)
+        self.assertEqual(required_data, sub['if_data'])
+
+    def test_varnish_jinja_vcl_backend_error(self):
+        required_data = [
+            {'statements': {}, 'if_data': {'if (bereq.http.host == "test_server_1") {': 'test-backend_error'}}
+        ]
+        initial_data = deepcopy(self.initial_data)
+        initial_data['sites'][0]['CACHE_PS_HTML'] = False
+        template = self.env.get_template('all/bp/varnish.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'varnish_jinja.vcl'), 'w') as f:
+            f.write(result)
+        parse = VCLParser(os.path.join(TEST_DIR, 'varnish_jinja.vcl'))
+        parsed = parse.parse_object()
+        sub = parsed['sub'].get('vcl_backend_error')
+        self.assertTrue(sub)
+        self.assertEqual(required_data, sub['if_data'])
+
 
 class TestSdkNginxConfJinja(TestAbstractConfig):
     schema_file_location = os.path.join(TEMPLATES_DIR, 'all/bp')
@@ -1364,7 +1498,6 @@ class TestWAFJinja(TestAbstractBpJinja):
                 if location.value in test_locations:
                     for row in location.as_list[2]:
                         if row[0] == 'CheckRule':
-                            print location.as_dict
                             find_waf_actions.add(row[1])
         self.assertTrue(len(find_waf_actions) == 2)
 
@@ -1457,7 +1590,6 @@ class TestBalancerJinja(TestAbstractBpJinja):
             if conf.get('upstream %s' % test_str):
                     find_line = True
         self.assertTrue(find_line)
-
 
     def test_balancer_jinja_bypass_no_bypass_locations(self):
         initial_data = deepcopy(self.initial_data)
