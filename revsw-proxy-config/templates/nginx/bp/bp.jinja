@@ -3,6 +3,7 @@
 {% import "common/loop_detect.jinja" as loop_detect_mod %}
 {% import "common/balancer.jinja" as balancer_mod %}
 {% import "common/waf.jinja" as waf_mod %}
+{% import "common/bot_prot.jinja" as bot_prot %}
 
 {% macro _common_upstream_block_co(this, balancer_name, routeid_suffix, profiles_base_port, is_https) %}
   {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
@@ -197,7 +198,7 @@
   {% set proto_prefix = "http://" if content_optimizers[0]|truncate(7, True, "") == "http://" else "https://" %}
   {# proto_prefix = {{proto_prefix}} #}
   {% set co_base_url = proto_prefix + balancer_mod.balancer_name(this, is_https, balancer_name) %}{# the balancer is defined in _common_upstream_block_co() #}
-  proxy_pass {{ co_base_url }}{{ rel_url }};
+  proxy_pass {{ co_base_url }};
   {#
     Wait at most for configured seconds for a reply from CO, then return error message.
     This will make recovery from CO failure quicker.
@@ -237,7 +238,7 @@
   {% endif %}
 {%- endmacro %}
 
-{% macro _common_proxy_config_step1(this, co_profiles_mod, co_profiles, varnish_port, profiles_base_port, is_https) %}
+{% macro _common_proxy_config_step1(this, co_profiles_mod, co_profiles, varnish_port, profiles_base_port, is_https) -%}
   server_name {{ this.SERVER_NAME }} {%- for alias in this.SERVER_ALIASES %} {{ alias }}{%- endfor -%};
   {% if this.SERVER_REGEX_ALIAS %}
     server_name "~{{ this.SERVER_REGEX_ALIAS }}";
@@ -248,12 +249,14 @@
 
   {{ _common_proxy_settings(this) }}
   {{ loop_detect_mod.loop_detect_bp(this) }}
-
   {# Never disable the Varnish backend, even if it has temporary problems. #}
   location / {
     proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }}/;
     {# Wait at most for configured seconds for a reply from Varnish, then return error message. #}
     proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+    {% if this.ENABLE_BOT_PROTECTION %}
+      {{ bot_prot.get_rules(this, "/") }}
+    {% endif %}
   }
   {#
     mod_rev_profile_selection
@@ -269,16 +272,29 @@
     {% for url in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-      {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
-
+        {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+        {{ bot_prot.get_rules(this, url) }}
       {# TODO: RevProfilesMode full #}
       }
     {% endfor %}
     {# End Varnish bypass #}
   {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
-{% endmacro %}{# _common_proxy_config_step1 #}
 
-{% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) %}
+  {% for url in this.BOT_PROTECTION %}
+    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
+      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
+      {% if url.location != "/" %}
+        location {{url.location}} {
+          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+          {{ bot_prot.get_rules(this, url.location) }}
+        }
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{%- endmacro %}{# _common_proxy_config_step1 #}
+
+{% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) -%}
   server_name {{this.SERVER_NAME}};
 
   {{ _common_proxy_settings(this) }}
@@ -318,6 +334,9 @@
   {% if not '/' in this.BYPASS_CO_LOCATIONS %}
     location / {
         {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
+        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+          {{ bot_prot.get_rules(this, "/") }}
+        {% endif %}
         {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, "/") }}
         {% endif %}
@@ -331,7 +350,12 @@
     {% for url in this.BYPASS_CO_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-        proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}/{{ rel_url }};
+
+        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+          {{ bot_prot.get_rules(this, url) }}
+        {% endif %}
+
+        proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
         {#
           TODO: RevProfilesMode off
           Make sure the origin sees the right Host header
@@ -351,20 +375,27 @@
     {% endfor %}
   {% endif %}{# this.BYPASS_CO_LOCATIONS #}
 
+  {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+    {% for botp in this.BOT_PROTECTION %}
+      {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
+        {% if botp.location != '/' %}
+          location {{ botp.location }} {
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
+            {{ bot_prot.get_rules(this, botp.location) }}
+          }
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
   {# WAF rules for location not present in BYPASS #}
   {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
     {% for waf in this.WAF_RULES %}
       {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
         {% if waf.location != '/' %}
           location {{ waf.location }} {
-            proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }}{{ waf.location }};
-            proxy_ssl_server_name on;
-            proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Host {{this.ORIGIN_SERVER_NAME}};
-            proxy_set_header Connection "";
-            {% if this.ENABLE_WAF %}
-              {{ waf_mod.get_rules(this, waf.location) }}
-            {% endif %}
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
+            {{ waf_mod.get_rules(this, waf.location) }}
           }
         {% endif %}
       {% endif %}

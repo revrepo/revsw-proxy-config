@@ -36,7 +36,7 @@ from revsw_apache_config import API_VERSION, configure_all, set_log as acfg_set_
     sorted_non_empty
 
 _UI_CONFIG_VERSION = "1.0.6"
-_BP_CONFIG_VERSION = 27
+_BP_CONFIG_VERSION = 28
 _CO_CONFIG_VERSION = 16
 _CO_PROFILES_CONFIG_VERSION = 2
 _VARNISH_CONFIG_VERSION = 17
@@ -289,6 +289,8 @@ class ConfigCommon:
 
         self._patch_if_changed_bp_webserver("ENABLE_WAF", security.get("enable_waf", False))
         self._patch_if_changed_bp_webserver("WAF_RULES", security.get("waf", []))
+        self._patch_if_changed_bp_webserver("ENABLE_BOT_PROTECTION", security.get("enable_bot_protection", False))
+        self._patch_if_changed_bp_webserver("BOT_PROTECTION", security.get("bot_protection", []))
         self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", security.get("block_crawlers", True))
 
         self._patch_if_changed_bp_webserver("acl", security.get("acl", {
@@ -297,8 +299,10 @@ class ConfigCommon:
             "acl_rules": []
         }))
 
-        log.LOGD("ACL parameters: %s | %s" % (security, security.get("acl")))
-        log.LOGD("WAF parameters: %s | %s" % (security, security.get("waf")))
+        log.LOGD("Security parameters: %s" % security)
+        log.LOGD("ACL parameters: %s" % security.get("acl"))
+        log.LOGD("WAF parameters: %s" % security.get("waf"))
+        log.LOGD("BOT_PROTECTION rules: %s" % security.get("bot_protection"))
 
     def _patch_ssl_vars(self):
         if "enable_ssl" in self.ui_config:
@@ -414,8 +418,15 @@ class ConfigCommon:
         self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", misc.get("origin_http_keepalive_enabled", True))
 
         self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", misc.get("enable_proxy_buffering", False))
-        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", misc.get("end_user_response_headers", [])) # (BP-92) BP
 
+        caching_rules = misc.get("caching_rules", [])
+        responce_headers = []
+        if caching_rules:
+            for rule in caching_rules:
+                for r in rule.get("end_user_response_headers", []):
+                    responce_headers.append(r)
+
+        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", responce_headers)
         self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", co.get("origin_request_headers", []))
         self._patch_if_changed_bp_webserver("ENABLE_QUIC", misc.get("enable_quic", False))
 
@@ -951,6 +962,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 27 < new_ver:
             bp["ENABLE_WAF"] = False
             bp["WAF_RULES"] = []
+
+        if ver <= 28 < new_ver:
+            bp["ENABLE_BOT_PROTECTION"] = False
+            bp["BOT_PROTECTION"] = []
 
         bp["VERSION"] = new_ver
 

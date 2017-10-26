@@ -267,7 +267,7 @@
     }
     {% endif %}
 
-    {% if rule.edge_caching.override_origin or rule.browser_caching.override_edge or origin_redirects.override %}
+    {% if rule.edge_caching.override_origin or rule.browser_caching.override_edge or origin_redirects.override or rule.end_user_response_headers|default({}) %}
     {{ " else" if site.CACHING_RULES_MODE == "first" and not first else " "}} if (bereq.url ~ "{{url_re}}") {
           # Override caching time (0 means "don't cache").
     {% if rule.edge_caching.override_origin and rule.edge_caching.override_no_cc|default(False) %}{# ignore missing Cache-Control, which normally indicates uncacheable content #}
