@@ -27,7 +27,7 @@
     "PROXY_TIMEOUT": 5, 
     "ENABLE_WAF": false, 
     "ssl": {}, 
-    "VERSION": 27, 
+    "VERSION": 28,
     "ORIGIN_SERVER_NAME": "test", 
     "SSL_CERT_ID": "default", 
     "ENABLE_DECOMPRESSION": true, 
@@ -84,6 +84,8 @@
     "ORIGIN_REQUEST_HEADERS": [], 
     "CUSTOM_WEBSERVER_CODE_AFTER": "", 
     "DOMAIN_SHARDS_COUNT": 1, 
-    "CO_LUA_LOCATIONS": []
+    "CO_LUA_LOCATIONS": [],
+    "ENABLE_BOT_PROTECTION": false,
+    "BOT_PROTECTION": []
   }
 }
