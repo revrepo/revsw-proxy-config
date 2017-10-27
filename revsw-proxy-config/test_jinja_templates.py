@@ -796,6 +796,17 @@ class TestAbstractBpJinja(TestAbstractConfig):
             },
         ],
         "SECURITY_MODE":'test-security-mode',
+        "ENABLE_BOT_PROTECTION": False,
+        "BOT_PROTECTION": [
+            {
+                "location": 'test_location',
+                "mode": 'active_protection',
+                "call_type": 2,
+                "username_cookie_name": "test_cookie_name",
+                "sessionid_cookie_name": "test_sessionid_cookie_name",
+                "bot_protection_id": "test_bot_protection_id"
+            }
+        ]
     }
 
     co_profiles_data = {
@@ -888,7 +899,7 @@ class TestBpJinja(TestAbstractBpJinja):
         bp_initial_data['VERSION'] = -1
         validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
         self.assertFalse(validation_result)
-        bp_initial_data['VERSION'] = 28
+        bp_initial_data['VERSION'] = 400
         validation_result = self.validate_schema(bp_initial_data, self.schema_file_location, self.schema_file_name)
         self.assertFalse(validation_result)
 
@@ -1747,6 +1758,190 @@ class TestLoopDetectJinja(TestAbstractBpJinja):
                     required_lines.pop(0)
 
         self.assertEqual(test_answ, find_answer)
+
+
+class TestBotProtJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_bot_prot_jinja_macros_get_rules(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('access_by_lua') and line['access_by_lua'] == '\'require("nginx_ss").validateRequest()\'':
+                        find_line = True
+        self.assertTrue(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_not_called(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('access_by_lua') and line['access_by_lua'] == '\'require("nginx_ss").validateRequest()\'':
+                        find_line = True
+        self.assertFalse(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_mode_disabled(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        initial_data['bp']["BOT_PROTECTION"][0]["mode"] = "disable"
+
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('access_by_lua') and line['access_by_lua'] == '\'require("nginx_ss").validateRequest()\'':
+                        find_line = True
+        self.assertFalse(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_mode_monitor(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        initial_data['bp']["BOT_PROTECTION"][0]["mode"] = "monitor"
+
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('set') and line['set'] == '$shieldsquare_mode \'monitor\'':
+                        find_line = True
+        self.assertTrue(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_mode_active_protection(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        initial_data['bp']["BOT_PROTECTION"][0]["mode"] = "active_protection"
+
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('set') and line['set'] == '$shieldsquare_mode \'active\'':
+                        find_line = True
+        self.assertTrue(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_protection_id(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('set') and \
+                            line['set'] == '$shieldsquare_sid \'%s\'' % initial_data['bp']["BOT_PROTECTION"][0]["bot_protection_id"]:
+                        find_line = True
+        self.assertTrue(find_line)
+
+    def test_bot_prot_jinja_macros_get_rules_sessionid_cookie_name(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_BOT_PROTECTION"] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server: break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == 'test_location':
+                for line in location.as_dict['location test_location']:
+                    if line.get('set') and \
+                            line['set'] == '$shieldsquare_sessionid \'%s\'' % initial_data['bp']["BOT_PROTECTION"][0]["sessionid_cookie_name"]:
+                        find_line = True
+        self.assertTrue(find_line)
 
 
 if __name__ == '__main__':
