@@ -46,8 +46,8 @@ server {
     proxy_set_header X-Rev-SDK-Nodes "${http_x_rev_sdk_nodes} {{bpname}}";
 
     # if x_rev_sdk_nodes matches pattern a redirect loop has been detected
-    if ($http_x_rev_sdk_nodes ~* /{{bpname}}/) {
-    	return 508 "A redirection loop was detected on '{{bpname}}' Please review the server configuration.";
+    if ($http_x_rev_sdk_nodes ~ {{bpname}}) {
+    	return 508 "A redirection loop was detected on '{{bpname}}'. Please review the server configuration.";
     }
 
     location / {
