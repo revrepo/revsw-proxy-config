@@ -461,7 +461,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 u'BYPASS_VARNISH_LOCATIONS': [],
                 u'ENABLE_WAF': False, u'ssl': {},
                 u'CONTENT_OPTIMIZERS_HTTP': [u'http://e', u'http://s', u'http://t', u'http://t'],
-                u'VERSION': 27,
+                u'VERSION': 28,
                 u'ORIGIN_SERVER_NAME': u'test',
                 u'SSL_CERT_ID': u'default',
                 u'ENABLE_JS_SUBSTITUTE': True,
@@ -485,7 +485,10 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 u'ORIGIN_REQUEST_HEADERS': [],
                 u'SSL_PREFER_SERVER_CIPHERS': True,
                 u'ENABLE_HTTP': True,
-                u'DOMAINS_TO_PROXY_HTTPS': [u'test1', u'test2']
+                u'DOMAINS_TO_PROXY_HTTPS': [u'test1', u'test2'],
+                u"ENABLE_BOT_PROTECTION": False,
+                u"BOT_PROTECTION": []
+
             }
         }
         result_string = apache_gen_config_script.generate_bp_domain_json(self.domain)
@@ -509,6 +512,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'origin_secure_protocol': 'use_end_user_protocol',
             'co_cnames': ['test1', 'test2'],
             'rev_component_bp': {
+                'enable_bot_protection': False,
+                'bot_protection': [],
                 'bp_apache_fe_custom_config': '',
                 'bp_apache_custom_config': '',
                 'cache_opt_choice': 'Extend CDN',
@@ -609,9 +614,14 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'caching_rules': [],
             'ssl_certificates': 'rev_certs',
             'enable_decompression': True,
-            'enable_rum': True
+            'enable_rum': True,
+            'enable_bot_protection': False,
+            'bot_protection': []
         }
         result_string = apache_gen_config_script.generate_bp_ui_config_json(self.domain)
+        for key in result_string.keys():
+            if result_string[key] != test_json[key]:
+                print key
         self.assertEqual(result_string, test_json)
 
 
