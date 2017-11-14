@@ -3,7 +3,7 @@ var
   async = require('async'),
   https = require('https'),
   config = require('config'),
-  fs = require("fs"),
+  fs = require('fs'),
   Promise = require('bluebird'),
   api = require('./proxy-qa-libs/api.js'),
   tools = require('./proxy-qa-libs/tools.js'),
@@ -36,7 +36,7 @@ var merge = function () {
         // Concat Arrays
         //destination[prop] = destination[prop].concat(source[prop]);
         destination[prop] = source[prop];
-      } else if (prop in destination && typeof destination[prop] === "object") {
+      } else if (prop in destination && typeof destination[prop] === 'object') {
         // Merge Objects
         destination[prop] = merge(destination[prop], source[prop]);
 
@@ -53,36 +53,36 @@ var merge = function () {
 var checking = function (host, url, domain, values, set, method) {
   //console.log(host, url, domain, values, set, method);
   return new Promise(function (response, reject) {
-
+    var request = null;
     switch (method) {
 
-      case "POST":
-        var request = tools.postHostRequest(host, url, set, domain)
+      case 'POST':
+        request = tools.postHostRequest(host, url, set, domain);
         break;
 
-      case "PATCH":
-        var request = tools.patchHostRequest(host, url, set, domain)
+      case 'PATCH':
+        request = tools.patchHostRequest(host, url, set, domain);
         break;
 
-      case "PUT":
-        var request = tools.putHostRequest(host, url, set, domain)
+      case 'PUT':
+        request = tools.putHostRequest(host, url, set, domain);
         break;
 
-      case "DELETE":
+      case 'DELETE':
         //console.log(host, url, domain);
-        var request = tools.delHostRequest(host, url, domain)
+        request = tools.delHostRequest(host, url, domain);
         break;
 
       default:
         if (!set || set === '') {
-          var request = tools.getHostRequest(host, url, domain);
+          request = tools.getHostRequest(host, url, domain);
         } else {
           var setValues = {
             'Host': domain
           };
           setValues = merge(setValues, set);
           //console.log(setValues);
-          var request = tools.getSetRequest(host, url, setValues);
+          request = tools.getSetRequest(host, url, setValues);
         }
         break;
     }
@@ -91,76 +91,77 @@ var checking = function (host, url, domain, values, set, method) {
         if (rej) {
           throw rej;
         }
-        if (development == true) {
+        if (development === true) {
           console.log(res.header);
           //console.log(res.text);
         }
         //console.log(values);
         for (var key in values) {
-          if (values[key] != '') {
+          var header = null;
+          var text = null;
+          var reg = null;
+          if (values[key] !=='') {
             switch (key) {
 
-              case "header":
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <=> " + values[key][header]);
+              case 'header':
+                for (header in values[key]) {
+                  if (development === true) {
+                    console.log(res.header[header] + ' <=> ' + values[key][header]);
                   }
                   res.header[header].should.eql(values[key][header]);
                 }
                 break;
 
-              case "header_not":
-                for (var header in values[key]) {
-                  if (development == true) {
-                    console.log(res.header[header] + " <!=> " + values[key][header]);
+              case 'header_not':
+                for (header in values[key]) {
+                  if (development === true) {
+                    console.log(res.header[header] + ' <!=> ' + values[key][header]);
                   }
                   res.header[header].should.not.eql(values[key][header]);
                 }
                 break;
 
-              case "header_properties":
-                for (var header in values[key]) {
+              case 'header_properties':
+                for (header in values[key]) {
                   res.header.should.have.properties(values[key][header]);
                 }
                 break;
 
-              case "header_not_properties":
-                for (var header in values[key]) {
+              case 'header_not_properties':
+                for (header in values[key]) {
                   res.header.should.not.have.properties(values[key][header]);
                 }
                 break;
 
-              case "content":
-                for (var text in values[key]) {
+              case 'content':
+                for (text in values[key]) {
                   //console.log(res.text);
                   res.text.should.containEql(values[key][text]);
                 }
                 break;
 
-              case "content_not":
-                for (var text in values[key]) {
+              case 'content_not':
+                for (text in values[key]) {
                   res.text.should.not.containEql(values[key][text]);
                 }
                 break;
 
-              case "content_match":
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
+              case 'content_match':
+                for (text in values[key]) {
+                  reg = new RegExp(values[key][text]);
                   res.text.should.match(reg);
                 }
                 break;
 
-              case "content_not_match":
-                for (var text in values[key]) {
-                  var reg = new RegExp(values[key][text]);
-                  //console.log(reg);
+              case 'content_not_match':
+                for (text in values[key]) {
+                  reg = new RegExp(values[key][text]);
                   res.text.should.not.match(reg);
                 }
                 break;
 
               default:
-                console.log("Property '"+key+"' not found");
+                console.log('Property "'+key+'" not found');
                 break;
             }
           }
@@ -176,11 +177,11 @@ var checking = function (host, url, domain, values, set, method) {
 var purge = function (newDomainName, is_wildcard, expression) {
   return new Promise(function (response, reject) {
     var jsonPurge = {
-      "domainName": newDomainName,
-      "purges": [{
-        "url": {
-          "is_wildcard": is_wildcard,
-          "expression": expression
+      'domainName': newDomainName,
+      'purges': [{
+        'url': {
+          'is_wildcard': is_wildcard,
+          'expression': expression
         }
       }]
     };
@@ -214,10 +215,10 @@ function test_process(value, newDomainName, jsonContent) {
     var internal = value.cases[key];
     it(internal.description, function (done) {
       var host = testHTTPUrl;
-      if (value.protocol == "HTTPS") {
+      if (value.protocol === 'HTTPS') {
         host = testHTTPSUrl;
       }
-      var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+      var newDomainName = config.get('test_domain_start') + value.name + '-' + value.step + config.get('test_domain_end');
       checking(host, internal.url, newDomainName, internal.check, internal.set, internal.method).then(function (res, rej) {
         if (rej) {
           throw rej;
@@ -233,7 +234,7 @@ function test_process(value, newDomainName, jsonContent) {
   switch (value.command) {
 
     // Domain creation for testing
-    case "create":
+    case 'create':
       it(value.description, function (done) {
         tools.beforeSetDomain(newDomainName, jsonContent.origin)
           .then(function (res, rej) {
@@ -244,7 +245,7 @@ function test_process(value, newDomainName, jsonContent) {
             domainConfig = res.config;
           })
           .catch(function (err) {
-            done(util.getError(err))
+            done(util.getError(err));
           })
           .then(function () {
             done();
@@ -252,19 +253,19 @@ function test_process(value, newDomainName, jsonContent) {
       });
       break;
 
-    case "group_create":
+    case 'group_create':
       it(value.description, function (done) {
-        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+        var newDomainName = config.get('test_domain_start') + value.name + '-' + value.step + config.get('test_domain_end');
 
         var found = false;
         for (var ad in domains) {
-          if (domains[ad] == newDomainName) {
+          if (domains[ad] === newDomainName) {
             found = true;
           }
         }
 
         if (found) {
-          if (development == true)
+          if (development === true)
           {
             console.log('    ♦ Domain found');
           }
@@ -281,7 +282,7 @@ function test_process(value, newDomainName, jsonContent) {
               })
               .then(function () {
                 domainConfig = merge(domainConfig, value.set);
-                if (development == true) {
+                if (development === true) {
                   console.log(JSON.stringify(domainConfig));
                 }
                 tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
@@ -303,7 +304,7 @@ function test_process(value, newDomainName, jsonContent) {
                 domainConfig = res.config;
               })
               .catch(function (err) {
-                done(util.getError(err))
+                done(util.getError(err));
               })
               .then(function () {
                 done();
@@ -314,11 +315,11 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     // Setting domain options
-    case "update":
+    case 'update':
       it(value.description, function (done) {
         //console.log(JSON.stringify(domainConfig));
         domainConfig = merge(domainConfig, value.set);
-        if (development == true) {
+        if (development === true) {
           console.log(JSON.stringify(domainConfig));
         }
         tools.afterSetDomain(domainConfigId, domainConfig).then(function (res, rej) {
@@ -333,7 +334,7 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     // Domain removing
-    case "delete":
+    case 'delete':
       it(value.description, function (done) {
         tools.deleteDomain(domainConfigId).then(function (res, rej) {
           if (rej) {
@@ -347,13 +348,13 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     // Make test
-    case "check":
-      it(value.description + " / " + value.step, function (done) {
+    case 'check':
+      it(value.description + ' / ' + value.step, function (done) {
         var host = testHTTPUrl;
-        if (value.protocol == "HTTPS") {
+        if (value.protocol === 'HTTPS') {
           host = testHTTPSUrl;
         }
-        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+        var newDomainName = config.get('test_domain_start') + value.name + '-' + value.step + config.get('test_domain_end');
         checking(host, value.url, newDomainName, value.check, value.set, value.method).then(function (res, rej) {
           if (rej) {
             throw rej;
@@ -367,9 +368,9 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     // Make purge
-    case "purge":
-      it(value.description + " / " + value.step, function (done) {
-        var newDomainName = config.get('test_domain_start') + value.name + "-" + value.step + config.get('test_domain_end');
+    case 'purge':
+      it(value.description + ' / ' + value.step, function (done) {
+        var newDomainName = config.get('test_domain_start') + value.name + '-' + value.step + config.get('test_domain_end');
         purge(newDomainName, value.is_wildcard , value.expression).then(function (res, rej) {
           if (rej) {
             throw rej;
@@ -383,7 +384,7 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     // Make async tests
-    case "async":
+    case 'async':
       parallel(value.description, function () {
         for (var key in value.cases) {
           sub(key);
@@ -392,14 +393,13 @@ function test_process(value, newDomainName, jsonContent) {
       break;
 
     default:
-      it.skip("Skipped command " + value.command, function (done) {
+      it.skip('Skipped command ' + value.command, function (done) {
         done();
       });
   }
+}
 
-};
-
-describe("Proxy check", function () {
+describe('Proxy check', function () {
   this.timeout(30000);
 
   it('should return AccountId', function (done) {
@@ -419,14 +419,14 @@ describe("Proxy check", function () {
           for (var attributename in response_json) {
             var domain = response_json[attributename].domain_name;
             if (
-              domain.substring(0, config.get('test_domain_start').length) == config.get('test_domain_start')
+              domain.substring(0, config.get('test_domain_start').length) === config.get('test_domain_start')
             ) {
               //console.log(domain);
               domains.push(response_json[attributename].domain_name);
             }
           }
           done();
-        })
+        });
       })
       .catch(function (err) {
         done(util.getError(err));
@@ -441,12 +441,12 @@ describe("Proxy check", function () {
   } else {
     for (var i = 0; i < items.length; i++) {
       //console.log(items[i]);
-      if(items[i] != "special") files.push(sctiptsFolder + items[i]);
+      if(items[i] !== 'special') {files.push(sctiptsFolder + items[i]);}
     }
   }
 
-  for (var i = 0; i < files.length; i++) {
-    var contents = fs.readFileSync(files[i]);
+  for (var ii = 0; ii < files.length; ii++) {
+    var contents = fs.readFileSync(files[ii]);
     var jsonContent = JSON.parse(contents);
     var newDomainName = config.get('test_domain_start') + Date.now() + getRandomInt(1000, 9999) + config.get('test_domain_end');
     var tasks = jsonContent.tasks;
@@ -458,7 +458,8 @@ describe("Proxy check", function () {
         for (var task in tasks) {
           test_process(tasks[task], newDomainName, jsonContent);
         }
-      });
+      }
+      );
     }
   }
 });

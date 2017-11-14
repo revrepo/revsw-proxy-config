@@ -680,6 +680,65 @@
         "ssl_ciphers": "",
         "ssl_prefer_server_ciphers": false
       }
+    },{
+      "command": "group_create",
+      "description": "should create domains and enable bot protection",
+      "name": "bot-protection",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/get"],
+          "co_bypass_locations": ["/headers"],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },{
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },{
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },{
+              "location": "/cookies",
+              "mode": "disable",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domains and disable bot protection",
+      "name": "bot-protection",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/get"],
+          "co_bypass_locations": ["/headers"],
+          "enable_bot_protection": false,
+          "bot_protection": []
+        }
+      }
     }
   ]
 }
