@@ -1,0 +1,262 @@
+{
+  "name": "bot protection",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should make purge for freshly domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for root location",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/",
+      "check": {
+        "header": {
+          "content-type": "text/html; charset=utf-8"
+        },
+        "header_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers with disable bot protection in specific location",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for root location with disable bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/",
+      "check": {
+        "header": {
+          "content-type": "text/html; charset=utf-8"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with disable bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with disable bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers with disable bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for root location and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/",
+      "check": {
+        "header": {
+          "content-type": "text/html; charset=utf-8"
+        },
+        "header_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with active bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with active bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers with disable bot protection in specific location and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for root location with disable bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/",
+      "check": {
+        "header": {
+          "content-type": "text/html; charset=utf-8"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with disable bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with disable bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "bot-protection",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers with disable bot protection and HTTPS",
+      "delay": 0,
+      "protocol": "HTTPS",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    }
+  ]
+}

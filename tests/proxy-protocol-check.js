@@ -516,7 +516,7 @@ describe('Proxy origin secure protocol checker with setted co_bypass_locations',
   it('should change domain config enable cache, set co_bypass_locations and origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
     domainConfig.rev_component_bp.enable_cache = true;
-    domainConfig.rev_component_bp.co_bypass_locations = ["/static"];
+    domainConfig.rev_component_bp.co_bypass_locations = ['/static'];
 
     api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
@@ -683,7 +683,7 @@ describe('Proxy origin secure protocol checker with disabled cache and setted co
   it('should change domain config disable cache, set co_bypass_locations and origin_secure_protocol to http_only', function (done) {
     domainConfig.origin_secure_protocol = 'http_only';
     domainConfig.rev_component_bp.enable_cache = true;
-    domainConfig.rev_component_bp.co_bypass_locations = ["/static"];
+    domainConfig.rev_component_bp.co_bypass_locations = ['/static'];
 
     api.putDomainConfigsById(domainConfigId, domainConfig).then(function (res, rej) {
       if (rej) {
