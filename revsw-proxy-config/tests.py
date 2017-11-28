@@ -346,12 +346,12 @@ class TestApacheGenConfigScript(unittest.TestCase):
         self.assertTrue(os.path.exists("bp-apache-test_domain.json"))
         self.assertTrue(os.path.exists("bp-varnish-test_domain.json"))
         self.assertEqual(
-            json.loads(open("bp-apache-test_domain.json").read()),
-            json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-apache-test_domain.json")).read()),
+           json.loads(open("bp-apache-test_domain.json").read()),
+           json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-apache-test_domain.json")).read()),
         )
         self.assertEqual(
-            json.loads(open("bp-varnish-test_domain.json").read()),
-            json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-varnish-test_domain.json")).read()),
+           json.loads(open("bp-varnish-test_domain.json").read()),
+           json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-varnish-test_domain.json")).read()),
         )
         os.system("rm bp-varnish-test_domain.json")
         os.system("rm bp-apache-test_domain.json")

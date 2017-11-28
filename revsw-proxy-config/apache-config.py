@@ -1,19 +1,23 @@
 #!/usr/bin/env python
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
+
 import argparse
 from cStringIO import StringIO
 import json
-import os
-import sys
 import itertools
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
+import traceback
 
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
-from revsw_apache_config import API_VERSION, set_log as acfg_set_log, VarnishConfig, \
-    PlatformWebServer, WebServerConfig, NginxConfig
+
+from revsw_apache_config import revsw_config, set_log as apache_cfg_set_log, \
+                                VarnishConfig, PlatformWebServer, \
+                                WebServerConfig, NginxConfig
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
@@ -45,8 +49,8 @@ if __name__ == "__main__":
                          default="main")
     add_mod.add_argument("vars_file", help="Input JSON template variables file")
 
-    dele = actions.add_parser("del", help="Delete site")
-    dele.add_argument("site_name_del", help="Unique identifier of site to delete")
+    delete = actions.add_parser("del", help="Delete site")
+    delete.add_argument("site_name_del", help="Unique identifier of site to delete")
 
     certs = actions.add_parser("certs", help="Send site certificates")
     certs.add_argument("site_name_certs", help="Unique identifier of site for which certificates are provided")
@@ -65,42 +69,43 @@ if __name__ == "__main__":
     global log
 
     try:
-        class Actions:
-            START = 1
-            FLUSH = 2
-            CONFIG = 3
-            DELETE = 4
-            CERTS = 5
-            VARNISH_TEMPL = 6
-            SEND = 7
-            COPY = 8
+        actions = {
+            "START": 1,
+            "FLUSH_SITES": 2,
+            "CONFIG": 3,
+            "DELETE": 4,
+            "CERTS": 5,
+            "VARNISH_TEMPLATE": 6,
+            "SEND": 7,
+            "COPY": 8
+        }
 
         if args.command == "start":
-            action = Actions.START
+            action = actions.START
         elif args.command == "flush-sites":
-            action = Actions.FLUSH
+            action = actions.FLUSH
         elif args.command == "del":
-            action = Actions.DELETE
+            action = actions.DELETE
         elif args.command == "certs":
-            action = Actions.CERTS
+            action = actions.CERTS
         elif args.command == "config":
-            action = Actions.CONFIG
+            action = actions.CONFIG
         elif args.command == "varnish-template":
-            action = Actions.VARNISH_TEMPL
+            action = actions.VARNISH_TEMPLATE
         elif args.command == "send":
-            action = Actions.SEND
+            action = actions.SEND
         elif args.command == "copy":
-            action = Actions.COPY
+            action = actions.COPY
         else:
             raise AttributeError("Unknown command line action")
 
-        if action == Actions.START:
+        if action == actions.START:
             log = RevStdLogger(args.verbose)
             log.LOGI("Starting new configuration for server '%s'" % args.server_addr)
             with open("/tmp/apache-config.conf", "w") as c:
                 json.dump(vars(args), c)
             with open("/tmp/apache-config.json", "w") as j:
-                j.write('{"type": "apache", "version": %d, "commands": []}' % API_VERSION)
+                j.write('{"type": "apache", "version": %d, "commands": []}' % revsw_config["API_VERSION"])
             sys.exit(0)
 
         with open("/tmp/apache-config.conf") as c:
@@ -110,26 +115,25 @@ if __name__ == "__main__":
             global_json = json.load(j)
 
         log = RevStdLogger(global_cfg["verbose"])
-        acfg_set_log(log)
+        apache_cfg_set_log(log)
 
         # Send current config and exit
-        if action == Actions.SEND:
+        if action == actions.SEND:
             log.LOGD("Sending configuration to '%s'" % global_cfg["server_addr"])
 
             data = StringIO()
             json.dump(global_json, data)
 
             # Send config to server
-            creds_path = "/opt/revsw-config/"
-            #creds_path = "/home/sorin/ownCloud/revsw/eng/certs/conf-tools"
+            creds_path = revsw_config["main_path"]
 
-            creds = RevTLSCredentials("%s/clicert.pem" % creds_path,
-                                      "%s/clikey.pem" % creds_path,
-                                      "alabala",
-                                      "%s/srvcert.pem" % creds_path)
+            tls_creds = RevTLSCredentials("%s/clicert.pem" % creds_path,
+                                          "%s/clikey.pem" % creds_path,
+                                          "alabala",
+                                          "%s/srvcert.pem" % creds_path)
 
             if not global_cfg["simulate"]:
-                c = RevTLSClient((global_cfg["server_addr"], 16002), creds)
+                c = RevTLSClient((global_cfg["server_addr"], 16002), tls_creds)
                 c.sendall(data.getvalue())
                 rsp = c.recvall()
                 print "Response: %s" % rsp
@@ -137,8 +141,7 @@ if __name__ == "__main__":
             data.close()
             sys.exit(0)
 
-        # Copy config to file and exit
-        if action == Actions.COPY:
+        if action == actions.COPY:
             log.LOGD("Copying configuration to '%s'" % args.copy_file_name)
 
             with open(args.copy_file_name, "w") as j:
@@ -147,13 +150,13 @@ if __name__ == "__main__":
             sys.exit(0)
 
         # Main processing
-        if action == Actions.FLUSH:
+        if action == actions.FLUSH:
             log.LOGD("Removing all sites")
             config = {
                 "type": "flush"
             }
 
-        elif action == Actions.VARNISH_TEMPL:
+        elif action == actions.VARNISH_TEMPL:
             log.LOGD("Saving Varnish config template")
 
             search_dirs = ["."] + \
@@ -165,7 +168,7 @@ if __name__ == "__main__":
                 "templates": VarnishConfig().gather_template_files(search_dirs)
             }
 
-        elif action == Actions.CONFIG:    # also add
+        elif action == actions.CONFIG:    # also add
             log.LOGD("Regenerate web server config for site '%s'" % args.site_name_config)
 
             search_dirs_base = ["."] + \
@@ -176,14 +179,14 @@ if __name__ == "__main__":
 
             templates = {}
 
-            subdirs = ("all", "nginx")
+            sub_dirs = ("all", "nginx")
             search_dirs = [os.path.join(base, subdir) for (base, subdir) in
-                               itertools.product(search_dirs_base, subdirs)]
+                               itertools.product(search_dirs_base, sub_dirs)]
 
             log.LOGD("Search dirs:", search_dirs)
 
             with open(args.vars_file) as f:
-                vars = json.load(f)
+                config_vars = json.load(f)
 
             cfg = NginxConfig(args.site_name_config)
             templates["nginx"] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
@@ -192,7 +195,7 @@ if __name__ == "__main__":
                 "type": "config",
                 "site_name": args.site_name_config,
                 "templates": templates,
-                "config_vars": vars
+                "config_vars": config_vars
             }
 
             if args.varnish_vars:
@@ -200,7 +203,7 @@ if __name__ == "__main__":
                 with open(args.varnish_vars) as f:
                     config["varnish_config_vars"] = json.load(f)
 
-        elif action == Actions.DELETE:
+        elif action == actions.DELETE:
             log.LOGD("Delete site '%s'" % args.site_name_del)
 
             cfg = PlatformWebServer().config_class()(args.site_name_del)
@@ -209,7 +212,7 @@ if __name__ == "__main__":
                 "site_name": args.site_name_del
             }
 
-        elif action == Actions.CERTS:
+        elif action == actions.CERTS:
             log.LOGD("Configure certificates for site '%s'" % args.site_name_certs)
 
             cfg = PlatformWebServer().config_class()(args.site_name_certs)
@@ -232,7 +235,6 @@ if __name__ == "__main__":
             json.dump(global_json, j, indent=2)
 
     except Exception as e:
-        import traceback
         traceback.print_exc()
         log.LOGE(e)
         sys.exit(1)

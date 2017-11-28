@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-import argparse
-import os
-import re
 import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
+
+import argparse
+import re
 import socket
 from cStringIO import StringIO
 import json
@@ -10,12 +13,8 @@ import shlex
 
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
+from revsw_apache_config import sorted_non_empty, revsw_config
 
-from revsw_apache_config import sorted_non_empty
-
-RUM_BEACON_URL = "http://rum-02-prod-sjc.revsw.net/service"
 
 help_str = r"""
 This script reads a configuration from the standard input and generates a configuration shell script
@@ -155,11 +154,6 @@ _ignore_cookies_default = [
     r"**"
 ]
 
-_BP_CONFIG_VERSION = 28
-_CO_CONFIG_VERSION = 16
-_CO_PROFILES_CONFIG_VERSION = 2
-_VARNISH_CONFIG_VERSION = 17
-
 
 # noinspection PyClassHasNoInit
 class States:
@@ -239,7 +233,7 @@ def check_ip_or_hostname(arg):
         fail("'%s' is not a valid IP address or hostname." % arg)
 
 
-def check_url(arg):
+def is_vaid_url(arg):
     url_re = re.compile(
         r'^(https?://)'  # http:// or https://
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
@@ -252,9 +246,9 @@ def check_url(arg):
         fail("'%s' is not a valid URL." % arg)
 
 
-def check_file_exists(arg):
-    if not os.path.exists(arg):
-        fail("File '%s' doesn't exist." % arg)
+def check_file_exists(filename):
+    if not os.path.exists(filename):
+        fail("File '%s' doesn't exist." % filename)
 
 
 def parse_line(line):
@@ -381,7 +375,7 @@ def parse_line(line):
                 check_hostname(arg)
                 domain["bp_cos"].add(arg)
             elif state == States.STATIC_CONTENT_SERVERS:
-                check_url(arg)
+                is_vaid_url(arg)
                 if arg.startswith("https://"):
                     domain["static_servers_https"].add(arg.replace("https://", ""))
                 else:
@@ -492,7 +486,7 @@ def parse_line(line):
         fail("No 'domain' keyword was found.")
 
 
-def _(s):
+def replace_underscore(s):
     return s.replace(".", "_")
 
 
@@ -505,19 +499,18 @@ def vars_schema_name(templ):
 
 
 def apache_vars_name(prefix, domain):
-    return "%s-apache-%s.json" % (prefix, _(domain["name"]))
+    return "%s-apache-%s.json" % (prefix, replace_underscore(domain["name"]))
 
 
 def varnish_vars_name(domain):
-    return "bp-varnish-%s.json" % _(domain["name"])
+    return "bp-varnish-%s.json" % replace_underscore(domain["name"])
 
 
 def fixup_domain(domain):
     create_bp_templ = False
-    create_co_templ = False
 
     if not domain["bp_template"]:
-        domain["bp_template"] = "bp-%s.jinja" % _(domain["name"])
+        domain["bp_template"] = "bp-%s.jinja" % replace_underscore(domain["name"])
         create_bp_templ = True
 
     if domain["profiles_disabled"]:
@@ -542,7 +535,7 @@ def fixup_domain(domain):
         with open(domain["caching_rules_file"]) as f:
             domain["caching_rules"] = json.load(f)
     else:
-        # Implement the old URLS_REMOVE_COOKIES_REGEX rules
+        # TODO: Implement the old URLS_REMOVE_COOKIES_REGEX rules
         caching_rules = []
         for ign_cookie in domain["ignore_cookies"]:
             remove_cookies_rule = {
@@ -645,7 +638,7 @@ def get_next_https_profiles_base(count):
 
 def get_co_profiles():
     return {
-        "VERSION": _CO_PROFILES_CONFIG_VERSION,
+        "VERSION": revsw_config["_CO_PROFILES_CONFIG_VERSION"],
         "REV_OPTIMIZATION_LEVEL": "custom",
         "REV_CUSTOM_IMG_LEVEL": "medium",
         "REV_CUSTOM_JS_LEVEL": "medium",
@@ -654,11 +647,11 @@ def get_co_profiles():
 
 
 def generate_bp_domain_json(domain):
-    # At least one is always True
+    # domain variable here is a dict
     http = "http" if domain["ows_http"] else "https"
     https = "https" if domain["ows_https"] else "http"
     bp = {
-        "VERSION": _BP_CONFIG_VERSION,
+        "VERSION": revsw_config["_BP_CONFIG_VERSION"],
         "ssl": {},
         "acl": {
             "enabled": False,
@@ -710,7 +703,7 @@ def generate_bp_domain_json(domain):
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
         "END_USER_RESPONSE_HEADERS": [], # (BP-92)
 
-        "REV_RUM_BEACON_URL": RUM_BEACON_URL,
+        "REV_RUM_BEACON_URL": revsw_config["rum_beacon_url"],
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "ORIGIN_REQUEST_HEADERS": [], # (BP-92)
@@ -748,7 +741,7 @@ def generate_bp_varnish_domain_json(domain):
     }
 
     site = {
-        "VERSION": _VARNISH_CONFIG_VERSION,
+        "VERSION": revsw_config["_VARNISH_CONFIG_VERSION"],
         "SERVER_NAME": domain["name"],
         "ENABLE_CACHE": True,
         "INCLUDE_USER_AGENT": False,
@@ -781,7 +774,7 @@ def generate_bp_varnish_domain_json(domain):
 def generate_bp(domain):
     # print >>sys.stderr, "BP Domain:", domain
 
-    cfg_name = _(domain["name"])
+    cfg_name = replace_underscore(domain["name"])
     basename_templ = template_basename(domain["bp_template"])
 
     json_fname = apache_vars_name("bp", domain)
@@ -795,21 +788,21 @@ def generate_bp(domain):
     with open(varn_fname, "w") as f:
         f.write(j)
 
-    print_configure_sh("""
+    print """
 DOMAIN_NAME=%s
 CFG_NAME=%s
-""" % (domain["name"], cfg_name))
+""" % (domain["name"], cfg_name)
 
     if domain["certs"]:
-        print_configure_sh("""
+        print """
 echo "    -> configuring $DOMAIN_NAME certificates"
 apache-config.py certs $CFG_NAME %s || EXIT=$?
-""" % domain["certs"])
+""" % domain["certs"]
 
-    print_configure_sh("""
+    print """
 echo "    -> configuring site $DOMAIN_NAME"
 apache-config.py config -V %s $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
-""" % (varn_fname, basename_templ, json_fname))
+""" % (varn_fname, basename_templ, json_fname)
 
 
 def _get_ui_config_command_opts(domain):
@@ -868,7 +861,7 @@ def generate_bp_ui_config_json(domain):
         "end_user_response_headers": [],
         "co_apache_custom_config": "",
         "enable_rum": True,
-        "rum_beacon_url": RUM_BEACON_URL,
+        "rum_beacon_url": revsw_config["rum_beacon_url"],
         "enable_optimization": domain["enable_opt"],
         "enable_decompression": domain["enable_decompression"],
         "mode": "custom",
@@ -884,7 +877,7 @@ def generate_co_ui_config_json(domain):
     return {
         "co_apache_custom_config": "",
         "enable_rum": True,
-        "rum_beacon_url": RUM_BEACON_URL,
+        "rum_beacon_url": revsw_config["rum_beacon_url"],
         "enable_optimization": domain["enable_opt"],
         "enable_decompression": domain["enable_decompression"],
         "mode": "custom",
@@ -940,9 +933,6 @@ def generate_ui_configs():
             json.dump(cfg, f, indent=2)
 
 
-def print_configure_sh(txt):
-    print txt
-
 #TODO: try to understand for what so strange way to write to file
 def generate_config_sh():
     global _bps
@@ -951,37 +941,37 @@ def generate_config_sh():
     # Generate the config script
     sys.stdout = open("configure.sh", "w")
 
-    print_configure_sh("""#!/bin/bash
+    print """#!/bin/bash
     EXIT=0
     THIS_DIR=`readlink -f .`
-    """)
+    """
 
     if not args.no_bp:
         for addr, domains in _bps.iteritems():
-            print_configure_sh("""
+            print """
     BP=%s
     echo "Configuring BP '$BP'"
     apache-config.py start -I $THIS_DIR $BP || EXIT=$?
-    """ % addr)
+    """ % addr
             if args.flush:
-                print_configure_sh("""
+                print """
     echo "    -> removing all sites on server"
     apache-config.py flush-sites || EXIT=$?
-    """)
+    """
             for domain in domains:
                 generate_bp(domain)
             if not args.no_send:
-                print_configure_sh("""
+                print """
     echo "    -> sending configuration"
     apache-config.py send || EXIT=$?
-    """)
+    """
             if args.copy_to:
-                print_configure_sh("""
+                print """
     echo "    -> copying configuration to '%s'"
     apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to))
+    """ % (args.copy_to, args.copy_to)
 
-    print_configure_sh("exit $EXIT")
+    print "exit $EXIT"
 
 
 def main():
@@ -1017,9 +1007,6 @@ def main():
         generate_config_sh()
 
 
-# ##################################################################################
-# MAIN
-# ##################################################################################
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate configuration and/or configure web server and Varnish.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
