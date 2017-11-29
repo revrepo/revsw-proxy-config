@@ -34,7 +34,7 @@ from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_d
 from revsw_apache_config.varnishadmin import VarnishAdmin
 
 from revsw.logger import RevSysLogger
-from revsw_apache_config import revsw_config, configure_all, sorted_non_empty, \
+from revsw_apache_config import configure_all, sorted_non_empty, \
                                 set_log as acfg_set_log, VarnishConfig
 
 varnish_admin = VarnishAdmin()
@@ -311,7 +311,7 @@ class ConfigCommon:
         optimized_domains = []
 
         old_version = False
-        if _compare_versions(self.ui_config.get("version", "0.0.0"), revsw_config["_UI_CONFIG_VERSION"]) < 0 or \
+        if _compare_versions(self.ui_config.get("version", "0.0.0"), script_configs._UI_CONFIG_VERSION) < 0 or \
                 not "enable_3rd_party_runtime_rewrite" in self.ui_config.get("3rd_party_rewrite", {}):
             old_version = True
 
@@ -327,7 +327,7 @@ class ConfigCommon:
                 optimized_domains = [url.strip() for url in third_party["3rd_party_urls"].split(",")]
             optimized_domains += proxied_domains
             enable_rewr = third_party["enable_3rd_party_rewrite"]
-        else:  # _UI_CONFIG_VERSION or newer
+        else:  # script_configs._UI_CONFIG_VERSION or newer
             third_party = self.ui_config.get("3rd_party_rewrite", {
                 "enable_3rd_party_runtime_rewrite": self.cmd_opts["js_subst"],
                 "3rd_party_runtime_domains": ",".join(proxied_domains),
@@ -500,7 +500,7 @@ def fatal(msg):
 def _compatible_version(ver):
     try:
         [major, minor, _] = [int(x) for x in ver.split(".")]
-        [good_major, good_minor, _] = [int(x) for x in revsw_config["_UI_CONFIG_VERSION"].split(".")]
+        [good_major, good_minor, _] = [int(x) for x in script_configs._UI_CONFIG_VERSION.split(".")]
 
         # Ignore micro version; it means the API is compatible
         return major < good_major or (major == good_major and minor <= good_minor)
@@ -599,7 +599,7 @@ def _get_content_optimizers(ui_config):
 def _get_domain_mapping(domain_name):
     mapping = {}
     try:
-        with open(revsw_config["site-mappings-filepath"]) as j:
+        with open(script_configs.APACHE_MAPPING_FILE) as j:
             mappings = json.load(j)
         mapping = mappings.get(domain_name, {})
     except IOError as e:  # file doesn't exist
@@ -675,7 +675,7 @@ def delete_domain(domain_name):
     log.LOGI("Deleting domain '%s'" % domain_name)
 
     configure_all({
-        "version": revsw_config["API_VERSION"],
+        "version": script_configs.API_VERSION,
         "commands": [
             {
                 "type": "delete",
@@ -735,7 +735,7 @@ def add_or_update_domain(domain_name, ui_config, type):
     #print json.dumps(varnish_config_vars)
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
-            "version": revsw_config["API_VERSION"],
+            "version": script_configs.API_VERSION,
             # TODO: rename type variable
             "type": type,
             "site_name": site_name,
@@ -745,7 +745,7 @@ def add_or_update_domain(domain_name, ui_config, type):
 
         # Apply patched config
         configure_all({
-            "version": revsw_config["API_VERSION"],
+            "version": script_configs.API_VERSION,
             "commands": [config],
             "varnish_changed": cfg_common.varnish_changed(),
             "config_changed": cfg_common.config_changed()
@@ -815,9 +815,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         ver = bp.get("VERSION", 0)
 
         new_ver = new_vars_for_version["bp"].get("VERSION", 1)
-        if new_ver > rev["_BP_CONFIG_VERSION"]:
+        if new_ver > script_configs._BP_CONFIG_VERSION:
             raise AttributeError("'bp' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, revsw_config["_BP_CONFIG_VERSION"]))
+                                 "(%d). Upgrade your server packages." % (new_ver, script_configs._BP_CONFIG_VERSION))
 
         if ver <= 3 < new_ver:
             if "nss" in bp:
@@ -935,9 +935,9 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         ver = co.get("VERSION", 0)
 
         new_ver = new_vars_for_version["co"].get("VERSION", 1)
-        if new_ver > revsw_config["_CO_CONFIG_VERSION"]:
+        if new_ver > script_configs._CO_CONFIG_VERSION:
             raise AttributeError("'co' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, revsw_config["_CO_CONFIG_VERSION"]))
+                                 "(%d). Upgrade your server packages." % (new_ver, script_configs._CO_CONFIG_VERSION))
 
         if ver < 1:
             co["STATIC_CONTENT_SERVERS_HTTPS"] = []
@@ -995,10 +995,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         ver = co_profiles.setdefault("VERSION", 1)
 
         new_ver = new_vars_for_version["co_profiles"].get("VERSION", 1)
-        if new_ver > revsw_config["_CO_PROFILES_CONFIG_VERSION"]:
+        if new_ver > script_configs._CO_PROFILES_CONFIG_VERSION:
             raise AttributeError("'co_profiles' structure version is %d, which is newer than what pc-apache-config.py "
                                  "supports (%d). Upgrade your server packages." %
-                                 (new_ver, revsw_config["_CO_PROFILES_CONFIG_VERSION"]))
+                                 (new_ver, script_configs._CO_PROFILES_CONFIG_VERSION))
 
         if ver == 1 and new_ver > 1:  # Upgrade 1 to 2
             if "REV_CUSTOM_IMG_LEVEL" in co_profiles:
@@ -1021,9 +1021,9 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
     ver = vars_.setdefault("VERSION", 1)
 
     new_ver = new_vars_for_version.get("VERSION", 1)
-    if new_ver > revsw_config["_VARNISH_CONFIG_VERSION"]:
+    if new_ver > script_configs._VARNISH_CONFIG_VERSION:
         raise AttributeError("Varnish site structure version is %d, which is newer than what pc-apache-config.py "
-                             "supports (%d). Upgrade your server packages." % (new_ver, revsw_config["_VARNISH_CONFIG_VERSION"]))
+                             "supports (%d). Upgrade your server packages." % (new_ver, script_configs._VARNISH_CONFIG_VERSION))
 
     if ver == 2 and new_ver > 2:  # Upgrade 2 to 3
         # Convert URLS_REMOVE_COOKIES_REGEX into CACHING_RULES
@@ -1226,7 +1226,7 @@ def _upgrade_domain_config(domain_name):
 
     # Apply the patched configuration
     config = new_config
-    config["version"] = revsw_config["API_VERSION"]
+    config["version"] = script_configs.API_VERSION
     config["config_vars"] = new_webserver_config_vars
     config["varnish_config_vars"] = new_varnish_config_vars
 
@@ -1259,7 +1259,7 @@ def upgrade_all_domains():
 
         # Apply patched config
         configure_all({
-            "version": revsw_config["API_VERSION"],
+            "version": script_configs.API_VERSION,
             "commands": cmds,
             "varnish_changed": True,
             "config_changed": True
@@ -1310,7 +1310,7 @@ def _main():
             ver = _ui_config.get("version", "0.0.0")
             if not _compatible_version(ver):
                 raise AttributeError("Provided JSON config version '%s' is not compatible with current version '%s'" %
-                                     (ver, revsw_config["_UI_CONFIG_VERSION"]))
+                                     (ver, script_configs._UI_CONFIG_VERSION))
 
             # Interpret content
             domain_name = _ui_config["domain_name"]

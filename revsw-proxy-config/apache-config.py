@@ -14,9 +14,10 @@ from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
 
-from revsw_apache_config import revsw_config, set_log as apache_cfg_set_log, \
+from revsw_apache_config import set_log as apache_cfg_set_log, \
                                 VarnishConfig, PlatformWebServer, \
                                 WebServerConfig, NginxConfig
+import script_configs
 
 
 if __name__ == "__main__":
@@ -105,7 +106,7 @@ if __name__ == "__main__":
             with open("/tmp/apache-config.conf", "w") as c:
                 json.dump(vars(args), c)
             with open("/tmp/apache-config.json", "w") as j:
-                j.write('{"type": "apache", "version": %d, "commands": []}' % revsw_config["API_VERSION"])
+                j.write('{"type": "apache", "version": %d, "commands": []}' % script_configs.API_VERSION)
             sys.exit(0)
 
         with open("/tmp/apache-config.conf") as c:
@@ -125,7 +126,7 @@ if __name__ == "__main__":
             json.dump(global_json, data)
 
             # Send config to server
-            creds_path = revsw_config["main_path"]
+            creds_path = script_configs.CONFIG_PATH
 
             tls_creds = RevTLSCredentials("%s/clicert.pem" % creds_path,
                                           "%s/clikey.pem" % creds_path,

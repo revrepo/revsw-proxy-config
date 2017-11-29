@@ -21,23 +21,6 @@ from revsw.misc import dict_raise_on_duplicates, base64_string_gzip_to_file, sel
 import script_configs
 
 
-#TODO: maybe we must rplace all this config code to other file
-# Defines config structure version
-revsw_config = {
-    "API_VERSION": 5,
-    "_UI_CONFIG_VERSION": "1.0.6",
-    "_BP_CONFIG_VERSION": 28,
-    "_CO_CONFIG_VERSION": 16,
-    "_CO_PROFILES_CONFIG_VERSION": 2,
-    "_VARNISH_CONFIG_VERSION": 17,
-    "main_path": "/opt/revsw-config/",
-    "webserver_config_path": "/opt/revsw-config/apache",
-    "varnish_config_path": "/opt/revsw-config/varnish",
-    "site-mappings-filepath": os.path.join(script_configs.APACHE_PATH, "site-mappings.json"),
-    "rum_beacon_url": "http://rum-02-prod-sjc.revsw.net/service",
-    "profile_template": "co/standard_profiles/default_customer_profiles.jinja",
-}
-
 _log = None
 _jinja2_globals = {}
 _domain_name = ""
@@ -486,7 +469,7 @@ def _generate_jinja_hierarchy(jinja_name, search_dirs, file_list, alt_name=None)
 
 def jinja_config_webserver_base_dir():
     """Returns jinja config webserver base directory"""
-    return revsw_config["webserver_config_path"]
+    return script_configs.APACHE_PATH
 
 
 def jinja_config_webserver_dir(site_name):
@@ -496,7 +479,7 @@ def jinja_config_webserver_dir(site_name):
 
 def jinja_config_varnish_base_dir():
     """Returns path of varnish config"""
-    return revsw_config["varnish_config_path"]
+    return script_configs.VARNISH_PATH_CONFIG
 
 
 def _write_template_files(files, output_dir):
@@ -1211,9 +1194,9 @@ def configure_all(config):
     _log.LOGD(u"Input CONFIG is: ", json.dumps(config))
     if "version" not in config:
         raise AttributeError("No version info in configuration")
-    if config["version"] != revsw_config["API_VERSION"]:
+    if config["version"] != script_configs.API_VERSION:
         raise AttributeError("Incompatible version %d in configuration; expected %d" %
-                             (config["version"], revsw_config["API_VERSION"]))
+                             (config["version"], script_configs.API_VERSION))
 
     transaction = ConfigTransaction()
 

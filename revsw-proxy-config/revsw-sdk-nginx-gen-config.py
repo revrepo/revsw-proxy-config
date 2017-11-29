@@ -25,19 +25,8 @@ from jinja2.runtime import StrictUndefined
 from jinja2.sandbox import ImmutableSandboxedEnvironment
 
 from revsw.logger import RevSysLogger
+import script_configs
 
-# Defines config structure version
-
-revsw_config = {
-    "jinja_template": "/opt/revsw-config/templates/all/bp/sdk_nginx_conf.jinja",
-    "jinja_conf_vars": "/opt/revsw-config/policy/apps.json",
-    "conf_name": "revsw-apps.conf",
-    "tmp_location": "/tmp/",
-    "final_location": "/etc/nginx/conf.d/",
-    "backup_location": "/etc/nginx/backup/",
-}
-
-SDK_VERSION = 1
 
 class NginxConfigSDK:
     """NginxConfigSDK refreshes the configuration of the Nginx server based on
@@ -68,12 +57,12 @@ class NginxConfigSDK:
 
     # Sets default location of JSON and Jinja template
     def _set_default_values(self):
-        self.nginx_conf["jinja_template"] = revsw_config["jinja_template"]
-        self.nginx_conf["jinja_conf_vars"] = revsw_config["jinja_conf_vars"]
-        self.nginx_conf["conf_name"] = revsw_config["conf_name"]
-        self.nginx_conf["tmp_location"] = revsw_config["tmp_location"]
-        self.nginx_conf["final_location"] = revsw_config["final_location"]
-        self.nginx_conf["backup_location"] = revsw_config["backup_location"]
+        self.nginx_conf["jinja_template"] = script_configs.JINJA_TEMPLATE
+        self.nginx_conf["jinja_conf_vars"] = script_configs.JINJA_CONF_VARS
+        self.nginx_conf["conf_name"] = script_configs.CONF_NAME
+        self.nginx_conf["tmp_location"] = script_configs.TMP_PATH
+        self.nginx_conf["final_location"] = script_configs.NGINX_FINAL_LOCATION
+        self.nginx_conf["backup_location"] = script_configs.NGINX_BACKUP_LOCATION
 
     # Reads the options provided by the command line call
     def _interpret_arguments(self, args):

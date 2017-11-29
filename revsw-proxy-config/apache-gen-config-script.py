@@ -13,7 +13,8 @@ import shlex
 
 import unittest
 
-from revsw_apache_config import sorted_non_empty, revsw_config
+from revsw_apache_config import sorted_non_empty
+import script_configs
 
 
 help_str = r"""
@@ -233,7 +234,7 @@ def check_ip_or_hostname(arg):
         fail("'%s' is not a valid IP address or hostname." % arg)
 
 
-def is_vaid_url(arg):
+def is_valid_url(arg):
     url_re = re.compile(
         r'^(https?://)'  # http:// or https://
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
@@ -375,7 +376,7 @@ def parse_line(line):
                 check_hostname(arg)
                 domain["bp_cos"].add(arg)
             elif state == States.STATIC_CONTENT_SERVERS:
-                is_vaid_url(arg)
+                is_valid_url(arg)
                 if arg.startswith("https://"):
                     domain["static_servers_https"].add(arg.replace("https://", ""))
                 else:
@@ -514,14 +515,14 @@ def fixup_domain(domain):
         create_bp_templ = True
 
     if domain["profiles_disabled"]:
-        domain["profile_template"] = "co/standard_profiles/no_customer_profiles.jinja"
+        domain["profile_template"] = os.path.join(script_configs.PROFILE_TEMPLATE, "no_customer_profiles.jinja")
         domain["profiles_count"] = 1  # hardcoded from no customer profiles
 
         domain["base_http_port"] = 80
         domain["base_https_port"] = 443
     else:
         if not domain["profile_template"]:
-            domain["profile_template"] = "co/standard_profiles/default_customer_profiles.jinja"
+            domain["profile_template"] = os.path.join(script_configs.PROFILE_TEMPLATE, "default_customer_profiles.jinja")
             domain["profiles_count"] = 1  # hardcoded from default customer profiles
         else:
             domain["profiles_count"] = parse_profile_template_get_count(domain["profile_template"])
@@ -638,7 +639,7 @@ def get_next_https_profiles_base(count):
 
 def get_co_profiles():
     return {
-        "VERSION": revsw_config["_CO_PROFILES_CONFIG_VERSION"],
+        "VERSION": script_configs._CO_PROFILES_CONFIG_VERSION,
         "REV_OPTIMIZATION_LEVEL": "custom",
         "REV_CUSTOM_IMG_LEVEL": "medium",
         "REV_CUSTOM_JS_LEVEL": "medium",
@@ -651,7 +652,7 @@ def generate_bp_domain_json(domain):
     http = "http" if domain["ows_http"] else "https"
     https = "https" if domain["ows_https"] else "http"
     bp = {
-        "VERSION": revsw_config["_BP_CONFIG_VERSION"],
+        "VERSION": script_configs._BP_CONFIG_VERSION,
         "ssl": {},
         "acl": {
             "enabled": False,
@@ -703,7 +704,7 @@ def generate_bp_domain_json(domain):
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
         "END_USER_RESPONSE_HEADERS": [], # (BP-92)
 
-        "REV_RUM_BEACON_URL": revsw_config["rum_beacon_url"],
+        "REV_RUM_BEACON_URL": script_configs.RUM_BEACON_URL,
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
         "ORIGIN_REQUEST_HEADERS": [], # (BP-92)
@@ -741,7 +742,7 @@ def generate_bp_varnish_domain_json(domain):
     }
 
     site = {
-        "VERSION": revsw_config["_VARNISH_CONFIG_VERSION"],
+        "VERSION": script_configs._VARNISH_CONFIG_VERSION,
         "SERVER_NAME": domain["name"],
         "ENABLE_CACHE": True,
         "INCLUDE_USER_AGENT": False,
@@ -861,7 +862,7 @@ def generate_bp_ui_config_json(domain):
         "end_user_response_headers": [],
         "co_apache_custom_config": "",
         "enable_rum": True,
-        "rum_beacon_url": revsw_config["rum_beacon_url"],
+        "rum_beacon_url": script_configs.RUM_BEACON_URL,
         "enable_optimization": domain["enable_opt"],
         "enable_decompression": domain["enable_decompression"],
         "mode": "custom",
@@ -877,7 +878,7 @@ def generate_co_ui_config_json(domain):
     return {
         "co_apache_custom_config": "",
         "enable_rum": True,
-        "rum_beacon_url": revsw_config["rum_beacon_url"],
+        "rum_beacon_url": script_configs.RUM_BEACON_URL,
         "enable_optimization": domain["enable_opt"],
         "enable_decompression": domain["enable_decompression"],
         "mode": "custom",
