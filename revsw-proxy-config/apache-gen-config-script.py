@@ -789,21 +789,21 @@ def generate_bp(domain):
     with open(varn_fname, "w") as f:
         f.write(j)
 
-    print """
+        print_configure_sh("""
 DOMAIN_NAME=%s
 CFG_NAME=%s
-""" % (domain["name"], cfg_name)
+""" % (domain["name"], cfg_name))
 
     if domain["certs"]:
-        print """
+        print_configure_sh("""
 echo "    -> configuring $DOMAIN_NAME certificates"
 apache-config.py certs $CFG_NAME %s || EXIT=$?
-""" % domain["certs"]
+""" % domain["certs"])
 
-    print """
+    print_configure_sh("""
 echo "    -> configuring site $DOMAIN_NAME"
 apache-config.py config -V %s $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
-""" % (varn_fname, basename_templ, json_fname)
+""" % (varn_fname, basename_templ, json_fname))
 
 
 def _get_ui_config_command_opts(domain):
@@ -934,6 +934,10 @@ def generate_ui_configs():
             json.dump(cfg, f, indent=2)
 
 
+def print_configure_sh(txt):
+    print txt
+
+
 #TODO: try to understand for what so strange way to write to file
 def generate_config_sh():
     global _bps
@@ -942,37 +946,37 @@ def generate_config_sh():
     # Generate the config script
     sys.stdout = open("configure.sh", "w")
 
-    print """#!/bin/bash
+    print_configure_sh("""#!/bin/bash
     EXIT=0
     THIS_DIR=`readlink -f .`
-    """
+    """)
 
     if not args.no_bp:
         for addr, domains in _bps.iteritems():
-            print """
+            print_configure_sh("""
     BP=%s
     echo "Configuring BP '$BP'"
     apache-config.py start -I $THIS_DIR $BP || EXIT=$?
-    """ % addr
+    """ % addr)
             if args.flush:
-                print """
+                print_configure_sh("""
     echo "    -> removing all sites on server"
     apache-config.py flush-sites || EXIT=$?
-    """
+    """)
             for domain in domains:
                 generate_bp(domain)
             if not args.no_send:
-                print """
+                print_configure_sh("""
     echo "    -> sending configuration"
     apache-config.py send || EXIT=$?
-    """
+    """)
             if args.copy_to:
-                print """
+                print_configure_sh("""
     echo "    -> copying configuration to '%s'"
     apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to)
+    """ % (args.copy_to, args.copy_to))
 
-    print "exit $EXIT"
+    print_configure_sh("exit $EXIT")
 
 
 def main():
