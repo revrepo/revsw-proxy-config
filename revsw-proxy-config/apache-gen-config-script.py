@@ -789,7 +789,7 @@ def generate_bp(domain):
     with open(varn_fname, "w") as f:
         f.write(j)
 
-        print_configure_sh("""
+    print_configure_sh("""
 DOMAIN_NAME=%s
 CFG_NAME=%s
 """ % (domain["name"], cfg_name))
