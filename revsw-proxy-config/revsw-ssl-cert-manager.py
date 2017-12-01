@@ -3,9 +3,9 @@
 for Nginx edge server.
 
 This module is used by the revsw-pcm-config daemon to change and refresh Nginx
-server ssl certs configuration on edge server. The files updated are public.crt, 
+server ssl certs configuration on edge server. The files updated are public.crt,
 private.key, pass.txt, and info.txt. On the server they are located in
-/opt/revsw-config/certs/<Cert ID>/. 
+/opt/revsw-config/certs/<Cert ID>/.
 Usage of script:
     $ python rewsw-ssl-cert-manager -f /opt/revsw-config/policy/ssl.json
 
@@ -17,14 +17,13 @@ import json
 import optparse
 import os
 import shutil
-import socket
 import subprocess
 import sys
 import script_configs
 from revsw.logger import RevSysLogger
 
 
-def run_cmd(cmd, logger, help=None, silent=False):
+def run_cmd(cmd, logger, help_=None, silent=False):
     """Run a shell command.
 
     Args:
@@ -40,14 +39,16 @@ def run_cmd(cmd, logger, help=None, silent=False):
     """
     errmsg = None
     try:
-        if help or not silent:
-            logger.LOGI(help or "Running '%s'" % cmd)
+        if help_ or not silent:
+            logger.LOGI(help_ or "Running '%s'" % cmd)
 
-        child = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        child = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
         if child.returncode < 0:
-            errmsg = "'%s' was terminated by signal %d" % (cmd, -child.returncode)
+            errmsg = "'%s' was terminated by signal %d" % (
+                cmd, -child.returncode)
         elif child.returncode > 0:
             errmsg = "'%s' returned %d" % (cmd, child.returncode)
 
@@ -81,6 +82,7 @@ class ConfigSSL:
         status (bool): True if configuration settings are correct. False
             otherwise
     """
+
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.conf = {}
@@ -144,7 +146,7 @@ class ConfigSSL:
                     self.log.LOGE("Bad JSON format for file " + conf_full_path)
                     self.log.LOGE(e)
                     return 1
-        except:
+        except BaseException:
             self.log.LOGE("Can't find file " + conf_full_path)
             return 2
 
@@ -156,12 +158,13 @@ class ConfigSSL:
         try:
             self.run(
                 lambda: run_cmd("rm -Rf %srevsw-ssl-cert.tar && tar cf %srevsw-ssl-cert.tar %s" % (
-                self.conf['tmp_location'], self.conf['tmp_location'], self.conf['location']),
-                                self.log, "Backing up existing certificates"),
+                    self.conf['tmp_location'], self.conf['tmp_location'], self.conf['location']),
+                    self.log, "Backing up existing certificates"),
                 lambda: run_cmd("rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (
-                self.conf['location'], self.conf['tmp_location']), self.log, "Restoring certificates directory"))
-        except:
-            self.log.LOGE("An error appeared while trying to backup the original files")
+                    self.conf['location'], self.conf['tmp_location']), self.log, "Restoring certificates directory"))
+        except BaseException:
+            self.log.LOGE(
+                "An error appeared while trying to backup the original files")
             raise
 
     def _create_certs(self):
@@ -172,22 +175,28 @@ class ConfigSSL:
         if not os.path.exists(files_patch):
             os.makedirs(files_patch)
 
-        with open(files_patch + self.conf['cert'], 'w+') as f: f.write(self.config_vars["public_ssl_cert"])
-        with open(files_patch + self.conf['key'], 'w+') as f: f.write(self.config_vars["private_ssl_key"])
-        with open(files_patch + self.conf['passphrase'], 'w+') as f: f.write(
-            self.config_vars["private_ssl_key_passphrase"])
+        with open(files_patch + self.conf['cert'], 'w+') as f:
+            f.write(self.config_vars["public_ssl_cert"])
+        with open(files_patch + self.conf['key'], 'w+') as f:
+            f.write(self.config_vars["private_ssl_key"])
+        with open(files_patch + self.conf['passphrase'], 'w+') as f:
+            f.write(
+                self.config_vars["private_ssl_key_passphrase"])
 
-        with open(files_patch + self.conf['info'], 'w+') as f: f.write(json.dumps(self.config_vars))
+        with open(files_patch + self.conf['info'], 'w+') as f:
+            f.write(json.dumps(self.config_vars))
 
     def _create_symlink(self):
         files_patch = self.conf["location"] + "default"
         if os.path.exists(files_patch):
             os.unlink(files_patch)
-        os.symlink(self.conf["location"] + self.config_vars["id"] + "/", files_patch)
+        os.symlink(self.conf["location"] +
+                   self.config_vars["id"] + "/", files_patch)
         self.log.LOGI("Created default symlink")
 
     def _remove_certs(self):
-        self.log.LOGI("Starting removing process " + sys._getframe().f_code.co_name)
+        self.log.LOGI("Starting removing process " +
+                      sys._getframe().f_code.co_name)
         # remove the active configuration file
 
         files_patch = self.conf["location"] + self.config_vars["id"] + "/"
@@ -197,8 +206,9 @@ class ConfigSSL:
                     # remove the directory with files
                     shutil.rmtree(files_patch)
                     return True
-            except:
-                self.log.LOGE("An error appeared while removing the certificate file " + files_patch)
+            except BaseException:
+                self.log.LOGE(
+                    "An error appeared while removing the certificate file " + files_patch)
                 return False
         else:
             self.log.LOGI("Directory not found")
@@ -214,7 +224,8 @@ class ConfigSSL:
         if p.returncode != 0:
             self.log.LOGE("Nginx configuration has a problem!")
             run_cmd(
-                "rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (self.conf['location'], self.conf['tmp_location']),
+                "rm -Rf %s && tar -C / -xf %srevsw-ssl-cert.tar" % (
+                    self.conf['location'], self.conf['tmp_location']),
                 self.log, "Restoring certificates directory")
             return p.returncode
 
@@ -242,7 +253,7 @@ class ConfigSSL:
             cmd_func()
             if rollback_func:
                 self.rollbacks.append(rollback_func)
-        except:
+        except BaseException:
             self.log.LOGE("Transaction failed, rolling back")
             self.rollback()
             raise

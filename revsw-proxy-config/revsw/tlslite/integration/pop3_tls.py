@@ -8,10 +8,11 @@ from poplib import POP3, POP3_SSL_PORT
 from revsw.tlslite.tlsconnection import TLSConnection
 from revsw.tlslite.integration.clienthelper import ClientHelper
 
+
 class POP3_TLS(POP3, ClientHelper):
     """This class extends L{poplib.POP3} with TLS support."""
 
-    def __init__(self, host, port = POP3_SSL_PORT,
+    def __init__(self, host, port=POP3_SSL_PORT,
                  timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
                  username=None, password=None,
                  certChain=None, privateKey=None,
@@ -46,7 +47,7 @@ class POP3_TLS(POP3, ClientHelper):
 
         @type username: str
         @param username: SRP username.
-        
+
         @type password: str
         @param password: SRP password for mutual authentication.
         Requires the 'username' argument.
@@ -60,7 +61,7 @@ class POP3_TLS(POP3, ClientHelper):
         Requires the 'certChain' argument.  Excludes the SRP argument.
 
         @type checker: L{tlslite.checker.Checker}
-        @param checker: Callable object called after handshaking to 
+        @param checker: Callable object called after handshaking to
         evaluate the connection and raise an Exception if necessary.
 
         @type settings: L{tlslite.handshakesettings.HandshakeSettings}
@@ -72,11 +73,11 @@ class POP3_TLS(POP3, ClientHelper):
         self.port = port
         sock = socket.create_connection((host, port), timeout)
         ClientHelper.__init__(self,
-                 username, password,
-                 certChain, privateKey,
-                 checker,
-                 settings)
-        connection = TLSConnection(sock) 
+                              username, password,
+                              certChain, privateKey,
+                              checker,
+                              settings)
+        connection = TLSConnection(sock)
         ClientHelper._handshake(self, connection)
         self.sock = connection
         self.file = self.sock.makefile('rb')

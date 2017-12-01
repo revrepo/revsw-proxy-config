@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Martin von Loewis - python 3 port
 #
@@ -8,6 +8,7 @@
 
 import threading
 import time
+
 
 class SessionCache(object):
     """This class is used by the server to cache TLS sessions.
@@ -20,10 +21,10 @@ class SessionCache(object):
     This class is thread-safe.
     """
 
-    #References to these instances
-    #are also held by the caller, who may change the 'resumable'
-    #flag, so the SessionCache must return the same instances
-    #it was passed in.
+    # References to these instances
+    # are also held by the caller, who may change the 'resumable'
+    # flag, so the SessionCache must return the same instances
+    # it was passed in.
 
     def __init__(self, maxEntries=10000, maxAge=14400):
         """Create a new SessionCache.
@@ -42,8 +43,8 @@ class SessionCache(object):
         # Maps sessionIDs to sessions
         self.entriesDict = {}
 
-        #Circular list of (sessionID, timestamp) pairs
-        self.entriesList = [(None,None)] * maxEntries
+        # Circular list of (sessionID, timestamp) pairs
+        self.entriesList = [(None, None)] * maxEntries
 
         self.firstIndex = 0
         self.lastIndex = 0
@@ -52,13 +53,13 @@ class SessionCache(object):
     def __getitem__(self, sessionID):
         self.lock.acquire()
         try:
-            self._purge() #Delete old items, so we're assured of a new one
+            self._purge()  # Delete old items, so we're assured of a new one
             session = self.entriesDict[bytes(sessionID)]
 
-            #When we add sessions they're resumable, but it's possible
-            #for the session to be invalidated later on (if a fatal alert
-            #is returned), so we have to check for resumability before
-            #returning the session.
+            # When we add sessions they're resumable, but it's possible
+            # for the session to be invalidated later on (if a fatal alert
+            # is returned), so we have to check for resumability before
+            # returning the session.
 
             if session.valid():
                 return session
@@ -67,43 +68,45 @@ class SessionCache(object):
         finally:
             self.lock.release()
 
-
     def __setitem__(self, sessionID, session):
         self.lock.acquire()
         try:
-            #Add the new element
+            # Add the new element
             self.entriesDict[bytes(sessionID)] = session
             self.entriesList[self.lastIndex] = (sessionID, time.time())
-            self.lastIndex = (self.lastIndex+1) % len(self.entriesList)
+            self.lastIndex = (self.lastIndex + 1) % len(self.entriesList)
 
-            #If the cache is full, we delete the oldest element to make an
-            #empty space
+            # If the cache is full, we delete the oldest element to make an
+            # empty space
             if self.lastIndex == self.firstIndex:
                 del(self.entriesDict[self.entriesList[self.firstIndex][0]])
-                self.firstIndex = (self.firstIndex+1) % len(self.entriesList)
+                self.firstIndex = (self.firstIndex + 1) % len(self.entriesList)
         finally:
             self.lock.release()
 
-    #Delete expired items
+    # Delete expired items
     def _purge(self):
         currentTime = time.time()
 
-        #Search through the circular list, deleting expired elements until
-        #we reach a non-expired element.  Since elements in list are
-        #ordered in time, we can break once we reach the first non-expired
-        #element
+        # Search through the circular list, deleting expired elements until
+        # we reach a non-expired element.  Since elements in list are
+        # ordered in time, we can break once we reach the first non-expired
+        # element
         index = self.firstIndex
         while index != self.lastIndex:
             if currentTime - self.entriesList[index][1] > self.maxAge:
                 del(self.entriesDict[self.entriesList[index][0]])
-                index = (index+1) % len(self.entriesList)
+                index = (index + 1) % len(self.entriesList)
             else:
                 break
         self.firstIndex = index
 
+
 def _test():
-    import doctest, SessionCache
+    import doctest
+    import SessionCache
     return doctest.testmod(SessionCache)
+
 
 if __name__ == "__main__":
     _test()

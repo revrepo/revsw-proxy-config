@@ -15,7 +15,7 @@ from .tlssocketservermixin import TLSSocketServerMixIn
 
 class TLSXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
     """XMLRPCRequestHandler using TLS"""
-    
+
     # Redefine the setup method (see SocketServer.StreamRequestHandler)
     def setup(self):
         self.connection = self.request
@@ -24,23 +24,23 @@ class TLSXMLRPCRequestHandler(SimpleXMLRPCRequestHandler):
             self.connection.settimeout(self.timeout)
         self.rfile = self.connection.makefile('rb', self.rbufsize)
         self.wfile = self.connection.makefile('wb', self.wbufsize)
-        
+
     def do_POST(self):
         """Handles the HTTPS POST request."""
         SimpleXMLRPCRequestHandler.do_POST(self)
         try:
             # shut down the connection
             self.connection.shutdown()
-        except:
+        except BaseException:
             pass
 
 
 class TLSXMLRPCServer(TLSSocketServerMixIn,
                       SimpleXMLRPCServer):
-    """Simple XML-RPC server using TLS""" 
+    """Simple XML-RPC server using TLS"""
 
     def __init__(self, addr, *args, **kwargs):
-        if not args and not 'requestHandler' in kwargs:
+        if args and 'requestHandler' not in kwargs:
             kwargs['requestHandler'] = TLSXMLRPCRequestHandler
         SimpleXMLRPCServer.__init__(self, addr, *args, **kwargs)
 
@@ -51,5 +51,5 @@ class MultiPathTLSXMLRPCServer(TLSXMLRPCServer):
     def __init__(self, addr, *args, **kwargs):
         TLSXMLRPCServer.__init__(addr, *args, **kwargs)
         self.dispatchers = {}
-        self.allow_none = allow_none
-        self.encoding = encoding
+        # self.allow_none = allow_none
+        # self.encoding = encoding

@@ -1,71 +1,83 @@
 #!/usr/bin/env python
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
-
 import argparse
-from cStringIO import StringIO
 import json
 import itertools
+import os
+import sys
 import traceback
+from cStringIO import StringIO
 
+import script_configs
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
-
 from revsw_apache_config import set_log as apache_cfg_set_log, \
-                                VarnishConfig, PlatformWebServer, \
-                                WebServerConfig, NginxConfig
-import script_configs
+    VarnishConfig, PlatformWebServer, \
+    WebServerConfig, NginxConfig
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
+sys.path.insert(0, os.path.realpath(
+    os.path.join(os.path.dirname(__file__), ".")))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     actions = parser.add_subparsers(title="Subcommands", dest="command")
 
-    start = actions.add_parser("start", help="Starts a configuration from scratch")
+    start = actions.add_parser(
+        "start", help="Starts a configuration from scratch")
     start.add_argument("-I", "--include-dir",
                        help="Configuration template search directory, for 'include' and 'import'",
                        action="append", default=[])
-    start.add_argument("-c", "--customer-id", help="Customer database ID", default=1)
-    start.add_argument("-v", "--verbose", help="Verbose output", action="store_true")
+    start.add_argument("-c", "--customer-id",
+                       help="Customer database ID", default=1)
+    start.add_argument("-v", "--verbose",
+                       help="Verbose output", action="store_true")
     start.add_argument("-s", "--simulate", help="Simulate configuration, but don't actually configure",
                        action="store_true")
     start.add_argument("server_addr", help="Address of server to configure")
 
-    actions.add_parser("flush-sites", help="Remove all configured sites on the server")
+    actions.add_parser(
+        "flush-sites", help="Remove all configured sites on the server")
 
-    add_mod = actions.add_parser("config", help="Configure site, adding it if necessary")
+    add_mod = actions.add_parser(
+        "config", help="Configure site, adding it if necessary")
     add_mod.add_argument("-I", "--include-dir",
                          help="Configuration template search directory, for 'include' and 'import'",
                          action="append", default=[])
     add_mod.add_argument("-V", "--varnish-vars",
                          help="Use Varnish cache and configure it using this JSON template variables file",
                          default=None)
-    add_mod.add_argument("site_name_config", help="Unique identifier for site specified in template")
+    add_mod.add_argument(
+        "site_name_config", help="Unique identifier for site specified in template")
     add_mod.add_argument("template_file",
                          help="Configuration template, without extension. The files <template>.jinja and <template>.vars.schema must exist",
                          default="main")
-    add_mod.add_argument("vars_file", help="Input JSON template variables file")
+    add_mod.add_argument(
+        "vars_file", help="Input JSON template variables file")
 
     delete = actions.add_parser("del", help="Delete site")
-    delete.add_argument("site_name_del", help="Unique identifier of site to delete")
+    delete.add_argument(
+        "site_name_del", help="Unique identifier of site to delete")
 
     certs = actions.add_parser("certs", help="Send site certificates")
-    certs.add_argument("site_name_certs", help="Unique identifier of site for which certificates are provided")
-    certs.add_argument("certs_dir", help="Directory containing cert8.db, key3.db and secmod.db for the site")
+    certs.add_argument(
+        "site_name_certs", help="Unique identifier of site for which certificates are provided")
+    certs.add_argument(
+        "certs_dir", help="Directory containing cert8.db, key3.db and secmod.db for the site")
 
-    actions.add_parser("varnish-template", help="Upload Varnish configuration template")
+    actions.add_parser("varnish-template",
+                       help="Upload Varnish configuration template")
 
-    actions.add_parser("send", help="Send the generated configuration to the server")
+    actions.add_parser(
+        "send", help="Send the generated configuration to the server")
 
-    copy = actions.add_parser("copy", help="Copy the generated configuration to the specified file")
+    copy = actions.add_parser(
+        "copy", help="Copy the generated configuration to the specified file")
     copy.add_argument("copy_file_name", help="File to copy to")
 
     args = parser.parse_args()
-    #print json.dumps(vars(args))
+    # print json.dumps(vars(args))
 
     global log
 
@@ -102,11 +114,13 @@ if __name__ == "__main__":
 
         if action == actions.START:
             log = RevStdLogger(args.verbose)
-            log.LOGI("Starting new configuration for server '%s'" % args.server_addr)
+            log.LOGI("Starting new configuration for server '%s'" %
+                     args.server_addr)
             with open("/tmp/apache-config.conf", "w") as c:
                 json.dump(vars(args), c)
             with open("/tmp/apache-config.json", "w") as j:
-                j.write('{"type": "apache", "version": %d, "commands": []}' % script_configs.API_VERSION)
+                j.write('{"type": "apache", "version": %d, "commands": []}' %
+                        script_configs.API_VERSION)
             sys.exit(0)
 
         with open("/tmp/apache-config.conf") as c:
@@ -120,7 +134,8 @@ if __name__ == "__main__":
 
         # Send current config and exit
         if action == actions.SEND:
-            log.LOGD("Sending configuration to '%s'" % global_cfg["server_addr"])
+            log.LOGD("Sending configuration to '%s'" %
+                     global_cfg["server_addr"])
 
             data = StringIO()
             json.dump(global_json, data)
@@ -161,28 +176,29 @@ if __name__ == "__main__":
             log.LOGD("Saving Varnish config template")
 
             search_dirs = ["."] + \
-                          global_cfg["include_dir"] + \
-                          [os.path.join(os.path.dirname(__file__), "templates/bp"),
-                           "/opt/revsw-config/templates/bp"]
+                global_cfg["include_dir"] + \
+                [os.path.join(os.path.dirname(__file__), "templates/bp"),
+                 "/opt/revsw-config/templates/bp"]
             config = {
                 "type": "varnish_template",
                 "templates": VarnishConfig().gather_template_files(search_dirs)
             }
 
         elif action == actions.CONFIG:    # also add
-            log.LOGD("Regenerate web server config for site '%s'" % args.site_name_config)
+            log.LOGD("Regenerate web server config for site '%s'" %
+                     args.site_name_config)
 
             search_dirs_base = ["."] + \
-                                global_cfg["include_dir"] + \
-                                args.include_dir + \
-                                [os.path.join(os.path.dirname(__file__), "templates"),
-                                "/opt/revsw-config/templates"]
+                global_cfg["include_dir"] + \
+                args.include_dir + \
+                [os.path.join(os.path.dirname(__file__), "templates"),
+                 "/opt/revsw-config/templates"]
 
             templates = {}
 
             sub_dirs = ("all", "nginx")
             search_dirs = [os.path.join(base, subdir) for (base, subdir) in
-                               itertools.product(search_dirs_base, sub_dirs)]
+                           itertools.product(search_dirs_base, sub_dirs)]
 
             log.LOGD("Search dirs:", search_dirs)
 
@@ -190,7 +206,8 @@ if __name__ == "__main__":
                 config_vars = json.load(f)
 
             cfg = NginxConfig(args.site_name_config)
-            templates["nginx"] = WebServerConfig.gather_template_files(args.template_file, search_dirs)
+            templates["nginx"] = WebServerConfig.gather_template_files(
+                args.template_file, search_dirs)
 
             config = {
                 "type": "config",
@@ -200,7 +217,8 @@ if __name__ == "__main__":
             }
 
             if args.varnish_vars:
-                log.LOGD("Reading Varnish config from '%s'" % args.varnish_vars)
+                log.LOGD("Reading Varnish config from '%s'" %
+                         args.varnish_vars)
                 with open(args.varnish_vars) as f:
                     config["varnish_config_vars"] = json.load(f)
 
@@ -214,7 +232,8 @@ if __name__ == "__main__":
             }
 
         elif action == actions.CERTS:
-            log.LOGD("Configure certificates for site '%s'" % args.site_name_certs)
+            log.LOGD("Configure certificates for site '%s'" %
+                     args.site_name_certs)
 
             cfg = PlatformWebServer().config_class()(args.site_name_certs)
             config = {
@@ -224,9 +243,12 @@ if __name__ == "__main__":
 
             certs = {}
 
-            certs["crt"] = file_to_gzip_base64_string("%s/server.crt" % args.certs_dir)
-            certs["key"] = file_to_gzip_base64_string("%s/server.key" % args.certs_dir)
-            certs["ca-bundle"] = file_to_gzip_base64_string("%s/ca-bundle.crt" % args.certs_dir)
+            certs["crt"] = file_to_gzip_base64_string(
+                "%s/server.crt" % args.certs_dir)
+            certs["key"] = file_to_gzip_base64_string(
+                "%s/server.key" % args.certs_dir)
+            certs["ca-bundle"] = file_to_gzip_base64_string(
+                "%s/ca-bundle.crt" % args.certs_dir)
 
             config["certs"] = certs
 

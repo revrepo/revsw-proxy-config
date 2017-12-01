@@ -13,7 +13,7 @@ If you have questions or feedback, feel free to contact me.
 To use, do::
 
     from tlslite import TLSConnection, ...
-    
+
 If you want to import the most useful objects, the cleanest way is:
 
     from tlslite.api import *
@@ -25,4 +25,5 @@ Then use the L{tlslite.TLSConnection.TLSConnection} class with a socket.
 """
 
 from revsw.tlslite.api import *
-from revsw.tlslite.api import __version__ # Unsure why this is needed, but it is
+# Unsure why this is needed, but it is
+from revsw.tlslite.api import __version__

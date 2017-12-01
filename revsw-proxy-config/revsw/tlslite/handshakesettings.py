@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dave Baggett (Arcode Corporation) - cleanup handling of constants
 #
@@ -13,9 +13,10 @@ from .utils import cipherfactory
 # RC4 is preferred as faster in Python, works in SSL3, and immune to CBC
 # issues such as timing attacks
 CIPHER_NAMES = ["rc4", "aes256", "aes128", "3des"]
-MAC_NAMES = ["sha"] # "md5" is allowed
+MAC_NAMES = ["sha"]  # "md5" is allowed
 CIPHER_IMPLEMENTATIONS = ["openssl", "pycrypto", "python"]
 CERTIFICATE_TYPES = ["x509"]
+
 
 class HandshakeSettings(object):
     """This class encapsulates various parameters that can be used with
@@ -57,9 +58,9 @@ class HandshakeSettings(object):
 
     @type macNames: list
     @ivar macNames: The allowed MAC algorithms.
-    
+
     The allowed values in this list are 'sha' and 'md5'.
-    
+
     The default value is ['sha'].
 
 
@@ -90,13 +91,14 @@ class HandshakeSettings(object):
     The default is (3,2).  (WARNING: Some servers may (improperly)
     reject clients which offer support for TLS 1.1.  In this case,
     try lowering maxVersion to (3,1)).
-    
+
     @type useExperimentalTackExtension: bool
     @ivar useExperimentalTackExtension: Whether to enabled TACK support.
-    
+
     Note that TACK support is not standardized by IETF and uses a temporary
     TLS Extension number, so should NOT be used in production software.
     """
+
     def __init__(self):
         self.minKeySize = 1023
         self.maxKeySize = 8193
@@ -104,8 +106,8 @@ class HandshakeSettings(object):
         self.macNames = MAC_NAMES
         self.cipherImplementations = CIPHER_IMPLEMENTATIONS
         self.certificateTypes = CERTIFICATE_TYPES
-        self.minVersion = (3,0)
-        self.maxVersion = (3,2)
+        self.minVersion = (3, 0)
+        self.maxVersion = (3, 2)
         self.useExperimentalTackExtension = False
 
     # Validates the min/max fields, and certificateTypes
@@ -123,9 +125,9 @@ class HandshakeSettings(object):
 
         if not cipherfactory.tripleDESPresent:
             other.cipherNames = [e for e in self.cipherNames if e != "3des"]
-        if len(other.cipherNames)==0:
+        if len(other.cipherNames) == 0:
             raise ValueError("No supported ciphers")
-        if len(other.certificateTypes)==0:
+        if len(other.certificateTypes) == 0:
             raise ValueError("No supported certificate types")
 
         if not cryptomath.m2cryptoLoaded:
@@ -134,16 +136,16 @@ class HandshakeSettings(object):
         if not cryptomath.pycryptoLoaded:
             other.cipherImplementations = \
                 [e for e in other.cipherImplementations if e != "pycrypto"]
-        if len(other.cipherImplementations)==0:
+        if len(other.cipherImplementations) == 0:
             raise ValueError("No supported cipher implementations")
 
-        if other.minKeySize<512:
+        if other.minKeySize < 512:
             raise ValueError("minKeySize too small")
-        if other.minKeySize>16384:
+        if other.minKeySize > 16384:
             raise ValueError("minKeySize too large")
-        if other.maxKeySize<512:
+        if other.maxKeySize < 512:
             raise ValueError("maxKeySize too small")
-        if other.maxKeySize>16384:
+        if other.maxKeySize > 16384:
             raise ValueError("maxKeySize too large")
         for s in other.cipherNames:
             if s not in CIPHER_NAMES:
@@ -158,19 +160,19 @@ class HandshakeSettings(object):
         if other.minVersion > other.maxVersion:
             raise ValueError("Versions set incorrectly")
 
-        if not other.minVersion in ((3,0), (3,1), (3,2)):
+        if other.minVersion not in ((3, 0), (3, 1), (3, 2)):
             raise ValueError("minVersion set incorrectly")
 
-        if not other.maxVersion in ((3,0), (3,1), (3,2)):
+        if other.maxVersion not in ((3, 0), (3, 1), (3, 2)):
             raise ValueError("maxVersion set incorrectly")
 
         return other
 
     def _getCertificateTypes(self):
-        l = []
+        list_ = []
         for ct in self.certificateTypes:
             if ct == "x509":
-                l.append(CertificateType.x509)
+                list_.append(CertificateType.x509)
             else:
                 raise AssertionError()
-        return l
+        return list_

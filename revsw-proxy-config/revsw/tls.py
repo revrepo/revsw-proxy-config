@@ -10,6 +10,7 @@ from tlslite.checker import Checker
 
 _re_length = re.compile(r"^Length:\s+([0-9]+)$")
 
+
 def _getFingerprint(fname):
     s = open(fname).read()
     x509 = X509()
@@ -17,14 +18,15 @@ def _getFingerprint(fname):
     cert = X509CertChain([x509])
     return cert.getFingerprint()
 
+
 def _read_with_length(f):
-    l = f.readline()
-    m = _re_length.match(l)
-    if not m:
+    line = f.readline()
+    match = _re_length.match(line)
+    if not match:
         raise IOError("No data length received; ignoring reply")
 
-    size = int(m.group(1))
-    #print "Data size:", size
+    size = int(match.group(1))
+    # print "Data size:", size
     data = StringIO()
     while size:
         got = f.read(size)
@@ -35,10 +37,12 @@ def _read_with_length(f):
     data.close()
     return s
 
+
 def _write_with_length(f, data):
     f.write("Length: %d\n" % len(data))
     f.write(data)
     f.flush()
+
 
 class RevTLSCredentials:
     def __init__(self, cert_fname, pkey_fname, pkey_password, peer_cert_fname):
@@ -50,7 +54,8 @@ class RevTLSCredentials:
 
         # Read our own primary key
         s = open(pkey_fname).read()
-        self.pkey = parsePEMKey(s, private=True, passwordCallback=lambda:pkey_password)
+        self.pkey = parsePEMKey(
+            s, private=True, passwordCallback=lambda: pkey_password)
 
         # Read our peer's cert
         s = open(peer_cert_fname).read()
@@ -58,6 +63,7 @@ class RevTLSCredentials:
         x509.parse(s)
         cert = X509CertChain([x509])
         self.checker = Checker(cert.getFingerprint())
+
 
 class RevTLSClient:
     def __init__(self, address, credentials):
@@ -80,8 +86,8 @@ class RevTLSClient:
         sock.connect(self.address)
 
         self.conn = TLSConnection(sock)
-        self.conn.handshakeClientCert(self.__creds.cert, self.__creds.pkey, 
-            checker=self.__creds.checker)
+        self.conn.handshakeClientCert(self.__creds.cert, self.__creds.pkey,
+                                      checker=self.__creds.checker)
         self.fconn = self.conn.makefile()
 
     def sendall(self, data):
@@ -96,6 +102,7 @@ class RevTLSClient:
         self.conn.close()
         self.conn = None
 
+
 class _ReqHandler(ss.StreamRequestHandler):
     def __init__(self, owner, *args, **kwargs):
         self.owner = owner
@@ -105,7 +112,7 @@ class _ReqHandler(ss.StreamRequestHandler):
         conn = TLSConnection(self.request)
         conn.closeSocket = True
         conn.handshakeServer(certChain=self.owner.creds.cert, privateKey=self.owner.creds.pkey,
-            checker=self.owner.creds.checker, reqCert=True)
+                             checker=self.owner.creds.checker, reqCert=True)
         self.rfile = conn.makefile('rb', self.rbufsize)
         self.wfile = conn.makefile('wb', self.wbufsize)
         self.owner.conn = conn
@@ -122,9 +129,11 @@ class _ReqHandler(ss.StreamRequestHandler):
         _write_with_length(self.wfile, wfile.getvalue())
         wfile.close()
 
+
 class _Server(ss.ThreadingTCPServer):
     allow_reuse_address = 1
     daemon_threads = 1
+
 
 class RevTLSServer:
     def __init__(self, address, credentials, handler):
