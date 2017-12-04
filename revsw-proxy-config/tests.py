@@ -229,20 +229,6 @@ class TestConfigCommon(unittest.TestCase):
         must_ban = config_common.must_ban_html()
         self.assertTrue(must_ban)
 
-    def test_can_config_bp(self):
-        config_common = pc_apache_config.ConfigCommon(
-            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
-        )
-        can_config = config_common.can_config_bp()
-        self.assertTrue(can_config)
-
-    def test_can_config_co(self):
-        config_common = pc_apache_config.ConfigCommon(
-            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
-        )
-        can_config = config_common.can_config_co()
-        self.assertTrue(can_config)
-
     def test_config_changed(self):
         config_common = pc_apache_config.ConfigCommon(
             self.webserver_config_vars, self.varnish_config_vars, self.ui_config

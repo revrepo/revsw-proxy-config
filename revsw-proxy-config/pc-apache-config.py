@@ -462,14 +462,6 @@ class ConfigCommon:
 
         log.LOGD("Finished vars update in misc")
 
-    def can_config_bp(self):
-        """Browser proxy"""
-        return "bp" in self.webserver_config_vars and self.cmd_opts["config_bp"]
-
-    def can_config_co(self):
-        """Content optimization"""
-        return "co" in self.webserver_config_vars and self.cmd_opts["config_co"]
-
     def config_changed(self):
         return self._config_changed
 
