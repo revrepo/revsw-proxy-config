@@ -23,9 +23,10 @@ from revsw_apache_config import wildcard_to_regex
 from revsw.logger import RevSysLogger
 
 from  revsw_apache_config.varnishadmin import VarnishAdmin
+import script_configs
+
 admin = VarnishAdmin()
 
-_UI_PURGE_VERSION = 1
 
 def json_validator(jsonfile, schemafile):
     """Function used to validate a JSON purge file with the schema provided.
@@ -46,7 +47,7 @@ def json_validator(jsonfile, schemafile):
     try:
         jsonschema.validate(json.loads(json1),json.loads(schema1))
         urls1 = jdata["purges"]
-        if jdata["version"] != _UI_PURGE_VERSION:
+        if jdata["version"] != script_configs._UI_PURGE_VERSION:
             return "Failure:_Version error"
         for url in urls1:
             expression = urls1[0]["url"]["expression"]

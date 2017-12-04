@@ -21,13 +21,10 @@ from revsw.misc import dict_raise_on_duplicates, base64_string_gzip_to_file, sel
 import script_configs
 
 
-#TODO: maybe we must rplace all this code to other file
-# Defines config structure version
-API_VERSION = 5
-
 _log = None
 _jinja2_globals = {}
 _domain_name = ""
+
 
 # Must be called by importing module !
 def set_log(alog):
@@ -472,7 +469,7 @@ def _generate_jinja_hierarchy(jinja_name, search_dirs, file_list, alt_name=None)
 
 def jinja_config_webserver_base_dir():
     """Returns jinja config webserver base directory"""
-    return "/opt/revsw-config/apache"
+    return script_configs.APACHE_PATH
 
 
 def jinja_config_webserver_dir(site_name):
@@ -482,7 +479,7 @@ def jinja_config_webserver_dir(site_name):
 
 def jinja_config_varnish_base_dir():
     """Returns path of varnish config"""
-    return "/opt/revsw-config/varnish"
+    return script_configs.VARNISH_PATH_CONFIG
 
 
 def _write_template_files(files, output_dir):
@@ -1197,9 +1194,9 @@ def configure_all(config):
     _log.LOGD(u"Input CONFIG is: ", json.dumps(config))
     if "version" not in config:
         raise AttributeError("No version info in configuration")
-    if config["version"] != API_VERSION:
+    if config["version"] != script_configs.API_VERSION:
         raise AttributeError("Incompatible version %d in configuration; expected %d" %
-                             (config["version"], API_VERSION))
+                             (config["version"], script_configs.API_VERSION))
 
     transaction = ConfigTransaction()
 
