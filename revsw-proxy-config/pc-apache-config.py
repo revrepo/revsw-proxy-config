@@ -30,7 +30,7 @@ import script_configs
 from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_dir,\
                                 jinja_config_webserver_dir, ConfigTransaction, \
                                 dns_query, is_ipv4, ConfigException, PlatformWebServer, \
-                                NginxConfig, underscore_url
+                                NginxConfig
 from revsw_apache_config.varnishadmin import VarnishAdmin
 
 from revsw.logger import RevSysLogger
@@ -487,6 +487,10 @@ class ConfigCommon:
 def fatal(msg):
     log.LOGE(msg)
     sys.exit(1)
+
+
+def underscore_url(s):
+    return s.replace(".", "_")
 
 
 def _compatible_version(ver):
