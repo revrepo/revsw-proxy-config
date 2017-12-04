@@ -70,37 +70,36 @@ if __name__ == "__main__":
     global log
 
     try:
-        actions = {
-            "START": 1,
-            "FLUSH_SITES": 2,
-            "CONFIG": 3,
-            "DELETE": 4,
-            "CERTS": 5,
-            "VARNISH_TEMPLATE": 6,
-            "SEND": 7,
-            "COPY": 8
-        }
+        class Actions:
+            START = 1
+            FLUSH_SITES = 2
+            CONFIG = 3
+            DELETE = 4
+            CERTS = 5
+            VARNISH_TEMPLATE = 6
+            SEND = 7
+            COPY = 8
 
         if args.command == "start":
-            action = actions.START
+            action = Actions.START
         elif args.command == "flush-sites":
-            action = actions.FLUSH
+            action = Actions.FLUSH
         elif args.command == "del":
-            action = actions.DELETE
+            action = Actions.DELETE
         elif args.command == "certs":
-            action = actions.CERTS
+            action = Actions.CERTS
         elif args.command == "config":
-            action = actions.CONFIG
+            action = Actions.CONFIG
         elif args.command == "varnish-template":
-            action = actions.VARNISH_TEMPLATE
+            action = Actions.VARNISH_TEMPLATE
         elif args.command == "send":
-            action = actions.SEND
+            action = Actions.SEND
         elif args.command == "copy":
-            action = actions.COPY
+            action = Actions.COPY
         else:
             raise AttributeError("Unknown command line action")
 
-        if action == actions.START:
+        if action == Actions.START:
             log = RevStdLogger(args.verbose)
             log.LOGI("Starting new configuration for server '%s'" % args.server_addr)
             with open("/tmp/apache-config.conf", "w") as c:
@@ -119,7 +118,7 @@ if __name__ == "__main__":
         apache_cfg_set_log(log)
 
         # Send current config and exit
-        if action == actions.SEND:
+        if action == Actions.SEND:
             log.LOGD("Sending configuration to '%s'" % global_cfg["server_addr"])
 
             data = StringIO()
@@ -142,7 +141,7 @@ if __name__ == "__main__":
             data.close()
             sys.exit(0)
 
-        if action == actions.COPY:
+        if action == Actions.COPY:
             log.LOGD("Copying configuration to '%s'" % args.copy_file_name)
 
             with open(args.copy_file_name, "w") as j:
@@ -151,13 +150,13 @@ if __name__ == "__main__":
             sys.exit(0)
 
         # Main processing
-        if action == actions.FLUSH:
+        if action == Actions.FLUSH:
             log.LOGD("Removing all sites")
             config = {
                 "type": "flush"
             }
 
-        elif action == actions.VARNISH_TEMPL:
+        elif action == Actions.VARNISH_TEMPL:
             log.LOGD("Saving Varnish config template")
 
             search_dirs = ["."] + \
@@ -169,7 +168,7 @@ if __name__ == "__main__":
                 "templates": VarnishConfig().gather_template_files(search_dirs)
             }
 
-        elif action == actions.CONFIG:    # also add
+        elif action == Actions.CONFIG:    # also add
             log.LOGD("Regenerate web server config for site '%s'" % args.site_name_config)
 
             search_dirs_base = ["."] + \
@@ -204,7 +203,7 @@ if __name__ == "__main__":
                 with open(args.varnish_vars) as f:
                     config["varnish_config_vars"] = json.load(f)
 
-        elif action == actions.DELETE:
+        elif action == Actions.DELETE:
             log.LOGD("Delete site '%s'" % args.site_name_del)
 
             cfg = PlatformWebServer().config_class()(args.site_name_del)
@@ -213,7 +212,7 @@ if __name__ == "__main__":
                 "site_name": args.site_name_del
             }
 
-        elif action == actions.CERTS:
+        elif action == Actions.CERTS:
             log.LOGD("Configure certificates for site '%s'" % args.site_name_certs)
 
             cfg = PlatformWebServer().config_class()(args.site_name_certs)
