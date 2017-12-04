@@ -83,7 +83,7 @@ if __name__ == "__main__":
         if args.command == "start":
             action = Actions.START
         elif args.command == "flush-sites":
-            action = Actions.FLUSH
+            action = Actions.FLUSH_SITES
         elif args.command == "del":
             action = Actions.DELETE
         elif args.command == "certs":
@@ -150,13 +150,13 @@ if __name__ == "__main__":
             sys.exit(0)
 
         # Main processing
-        if action == Actions.FLUSH:
+        if action == Actions.FLUSH_SITES:
             log.LOGD("Removing all sites")
             config = {
                 "type": "flush"
             }
 
-        elif action == Actions.VARNISH_TEMPL:
+        elif action == Actions.VARNISH_TEMPLATE:
             log.LOGD("Saving Varnish config template")
 
             search_dirs = ["."] + \
