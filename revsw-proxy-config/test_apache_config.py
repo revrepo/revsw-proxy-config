@@ -29,8 +29,8 @@ import revsw_apache_config
 # import . as revsw
 import script_configs
 from revsw.logger import RevSysLogger
-from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer, VarnishConfig, NginxConfig, \
-    jinja_config_webserver_base_dir
+from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer,\
+    VarnishConfig, NginxConfig
 
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")

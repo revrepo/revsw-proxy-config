@@ -37,6 +37,7 @@ def set_log(alog):
 def _(s):
     return s.replace(".", "_")
 
+
 def flatten_to_set(lst, aset=None):
     """Custom Jinja2 Filter - Flatten a list of items or lists to a set
 
@@ -55,6 +56,7 @@ def flatten_to_set(lst, aset=None):
         else:
             aset.add(k)
     return aset
+
 
 def parse_url(url):
     """Custom Jinja2 Filter - Split a URL into its protocol, hostname, port and path
@@ -83,6 +85,7 @@ def parse_url(url):
         raise AttributeError("Invalid URL scheme '%s'" % uri.scheme)
     return uri.scheme, uri.hostname, port, uri.path
 
+
 def underscore_url(url):
     """Custom Jinja2 Filter - Convert to Underscore Url
 
@@ -98,6 +101,7 @@ def underscore_url(url):
             "a___b__c_ex_com"
     """
     return url.replace("_", "___").replace("-", "__").replace(".", "_")
+
 
 def dns_query(hostname):
     """Custom Jinja2 Filter - Return a list of all the IP addresses associated with a domain name
@@ -119,6 +123,7 @@ def dns_query(hostname):
         return ips
     except:
         raise LookupError("Can't resolve hostname '%s'" % hostname)
+
 
 def wildcard_to_regex(expr):
     """Custom Jinja2 Filter - Convert a wildcard expression into a regular expression
@@ -203,6 +208,7 @@ def wildcard_to_regex(expr):
     out.write('$')
     return out.getvalue()
 
+
 def is_ipv4(expr):
     """Custom Jinja2 Filter - Check if an expression is a valid IPv4 address
 
@@ -219,6 +225,7 @@ def is_ipv4(expr):
         return True
     except socket.error:
         return False
+
 
 def netmask_bits(mask):
     """Custom Jinja2 Filter - Convert a netmask to bit count
@@ -244,6 +251,7 @@ def netmask_bits(mask):
             binary_str += bin(int(octet))[2:].zfill(8)
         return str(len(binary_str.rstrip('0')))
 
+
 def custom_backend_name(name, site, as_director=False):
     """Custom Jinja2 Filter - Rename Backend
 
@@ -265,6 +273,7 @@ def custom_backend_name(name, site, as_director=False):
             dyn_backends.add(be["name"])
 
     return "%scustom_%s_%s" % ("dir" if as_director and name in dyn_backends else "be", site_name, name)
+
 
 def process_custom_vcl(vcl, site):
     """Custom Jinja2 Filter - Replace REV_BACKEND occurences in custom VCL code.
