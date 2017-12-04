@@ -8,17 +8,19 @@ from .cryptomath import *
 from .rsakey import *
 from .python_rsakey import Python_RSAKey
 
-#copied from M2Crypto.util.py, so when we load the local copy of m2
-#we can still use it
+# copied from M2Crypto.util.py, so when we load the local copy of m2
+# we can still use it
+
+
 def password_callback(v, prompt1='Enter private key passphrase:',
-                           prompt2='Verify passphrase:'):
+                      prompt2='Verify passphrase:'):
     from getpass import getpass
-    while 1:
+    while True:
         try:
-            p1=getpass(prompt1)
+            p1 = getpass(prompt1)
             if v:
-                p2=getpass(prompt2)
-                if p1==p2:
+                p2 = getpass(prompt2)
+                if p1 == p2:
                     break
             else:
                 break
@@ -70,16 +72,19 @@ if m2cryptoLoaded:
             m = bytesToNumber(bytearray(s))
             return m
 
-        def acceptsPassword(self): return True
+        def acceptsPassword(self):
+            return True
 
         def write(self, password=None):
             bio = m2.bio_new(m2.bio_s_mem())
             if self._hasPrivateKey:
                 if password:
-                    def f(v): return password
+                    def f(v):
+                        return password
                     m2.rsa_write_key(self.rsa, bio, m2.des_ede_cbc(), f)
                 else:
-                    def f(): pass
+                    def f():
+                        pass
                     m2.rsa_write_key_no_cipher(self.rsa, bio, f)
             else:
                 if password:
@@ -91,7 +96,9 @@ if m2cryptoLoaded:
 
         def generate(bits):
             key = OpenSSL_RSAKey()
-            def f():pass
+
+            def f():
+                pass
             key.rsa = m2.rsa_generate_key(bits, 3, f)
             key._hasPrivateKey = True
             return key
@@ -102,9 +109,9 @@ if m2cryptoLoaded:
             start = s.find("-----BEGIN ")
             if start == -1:
                 raise SyntaxError()
-            s = s[start:]            
+            s = s[start:]
             if s.startswith("-----BEGIN "):
-                if passwordCallback==None:
+                if passwordCallback is None:
                     callback = password_callback
                 else:
                     def f(v, prompt1=None, prompt2=None):
@@ -114,15 +121,17 @@ if m2cryptoLoaded:
                 try:
                     m2.bio_write(bio, s)
                     key = OpenSSL_RSAKey()
-                    if s.startswith("-----BEGIN RSA PRIVATE KEY-----") or s.startswith("-----BEGIN ENCRYPTED PRIVATE KEY-----"):
-                        def f():pass
+                    if s.startswith("-----BEGIN RSA PRIVATE KEY-----") or s.startswith(
+                            "-----BEGIN ENCRYPTED PRIVATE KEY-----"):
+                        def f():
+                            pass
                         key.rsa = m2.rsa_read_key(bio, callback)
-                        if key.rsa == None:
+                        if key.rsa is None:
                             raise SyntaxError()
                         key._hasPrivateKey = True
                     elif s.startswith("-----BEGIN PUBLIC KEY-----"):
                         key.rsa = m2.rsa_read_pub_key(bio)
-                        if key.rsa == None:
+                        if key.rsa is None:
                             raise SyntaxError()
                         key._hasPrivateKey = False
                     else:

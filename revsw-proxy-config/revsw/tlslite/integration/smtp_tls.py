@@ -7,6 +7,7 @@ from smtplib import SMTP
 from revsw.tlslite.tlsconnection import TLSConnection
 from revsw.tlslite.integration.clienthelper import ClientHelper
 
+
 class SMTP_TLS(SMTP):
     """This class extends L{smtplib.SMTP} with TLS support."""
 
@@ -56,7 +57,7 @@ class SMTP_TLS(SMTP):
         Requires the 'certChain' argument.  Excludes the SRP arguments.
 
         @type checker: L{tlslite.checker.Checker}
-        @param checker: Callable object called after handshaking to 
+        @param checker: Callable object called after handshaking to
         evaluate the connection and raise an Exception if necessary.
 
         @type settings: L{tlslite.handshakesettings.HandshakeSettings}
@@ -67,10 +68,10 @@ class SMTP_TLS(SMTP):
         (resp, reply) = self.docmd("STARTTLS")
         if resp == 220:
             helper = ClientHelper(
-                     username, password, 
-                     certChain, privateKey,
-                     checker,
-                     settings)
+                username, password,
+                certChain, privateKey,
+                checker,
+                settings)
             conn = TLSConnection(self.sock)
             helper._handshake(conn)
             self.sock = conn

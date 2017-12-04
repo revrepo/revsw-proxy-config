@@ -8,6 +8,7 @@ from .utils.compat import *
 from revsw.tlslite import mathtls
 from .basedb import BaseDB
 
+
 class VerifierDB(BaseDB):
     """This class represent an in-memory or on-disk database of SRP
     password verifiers.
@@ -17,6 +18,7 @@ class VerifierDB(BaseDB):
 
     This class is thread-safe.
     """
+
     def __init__(self, filename=None):
         """Create a new VerifierDB instance.
 
@@ -51,16 +53,15 @@ class VerifierDB(BaseDB):
         """
         BaseDB.__setitem__(self, username, verifierEntry)
 
-
     def _setItem(self, username, value):
-        if len(username)>=256:
+        if len(username) >= 256:
             raise ValueError("username too long")
         N, g, salt, verifier = value
         N = b2a_base64(numberToByteArray(N))
         g = b2a_base64(numberToByteArray(g))
         salt = b2a_base64(salt)
         verifier = b2a_base64(numberToByteArray(verifier))
-        valueStr = " ".join( (N, g, salt, verifier)  )
+        valueStr = " ".join((N, g, salt, verifier))
         return valueStr
 
     def _checkItem(self, value, username, param):
@@ -68,7 +69,6 @@ class VerifierDB(BaseDB):
         x = mathtls.makeX(salt, username, param)
         v = powMod(g, x, N)
         return (verifier == v)
-
 
     def makeVerifier(username, password, bits):
         """Create a verifier entry which can be stored in a VerifierDB.

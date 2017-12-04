@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dave Baggett (Arcode Corporation) - canonicalCipherName
 #
@@ -9,6 +9,7 @@
 from .utils.compat import *
 from .mathtls import *
 from .constants import *
+
 
 class Session(object):
     """
@@ -57,8 +58,8 @@ class Session(object):
         self.resumable = False
 
     def create(self, masterSecret, sessionID, cipherSuite,
-            srpUsername, clientCertChain, serverCertChain, 
-            tackExt, tackInHelloExt, serverName, resumable=True):
+               srpUsername, clientCertChain, serverCertChain,
+               tackExt, tackInHelloExt, serverName, resumable=True):
         self.masterSecret = masterSecret
         self.sessionID = sessionID
         self.cipherSuite = cipherSuite
@@ -66,7 +67,7 @@ class Session(object):
         self.clientCertChain = clientCertChain
         self.serverCertChain = serverCertChain
         self.tackExt = tackExt
-        self.tackInHelloExt = tackInHelloExt  
+        self.tackInHelloExt = tackInHelloExt
         self.serverName = serverName
         self.resumable = resumable
 
@@ -93,7 +94,7 @@ class Session(object):
         return self.resumable and self.sessionID
 
     def _setResumable(self, boolean):
-        #Only let it be set to True if the sessionID is non-null
+        # Only let it be set to True if the sessionID is non-null
         if (not boolean) or (boolean and self.sessionID):
             self.resumable = boolean
 
@@ -102,7 +103,7 @@ class Session(object):
             return self.tackExt.tack.getTackId()
         else:
             return None
-        
+
     def getBreakSigs(self):
         if self.tackExt and self.tackExt.break_sigs:
             return self.tackExt.break_sigs
@@ -116,7 +117,7 @@ class Session(object):
         @return: The name of the cipher used with this connection.
         """
         return CipherSuite.canonicalCipherName(self.cipherSuite)
-        
+
     def getMacName(self):
         """Get the name of the HMAC hash algo used with this connection.
 

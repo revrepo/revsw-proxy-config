@@ -1,29 +1,23 @@
 #!/usr/bin/env python
-"""This module is purges objects that are set by the user in the revAPM portal. 
-This script is usually executed by rev-pcm-purge Daemon Process. The purge 
+"""This module is purges objects that are set by the user in the revAPM portal.
+This script is usually executed by rev-pcm-purge Daemon Process. The purge
 JSON configuration is located in /opt/revsw-config/policy/ui-purge.json
 
 TODO:
     1. Take the main functionality of the script and place it inside a function.
     2. Insert command line options like in ssl cert or WAF rules manager.
 """
-import argparse
 import fnmatch
 import json
-import os
-import subprocess
-import sys
-import errno
-import re
 import jsonschema
+import os
+import sys
+
+import script_configs
+from revsw_apache_config import wildcard_to_regex
+from revsw_apache_config.varnishadmin import VarnishAdmin
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "common"))
-
-from revsw_apache_config import wildcard_to_regex
-from revsw.logger import RevSysLogger
-
-from  revsw_apache_config.varnishadmin import VarnishAdmin
-import script_configs
 
 admin = VarnishAdmin()
 
@@ -42,10 +36,10 @@ def json_validator(jsonfile, schemafile):
     json1 = open(jsonfile).read()
     schema1 = open(schemafile).read()
     jdata = json.loads(json1)
-    #check version
-        #validate json against schema
+    # check version
+    # validate json against schema
     try:
-        jsonschema.validate(json.loads(json1),json.loads(schema1))
+        jsonschema.validate(json.loads(json1), json.loads(schema1))
         urls1 = jdata["purges"]
         if jdata["version"] != script_configs._UI_PURGE_VERSION:
             return "Failure:_Version error"
@@ -54,19 +48,19 @@ def json_validator(jsonfile, schemafile):
             domain = urls1[0]["url"]["domain"]
             wildcard = urls1[0]["url"]["is_wildcard"]
             if wildcard:
-                expression = fnmatch.translate(expression)#converts shell wildcards to regex
-                domain = fnmatch.translate(domain)#converts shell wildcards to regex
+                # converts shell wildcards to regex
+                expression = fnmatch.translate(expression)
+                # converts shell wildcards to regex
+                domain = fnmatch.translate(domain)
         return "Pass"
     except jsonschema.ValidationError as e:
-        return "Failure:_%r" %e.message
+        return "Failure:_%r" % e.message
     except jsonschema.SchemaError as e:
-        return "Failure:_%r" %e
+        return "Failure:_%r" % e
 
-def fatal(msg):
-    log.LOGE(msg)
-    sys.exit(1)
 
-status = json_validator("/opt/revsw-config/policy/ui-purge.json","/opt/revsw-config/varnish/ui-purge.vars.schema")#test file here
+status = json_validator("/opt/revsw-config/policy/ui-purge.json",
+                        "/opt/revsw-config/varnish/ui-purge.vars.schema")  # test file here
 if status != "Pass":
     print "json validation failed [%s]" % status
 
@@ -86,5 +80,6 @@ for rule in urls:
         print "This rule received regex"
         regex = expression
 
-    command = "obj.http.X-Rev-Host == %s && obj.http.X-Rev-Url ~ %s" % (domain, regex)
+    command = "obj.http.X-Rev-Host == %s && obj.http.X-Rev-Url ~ %s" % (
+        domain, regex)
     admin.ban(command)

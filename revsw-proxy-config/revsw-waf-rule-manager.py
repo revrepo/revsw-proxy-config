@@ -15,15 +15,13 @@ TODO:
 import json
 import optparse
 import os
-import shutil
-import socket
 import subprocess
 import sys
 import script_configs
 from revsw.logger import RevSysLogger
 
 
-def run_cmd(cmd, logger, help=None, silent=False):
+def run_cmd(cmd, logger, help_=None, silent=False):
     """Run a shell command.
 
     Args:
@@ -34,14 +32,16 @@ def run_cmd(cmd, logger, help=None, silent=False):
     """
     errmsg = None
     try:
-        if help or not silent:
-            logger.LOGI(help or "Running '%s'" % cmd)
+        if help_ or not silent:
+            logger.LOGI(help_ or "Running '%s'" % cmd)
 
-        child = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        child = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
         if child.returncode < 0:
-            errmsg = "'%s' was terminated by signal %d" % (cmd, -child.returncode)
+            errmsg = "'%s' was terminated by signal %d" % (
+                cmd, -child.returncode)
         elif child.returncode > 0:
             errmsg = "'%s' returned %d" % (cmd, child.returncode)
 
@@ -75,6 +75,7 @@ class ConfigWAF:
         status (bool): True if configuration settings are correct. False
             otherwise
     """
+
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.conf = {}
@@ -130,7 +131,7 @@ class ConfigWAF:
                     self.log.LOGE("Bad JSON format for file " + conf_full_path)
                     self.log.LOGE(e)
                     return 1
-        except:
+        except BaseException:
             self.log.LOGE("Can't find file " + conf_full_path)
             return 2
 
@@ -143,11 +144,12 @@ class ConfigWAF:
             self.run(
                 lambda: run_cmd("rm -Rf %srevsw-waf-rule.tar && tar cf %srevsw-waf-rule.tar %s" % (
                     self.conf['tmp_location'], self.conf['tmp_location'], self.conf['location']),
-                                self.log, "Backing up existing rules"),
+                    self.log, "Backing up existing rules"),
                 lambda: run_cmd("rm -Rf %s && tar -C / -xf %srevsw-waf-rule.tar" % (
                     self.conf['location'], self.conf['tmp_location']), self.log, "Restoring waf directory"))
-        except:
-            self.log.LOGE("An error appeared while trying to backup the original files")
+        except BaseException:
+            self.log.LOGE(
+                "An error appeared while trying to backup the original files")
             raise
 
     def _create_rules(self):
@@ -165,10 +167,12 @@ class ConfigWAF:
             body += '%s\n' % rule
 
         with open(self.conf["location"] + self.config_vars["id"] + '.rule', 'w+') as \
-                f: f.write(body)
+                f:
+            f.write(body)
 
     def _remove_rules(self):
-        self.log.LOGI("Starting removing process " + sys._getframe().f_code.co_name)
+        self.log.LOGI("Starting removing process " +
+                      sys._getframe().f_code.co_name)
         # remove the active configuration file
 
         files_patch = self.conf["location"] + self.config_vars["id"] + ".rule"
@@ -177,8 +181,9 @@ class ConfigWAF:
             try:
                 os.remove(files_patch)
                 return True
-            except:
-                self.log.LOGE("An error appeared while removing the rules file " + files_patch)
+            except BaseException:
+                self.log.LOGE(
+                    "An error appeared while removing the rules file " + files_patch)
                 return False
         else:
             self.log.LOGI("File not found")
@@ -194,7 +199,8 @@ class ConfigWAF:
         if p.returncode != 0:
             self.log.LOGE("Nginx configuration has a problem!")
             run_cmd(
-                "rm -Rf %s && tar -C / -xf %srevsw-waf-rule.tar" % (self.conf['location'], self.conf['tmp_location']),
+                "rm -Rf %s && tar -C / -xf %srevsw-waf-rule.tar" % (
+                    self.conf['location'], self.conf['tmp_location']),
                 self.log, "Restoring rules directory")
             return p.returncode
 
@@ -203,6 +209,7 @@ class ConfigWAF:
         p.communicate()
 
         return p.returncode
+
     def rollback(self):
         """Executes rollback functions stored in instance variable rollbacks
         """
@@ -222,7 +229,7 @@ class ConfigWAF:
             cmd_func()
             if rollback_func:
                 self.rollbacks.append(rollback_func)
-        except:
+        except BaseException:
             self.log.LOGE("Transaction failed, rolling back")
             self.rollback()
             raise
@@ -259,4 +266,3 @@ if __name__ == "__main__":
     conf_manager = ConfigWAF(args=args)
     if conf_manager.status:
         conf_manager._reload_nginx()
-

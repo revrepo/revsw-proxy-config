@@ -15,11 +15,13 @@ class JinjaPlugin(coverage.plugin.CoveragePlugin):
         )
 
     def file_tracer(self, filename):
-        if os.path.samefile(os.path.dirname(filename), self.template_directory):
+        if os.path.samefile(os.path.dirname(filename),
+                            self.template_directory):
             return FileTracer(filename)
 
     def file_reporter(self, filename):
-        if os.path.samefile(os.path.dirname(filename), self.template_directory):
+        if os.path.samefile(os.path.dirname(filename),
+                            self.template_directory):
             return FileReporter(filename, self.environment)
 
 
@@ -34,7 +36,8 @@ class FileTracer(coverage.plugin.FileTracer):
         lineno = -1
         env = frame.f_locals.get('environment')
         if env:
-            template = env.get_template(os.path.basename(frame.f_code.co_filename))
+            template = env.get_template(
+                os.path.basename(frame.f_code.co_filename))
             lineno = template.get_corresponding_lineno(frame.f_lineno)
 
         if lineno == 0:

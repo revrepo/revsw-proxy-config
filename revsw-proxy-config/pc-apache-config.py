@@ -1,41 +1,39 @@
 #!/usr/bin/env python
-"""This script is used for the following purposes, usually started by the 
+"""This script is used for the following purposes, usually started by the
 revsw-pcm-config:
     1. To parse the JSON configuration file from /opt/revsw-config/policy/.
         JSON file is in format "ui-config-<Domain name>.json".
     2. Adds, updates, deletes configuration files for nginx located in:
         1. /etc/nginx/sites-enabled/
-        2. /etc/nginx/sites-availible/, and 
-        3. /opt/revsw-config/apache/. 
-        Reloads Nginx server if nessisary. 
+        2. /etc/nginx/sites-availible/, and
+        3. /opt/revsw-config/apache/.
+        Reloads Nginx server if nessisary.
     3. Adds, updates, deletes Varnish configuration for the following files
         and directories:
             1. /etc/varnish/revsw.vcl
             2. /opt/revsw-config/varnish/sites/
-        Reloads Varnish if nessary 
+        Reloads Varnish if nessary
 """
 import argparse
 import copy
+import errno
 import json
 import os
-import subprocess
-import sys
-import errno
 import re
+import sys
 import traceback
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 
 import script_configs
 from revsw_apache_config import wildcard_to_regex, jinja_config_webserver_base_dir,\
-                                jinja_config_webserver_dir, ConfigTransaction, \
-                                dns_query, is_ipv4, ConfigException, PlatformWebServer, \
-                                NginxConfig, underscore_url
+    jinja_config_webserver_dir, ConfigTransaction, \
+    dns_query, is_ipv4, ConfigException, PlatformWebServer, \
+    NginxConfig, underscore_url
 from revsw_apache_config.varnishadmin import VarnishAdmin
-
 from revsw.logger import RevSysLogger
 from revsw_apache_config import configure_all, sorted_non_empty, \
-                                set_log as acfg_set_log, VarnishConfig
+    set_log as acfg_set_log, VarnishConfig
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 
 varnish_admin = VarnishAdmin()
 
@@ -54,6 +52,7 @@ class ConfigCommon:
 
 
     """
+
     def __init__(self, webserver_config_vars, varnish_config_vars, ui_config):
         self.webserver_config_vars = webserver_config_vars
         self.varnish_config_vars = varnish_config_vars
@@ -65,9 +64,16 @@ class ConfigCommon:
         self._varnish_changed = False
         self._parse_config_command_options()
 
-    def _patch_if_changed_webserver_internal(self, webserver_cfg_field, enable_switch, option, val, ban_html_if_changed):
+    def _patch_if_changed_webserver_internal(
+            self,
+            webserver_cfg_field,
+            enable_switch,
+            option,
+            val,
+            ban_html_if_changed):
         # Patch the BP/CO/etc if present and allowed
-        if not webserver_cfg_field in self.webserver_config_vars or (enable_switch and not self.cmd_opts[enable_switch]):
+        if webserver_cfg_field not in self.webserver_config_vars or (
+                enable_switch and not self.cmd_opts[enable_switch]):
             return
         if self.webserver_config_vars[webserver_cfg_field].get(option) != val:
             self.webserver_config_vars[webserver_cfg_field][option] = val
@@ -138,24 +144,36 @@ class ConfigCommon:
     def _add_ban_urls(self, ban_urls):
         self.ban_urls.update(ban_urls)
 
-    def _patch_if_changed_bp_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("bp", "config_bp", option, val, ban_html_if_changed)
+    def _patch_if_changed_bp_webserver(
+            self, option, val, ban_html_if_changed=False):
+        self._patch_if_changed_webserver_internal(
+            "bp", "config_bp", option, val, ban_html_if_changed)
 
-    def _patch_if_changed_bp_varnish(self, option, val, ban_html_if_changed=False):
+    def _patch_if_changed_bp_varnish(
+            self, option, val, ban_html_if_changed=False):
         if self.varnish_config_vars.get(option) != val:
             log.LOGI("Detected change for Varnish '%s'" % option)
-            log.LOGD("From: ", json.dumps(self.varnish_config_vars.get(option)), "\r\nTo: ", json.dumps(val))
+            log.LOGD(
+                "From: ",
+                json.dumps(
+                    self.varnish_config_vars.get(option)),
+                "\r\nTo: ",
+                json.dumps(val))
             self.varnish_config_vars[option] = val
             self._config_changed = True
             self._varnish_changed = True
             if ban_html_if_changed:
                 self._must_ban_html = True
 
-    def _patch_if_changed_co_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("co", "config_co", option, val, ban_html_if_changed)
+    def _patch_if_changed_co_webserver(
+            self, option, val, ban_html_if_changed=False):
+        self._patch_if_changed_webserver_internal(
+            "co", "config_co", option, val, ban_html_if_changed)
 
-    def _patch_if_changed_co_profiles_webserver(self, option, val, ban_html_if_changed=False):
-        self._patch_if_changed_webserver_internal("co_profiles", "config_co", option, val, ban_html_if_changed)
+    def _patch_if_changed_co_profiles_webserver(
+            self, option, val, ban_html_if_changed=False):
+        self._patch_if_changed_webserver_internal(
+            "co_profiles", "config_co", option, val, ban_html_if_changed)
 
     def _patch_content_vars(self):
         co_component = self.ui_config["rev_component_co"]
@@ -190,32 +208,51 @@ class ConfigCommon:
             js_level = convert_choice(co_component["js_choice"])
             css_level = convert_choice(co_component["css_choice"])
 
-        self._patch_if_changed_co_profiles_webserver("REV_OPTIMIZATION_LEVEL", opt_level)
-        self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_IMG_LEVEL", img_level)
-        self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_JS_LEVEL", js_level)
-        self._patch_if_changed_co_profiles_webserver("REV_CUSTOM_CSS_LEVEL", css_level)
+        self._patch_if_changed_co_profiles_webserver(
+            "REV_OPTIMIZATION_LEVEL", opt_level)
+        self._patch_if_changed_co_profiles_webserver(
+            "REV_CUSTOM_IMG_LEVEL", img_level)
+        self._patch_if_changed_co_profiles_webserver(
+            "REV_CUSTOM_JS_LEVEL", js_level)
+        self._patch_if_changed_co_profiles_webserver(
+            "REV_CUSTOM_CSS_LEVEL", css_level)
         self._patch_if_changed_co_webserver("ENABLE_OPTIMIZATION", enable_opt)
-        self._patch_if_changed_bp_webserver("REV_PROFILES_COUNT", profiles_count, True)
-        self._patch_if_changed_co_webserver("REV_PROFILES_COUNT", profiles_count, True)
+        self._patch_if_changed_bp_webserver(
+            "REV_PROFILES_COUNT", profiles_count, True)
+        self._patch_if_changed_co_webserver(
+            "REV_PROFILES_COUNT", profiles_count, True)
 
     def _patch_cache_vars(self):
         cache = self.ui_config["rev_component_bp"]
 
-        self._patch_if_changed_bp_varnish("ENABLE_CACHE", cache["enable_cache"])
-        self._patch_if_changed_bp_webserver("ENABLE_VARNISH", cache["enable_cache"])
-        self._patch_if_changed_bp_varnish("INCLUDE_USER_AGENT", self.cmd_opts["include_user_agent"])
-        self._patch_if_changed_bp_varnish("CACHE_PS_HTML", self.cmd_opts["cache_ps_html"])
-        self._patch_if_changed_bp_varnish("CACHE_IGNORE_AUTH", self.cmd_opts["cache_ignore_auth"])
-        self._patch_if_changed_bp_webserver("BYPASS_VARNISH_LOCATIONS", cache.get("cache_bypass_locations", []))
+        self._patch_if_changed_bp_varnish(
+            "ENABLE_CACHE", cache["enable_cache"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_VARNISH", cache["enable_cache"])
+        self._patch_if_changed_bp_varnish(
+            "INCLUDE_USER_AGENT",
+            self.cmd_opts["include_user_agent"])
+        self._patch_if_changed_bp_varnish(
+            "CACHE_PS_HTML", self.cmd_opts["cache_ps_html"])
+        self._patch_if_changed_bp_varnish(
+            "CACHE_IGNORE_AUTH",
+            self.cmd_opts["cache_ignore_auth"])
+        self._patch_if_changed_bp_webserver(
+            "BYPASS_VARNISH_LOCATIONS", cache.get(
+                "cache_bypass_locations", []))
 
         # Check for caching rules mode (best or first)
-        self._patch_if_changed_bp_varnish("CACHING_RULES_MODE", cache.get("caching_rules_mode", "best"))
+        self._patch_if_changed_bp_varnish(
+            "CACHING_RULES_MODE", cache.get(
+                "caching_rules_mode", "best"))
 
         if "caching_rules" in cache:
-            bans = _compute_ban_urls_from_caching_rules(self.varnish_config_vars.get("CACHING_RULES", {}),
-                                                        cache["caching_rules"])
+            bans = _compute_ban_urls_from_caching_rules(
+                self.varnish_config_vars.get(
+                    "CACHING_RULES", {}), cache["caching_rules"])
             self._add_ban_urls(bans)
-            self._patch_if_changed_bp_varnish("CACHING_RULES", cache["caching_rules"])
+            self._patch_if_changed_bp_varnish(
+                "CACHING_RULES", cache["caching_rules"])
 
         custom_vcl = {
             "backends": [],
@@ -238,16 +275,18 @@ class ConfigCommon:
             _merge_dicts(custom_vcl, cache["custom_vcl"])
             del custom_vcl["enabled"]
 
-        self._patch_if_changed_bp_varnish("CUSTOM_VCL_ENABLED", custom_vcl_enabled)
+        self._patch_if_changed_bp_varnish(
+            "CUSTOM_VCL_ENABLED", custom_vcl_enabled)
         self._patch_if_changed_bp_varnish("CUSTOM_VCL", custom_vcl)
 
         geoip_headers = cache.get("enable_vcl_geoip_headers", False)
-        self._patch_if_changed_bp_webserver("ENABLE_VARNISH_GEOIP_HEADERS", geoip_headers)
-        self._patch_if_changed_bp_varnish("ENABLE_GEOIP_HEADERS", geoip_headers)
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_VARNISH_GEOIP_HEADERS", geoip_headers)
+        self._patch_if_changed_bp_varnish(
+            "ENABLE_GEOIP_HEADERS", geoip_headers)
 
-        self._patch_if_changed_bp_varnish("CLIENT_RESPONSE_TIMEOUT",
-                                          cache.get("client_response_timeout",
-                                                    self.cmd_opts["client_response_timeout"]))
+        self._patch_if_changed_bp_varnish("CLIENT_RESPONSE_TIMEOUT", cache.get(
+            "client_response_timeout", self.cmd_opts["client_response_timeout"]))
 
         # BEGIN (BP-255)
         health_probe = {
@@ -256,9 +295,13 @@ class ConfigCommon:
             "PROBE_INTERVAL": 0,
             "PROBE_TIMEOUT": 0
         }
-        enable_origin_health_probe = self.ui_config.get("enable_origin_health_probe", False)
-        config_health_probe = self.ui_config.get("origin_health_probe", {"enable": False})
-        log.LOGD("(BP-255) enable_origin_health_probe: %s" % enable_origin_health_probe)
+        enable_origin_health_probe = self.ui_config.get(
+            "enable_origin_health_probe", False)
+        config_health_probe = self.ui_config.get(
+            "origin_health_probe", {"enable": False})
+        log.LOGD(
+            "(BP-255) enable_origin_health_probe: %s" %
+            enable_origin_health_probe)
         if enable_origin_health_probe:
             log.LOGI("(BP-255) config_health_probe:\t%s" % config_health_probe)
             health_probe = config_health_probe
@@ -269,18 +312,29 @@ class ConfigCommon:
             # health_probe["PROBE_INTERVAL"] = config_health_probe["interval"]
             # health_probe["PROBE_TIMEOUT"] = config_health_probe["timeout"]
 
-        self._patch_if_changed_bp_varnish("ENABLE_ORIGIN_HEALTH_PROBE", enable_origin_health_probe)
+        self._patch_if_changed_bp_varnish(
+            "ENABLE_ORIGIN_HEALTH_PROBE",
+            enable_origin_health_probe)
         self._patch_if_changed_bp_varnish("ORIGIN_HEALTH_PROBE", health_probe)
         # END (BP-255)
 
     def _patch_security_vars(self):
         component_bp = self.ui_config["rev_component_bp"]
 
-        self._patch_if_changed_bp_webserver("ENABLE_WAF", component_bp.get("enable_waf", False))
-        self._patch_if_changed_bp_webserver("WAF_RULES", component_bp.get("waf", []))
-        self._patch_if_changed_bp_webserver("ENABLE_BOT_PROTECTION", component_bp.get("enable_bot_protection", False))
-        self._patch_if_changed_bp_webserver("BOT_PROTECTION", component_bp.get("bot_protection", []))
-        self._patch_if_changed_bp_webserver("BLOCK_CRAWLERS", component_bp.get("block_crawlers", True))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_WAF", component_bp.get(
+                "enable_waf", False))
+        self._patch_if_changed_bp_webserver(
+            "WAF_RULES", component_bp.get("waf", []))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_BOT_PROTECTION", component_bp.get(
+                "enable_bot_protection", False))
+        self._patch_if_changed_bp_webserver(
+            "BOT_PROTECTION", component_bp.get(
+                "bot_protection", []))
+        self._patch_if_changed_bp_webserver(
+            "BLOCK_CRAWLERS", component_bp.get(
+                "block_crawlers", True))
 
         self._patch_if_changed_bp_webserver("acl", component_bp.get("acl", {
             "enabled": False,
@@ -291,15 +345,24 @@ class ConfigCommon:
         log.LOGD("Security parameters: %s" % component_bp)
         log.LOGD("ACL parameters: %s" % component_bp.get("acl"))
         log.LOGD("WAF parameters: %s" % component_bp.get("waf"))
-        log.LOGD("BOT_PROTECTION rules: %s" % component_bp.get("bot_protection"))
+        log.LOGD(
+            "BOT_PROTECTION rules: %s" %
+            component_bp.get("bot_protection"))
 
     def _patch_ssl_vars(self):
         if "enable_ssl" in self.ui_config:
-            self._patch_if_changed_bp_webserver("ENABLE_SSL", self.ui_config["enable_ssl"], False)
-            self._patch_if_changed_bp_webserver("SSL_PROTOCOLS", self.ui_config["ssl_protocols"], "")
-            self._patch_if_changed_bp_webserver("SSL_CIPHERS", self.ui_config["ssl_ciphers"], "")
-            self._patch_if_changed_bp_webserver("SSL_PREFER_SERVER_CIPHERS", self.ui_config["ssl_prefer_server_ciphers"], True)
-            self._patch_if_changed_bp_webserver("SSL_CERT_ID", self.ui_config["ssl_cert_id"], "")
+            self._patch_if_changed_bp_webserver(
+                "ENABLE_SSL", self.ui_config["enable_ssl"], False)
+            self._patch_if_changed_bp_webserver(
+                "SSL_PROTOCOLS", self.ui_config["ssl_protocols"], "")
+            self._patch_if_changed_bp_webserver(
+                "SSL_CIPHERS", self.ui_config["ssl_ciphers"], "")
+            self._patch_if_changed_bp_webserver(
+                "SSL_PREFER_SERVER_CIPHERS",
+                self.ui_config["ssl_prefer_server_ciphers"],
+                True)
+            self._patch_if_changed_bp_webserver(
+                "SSL_CERT_ID", self.ui_config["ssl_cert_id"], "")
         log.LOGD("Finished vars update in SSL")
 
     def _get_proxied_and_optimized_domains(self, cdn_urls):
@@ -311,8 +374,13 @@ class ConfigCommon:
         optimized_domains = []
 
         old_version = False
-        if _compare_versions(self.ui_config.get("version", "0.0.0"), script_configs._UI_CONFIG_VERSION) < 0 or \
-                not "enable_3rd_party_runtime_rewrite" in self.ui_config.get("3rd_party_rewrite", {}):
+        if _compare_versions(
+            self.ui_config.get(
+                "version",
+                "0.0.0"),
+            script_configs._UI_CONFIG_VERSION) < 0 or "enable_3rd_party_runtime_rewrite" not in self.ui_config.get(
+            "3rd_party_rewrite",
+                {}):
             old_version = True
 
         if old_version:
@@ -324,7 +392,8 @@ class ConfigCommon:
             })
 
             if third_party["enable_3rd_party_rewrite"]:
-                optimized_domains = [url.strip() for url in third_party["3rd_party_urls"].split(",")]
+                optimized_domains = [
+                    url.strip() for url in third_party["3rd_party_urls"].split(",")]
             optimized_domains += proxied_domains
             enable_rewr = third_party["enable_3rd_party_rewrite"]
         else:  # script_configs._UI_CONFIG_VERSION or newer
@@ -336,19 +405,23 @@ class ConfigCommon:
             })
 
             if third_party["enable_3rd_party_runtime_rewrite"]:
-                optimized_domains = [url.strip() for url in third_party["3rd_party_runtime_domains"].split(",")]
+                optimized_domains = [
+                    url.strip() for url in third_party["3rd_party_runtime_domains"].split(",")]
             if third_party["enable_3rd_party_root_rewrite"]:
-                proxied_domains += [url for url in third_party["3rd_party_root_rewrite_domains"].split(",")]
+                proxied_domains += [
+                    url for url in third_party["3rd_party_root_rewrite_domains"].split(",")]
             optimized_domains += proxied_domains
             enable_rewr = third_party["enable_3rd_party_runtime_rewrite"]
 
-        proxied_http_servers, proxied_https_servers = _convert_static_servers(proxied_domains)
-        optimized_http_servers, optimized_https_servers = _convert_static_servers(optimized_domains)
+        proxied_http_servers, proxied_https_servers = _convert_static_servers(
+            proxied_domains)
+        optimized_http_servers, optimized_https_servers = _convert_static_servers(
+            optimized_domains)
 
-        #_check_valid_domains(proxied_http_servers, "Proxied HTTP domain")
-        #_check_valid_domains(proxied_https_servers, "Proxied HTTPS domain")
-        #_check_valid_domains(optimized_http_servers, "Rewritten HTTP domain")
-        #_check_valid_domains(optimized_https_servers, "Rewritten HTTPS domain")
+        # _check_valid_domains(proxied_http_servers, "Proxied HTTP domain")
+        # _check_valid_domains(proxied_https_servers, "Proxied HTTPS domain")
+        # _check_valid_domains(optimized_http_servers, "Rewritten HTTP domain")
+        # _check_valid_domains(optimized_https_servers, "Rewritten HTTPS domain")
 
         return (
             (proxied_http_servers, proxied_https_servers),
@@ -361,50 +434,85 @@ class ConfigCommon:
         component_bp = self.ui_config["rev_component_bp"]
         component_co = self.ui_config["rev_component_co"]
 
-        self._patch_if_changed_bp_webserver("BP_LUA_LOCATIONS", component_bp.get("lua", []))
-        self._patch_if_changed_bp_webserver("CO_LUA_LOCATIONS", component_co.get("lua", []))
+        self._patch_if_changed_bp_webserver(
+            "BP_LUA_LOCATIONS", component_bp.get("lua", []))
+        self._patch_if_changed_bp_webserver(
+            "CO_LUA_LOCATIONS", component_co.get("lua", []))
 
         log.LOGD("Start domain checking")
         ((http_servers, https_servers), (http_servers_rewr, https_servers_rewr), enable_rewr) = \
-            self._get_proxied_and_optimized_domains(_get_cdn_overlay_urls(component_bp))
+            self._get_proxied_and_optimized_domains(
+                _get_cdn_overlay_urls(component_bp))
         log.LOGD("Finished domain checking")
         log.LOGD("Start vars update in misc")
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTP", http_servers, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_PROXY_HTTPS", https_servers, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
-        self._patch_if_changed_bp_webserver("DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr, True)
+        self._patch_if_changed_bp_webserver(
+            "DOMAINS_TO_PROXY_HTTP", http_servers, True)
+        self._patch_if_changed_bp_webserver(
+            "DOMAINS_TO_PROXY_HTTPS", https_servers, True)
+        self._patch_if_changed_bp_webserver(
+            "DOMAINS_TO_OPTIMIZE_HTTP", http_servers_rewr, True)
+        self._patch_if_changed_bp_webserver(
+            "DOMAINS_TO_OPTIMIZE_HTTPS", https_servers_rewr, True)
 
         main_domain_name = self.webserver_config_vars["bp"]["SERVER_NAME"]
-        ows_domain, ows_server = _get_ows_domain_and_server(main_domain_name, self.ui_config)
+        ows_domain, ows_server = _get_ows_domain_and_server(
+            main_domain_name, self.ui_config)
         self._patch_if_changed_bp_webserver("ORIGIN_SERVER_NAME", ows_domain)
 
         domain_widlcard_alias = self.ui_config.get("domain_wildcard_alias", "")
-        domain_regex_alias = wildcard_to_regex(domain_widlcard_alias) if domain_widlcard_alias else ""
-        self._patch_if_changed_bp_webserver("SERVER_REGEX_ALIAS", domain_regex_alias)
-        self._patch_if_changed_bp_webserver("SERVER_ALIASES", self.ui_config.get("domain_aliases", []))
+        domain_regex_alias = wildcard_to_regex(
+            domain_widlcard_alias) if domain_widlcard_alias else ""
+        self._patch_if_changed_bp_webserver(
+            "SERVER_REGEX_ALIAS", domain_regex_alias)
+        self._patch_if_changed_bp_webserver(
+            "SERVER_ALIASES", self.ui_config.get(
+                "domain_aliases", []))
 
-        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_BEFORE", component_bp.get("bp_apache_fe_custom_config", ""))
-        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CODE_AFTER", component_bp.get("bp_apache_custom_config", ""))
-        self._patch_if_changed_bp_webserver("CUSTOM_WEBSERVER_CO_CODE_AFTER", component_co.get("co_apache_custom_config", ""))
+        self._patch_if_changed_bp_webserver(
+            "CUSTOM_WEBSERVER_CODE_BEFORE", component_bp.get(
+                "bp_apache_fe_custom_config", ""))
+        self._patch_if_changed_bp_webserver(
+            "CUSTOM_WEBSERVER_CODE_AFTER", component_bp.get(
+                "bp_apache_custom_config", ""))
+        self._patch_if_changed_bp_webserver(
+            "CUSTOM_WEBSERVER_CO_CODE_AFTER", component_co.get(
+                "co_apache_custom_config", ""))
 
-        self._patch_if_changed_bp_webserver("ENABLE_HTTP", self.cmd_opts["http"])
-        self._patch_if_changed_bp_webserver("ENABLE_HTTPS", self.cmd_opts["https"])
-        self._patch_if_changed_bp_webserver("ENABLE_SPDY", self.cmd_opts["spdy"])
-        self._patch_if_changed_bp_webserver("ENABLE_HTTP2", component_bp.get("enable_http2", True))
-        self._patch_if_changed_bp_webserver("DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_HTTP", self.cmd_opts["http"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_HTTPS", self.cmd_opts["https"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_SPDY", self.cmd_opts["spdy"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_HTTP2", component_bp.get(
+                "enable_http2", True))
+        self._patch_if_changed_bp_webserver(
+            "DOMAIN_SHARDS_COUNT", self.cmd_opts["shards_count"])
 
-        self._patch_if_changed_bp_webserver("ENABLE_JS_SUBSTITUTE", enable_rewr)
-        self._patch_if_changed_bp_webserver("ENABLE_HTML_SUBSTITUTE", enable_rewr and self.cmd_opts["html_subst"])
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_JS_SUBSTITUTE", enable_rewr)
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_HTML_SUBSTITUTE",
+            enable_rewr and self.cmd_opts["html_subst"])
 
-        self._patch_if_changed_bp_webserver("DEBUG_MODE", self.cmd_opts["debug"])
+        self._patch_if_changed_bp_webserver(
+            "DEBUG_MODE", self.cmd_opts["debug"])
         self._patch_if_changed_bp_varnish("DEBUG_MODE", self.cmd_opts["debug"])
 
-        self._patch_if_changed_bp_webserver("PROXY_TIMEOUT",
-                                            self.ui_config.get("proxy_timeout", self.cmd_opts["proxy_timeout"]))
-        self._patch_if_changed_bp_webserver("ORIGIN_IDLE_TIMEOUT", component_bp.get("origin_http_keepalive_ttl", 80))
-        self._patch_if_changed_bp_webserver("ORIGIN_REUSE_CONNS", component_bp.get("origin_http_keepalive_enabled", True))
+        self._patch_if_changed_bp_webserver(
+            "PROXY_TIMEOUT", self.ui_config.get(
+                "proxy_timeout", self.cmd_opts["proxy_timeout"]))
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_IDLE_TIMEOUT", component_bp.get(
+                "origin_http_keepalive_ttl", 80))
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_REUSE_CONNS", component_bp.get(
+                "origin_http_keepalive_enabled", True))
 
-        self._patch_if_changed_bp_webserver("ENABLE_PROXY_BUFFERING", component_bp.get("enable_proxy_buffering", False))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_PROXY_BUFFERING", component_bp.get(
+                "enable_proxy_buffering", False))
 
         caching_rules = component_bp.get("caching_rules", [])
         responce_headers = []
@@ -413,17 +521,29 @@ class ConfigCommon:
                 for r in rule.get("end_user_response_headers", []):
                     responce_headers.append(r)
 
-        self._patch_if_changed_bp_webserver("END_USER_RESPONSE_HEADERS", responce_headers)
-        self._patch_if_changed_bp_webserver("ORIGIN_REQUEST_HEADERS", component_co.get("origin_request_headers", []))
-        self._patch_if_changed_bp_webserver("ENABLE_QUIC", component_bp.get("enable_quic", False))
+        self._patch_if_changed_bp_webserver(
+            "END_USER_RESPONSE_HEADERS", responce_headers)
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_REQUEST_HEADERS", component_co.get(
+                "origin_request_headers", []))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_QUIC", component_bp.get(
+                "enable_quic", False))
 
-        self._patch_if_changed_bp_webserver("ENABLE_RUM", component_co.get("enable_rum"))
-        self._patch_if_changed_bp_webserver("REV_RUM_BEACON_URL", component_co.get("rum_beacon_url"))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_RUM", component_co.get("enable_rum"))
+        self._patch_if_changed_bp_webserver(
+            "REV_RUM_BEACON_URL", component_co.get("rum_beacon_url"))
 
-        self._patch_if_changed_bp_webserver("ENABLE_OPTIMIZATION", component_co.get("enable_optimization", True))
-        self._patch_if_changed_bp_webserver("ENABLE_DECOMPRESSION", component_co.get("enable_decompression", True))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_OPTIMIZATION", component_co.get(
+                "enable_optimization", True))
+        self._patch_if_changed_bp_webserver(
+            "ENABLE_DECOMPRESSION", component_co.get(
+                "enable_decompression", True))
 
-        origin_secure_protocol = self.ui_config.get("origin_secure_protocol", "")
+        origin_secure_protocol = self.ui_config.get(
+            "origin_secure_protocol", "")
         http = "http" if origin_secure_protocol != "https_only" else "https"
         https = "https" if origin_secure_protocol != "http_only" else "http"
 
@@ -434,31 +554,41 @@ class ConfigCommon:
 
         bp_cos = _get_content_optimizers(self.ui_config)
         if bp_cos:
-            self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
-                                                else ["%s://%s" % (http, co) for co in bp_cos])
-            self._patch_if_changed_bp_webserver("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
-                                                else ["%s://%s" % (https, co) for co in bp_cos])
+            self._patch_if_changed_bp_webserver(
+                "CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"] else [
+                    "%s://%s" %
+                    (http, co) for co in bp_cos])
+            self._patch_if_changed_bp_webserver(
+                "CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"] else [
+                    "%s://%s" %
+                    (https, co) for co in bp_cos])
 
-            self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTP", [] if not self.cmd_opts["http"]
-                                              else bp_cos)
-            self._patch_if_changed_bp_varnish("CONTENT_OPTIMIZERS_HTTPS", [] if not self.cmd_opts["https"]
-                                              else bp_cos)
+            self._patch_if_changed_bp_varnish(
+                "CONTENT_OPTIMIZERS_HTTP",
+                [] if not self.cmd_opts["http"] else bp_cos)
+            self._patch_if_changed_bp_varnish(
+                "CONTENT_OPTIMIZERS_HTTPS",
+                [] if not self.cmd_opts["https"] else bp_cos)
 
         co_bypass_urls = component_bp.get("co_bypass_locations", [])
-        self._patch_if_changed_bp_webserver("BYPASS_CO_LOCATIONS", co_bypass_urls)
-        self._patch_if_changed_bp_varnish("BYPASS_CO_LOCATIONS", co_bypass_urls)
-
+        self._patch_if_changed_bp_webserver(
+            "BYPASS_CO_LOCATIONS", co_bypass_urls)
+        self._patch_if_changed_bp_varnish(
+            "BYPASS_CO_LOCATIONS", co_bypass_urls)
 
         _check_valid_domains([ows_server], "Origin server")
 
-        self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"]
-                                            else ["%s://%s" % (http, ows_server)])
-        self._patch_if_changed_bp_webserver("ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"]
-                                            else ["%s://%s" % (https, ows_server)])
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_SERVERS_HTTP", [] if not self.cmd_opts["http"] else [
+                "%s://%s" %
+                (http, ows_server)])
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_SERVERS_HTTPS", [] if not self.cmd_opts["https"] else [
+                "%s://%s" %
+                (https, ows_server)])
 
-
-        self._patch_if_changed_bp_webserver("ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
-
+        self._patch_if_changed_bp_webserver(
+            "ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
 
         log.LOGD("Finished vars update in misc")
 
@@ -492,11 +622,13 @@ def fatal(msg):
 def _compatible_version(ver):
     try:
         [major, minor, _] = [int(x) for x in ver.split(".")]
-        [good_major, good_minor, _] = [int(x) for x in script_configs._UI_CONFIG_VERSION.split(".")]
+        [good_major, good_minor, _] = [
+            int(x) for x in script_configs._UI_CONFIG_VERSION.split(".")]
 
         # Ignore micro version; it means the API is compatible
-        return major < good_major or (major == good_major and minor <= good_minor)
-    except:
+        return major < good_major or (
+            major == good_major and minor <= good_minor)
+    except BaseException:
         raise AttributeError("Invalid version string '%s'" % ver)
 
 
@@ -510,19 +642,24 @@ def _compare_versions(ver_a, ver_b):
                 return a_micro - b_micro
             return a_minor - b_minor
         return a_major - b_major
-    except:
-        raise AttributeError("Invalid version string '%s' or '%s'" % (ver_a, ver_b))
+    except BaseException:
+        raise AttributeError(
+            "Invalid version string '%s' or '%s'" %
+            (ver_a, ver_b))
 
 
 def _check_proto_and_hostname(protocol_or_hostname):
     url_re = re.compile(
         r'^(https?://)?'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9_-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+        # domain...
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9_-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'
         r'localhost|'  # localhost...
         r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
         r'$', re.IGNORECASE)
     if not url_re.search(protocol_or_hostname):
-        fatal("'%s' is not a valid protocol and hostname URL." % protocol_or_hostname)
+        fatal(
+            "'%s' is not a valid protocol and hostname URL." %
+            protocol_or_hostname)
 
 
 def _check_valid_domains(domains, var_name):
@@ -533,7 +670,8 @@ def _check_valid_domains(domains, var_name):
             dns_query(d)
         except LookupError:
             log.LOGW("%s address not valid (yet): %s" % (var_name, d))
-            #domains.remove(d)   # this used to be a fatal error, but that breaks the whole config
+            # domains.remove(d)   # this used to be a fatal error, but that
+            # breaks the whole config
 
 
 def _convert_static_servers(servers):
@@ -577,11 +715,14 @@ def _compute_ban_urls_from_caching_rules(old, new):
 
 
 def _get_cdn_overlay_urls(bp):
-    return bp["cdn_overlay_urls"] if bp.get("cache_opt_choice") != "Rev CDN" else []
+    return bp["cdn_overlay_urls"] if bp.get(
+        "cache_opt_choice") != "Rev CDN" else []
 
 
 def _get_content_optimizers(ui_config):
-    cos = sorted_non_empty(ui_config.get("co_cnames")) or sorted_non_empty(ui_config.get("co_list"))
+    cos = sorted_non_empty(
+        ui_config.get("co_cnames")) or sorted_non_empty(
+        ui_config.get("co_list"))
 
     # First check that the COs are valid addresses/domains.
     _check_valid_domains(cos, "Content optimizer")
@@ -618,8 +759,8 @@ def _get_ows_domain_and_server(domain_name, ui_config, mapping=None):
 
 def _gen_initial_domain_config(domain_name, ui_config):
     mapping = _get_domain_mapping(domain_name)
-    ows_domain_name, ows_server = _get_ows_domain_and_server(domain_name, ui_config, mapping)
-
+    ows_domain_name, ows_server = _get_ows_domain_and_server(
+        domain_name, ui_config, mapping)
 
     # Let's see if we have a custom config for this domain
     config_str = ""
@@ -634,13 +775,31 @@ def _gen_initial_domain_config(domain_name, ui_config):
     # No custom config, generate from the generic site config and replace a magic string
     # with actual domain names
     if not config_str:
-        with open( os.path.join(script_configs.APACHE_GENERIC_SITE, "bp.json")) as j:
-            config_str = re.sub(r"ows-generic-domain\.1234", ows_domain_name, j.read())
-            config_str = re.sub(r"ows-generic-domain_1234", underscore_url(ows_domain_name), config_str)
-            config_str = re.sub(r"ows-generic-server\.1234", ows_server, config_str)
-            config_str = re.sub(r"ows-generic-server_1234", underscore_url(ows_server), config_str)
-            config_str = re.sub(r"generic-domain\.1234", domain_name, config_str)
-            config_str = re.sub(r"generic-domain_1234", underscore_url(domain_name), config_str)
+        with open(os.path.join(script_configs.APACHE_GENERIC_SITE, "bp.json")) as j:
+            config_str = re.sub(
+                r"ows-generic-domain\.1234",
+                ows_domain_name,
+                j.read())
+            config_str = re.sub(
+                r"ows-generic-domain_1234",
+                underscore_url(ows_domain_name),
+                config_str)
+            config_str = re.sub(
+                r"ows-generic-server\.1234",
+                ows_server,
+                config_str)
+            config_str = re.sub(
+                r"ows-generic-server_1234",
+                underscore_url(ows_server),
+                config_str)
+            config_str = re.sub(
+                r"generic-domain\.1234",
+                domain_name,
+                config_str)
+            config_str = re.sub(
+                r"generic-domain_1234",
+                underscore_url(domain_name),
+                config_str)
 
     config = json.loads(config_str)
 
@@ -653,8 +812,10 @@ def _gen_initial_domain_config(domain_name, ui_config):
                 cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTP"] = bp_cos
                 cmd["varnish_config_vars"]["CONTENT_OPTIMIZERS_HTTPS"] = bp_cos
             if "config_vars" in cmd and "bp" in cmd["config_vars"]:
-                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTP"] = ["http://%s" % co for co in bp_cos]
-                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTPS"] = ["https://%s" % co for co in bp_cos]
+                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTP"] = [
+                    "http://%s" % co for co in bp_cos]
+                cmd["config_vars"]["bp"]["CONTENT_OPTIMIZERS_HTTPS"] = [
+                    "https://%s" % co for co in bp_cos]
 
     return config
 
@@ -681,7 +842,7 @@ def delete_domain(domain_name):
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
-def add_or_update_domain(domain_name, ui_config, type):
+def add_or_update_domain(domain_name, ui_config, type_):
     """Adds a new domain to the server or updates one if it already exists.
 
     Args:
@@ -699,7 +860,7 @@ def add_or_update_domain(domain_name, ui_config, type):
         config = _gen_initial_domain_config(domain_name, ui_config)
         config.update(dict(varnish_changed=False))
         config.update(dict(config_changed=False))
-        config['commands'][0].update(dict(type=type))
+        config['commands'][0].update(dict(type=type_))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -712,11 +873,16 @@ def add_or_update_domain(domain_name, ui_config, type):
         log.LOGD(u"Start read Varnish Config")
         varnish_config_vars = VarnishConfig(site_name).load_site_config()
         log.LOGD(u"Finish read Varnish Config")
-    except:
-        log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
+    except BaseException:
+        log.LOGE(
+            "Couldn't load Varnish config for '%s' - ignoring" %
+            site_name)
 
     log.LOGD(u"Start read Main Config")
-    cfg_common = ConfigCommon(webserver_config_vars, varnish_config_vars, ui_config)
+    cfg_common = ConfigCommon(
+        webserver_config_vars,
+        varnish_config_vars,
+        ui_config)
     log.LOGD(u"Finish read Main Config")
 
     log.LOGD(u"Start config patch")
@@ -724,12 +890,12 @@ def add_or_update_domain(domain_name, ui_config, type):
     log.LOGD(u"End config patch")
 
     log.LOGD(u"Updated JSON is: ", json.dumps(webserver_config_vars))
-    #print json.dumps(varnish_config_vars)
+    # print json.dumps(varnish_config_vars)
     if cfg_common.config_changed() or cfg_common.varnish_changed:
         config = {
             "version": script_configs.API_VERSION,
             # TODO: rename type variable
-            "type": type,
+            "type": type_,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
             "varnish_config_vars": varnish_config_vars,
@@ -747,10 +913,14 @@ def add_or_update_domain(domain_name, ui_config, type):
         if cfg_common.ban_urls or cfg_common.must_ban_html():
             for url in cfg_common.ban_urls:
                 log.LOGI("Banning URL '%s' on '%s'" % (url, domain_name))
-                varnish_admin.ban('obj.http.X-Rev-Host == "%s" && obj.http.X-Rev-Url ~ "%s"' % (domain_name, url))
+                varnish_admin.ban(
+                    'obj.http.X-Rev-Host == "%s" && obj.http.X-Rev-Url ~ "%s"' %
+                    (domain_name, url))
             if cfg_common.must_ban_html():
                 log.LOGI("Banning HTML content '%s'" % domain_name)
-                varnish_admin.ban('obj.http.X-Rev-Host == "%s" && obj.http.Content-Type == "text/html"' % domain_name)
+                varnish_admin.ban(
+                    'obj.http.X-Rev-Host == "%s" && obj.http.Content-Type == "text/html"' %
+                    domain_name)
 
     # Save UI config
     with open(os.path.join(jinja_config_webserver_dir(site_name), "ui-config.json"), "wt") as f:
@@ -772,7 +942,9 @@ def _merge_dicts(dst, src):
                 else:
                     dst[key] = src[key]
         else:
-            raise AttributeError('Cannot merge non-dict "%s" into dict "%s"' % (src, dst))
+            raise AttributeError(
+                'Cannot merge non-dict "%s" into dict "%s"' %
+                (src, dst))
     else:
         raise TypeError("Expected dict type instead of %s" % type(dst))
 
@@ -790,7 +962,10 @@ def _diff_dicts(dst, src, dst_name, src_name):
             if isinstance(dst, dict) and isinstance(src, dict):
                 keys = set(src.keys()) | set(dst.keys())
                 for key in keys:
-                    _diff_dicts(dst.get(key), src.get(key), "%s.%s" % (dst_name, key), "%s.%s" % (src_name, key))
+                    _diff_dicts(
+                        dst.get(key), src.get(key), "%s.%s" %
+                        (dst_name, key), "%s.%s" %
+                        (src_name, key))
             else:
                 if dst != src:
                     log.LOGD("Difference found:")
@@ -808,8 +983,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         new_ver = new_vars_for_version["bp"].get("VERSION", 1)
         if new_ver > script_configs._BP_CONFIG_VERSION:
-            raise AttributeError("'bp' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, script_configs._BP_CONFIG_VERSION))
+            raise AttributeError(
+                "'bp' structure version is %d, which is newer than what pc-apache-config.py supports "
+                "(%d). Upgrade your server packages." %
+                (new_ver, script_configs._BP_CONFIG_VERSION))
 
         if ver <= 3 < new_ver:
             if "nss" in bp:
@@ -900,7 +1077,7 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 24 < new_ver:
             bp["ENABLE_SSL"] = True
             bp["SSL_PROTOCOLS"] = "TLSv1 TLSv1.1 TLSv1.2"
-            bp["SSL_CIPHERS"] = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
+            bp["SSL_CIPHERS"] = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"  # noqa: E501
             bp["SSL_PREFER_SERVER_CIPHERS"] = True
             bp["SSL_CERT_ID"] = ""
 
@@ -928,8 +1105,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         new_ver = new_vars_for_version["co"].get("VERSION", 1)
         if new_ver > script_configs._CO_CONFIG_VERSION:
-            raise AttributeError("'co' structure version is %d, which is newer than what pc-apache-config.py supports "
-                                 "(%d). Upgrade your server packages." % (new_ver, script_configs._CO_CONFIG_VERSION))
+            raise AttributeError(
+                "'co' structure version is %d, which is newer than what pc-apache-config.py supports "
+                "(%d). Upgrade your server packages." %
+                (new_ver, script_configs._CO_CONFIG_VERSION))
 
         if ver < 1:
             co["STATIC_CONTENT_SERVERS_HTTPS"] = []
@@ -988,9 +1167,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
 
         new_ver = new_vars_for_version["co_profiles"].get("VERSION", 1)
         if new_ver > script_configs._CO_PROFILES_CONFIG_VERSION:
-            raise AttributeError("'co_profiles' structure version is %d, which is newer than what pc-apache-config.py "
-                                 "supports (%d). Upgrade your server packages." %
-                                 (new_ver, script_configs._CO_PROFILES_CONFIG_VERSION))
+            raise AttributeError(
+                "'co_profiles' structure version is %d, which is newer than what pc-apache-config.py "
+                "supports (%d). Upgrade your server packages." %
+                (new_ver, script_configs._CO_PROFILES_CONFIG_VERSION))
 
         if ver == 1 and new_ver > 1:  # Upgrade 1 to 2
             if "REV_CUSTOM_IMG_LEVEL" in co_profiles:
@@ -1014,8 +1194,10 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
 
     new_ver = new_vars_for_version.get("VERSION", 1)
     if new_ver > script_configs._VARNISH_CONFIG_VERSION:
-        raise AttributeError("Varnish site structure version is %d, which is newer than what pc-apache-config.py "
-                             "supports (%d). Upgrade your server packages." % (new_ver, script_configs._VARNISH_CONFIG_VERSION))
+        raise AttributeError(
+            "Varnish site structure version is %d, which is newer than what pc-apache-config.py "
+            "supports (%d). Upgrade your server packages." %
+            (new_ver, script_configs._VARNISH_CONFIG_VERSION))
 
     if ver == 2 and new_ver > 2:  # Upgrade 2 to 3
         # Convert URLS_REMOVE_COOKIES_REGEX into CACHING_RULES
@@ -1062,7 +1244,8 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
         vars_["CACHE_PS_HTML"] = False
 
     if ver <= 6 < new_ver:
-        vars_["DOMAINS_TO_PROXY_HTTP"] = vars_.get("STATIC_CONTENT_SERVERS_HTTP", [])
+        vars_["DOMAINS_TO_PROXY_HTTP"] = vars_.get(
+            "STATIC_CONTENT_SERVERS_HTTP", [])
         vars_.pop("STATIC_CONTENT_SERVERS_HTTP", None)
 
     # Set caching rules mode to default ("best"), if version < 8
@@ -1120,9 +1303,9 @@ def _upgrade_varnish_site_config(vars_, new_vars_for_version):
         for caching_rule in vars_["CACHING_RULES"]:
             if "serve_stale" not in caching_rule:
                 caching_rule["serve_stale"] = {
-                  "enable": False,
-                  "while_fetching_ttl": 8,
-                  "origin_sick_ttl": 15
+                    "enable": False,
+                    "while_fetching_ttl": 8,
+                    "origin_sick_ttl": 15
                 }
             if "query_string_keep_or_remove_list" not in caching_rule["edge_caching"]:
                 caching_rule["edge_caching"]["query_string_keep_or_remove_list"] = []
@@ -1147,7 +1330,10 @@ def _upgrade_domain_config(domain_name):
     # - the global config dir, ui-config.json
     cfg_files = [
         os.path.join(jinja_config_webserver_dir(site_name), "ui-config.json"),
-        os.path.join(jinja_config_webserver_base_dir(), "ui-config-%s.json" % domain_name),
+        os.path.join(
+            jinja_config_webserver_base_dir(),
+            "ui-config-%s.json" %
+            domain_name),
         os.path.join(jinja_config_webserver_base_dir(), "ui-config.json")
     ]
     ui_config = {}
@@ -1167,7 +1353,8 @@ def _upgrade_domain_config(domain_name):
         except IOError:  # Ignore missing ui_config
             ui_config = {}
 
-    # Generate an initial config, extract the "config" command and patch it with the old one
+    # Generate an initial config, extract the "config" command and patch it
+    # with the old one
     init_config = _gen_initial_domain_config(domain_name, ui_config)
 
     new_config = {}
@@ -1176,7 +1363,8 @@ def _upgrade_domain_config(domain_name):
             new_config = cmd
             break
     if not new_config:
-        raise AssertionError("No 'config' command in initial site configuration")
+        raise AssertionError(
+            "No 'config' command in initial site configuration")
 
     new_webserver_config_vars = new_config["config_vars"]
     new_varnish_config_vars = new_config.get("varnish_config_vars")
@@ -1188,32 +1376,55 @@ def _upgrade_domain_config(domain_name):
         old_varnish_config_vars = {}
         # noinspection PyBroadException
         try:
-            old_varnish_config_vars = VarnishConfig(site_name).load_site_config()
-        except:
-            log.LOGE("Couldn't load Varnish config for '%s' - ignoring" % site_name)
+            old_varnish_config_vars = VarnishConfig(
+                site_name).load_site_config()
+        except BaseException:
+            log.LOGE(
+                "Couldn't load Varnish config for '%s' - ignoring" %
+                site_name)
     else:
         old_varnish_config_vars = None
 
-    _diff_dicts(new_webserver_config_vars, old_webserver_config_vars, "new_webserver_config", "old_webserver_config")
+    _diff_dicts(
+        new_webserver_config_vars,
+        old_webserver_config_vars,
+        "new_webserver_config",
+        "old_webserver_config")
 
-    # First convert the old config to the new config format, then patch the new config with the old values
-    _upgrade_webserver_config(old_webserver_config_vars, new_webserver_config_vars)
-    new_webserver_config_vars = _merge_dicts(new_webserver_config_vars, old_webserver_config_vars)
-    # print "New Apache config:", json.dumps(new_webserver_config_vars, indent=2)
+    # First convert the old config to the new config format, then patch the
+    # new config with the old values
+    _upgrade_webserver_config(
+        old_webserver_config_vars,
+        new_webserver_config_vars)
+    new_webserver_config_vars = _merge_dicts(
+        new_webserver_config_vars, old_webserver_config_vars)
+    # print "New Apache config:", json.dumps(new_webserver_config_vars,
+    # indent=2)
 
     if new_varnish_config_vars:
-        _diff_dicts(new_varnish_config_vars, old_varnish_config_vars, "new_varnish_config", "old_varnish_config")
+        _diff_dicts(
+            new_varnish_config_vars,
+            old_varnish_config_vars,
+            "new_varnish_config",
+            "old_varnish_config")
 
-        _upgrade_varnish_site_config(old_varnish_config_vars, new_varnish_config_vars)
-        new_varnish_config_vars = _merge_dicts(new_varnish_config_vars, old_varnish_config_vars)
+        _upgrade_varnish_site_config(
+            old_varnish_config_vars,
+            new_varnish_config_vars)
+        new_varnish_config_vars = _merge_dicts(
+            new_varnish_config_vars, old_varnish_config_vars)
     else:
         new_varnish_config_vars = None
 
     # If ui-config is present, we can simply use the freshly generated config, because it has all the information
     # we need.
-    # If ui-config is NOT present, then we have to patch the new config with values from it.
+    # If ui-config is NOT present, then we have to patch the new config with
+    # values from it.
     if ui_config:
-        cfg_common = ConfigCommon(new_webserver_config_vars, new_varnish_config_vars, ui_config)
+        cfg_common = ConfigCommon(
+            new_webserver_config_vars,
+            new_varnish_config_vars,
+            ui_config)
         cfg_common.patch_config()
 
     # Apply the patched configuration
@@ -1246,7 +1457,12 @@ def upgrade_all_domains():
     try:
         for domain_name in active_domains:
             cmd = _upgrade_domain_config(domain_name)
-            log.LOGD("Upgrade command for '%s':" % domain_name, json.dumps(cmd, indent=2))
+            log.LOGD(
+                "Upgrade command for '%s':" %
+                domain_name,
+                json.dumps(
+                    cmd,
+                    indent=2))
             cmds.append(cmd)
 
         # Apply patched config
@@ -1270,7 +1486,8 @@ def upgrade_all_domains():
         log.LOGE("Failures during upgrade: %s" % fail_msg)
         for f in fail_domains:
             log.LOGE("  -> Domain '%s'" % f)
-        raise RuntimeError("Failed to upgrade domain(s): %s" % ", ".join([f for f in fail_domains]))
+        raise RuntimeError("Failed to upgrade domain(s): %s" %
+                           ", ".join([f for f in fail_domains]))
     else:
         transaction.finalize()
         log.LOGI("Upgraded all active domains")
@@ -1279,13 +1496,26 @@ def upgrade_all_domains():
 def _main():
     global log
 
-    parser = argparse.ArgumentParser(description="Configure Apache and Varnish from Policy Controller.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-f", "--config-file", help="JSON file containing configuration",
-                        default=os.path.join(jinja_config_webserver_base_dir(), "ui-config.json"))
-    parser.add_argument("-U", "--upgrade", help="Upgrade all existing sites using after a generic site template update",
-                        action="store_true")
-    parser.add_argument("-v", "--verbose", help="Verbose logging", action="store_true")
+    parser = argparse.ArgumentParser(
+        description="Configure Apache and Varnish from Policy Controller.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "-f",
+        "--config-file",
+        help="JSON file containing configuration",
+        default=os.path.join(
+            jinja_config_webserver_base_dir(),
+            "ui-config.json"))
+    parser.add_argument(
+        "-U",
+        "--upgrade",
+        help="Upgrade all existing sites using after a generic site template update",
+        action="store_true")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Verbose logging",
+        action="store_true")
     args = parser.parse_args()
 
     log = RevSysLogger(args.verbose)
@@ -1301,8 +1531,9 @@ def _main():
 
             ver = _ui_config.get("version", "0.0.0")
             if not _compatible_version(ver):
-                raise AttributeError("Provided JSON config version '%s' is not compatible with current version '%s'" %
-                                     (ver, script_configs._UI_CONFIG_VERSION))
+                raise AttributeError(
+                    "Provided JSON config version '%s' is not compatible with current version '%s'" %
+                    (ver, script_configs._UI_CONFIG_VERSION))
 
             # Interpret content
             domain_name = _ui_config["domain_name"]
@@ -1316,7 +1547,9 @@ def _main():
             elif _ui_config["operation"] == "delete":
                 delete_domain(domain_name)
             else:
-                raise AttributeError("Invalid operation '%s'" % _ui_config["operation"])
+                raise AttributeError(
+                    "Invalid operation '%s'" %
+                    _ui_config["operation"])
 
     except Exception as e:
         print "========================================================================================================"

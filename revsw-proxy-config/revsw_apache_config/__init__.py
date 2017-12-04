@@ -37,6 +37,7 @@ def set_log(alog):
 def _(s):
     return s.replace(".", "_")
 
+
 def flatten_to_set(lst, aset=None):
     """Custom Jinja2 Filter - Flatten a list of items or lists to a set
 
@@ -55,6 +56,7 @@ def flatten_to_set(lst, aset=None):
         else:
             aset.add(k)
     return aset
+
 
 def parse_url(url):
     """Custom Jinja2 Filter - Split a URL into its protocol, hostname, port and path
@@ -83,6 +85,7 @@ def parse_url(url):
         raise AttributeError("Invalid URL scheme '%s'" % uri.scheme)
     return uri.scheme, uri.hostname, port, uri.path
 
+
 def underscore_url(url):
     """Custom Jinja2 Filter - Convert to Underscore Url
 
@@ -98,6 +101,7 @@ def underscore_url(url):
             "a___b__c_ex_com"
     """
     return url.replace("_", "___").replace("-", "__").replace(".", "_")
+
 
 def dns_query(hostname):
     """Custom Jinja2 Filter - Return a list of all the IP addresses associated with a domain name
@@ -117,8 +121,9 @@ def dns_query(hostname):
         for data in answer:
             ips.append(str(data))
         return ips
-    except:
+    except BaseException:
         raise LookupError("Can't resolve hostname '%s'" % hostname)
+
 
 def wildcard_to_regex(expr):
     """Custom Jinja2 Filter - Convert a wildcard expression into a regular expression
@@ -157,7 +162,8 @@ def wildcard_to_regex(expr):
             else:
                 out.write(ch)
         elif ch == '*':
-            if i + 1 < len(expr) and expr[i + 1] == '*':    # recursive globstar, **
+            # recursive globstar, **
+            if i + 1 < len(expr) and expr[i + 1] == '*':
                 if i + 2 < len(expr) and expr[i + 2] == '/':
                     out.write("([^/]+/)*")
                     i += 2
@@ -203,6 +209,7 @@ def wildcard_to_regex(expr):
     out.write('$')
     return out.getvalue()
 
+
 def is_ipv4(expr):
     """Custom Jinja2 Filter - Check if an expression is a valid IPv4 address
 
@@ -219,6 +226,7 @@ def is_ipv4(expr):
         return True
     except socket.error:
         return False
+
 
 def netmask_bits(mask):
     """Custom Jinja2 Filter - Convert a netmask to bit count
@@ -244,6 +252,7 @@ def netmask_bits(mask):
             binary_str += bin(int(octet))[2:].zfill(8)
         return str(len(binary_str.rstrip('0')))
 
+
 def custom_backend_name(name, site, as_director=False):
     """Custom Jinja2 Filter - Rename Backend
 
@@ -264,7 +273,9 @@ def custom_backend_name(name, site, as_director=False):
         if be["dynamic"]:
             dyn_backends.add(be["name"])
 
-    return "%scustom_%s_%s" % ("dir" if as_director and name in dyn_backends else "be", site_name, name)
+    return "%scustom_%s_%s" % (
+        "dir" if as_director and name in dyn_backends else "be", site_name, name)
+
 
 def process_custom_vcl(vcl, site):
     """Custom Jinja2 Filter - Replace REV_BACKEND occurences in custom VCL code.
@@ -295,7 +306,8 @@ def process_custom_vcl(vcl, site):
 
 
 def extract_custom_webserver_code(code, which_webserver):
-    """Custom Jinja2 filter - Extract Apache or Nginx-specific directives from 'code' or return an error comment if not found
+    """Custom Jinja2 filter - Extract Apache or Nginx-specific directives
+       from 'code' or return an error comment if not found
 
     TODO:
         1. Finish Commenting this function
@@ -337,14 +349,16 @@ def extract_custom_webserver_code(code, which_webserver):
         if m:
             ws = m.group(1)
             if in_ws:
-                raise SyntaxError("Found BEGIN CONFIG directive inside another block")
+                raise SyntaxError(
+                    "Found BEGIN CONFIG directive inside another block")
             in_ws = ws
         else:
             m = end_re.match(line)
             if m:
                 ws = m.group(1)
                 if in_ws != ws:
-                    raise SyntaxError("Found END CONFIG directive outside block")
+                    raise SyntaxError(
+                        "Found END CONFIG directive outside block")
                 in_ws = None
             elif in_ws:
                 cmds[in_ws].append(line)
@@ -353,13 +367,15 @@ def extract_custom_webserver_code(code, which_webserver):
 
     if extra_cmds:
         if cmds["APACHE"]:  # new style
-            raise SyntaxError("Found config statements outside BEGIN/END CONFIG blocks")
+            raise SyntaxError(
+                "Found config statements outside BEGIN/END CONFIG blocks")
         else:               # old style
             cmds["APACHE"] = extra_cmds
             nginx_cmds = []
             for cmd in cmds["NGINX"]:
                 if not cmd.startswith("#"):
-                    raise SyntaxError("Nginx custom config lines must start with #")
+                    raise SyntaxError(
+                        "Nginx custom config lines must start with #")
                 nginx_cmds.append(cmd.replace("#", "", 1))
             cmds["NGINX"] = nginx_cmds
 
@@ -378,6 +394,7 @@ def extract_custom_webserver_code(code, which_webserver):
         print >>out, cmd
     return out.getvalue()
 
+
 def global_var_set(name, value):
     """Sets the value of a global Jinja2 variable and returns the value
 
@@ -390,6 +407,7 @@ def global_var_set(name, value):
     """
     _jinja2_globals[name] = value
     return value
+
 
 def global_var_get(name):
     """Gets the value of a global Jinja2 Variable
@@ -412,7 +430,7 @@ def dns_servers():
     try:
         resolver = dns.resolver.Resolver()
         return resolver.nameservers
-    except:
+    except BaseException:
         raise LookupError("Can't get the name servers of the local machine")
 
 
@@ -434,7 +452,8 @@ def sorted_non_empty(lst):
     return sorted(nonempty)
 
 
-def _generate_jinja_hierarchy(jinja_name, search_dirs, file_list, alt_name=None):
+def _generate_jinja_hierarchy(
+        jinja_name, search_dirs, file_list, alt_name=None):
     # Must clone the list because we might insert paths in it
     search_dirs = list(search_dirs)
 
@@ -496,7 +515,8 @@ def _write_template_files(files, output_dir):
 def _generate_schema(schema_name, search_dirs):
     # Must clone the list because we might insert paths in it
     search_dirs = list(search_dirs)
-    schema_file = select_file_path(None, "%s.vars.schema" % schema_name, search_dirs, _log)
+    schema_file = select_file_path(
+        None, "%s.vars.schema" % schema_name, search_dirs, _log)
     schema_path = os.path.dirname(schema_file)
 
     # Also search in the directory containing the current schema
@@ -539,19 +559,23 @@ class PlatformWebServer:
         RuntimeError: If either both or neither variation of the Nginx server
         are installed this error is raised.
     """
+
     def __init__(self):
         global _g_webserver_name
         if not _g_webserver_name:
-            for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
+            for pkg, name in (("revsw-nginx-full", "NGINX"),
+                              ("revsw-nginx-naxsi", "NGINX")):
                 try:
                     run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
                     if _g_webserver_name:
-                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
+                        raise RuntimeError(
+                            "Both Nginx versions are installed; please check your configuration")
                     _g_webserver_name = name
                 except OSError:
                     pass
         if not _g_webserver_name:
-            raise RuntimeError("Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
+            raise RuntimeError(
+                "Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
         self._name = _g_webserver_name
 
     def _is_nginx(self):
@@ -574,6 +598,7 @@ class PlatformWebServer:
 
     def config_class(self):
         return NginxConfig
+
 
 class ConfigException(Exception):
     def __init__(self, message, error_domains):
@@ -613,10 +638,14 @@ class ConfigTransaction:
 
         etc_dir = PlatformWebServer().etc_dir()
 
-        self.run(lambda: run_cmd("rm -Rf /tmp/revsw-apache-config.%d.tar && tar cf /tmp/revsw-apache-config.%d.tar /opt/revsw-config/apache /opt/revsw-config/varnish %s/sites-enabled %s/sites-available %s --exclude=%s" %
-                                 (self.curr_idx, self.curr_idx, etc_dir, etc_dir, varnish_dir, ConfigTransaction.backup_file),
+        self.run(lambda: run_cmd("rm -Rf /tmp/revsw-apache-config.%d.tar && tar cf "
+                                 "/tmp/revsw-apache-config.%d.tar /opt/revsw-config/apache "
+                                 "/opt/revsw-config/varnish %s/sites-enabled %s/sites-available %s --exclude=%s" %
+                                 (self.curr_idx, self.curr_idx, etc_dir, etc_dir,
+                                  varnish_dir, ConfigTransaction.backup_file),
                                  _log, "Backing up existing config"),
-                 lambda: run_cmd("rm -Rf /opt/revsw-config/apache /opt/revsw-config/varnish %s/sites-enabled %s/sites-available %s && tar -C / -xf /tmp/revsw-apache-config.%d.tar" %
+                 lambda: run_cmd("rm -Rf /opt/revsw-config/apache /opt/revsw-config/varnish %s/"
+                                 "sites-enabled %s/sites-available %s && tar -C / -xf /tmp/revsw-apache-config.%d.tar" %
                                  (etc_dir, etc_dir, varnish_dir, self.curr_idx), _log, "Restoring previous config"))
 
     def rollback(self):
@@ -628,7 +657,7 @@ class ConfigTransaction:
             cmd_func()
             if rollback_func:
                 self.rollbacks.append(rollback_func)
-        except:
+        except BaseException:
             _log.LOGE("Transaction failed, rolling back")
             self.rollback()
             raise
@@ -652,14 +681,16 @@ class ConfigTransaction:
             reload_func = NginxConfig.reload_or_start
             self.run(reload_func)
 
-            # In case the Varnish reload fails, reload Apache again after the old config has been restored
+            # In case the Varnish reload fails, reload Apache again after the
+            # old config has been restored
             self.rollbacks.insert(0, reload_func)
 
         if self.varnish_reload_cmd:
             if VarnishConfig.varnish_is_installed():
                 v_reload_cmd = self.varnish_reload_cmd
                 try:
-                    run_cmd("service revsw-varnish4 status", _log, "Checking if Varnish is running", True)
+                    run_cmd("service revsw-varnish4 status", _log,
+                            "Checking if Varnish is running", True)
                 except OSError:
                     v_reload_cmd = "start"
                 VarnishConfig(transaction=self).write_config_file()
@@ -680,7 +711,8 @@ class ConfigTransaction:
 
                 self.run(reload_varnish)
             else:
-                _log.LOGI("Varnish is not installed; not %sing it" % self.varnish_reload_cmd)
+                _log.LOGI("Varnish is not installed; not %sing it" %
+                          self.varnish_reload_cmd)
 
         # Finally, save the previous config for reference
         run_cmd("mv -f /tmp/revsw-apache-config.%d.tar %s" %
@@ -692,7 +724,8 @@ def _webserver_write_command(f):
     def f_wrap(*args):
         obj = args[0]
         if not obj.transaction:
-            raise AssertionError("The method requires write access but the Apache config object is read-only")
+            raise AssertionError(
+                "The method requires write access but the Apache config object is read-only")
         f(*args)
         obj.transaction.schedule_webserver_reload()
     return f_wrap
@@ -702,7 +735,8 @@ def _varnish_write_command(f):
     def f_wrap(*args):
         obj = args[0]
         if not obj.transaction:
-            raise AssertionError("The method requires write access but the Varnish config object is read-only")
+            raise AssertionError(
+                "The method requires write access but the Varnish config object is read-only")
         f(*args)
         obj.transaction.schedule_varnish_reload()
     return f_wrap
@@ -721,6 +755,7 @@ class WebServerConfig:
         site_name (str): The name of the site config to change.
         transaction (instance, optional): ConfigTransaction Instance
     """
+
     def __init__(self, site_name, transaction=None):
         self.site_name = site_name
         self.transaction = transaction
@@ -737,17 +772,20 @@ class WebServerConfig:
 
     @_webserver_write_command
     def write_template_files(self, files):
-        self.transaction.run(lambda: _write_template_files(files, jinja_config_webserver_dir(self.site_name)))
+        self.transaction.run(lambda: _write_template_files(
+            files, jinja_config_webserver_dir(self.site_name)))
 
     @_webserver_write_command
     def _fixup_certs(self):
         def do_fixup():
             def fixup_file(fname):
-                fdir = os.path.join(jinja_config_webserver_dir(self.site_name), "certs")
+                fdir = os.path.join(
+                    jinja_config_webserver_dir(self.site_name), "certs")
                 fpath = os.path.join(fdir, fname)
                 if not os.path.exists(fpath):
                     run_cmd("mkdir -p %s && ln -f -s %s %s" %
-                            (fdir, os.path.join(jinja_config_webserver_base_dir(), "generic-site", "certs", fname), fpath),
+                            (fdir, os.path.join(jinja_config_webserver_base_dir(
+                            ), "generic-site", "certs", fname), fpath),
                             _log, "Creating default '%s'" % fname)
 
             fixup_file("ca-bundle.crt")
@@ -760,7 +798,8 @@ class WebServerConfig:
     @_webserver_write_command
     def write_certs(self, cert, key, ca_bundle):
         def write_certs():
-            certs_dir = os.path.join(jinja_config_webserver_dir(self.site_name), "certs")
+            certs_dir = os.path.join(
+                jinja_config_webserver_dir(self.site_name), "certs")
 
             run_cmd("rm -Rf %s" % certs_dir, _log,
                     "Removing directory '%s' if it exists" % certs_dir)
@@ -771,7 +810,8 @@ class WebServerConfig:
             _log.LOGI("Creating certificate files")
             base64_string_gzip_to_file(cert, "%s/server.crt" % certs_dir)
             base64_string_gzip_to_file(key, "%s/server.key" % certs_dir)
-            base64_string_gzip_to_file(ca_bundle, "%s/ca-bundle.crt" % certs_dir)
+            base64_string_gzip_to_file(
+                ca_bundle, "%s/ca-bundle.crt" % certs_dir)
 
             run_cmd("cat %s/server.crt %s/ca-bundle.crt > %s/server-chained.crt" % (certs_dir, certs_dir, certs_dir),
                     _log, "Creating server-chained.crt")
@@ -795,10 +835,13 @@ class WebServerConfig:
 
     @staticmethod
     def _site_name_from_config_file(path):
-        m = re.match(r"(/etc/(apache2|nginx)/sites-(available|enabled)/)?([\w-]+)\.conf", path)
+        m = re.match(
+            r"(/etc/(apache2|nginx)/sites-(available|enabled)/)?([\w-]+)\.conf", path)
         if not m:
-            raise AssertionError("Invalid web server config file path '%s'" % path)
+            raise AssertionError(
+                "Invalid web server config file path '%s'" % path)
         return m.group(4)
+
 
 class NginxConfig(WebServerConfig):
     """Configuration Class for Nginx.
@@ -811,19 +854,23 @@ class NginxConfig(WebServerConfig):
     @_webserver_write_command
     def disable_all_sites(self):
         """Disables all sites by removing all sites from /etc/nginx/sites-enabled"""
-        self.transaction.run(lambda: run_cmd("rm -f /etc/nginx/sites-enabled/*", _log, "Disabling all sites"))
-        #self.transaction.run(lambda: run_cmd("a2ensite 000-catch-all || true", _log, "Enabling catch-all error site"))
+        self.transaction.run(lambda: run_cmd(
+            "rm -f /etc/nginx/sites-enabled/*", _log, "Disabling all sites"))
+        # self.transaction.run(lambda: run_cmd("a2ensite 000-catch-all || true", _log, "Enabling catch-all error site"))
 
     @_webserver_write_command
     def remove_site(self):
         """Removes current working site pointed to by self.site_name by removing all
         Nginx .conf files and jinja templates if they exist
         """
-        self.transaction.run(lambda: run_cmd("rm -f %ssites-enabled/%s.conf" % (script_configs.NGINX_PATH, self.site_name),
+        self.transaction.run(lambda: run_cmd("rm -f %ssites-enabled/%s.conf"
+                                             % (script_configs.NGINX_PATH, self.site_name),
                                              _log, "Disabling site '%s' if it exists" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -f %ssites-available/%s.conf" % (script_configs.NGINX_PATH, self.site_name),
+        self.transaction.run(lambda: run_cmd("rm -f %ssites-available/%s.conf"
+                                             % (script_configs.NGINX_PATH, self.site_name),
                                              _log, "Removing site '%s' if it exists" % self.site_name))
-        self.transaction.run(lambda: run_cmd("rm -Rf %s" % jinja_config_webserver_dir(self.site_name), _log,
+        self.transaction.run(lambda: run_cmd("rm -Rf %s"
+                                             % jinja_config_webserver_dir(self.site_name), _log,
                                              "Removing site '%s' templates, if they exist" % self.site_name))
 
     @_webserver_write_command
@@ -844,11 +891,12 @@ class NginxConfig(WebServerConfig):
 
             _log.LOGD("Loading vars schema %s" % template_file_no_ext)
             with open("%s.vars.schema" % template_file_no_ext) as f:
-                schema = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
+                schema = json.load(
+                    f, object_pairs_hook=dict_raise_on_duplicates)
 
             _log.LOGD("Validating input vars from JSON")
-            jsch.validate(input_vars, schema, format_checker=jsch.FormatChecker())
-
+            jsch.validate(input_vars, schema,
+                          format_checker=jsch.FormatChecker())
 
             env = ImmutableSandboxedEnvironment(
                 line_statement_prefix=None,
@@ -884,15 +932,19 @@ class NginxConfig(WebServerConfig):
             cfg = cfg.replace('\n\n', '\n')
             cfg = cfg.replace('\n\n', '\n')
 
-            #TODO: we need to replace path to NGINX to variable outside this class
-            conf_file_name = "%ssites-available/%s.conf" % (script_configs.NGINX_PATH, self.site_name)
+            # TODO: we need to replace path to NGINX to variable outside this
+            # class
+            conf_file_name = "%ssites-available/%s.conf" % (
+                script_configs.NGINX_PATH, self.site_name)
 
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)
 
             # re-formatting Nginx config file:
-            run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp /tmp/" % \
-                    {"INPUT": conf_file_name, "OUTPUT": conf_file_name, "CONFIG_PATH": script_configs.CONFIG_PATH},
+            run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > "
+                    "%(OUTPUT)s && mv %(INPUT)s.tmp /tmp/" %
+                    {"INPUT": conf_file_name, "OUTPUT": conf_file_name,
+                        "CONFIG_PATH": script_configs.CONFIG_PATH},
                     _log, "re-formatting %s file" % conf_file_name)
             # .
 
@@ -901,8 +953,9 @@ class NginxConfig(WebServerConfig):
             # Make sure the site has at least the default certs
             self._fixup_certs()
 
-            run_cmd("cd %(NGINX_PATH)ssites-enabled && ln -sf %(NGINX_PATH)ssites-available/%(SITE_NAME)s.conf" % \
-                    {"NGINX_PATH": script_configs.NGINX_PATH, "SITE_NAME": self.site_name},
+            run_cmd("cd %(NGINX_PATH)ssites-enabled && ln -sf %(NGINX_PATH)ssites-available/%(SITE_NAME)s.conf" %
+                    {"NGINX_PATH": script_configs.NGINX_PATH,
+                        "SITE_NAME": self.site_name},
                     _log, "Enabling site '%s' if necessary" % self.site_name)
 
             _log.LOGD("Saving input vars")
@@ -950,7 +1003,8 @@ class NginxConfig(WebServerConfig):
     def reload_or_start():
         reload_cmd = "reload"
         try:
-            run_cmd("service revsw-nginx status", _log, "Checking if Nginx is running", True)
+            run_cmd("service revsw-nginx status", _log,
+                    "Checking if Nginx is running", True)
         except OSError:
             reload_cmd = "start"
 
@@ -958,7 +1012,8 @@ class NginxConfig(WebServerConfig):
         # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
         # failures.
         _log.LOGI("Checking Nginx config")
-        child = subprocess.Popen("service revsw-nginx configtest", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        child = subprocess.Popen("service revsw-nginx configtest",
+                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
         if child.returncode != 0:
@@ -967,7 +1022,8 @@ class NginxConfig(WebServerConfig):
             raise ConfigException("Nginx config check failed",
                                   NginxConfig.get_error_domains(stderr))
 
-        run_cmd("service revsw-nginx %s" % reload_cmd, _log, "%sing Nginx" % reload_cmd.capitalize(), True)
+        run_cmd("service revsw-nginx %s" % reload_cmd, _log,
+                "%sing Nginx" % reload_cmd.capitalize(), True)
 
 
 class VarnishConfig:
@@ -978,6 +1034,7 @@ class VarnishConfig:
         transaction (instance, optional): ConfigTransaction Instance
         search_path (list): List of already searched paths.
     """
+
     def __init__(self, site_name=None, transaction=None):
         self.site_name = site_name
         self.transaction = transaction
@@ -1023,7 +1080,8 @@ class VarnishConfig:
         _log.LOGD("Loaded Varnish template:", self.varn_template.filename)
 
         _log.LOGD("Loading vars schema")
-        self.input_vars_schema = json.loads(_generate_schema("varnish", search_path))
+        self.input_vars_schema = json.loads(
+            _generate_schema("varnish", search_path))
 
         self.search_path = search_path
 
@@ -1037,7 +1095,8 @@ class VarnishConfig:
 
     @_varnish_write_command
     def write_template_files(self, files):
-        self.transaction.run(lambda: _write_template_files(files, jinja_config_varnish_base_dir()))
+        self.transaction.run(lambda: _write_template_files(
+            files, jinja_config_varnish_base_dir()))
 
     @_varnish_write_command
     def write_config_file(self, search_path=None):
@@ -1055,29 +1114,33 @@ class VarnishConfig:
 
             for fname in fnames:
                 with open(fname) as f:
-                    site = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
+                    site = json.load(
+                        f, object_pairs_hook=dict_raise_on_duplicates)
                     sites.append(site)
 
             input_vars = {"sites": sites}
-            #_log.LOGD(json.dumps(input_vars, indent=2))
+            # _log.LOGD(json.dumps(input_vars, indent=2))
 
             self._lazy_load_template(search_path)
-            jsch.validate(input_vars, self.input_vars_schema, format_checker=jsch.FormatChecker())
+            jsch.validate(input_vars, self.input_vars_schema,
+                          format_checker=jsch.FormatChecker())
             cfg = self.varn_template.render(input_vars)
 
-            #_log.LOGI("Generated VCL:", cfg)
+            # _log.LOGI("Generated VCL:", cfg)
 
             cfg = cfg.replace('\r', '\n')
             cfg = cfg.replace('\n\n', '\n')
             cfg = cfg.replace('\n\n', '\n')
 
-            conf_file_name = os.path.join(script_configs.VARNISH_PATH, "revsw.vcl")
+            conf_file_name = os.path.join(
+                script_configs.VARNISH_PATH, "revsw.vcl")
 
             with open(conf_file_name + ".tmp", "w") as f:
                 f.write(cfg)
 
             # # re-formatting Varnish config file:
-            # run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh > %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
+            # run_cmd("cat %(INPUT)s.tmp | %(CONFIG_PATH)sbin/conf_files_formatter.sh >
+            # %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
             #         {
             #             "INPUT": conf_file_name, "OUTPUT": conf_file_name,
             #             "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
@@ -1087,13 +1150,13 @@ class VarnishConfig:
             # # .
             # TODO: remove it after test
             run_cmd(
-                "cp %(INPUT)s.tmp %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" % \
-                        {
-                            "INPUT": conf_file_name, "OUTPUT": conf_file_name,
-                            "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
-                        },
-                        _log, "re-formatting %s file" % conf_file_name
-                        )
+                "cp %(INPUT)s.tmp %(OUTPUT)s && mv %(INPUT)s.tmp %(TMP_PATH)s" %
+                {
+                    "INPUT": conf_file_name, "OUTPUT": conf_file_name,
+                    "TMP_PATH": script_configs.TMP_PATH, "CONFIG_PATH": script_configs.CONFIG_PATH
+                },
+                _log, "re-formatting %s file" % conf_file_name
+            )
         self.transaction.run(do_write)
 
     def load_site_config(self):
@@ -1104,18 +1167,22 @@ class VarnishConfig:
 
     def site_config_path(self):
         if not self.site_name:
-            raise AssertionError("'site_config_path' requires the site name but the object is global")
-        return "%ssites/%s.json" % (script_configs.VARNISH_PATH_CONFIG, self.site_name)
+            raise AssertionError(
+                "'site_config_path' requires the site name but the object is global")
+        return "%ssites/%s.json" % (script_configs.VARNISH_PATH_CONFIG,
+                                    self.site_name)
 
     def remove_site(self):
-        self.transaction.run(lambda: run_cmd("rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
+        self.transaction.run(lambda: run_cmd(
+            "rm -f %s" % self.site_config_path(), _log, "Removing Varnish config"))
 
     @_varnish_write_command
     def config_site(self, config):
         def do_add():
             cfg_dir = os.path.dirname(self.site_config_path())
             if not os.path.exists(cfg_dir):
-                run_cmd("mkdir -p %s" % cfg_dir, _log, "Creating Varnish config dir")
+                run_cmd("mkdir -p %s" % cfg_dir, _log,
+                        "Creating Varnish config dir")
             with open(self.site_config_path(), "w") as f:
                 json.dump(config, f, indent=2)
 
@@ -1135,15 +1202,18 @@ class VarnishConfig:
                 m = begin_re.match(l)
                 if m:
                     if curr_site:
-                        raise SyntaxError("Found 'BEGIN SITE' inside another 'BEGIN SITE' at line %d" % line_no)
+                        raise SyntaxError(
+                            "Found 'BEGIN SITE' inside another 'BEGIN SITE' at line %d" % line_no)
                     curr_site = m.group(1)
                     curr_begin_line = line_no
                 else:
                     m = end_re.match(l)
                     if m:
                         if not curr_site:
-                            raise SyntaxError("Found 'END SITE' without matching 'BEGIN SITE' at line %d" % line_no)
-                        domain_locations.append({"start": curr_begin_line, "end": line_no, "domain": curr_site})
+                            raise SyntaxError(
+                                "Found 'END SITE' without matching 'BEGIN SITE' at line %d" % line_no)
+                        domain_locations.append(
+                            {"start": curr_begin_line, "end": line_no, "domain": curr_site})
                         curr_site = None
                 line_no += 1
         return domain_locations
@@ -1172,10 +1242,12 @@ class VarnishConfig:
         for l in stderr.split("\n"):
             m = line_col_re.match(l)
             if m:
-                domain = VarnishConfig._find_domain_for_vcl_line(domain_locations, int(m.group(1)))
+                domain = VarnishConfig._find_domain_for_vcl_line(
+                    domain_locations, int(m.group(1)))
                 if domain:
                     err_domains.add(domain)
         return err_domains
+
 
 def _check_and_get_attr(command, attr):
     val = command.get(attr, None)
@@ -1226,7 +1298,8 @@ def configure_all(config):
 
         elif action == "varnish_template":
             _log.LOGD("Writing Varnish template")
-            vcfg.write_template_files(_check_and_get_attr(command, "templates"))
+            vcfg.write_template_files(
+                _check_and_get_attr(command, "templates"))
 
         elif action == "delete":
             _domain_name = _check_and_get_attr(command, "domain_name")
@@ -1241,7 +1314,7 @@ def configure_all(config):
             templates = command.get("templates")
 
             if templates:
-                if not "nginx" in templates:
+                if "nginx" not in templates:
                     raise AttributeError("Config templates don't presented")
                 real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
@@ -1262,7 +1335,7 @@ def configure_all(config):
             templates = command.get("templates")
 
             if templates:
-                if not "nginx" in templates:
+                if "nginx" not in templates:
                     raise AttributeError("Config templates don't presented")
                 real_templates = templates["nginx"]
                 _log.LOGD("Writing Jinja templates")
