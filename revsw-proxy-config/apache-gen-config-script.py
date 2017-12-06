@@ -1,21 +1,20 @@
 #!/usr/bin/env python
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".")))
-
 import argparse
-import re
-import socket
-from cStringIO import StringIO
 import json
+import os
+import re
 import shlex
-
+import socket
+import sys
 import unittest
+from cStringIO import StringIO
 
-from revsw_apache_config import sorted_non_empty
 import script_configs
+from revsw_apache_config import sorted_non_empty
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
+sys.path.insert(0, os.path.realpath(
+    os.path.join(os.path.dirname(__file__), ".")))
 
 help_str = r"""
 This script reads a configuration from the standard input and generates a configuration shell script
@@ -237,7 +236,8 @@ def check_ip_or_hostname(arg):
 def is_valid_url(arg):
     url_re = re.compile(
         r'^(https?://)'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+        # domain...
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'
         r'localhost|'  # localhost...
         r'invalid|'  # 'invalid' special hostname...
         r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
@@ -378,13 +378,16 @@ def parse_line(line):
             elif state == States.STATIC_CONTENT_SERVERS:
                 is_valid_url(arg)
                 if arg.startswith("https://"):
-                    domain["static_servers_https"].add(arg.replace("https://", ""))
+                    domain["static_servers_https"].add(
+                        arg.replace("https://", ""))
                 else:
-                    domain["static_servers_http"].add(arg.replace("http://", ""))
+                    domain["static_servers_http"].add(
+                        arg.replace("http://", ""))
             elif state == States.IGNORE_COOKIES:
                 if arg == "+":
                     if domain["ignore_cookies"]:
-                        fail("'+' is only allowed as the first parameter for 'varnish-ignore-cookies-url-regex'")
+                        fail(
+                            "'+' is only allowed as the first parameter for 'varnish-ignore-cookies-url-regex'")
                     domain["ignore_cookies"].extend(_ignore_cookies_default)
                 else:
                     domain["ignore_cookies"].append(arg)
@@ -399,7 +402,8 @@ def parse_line(line):
                 check_ip_addr(arg)
                 check_single_and_set("addr", arg, "addr")
             elif state == States.CERTS:
-                # Certificate directory and specific files under it must all exist
+                # Certificate directory and specific files under it must all
+                # exist
                 check_file_exists(os.path.join(arg, "server.crt"))
                 check_file_exists(os.path.join(arg, "server.key"))
                 check_file_exists(os.path.join(arg, "ca-bundle.crt"))
@@ -412,10 +416,12 @@ def parse_line(line):
                 check_single_and_set("co_template", arg, "co-template")
             elif state == States.PROFILE_TEMPLATE:
                 check_file_exists(arg)
-                check_single_and_set("profile_template", arg, "profile-selection-template")
+                check_single_and_set("profile_template",
+                                     arg, "profile-selection-template")
             elif state == States.CACHING_RULES_FILE:
                 check_file_exists(arg)
-                check_single_and_set("caching_rules_file", arg, "caching-rules-file")
+                check_single_and_set("caching_rules_file",
+                                     arg, "caching-rules-file")
             elif state == States.SHARDS_COUNT:
                 check_positive_int(arg)
                 check_single_and_set("shards_count", int(arg), "shards-count")
@@ -481,7 +487,8 @@ def parse_line(line):
             co_domains = _cos.setdefault(co_addr, [])
             for co_dom in co_domains:
                 if co_dom["name"] == domain["name"]:
-                    fail("Domain '%s' already specified for optimizer '%s'." % (domain["name"], co_addr))
+                    fail("Domain '%s' already specified for optimizer '%s'." %
+                         (domain["name"], co_addr))
             co_domains.append(domain)
     else:
         fail("No 'domain' keyword was found.")
@@ -511,24 +518,31 @@ def fixup_domain(domain):
     create_bp_templ = False
 
     if not domain["bp_template"]:
-        domain["bp_template"] = "bp-%s.jinja" % replace_underscore(domain["name"])
+        domain["bp_template"] = "bp-%s.jinja" % replace_underscore(
+            domain["name"])
         create_bp_templ = True
 
     if domain["profiles_disabled"]:
-        domain["profile_template"] = os.path.join(script_configs.PROFILE_TEMPLATE, "no_customer_profiles.jinja")
+        domain["profile_template"] = os.path.join(
+            script_configs.PROFILE_TEMPLATE, "no_customer_profiles.jinja")
         domain["profiles_count"] = 1  # hardcoded from no customer profiles
 
         domain["base_http_port"] = 80
         domain["base_https_port"] = 443
     else:
         if not domain["profile_template"]:
-            domain["profile_template"] = os.path.join(script_configs.PROFILE_TEMPLATE, "default_customer_profiles.jinja")
-            domain["profiles_count"] = 1  # hardcoded from default customer profiles
+            domain["profile_template"] = os.path.join(
+                script_configs.PROFILE_TEMPLATE, "default_customer_profiles.jinja")
+            # hardcoded from default customer profiles
+            domain["profiles_count"] = 1
         else:
-            domain["profiles_count"] = parse_profile_template_get_count(domain["profile_template"])
+            domain["profiles_count"] = parse_profile_template_get_count(
+                domain["profile_template"])
 
-        domain["base_http_port"] = get_next_http_profiles_base(domain["profiles_count"])
-        domain["base_https_port"] = get_next_https_profiles_base(domain["profiles_count"])
+        domain["base_http_port"] = get_next_http_profiles_base(
+            domain["profiles_count"])
+        domain["base_https_port"] = get_next_https_profiles_base(
+            domain["profiles_count"])
 
     profile_basename = template_basename(domain["profile_template"])
 
@@ -600,7 +614,6 @@ def fixup_domain(domain):
     "additionalProperties": false
 }
 """ % profile_basename)
-
 
 
 def parse_profile_template_get_count(fname):
@@ -702,17 +715,17 @@ def generate_bp_domain_json(domain):
         "ORIGIN_IDLE_TIMEOUT": 80,
         "ORIGIN_REUSE_CONNS": True,
         "ENABLE_VARNISH_GEOIP_HEADERS": False,
-        "END_USER_RESPONSE_HEADERS": [], # (BP-92)
+        "END_USER_RESPONSE_HEADERS": [],  # (BP-92)
 
         "REV_RUM_BEACON_URL": script_configs.RUM_BEACON_URL,
         "ENABLE_OPTIMIZATION": domain["enable_opt"],
         "ENABLE_DECOMPRESSION": domain["enable_decompression"],
-        "ORIGIN_REQUEST_HEADERS": [], # (BP-92)
+        "ORIGIN_REQUEST_HEADERS": [],  # (BP-92)
         "ENABLE_QUIC": False,
 
         "ENABLE_SSL": True,
         "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2",
-        "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",
+        "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS",  # noqa: E501
         "SSL_PREFER_SERVER_CIPHERS": True,
         "SSL_CERT_ID": "default",
         "BP_LUA_LOCATIONS": [],
@@ -772,6 +785,7 @@ def generate_bp_varnish_domain_json(domain):
     json.dump(site, f, indent=2)
     return f.getvalue()
 
+
 def generate_bp(domain):
     # print >>sys.stderr, "BP Domain:", domain
 
@@ -789,21 +803,21 @@ def generate_bp(domain):
     with open(varn_fname, "w") as f:
         f.write(j)
 
-    print_configure_sh("""
+    print """
 DOMAIN_NAME=%s
 CFG_NAME=%s
-""" % (domain["name"], cfg_name))
+""" % (domain["name"], cfg_name)
 
     if domain["certs"]:
-        print_configure_sh("""
+        print """
 echo "    -> configuring $DOMAIN_NAME certificates"
 apache-config.py certs $CFG_NAME %s || EXIT=$?
-""" % domain["certs"])
+""" % domain["certs"]
 
-    print_configure_sh("""
+    print """
 echo "    -> configuring site $DOMAIN_NAME"
 apache-config.py config -V %s $CFG_NAME $THIS_DIR/%s $THIS_DIR/%s || EXIT=$?
-""" % (varn_fname, basename_templ, json_fname))
+""" % (varn_fname, basename_templ, json_fname)
 
 
 def _get_ui_config_command_opts(domain):
@@ -825,9 +839,9 @@ def _get_ui_config_command_opts(domain):
         opts.write("enable-html-substitute ")
     # if domain["include_user_agent"]:
     # opts.write("include_user_agent ")
-    #if domain["cache_ps_html"]:
+    # if domain["cache_ps_html"]:
     #    opts.write("cache_ps_html ")
-    #if domain["debug"]:
+    # if domain["debug"]:
     #    opts.write("debug ")
 
     return opts.getvalue()
@@ -836,7 +850,8 @@ def _get_ui_config_command_opts(domain):
 def generate_bp_ui_config_json(domain):
     static_servers = \
         ["http://%s" % srv for srv in sorted_non_empty(domain["static_servers_http"])] + \
-        ["https://%s" % srv for srv in sorted_non_empty(domain["static_servers_https"])]
+        ["https://%s" %
+            srv for srv in sorted_non_empty(domain["static_servers_https"])]
 
     return {
         "bp_apache_custom_config": "",
@@ -934,11 +949,7 @@ def generate_ui_configs():
             json.dump(cfg, f, indent=2)
 
 
-def print_configure_sh(txt):
-    print txt
-
-
-#TODO: try to understand for what so strange way to write to file
+# TODO: try to understand for what so strange way to write to file
 def generate_config_sh():
     global _bps
     global _cos
@@ -946,37 +957,37 @@ def generate_config_sh():
     # Generate the config script
     sys.stdout = open("configure.sh", "w")
 
-    print_configure_sh("""#!/bin/bash
+    print """#!/bin/bash
     EXIT=0
     THIS_DIR=`readlink -f .`
-    """)
+    """
 
     if not args.no_bp:
         for addr, domains in _bps.iteritems():
-            print_configure_sh("""
+            print """
     BP=%s
     echo "Configuring BP '$BP'"
     apache-config.py start -I $THIS_DIR $BP || EXIT=$?
-    """ % addr)
+    """ % addr
             if args.flush:
-                print_configure_sh("""
+                print """
     echo "    -> removing all sites on server"
     apache-config.py flush-sites || EXIT=$?
-    """)
+    """
             for domain in domains:
                 generate_bp(domain)
             if not args.no_send:
-                print_configure_sh("""
+                print """
     echo "    -> sending configuration"
     apache-config.py send || EXIT=$?
-    """)
+    """
             if args.copy_to:
-                print_configure_sh("""
+                print """
     echo "    -> copying configuration to '%s'"
     apache-config.py copy %s || EXIT=$?
-    """ % (args.copy_to, args.copy_to))
+    """ % (args.copy_to, args.copy_to)
 
-    print_configure_sh("exit $EXIT")
+    print "exit $EXIT"
 
 
 def main():
@@ -1001,7 +1012,7 @@ def main():
     # Debug output
     # pp = pprint.PrettyPrinter(stream=sys.stderr)
     # print "Services:"
-    #pp.pprint(servers)
+    # pp.pprint(servers)
 
     for domain in _domains:
         fixup_domain(domain)
@@ -1025,14 +1036,13 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("--no-send", help="Don't send configuration",
                         action="store_true")
-    parser.add_argument("--copy-to", help="Copy generated configuration to file name")
+    parser.add_argument(
+        "--copy-to", help="Copy generated configuration to file name")
     parser.add_argument("--ui-config", help="Generate 'ui-config-<domain>.json' instead of 'configure.sh'",
                         action="store_true")
     parser.add_argument("--run_test", help="Run unit test for this module",
                         action="store_true")
     args = parser.parse_args()
-
-
 
     if args.manual:
         print help_str

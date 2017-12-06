@@ -1,5 +1,6 @@
 import syslog
 
+
 class RevSysLogger:
     def __init__(self, verbose=True):
         self.verbose = verbose

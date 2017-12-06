@@ -1,0 +1,24 @@
+#!/bin/bash
+# Script for checking that all Python pep8 rules are met
+# There are two commands: for revsw-proxy-config folder
+#       and for revsw-proxy-config/revsw folder
+
+echo "Run Flake8 Python pep8 checker.. "
+
+status=0
+
+commands=(
+    "flake8 $PWD --max-line-length=120 --exclude node_modules,revsw"
+    "flake8 $PWD/revsw --max-line-length=120 --ignore A001,A002,F403,F405,F401"
+)
+
+for command in "${commands[@]}"
+do
+    $command
+    if [ $? -ne 0 ]
+    then
+        status=1
+    fi
+done
+exit $status
+

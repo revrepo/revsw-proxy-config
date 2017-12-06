@@ -26,21 +26,20 @@ import revsw
 
 from mock import Mock, patch
 import revsw_apache_config
-# import . as revsw
 import script_configs
 from revsw.logger import RevSysLogger
 from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer,\
     VarnishConfig, NginxConfig
 
 
-TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")
+TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "temporary_testing_files/")
 TEST_CONFIG_DIR = os.path.join(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
 )
 
 revsw_apache_config._g_webserver_name = 'fdsdfsdfsd'
 revsw_apache_config._log = RevSysLogger()
-
 
 
 def redirect_to_test_dir(*args, **kwargs):
@@ -56,9 +55,6 @@ class TestConfigTransaction(ConfigTransaction):
 
         self.curr_idx = ConfigTransaction.file_idx
         ConfigTransaction.file_idx += 1
-
-        varnish_dir = TEST_DIR
-        etc_dir = TEST_DIR
 
     def finalize(self):
         pass
@@ -78,16 +74,21 @@ class TestAbstractConfig(unittest.TestCase):
         # create folder for tests
         os.system("mkdir %s" % TEST_DIR)
         self.search_dirs_base = [os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/templates"
+            os.path.dirname(os.path.dirname(os.path.abspath(
+                __file__))), "revsw-proxy-config/templates"
         )]
         self.subdirs = ("all/bp",)
         self.search_dirs = [os.path.join(base, subdir) for (base, subdir) in
                             itertools.product(self.search_dirs_base, self.subdirs)]
         self.platform = PlatformWebServer()
         self.platform.etc_dir = Mock(TEST_DIR)
-        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
-        patch('revsw_apache_config._webserver_write_command', lambda x: x).start()
-        self.testing_class.jinja_config_webserver_dir = Mock(return_value=TEST_DIR)
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(
+            return_value=TEST_DIR)
+        patch(
+            'revsw_apache_config._webserver_write_command',
+            lambda x: x).start()
+        self.testing_class.jinja_config_webserver_dir = Mock(
+            return_value=TEST_DIR)
 
     def tearDown(self):
         # remove all temporary test files
@@ -101,39 +102,22 @@ class TestWebServerConfig(TestAbstractConfig):
     def test_gather_template_files(self):
         subdirs = ("nginx/common",)
         search_dirs = [os.path.join(base, subdir) for (base, subdir) in
-                            itertools.product(self.search_dirs_base, subdirs)]
-        templates = self.testing_class.gather_template_files('balancer', search_dirs)
+                       itertools.product(self.search_dirs_base, subdirs)]
+        templates = self.testing_class.gather_template_files(
+            'balancer', search_dirs)
         self.assertTrue(templates)
 
     def test_write_template_files(self):
-        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
-        self.testing_class.write_template_files({'test_template.json': 'testing data'})
-        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_site/test_template.json")))
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(
+            return_value=TEST_DIR)
+        self.testing_class.write_template_files(
+            {'test_template.json': 'testing data'})
+        self.assertTrue(os.path.exists(os.path.join(
+            TEST_DIR, "test_site/test_template.json")))
 
     def test_write_certs(self):
-        revsw_apache_config.jinja_config_webserver_base_dir = Mock(return_value=TEST_DIR)
-        cert = """-----BEGIN CERTIFICATE-----
-MIIDizCCAnOgAwIBAgIJAIKWzl34sq5rMA0GCSqGSIb3DQEBBQUAMFwxCzAJBgNV
-BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
-aWRnaXRzIFB0eSBMdGQxFTATBgNVBAMMDHJldnN3LWNvbmZpZzAeFw0xNDAzMjQx
-ODQ3MTNaFw0xNTAzMjQxODQ3MTNaMFwxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApT
-b21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFTAT
-BgNVBAMMDHJldnN3LWNvbmZpZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
-ggEBAMX9kMXcdF0z1vEryj79xV7Lz8YP3CL+ByrR+JsXlD0TTSH3xx9G2gxIrT/E
-Nv5z4P4DXYUs4/74iyS645WTddiv4Z3vkcqvYbmdy0BRTdg80oOEKbkSO9CnjDbt
-7ylXAXs0n3zZT9Ms92dko3nf0W0suwrD3RnksOxMZoFes02qsf73B8xqp7m9Bm93
-16U9DGBAkdgzctlVj5DdARW7BnUjYpUAvMZG+9cgLu84HDdrrMgxOGEc5SwWJqLK
-pRzJireDR88WoBnFPsBl4cvwS0K6FMaLcrnNpX2IBXf8FE9uaXNW9n0DaEAltTDa
-M3Twv+kkuyu4Fw6Ed34hZeb+NsECAwEAAaNQME4wHQYDVR0OBBYEFLgvOaN9ERpV
-nuQo8JzHvdRVWexcMB8GA1UdIwQYMBaAFLgvOaN9ERpVnuQo8JzHvdRVWexcMAwG
-A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADggEBACWJj+fsjTUqcvubiHXaK57I
-8FsbjfYXVw7qzi5EqnLj0uXB+DYYUZB8dI9s7zLvnuqKqH6fXw4ahp+1DOAIMDie
-tI/6rkTKykqw05A0Yd7hpK35+5YR9XC5Nh0NCRnHCaEsEOyaN+v5wy4+JMy44IWu
-EBTSrTVumTy7w7A52GEbsObVQM1UNB94zBrQFPrcOLdIerARWf4yJ2RkJzGpy3+c
-BTInOSVqmsV3Dna4cw+S9hC7e+goeeCwyse6EBQSQtNwXLk6NAWzM7DK0FzKWWa+
-pBQFcL5ZOPHeTbfzHnljVA0G1kbwcJmKPCuNhwGIrjCX7XQncaJGNxIplRJkb7k=
------END CERTIFICATE-----
-"""
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(
+            return_value=TEST_DIR)
 
         # self.testing_class.write_certs(cert, cert, cert)
         # self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_site/certs/server.crt")))
@@ -142,10 +126,14 @@ pBQFcL5ZOPHeTbfzHnljVA0G1kbwcJmKPCuNhwGIrjCX7XQncaJGNxIplRJkb7k=
 
     def test_fixup_certs(self):
         self.testing_class._fixup_certs()
-        self.assertTrue(os.path.islink((os.path.join(TEST_DIR, "test_site/certs/server.crt"))))
-        self.assertTrue(os.path.islink((os.path.join(TEST_DIR, "test_site/certs/server.key"))))
-        self.assertTrue(os.path.islink((os.path.join(TEST_DIR, "test_site/certs/ca-bundle.crt"))))
-        self.assertTrue(os.path.islink((os.path.join(TEST_DIR, "test_site/certs/server-chained.crt"))))
+        self.assertTrue(os.path.islink(
+            (os.path.join(TEST_DIR, "test_site/certs/server.crt"))))
+        self.assertTrue(os.path.islink(
+            (os.path.join(TEST_DIR, "test_site/certs/server.key"))))
+        self.assertTrue(os.path.islink(
+            (os.path.join(TEST_DIR, "test_site/certs/ca-bundle.crt"))))
+        self.assertTrue(os.path.islink(
+            (os.path.join(TEST_DIR, "test_site/certs/server-chained.crt"))))
 
 
 class TestVarnishConfig(TestAbstractConfig):
@@ -169,14 +157,20 @@ class TestVarnishConfig(TestAbstractConfig):
             ),
             os.path.join(TEST_DIR, 'bin/')
         ))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'test_site/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'bin/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, 'sites/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test_site.json"), os.path.join(TEST_DIR, 'sites/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test_domain.json"), os.path.join(TEST_DIR, 'sites/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
-
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.json"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.json"), os.path.join(TEST_DIR, 'bin/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "test_site.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "test_domain.json"), os.path.join(TEST_DIR, 'sites/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
 
         self.testing_class.write_config_file(self.search_dirs)
 
@@ -184,10 +178,13 @@ class TestVarnishConfig(TestAbstractConfig):
         templates = self.testing_class.gather_template_files(self.search_dirs)
         self.assertTrue(templates)
 
-    @patch('revsw_apache_config.jinja_config_varnish_base_dir', side_effect=redirect_to_test_dir)
+    @patch('revsw_apache_config.jinja_config_varnish_base_dir',
+           side_effect=redirect_to_test_dir)
     def test_write_template_files(self, redirect_to_test_dir):
-        self.testing_class.write_template_files({'test_template.json': 'testing data'})
-        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "test_template.json")))
+        self.testing_class.write_template_files(
+            {'test_template.json': 'testing data'})
+        self.assertTrue(os.path.exists(
+            os.path.join(TEST_DIR, "test_template.json")))
 
     def test_load_site_config(self):
         test_json = {'test': 'test'}
@@ -205,7 +202,8 @@ class TestVarnishConfig(TestAbstractConfig):
             return_value=os.path.join(TEST_CONFIG_DIR, "test_config2.json")
         )
         self.testing_class.config_site({'test': 'test'})
-        self.assertTrue(os.path.exists(os.path.join(TEST_CONFIG_DIR, "test_config2.json")))
+        self.assertTrue(os.path.exists(os.path.join(
+            TEST_CONFIG_DIR, "test_config2.json")))
 
     def test_remove_site(self):
         open(os.path.join(TEST_CONFIG_DIR, "test_config.json"), "w")
@@ -213,7 +211,8 @@ class TestVarnishConfig(TestAbstractConfig):
             return_value=os.path.join(TEST_CONFIG_DIR, "test_config.json")
         )
         self.testing_class.remove_site()
-        self.assertFalse(os.path.exists(os.path.join(TEST_CONFIG_DIR, "test_config.json")))
+        self.assertFalse(os.path.exists(
+            os.path.join(TEST_CONFIG_DIR, "test_config.json")))
 
     def test_site_config_path(self):
         config_path = self.testing_class.site_config_path()
@@ -239,7 +238,6 @@ class TestNginxConfig(TestAbstractConfig):
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-available/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-enabled/'))
 
-
         os.path.join(os.path.dirname(
             os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
         )
@@ -249,22 +247,27 @@ class TestNginxConfig(TestAbstractConfig):
             ),
             os.path.join(TEST_DIR, 'bin/')
         ))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
 
         self.testing_class.configure_site({
             "configs": [{"sdk_domain_name": "test"}],
             "bpname": "test"
         })
-        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")))
+        self.assertTrue(os.path.exists(os.path.join(
+            TEST_DIR, "sites-available/test_site.conf")))
 
     def test_remove_site(self):
         script_configs.NGINX_PATH = TEST_DIR
-        if not os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")):
+        if not os.path.exists(os.path.join(
+                TEST_DIR, "sites-available/test_site.conf")):
             os.mkdir("%s/sites-available" % TEST_DIR)
             with open("%s/sites-available/test_site.conf" % TEST_DIR, "wb") as f:
                 f.write("test")
-        if not os.path.exists(os.path.join(TEST_DIR, "sites-enabled/test_site.conf")):
+        if not os.path.exists(os.path.join(
+                TEST_DIR, "sites-enabled/test_site.conf")):
             os.mkdir("%s/sites-enabled" % TEST_DIR)
             with open("%s/sites-enabled/test_site.conf" % TEST_DIR, "wb") as f:
                 f.write("test")
@@ -272,18 +275,21 @@ class TestNginxConfig(TestAbstractConfig):
             os.mkdir("%s/test_site" % TEST_DIR)
 
         self.testing_class.remove_site()
-        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "sites-available/test_site.conf")))
-        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "sites-enabled/test_site.conf")))
+        self.assertFalse(os.path.exists(os.path.join(
+            TEST_DIR, "sites-available/test_site.conf")))
+        self.assertFalse(os.path.exists(os.path.join(
+            TEST_DIR, "sites-enabled/test_site.conf")))
         self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "test_site")))
 
     def test_get_all_active_domains(self):
         script_configs.APACHE_PATH = TEST_DIR
         # create test folder
         os.mkdir(os.path.join(TEST_DIR, "test_site"))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "main.json"), os.path.join(TEST_DIR, "test_site")))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.json"), os.path.join(TEST_DIR, "test_site")))
 
         domains = self.testing_class.get_all_active_domains()
-        self.assertEqual(domains, ["test_domain",])
+        self.assertEqual(domains, ["test_domain", ])
 
 
 if __name__ == '__main__':
