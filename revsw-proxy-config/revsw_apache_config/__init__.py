@@ -550,16 +550,15 @@ class PlatformWebServer:
     """
     def __init__(self):
         global _g_webserver_name
-        # if not _g_webserver_name:
-        #     for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
-        #         try:
-        #             run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
-        #             if _g_webserver_name:
-        #                 raise RuntimeError("Both Nginx versions are installed; please check your configuration")
-        #             _g_webserver_name = name
-        #         except OSError:
-        #             pass
-        _g_webserver_name = "NGINX"  # test
+        if not _g_webserver_name:
+            for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
+                try:
+                    run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
+                    if _g_webserver_name:
+                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
+                    _g_webserver_name = name
+                except OSError:
+                    pass
         if not _g_webserver_name:
             raise RuntimeError("Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
 
@@ -676,22 +675,20 @@ class ConfigTransaction:
                 VarnishConfig(transaction=self).write_config_file()
 
                 def reload_varnish():
-                    print "vARNISH reloaded"
-                    pass  # test
-                #     # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
-                #     # failures.
-                #     child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
-                #                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                #     (stdout, stderr) = child.communicate()
-                #
-                #     _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
-                #     if child.returncode != 0:
-                #         for line in stderr.split("\n"):
-                #             _log.LOGE(line)
-                #         raise ConfigException("Varnish %s failed" % v_reload_cmd,
-                #                               VarnishConfig.get_error_domains(stderr))
-                #
-                # self.run(reload_varnish)
+                    # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
+                    # failures.
+                    child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
+                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (stdout, stderr) = child.communicate()
+
+                    _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
+                    if child.returncode != 0:
+                        for line in stderr.split("\n"):
+                            _log.LOGE(line)
+                        raise ConfigException("Varnish %s failed" % v_reload_cmd,
+                                              VarnishConfig.get_error_domains(stderr))
+
+                self.run(reload_varnish)
             else:
                 _log.LOGI("Varnish is not installed; not %sing it" % self.varnish_reload_cmd)
 
