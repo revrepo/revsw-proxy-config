@@ -561,7 +561,6 @@ class PlatformWebServer:
                     pass
         if not _g_webserver_name:
             raise RuntimeError("Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
-
         self._name = _g_webserver_name
 
     def _is_nginx(self):
@@ -971,13 +970,13 @@ class NginxConfig(WebServerConfig):
         child = subprocess.Popen("service revsw-nginx configtest", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
-        # if child.returncode != 0:
-        #     for line in stderr.split("\n"):
-        #         _log.LOGE(line)
-        #     raise ConfigException("Nginx config check failed",
-        #                           NginxConfig.get_error_domains(stderr))
-        #
-        # run_cmd("service revsw-nginx %s" % reload_cmd, _log, "%sing Nginx" % reload_cmd.capitalize(), True)
+        if child.returncode != 0:
+            for line in stderr.split("\n"):
+                _log.LOGE(line)
+            raise ConfigException("Nginx config check failed",
+                                  NginxConfig.get_error_domains(stderr))
+
+        run_cmd("service revsw-nginx %s" % reload_cmd, _log, "%sing Nginx" % reload_cmd.capitalize(), True)
 
 
 class VarnishConfig:

@@ -49,7 +49,6 @@ def run_cmd(cmd, logger, help=None, silent=False):
         raise OSError(errmsg)
 
 
-
 def select_file_path(fname, alt_fname, paths_to_search, logger):
     """
     Selects either fname (if defined), alt_fname (if it starts with /)
