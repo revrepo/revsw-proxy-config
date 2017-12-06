@@ -28,8 +28,8 @@ from mock import Mock, patch
 import revsw_apache_config
 import script_configs
 from revsw.logger import RevSysLogger
-from revsw_apache_config import WebServerConfig, ConfigTransaction, \
-    PlatformWebServer, VarnishConfig, NginxConfig
+from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer,\
+    VarnishConfig, NginxConfig
 
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(
