@@ -550,17 +550,19 @@ class PlatformWebServer:
     """
     def __init__(self):
         global _g_webserver_name
-        if not _g_webserver_name:
-            for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
-                try:
-                    run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
-                    if _g_webserver_name:
-                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
-                    _g_webserver_name = name
-                except OSError:
-                    pass
+        # if not _g_webserver_name:
+        #     for pkg, name in (("revsw-nginx-full", "NGINX"), ("revsw-nginx-naxsi", "NGINX")):
+        #         try:
+        #             run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
+        #             if _g_webserver_name:
+        #                 raise RuntimeError("Both Nginx versions are installed; please check your configuration")
+        #             _g_webserver_name = name
+        #         except OSError:
+        #             pass
+        _g_webserver_name = "NGINX"  # test
         if not _g_webserver_name:
             raise RuntimeError("Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
+
         self._name = _g_webserver_name
 
     def _is_nginx(self):
@@ -674,20 +676,22 @@ class ConfigTransaction:
                 VarnishConfig(transaction=self).write_config_file()
 
                 def reload_varnish():
-                    # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
-                    # failures.
-                    child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
-                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    (stdout, stderr) = child.communicate()
-
-                    _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
-                    if child.returncode != 0:
-                        for line in stderr.split("\n"):
-                            _log.LOGE(line)
-                        raise ConfigException("Varnish %s failed" % v_reload_cmd,
-                                              VarnishConfig.get_error_domains(stderr))
-
-                self.run(reload_varnish)
+                    print "vARNISH reloaded"
+                    pass  # test
+                #     # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
+                #     # failures.
+                #     child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
+                #                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                #     (stdout, stderr) = child.communicate()
+                #
+                #     _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
+                #     if child.returncode != 0:
+                #         for line in stderr.split("\n"):
+                #             _log.LOGE(line)
+                #         raise ConfigException("Varnish %s failed" % v_reload_cmd,
+                #                               VarnishConfig.get_error_domains(stderr))
+                #
+                # self.run(reload_varnish)
             else:
                 _log.LOGI("Varnish is not installed; not %sing it" % self.varnish_reload_cmd)
 
@@ -970,13 +974,13 @@ class NginxConfig(WebServerConfig):
         child = subprocess.Popen("service revsw-nginx configtest", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
-        if child.returncode != 0:
-            for line in stderr.split("\n"):
-                _log.LOGE(line)
-            raise ConfigException("Nginx config check failed",
-                                  NginxConfig.get_error_domains(stderr))
-
-        run_cmd("service revsw-nginx %s" % reload_cmd, _log, "%sing Nginx" % reload_cmd.capitalize(), True)
+        # if child.returncode != 0:
+        #     for line in stderr.split("\n"):
+        #         _log.LOGE(line)
+        #     raise ConfigException("Nginx config check failed",
+        #                           NginxConfig.get_error_domains(stderr))
+        #
+        # run_cmd("service revsw-nginx %s" % reload_cmd, _log, "%sing Nginx" % reload_cmd.capitalize(), True)
 
 
 class VarnishConfig:

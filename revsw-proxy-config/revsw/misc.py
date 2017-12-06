@@ -46,7 +46,8 @@ def run_cmd(cmd, logger, help=None, silent=False):
     if errmsg:
         if not silent:
             logger.LOGE(errmsg)
-        raise OSError(errmsg)
+        # raise OSError(errmsg)
+        pass  # test
 
 
 def select_file_path(fname, alt_fname, paths_to_search, logger):
