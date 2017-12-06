@@ -8,7 +8,7 @@ import logging
 import sys
 
 from docopt import docopt
-from ngxtop.utils import error_exit, choose_one
+from ngxtop.utils import error_exit
 
 
 NGINX_LOG_CO = "/var/log/nginx/revsw_nginx_access_json_co.log"
@@ -49,6 +49,7 @@ def detect_log_config(arguments):
     if format_name not in log_formats:
         error_exit('Incorrect format name set in config for access log file "%s"' % log_path)
     return log_path, log_formats[format_name]
+
 
 def process(arguments):
     access_log = arguments['--access-log']
@@ -96,5 +97,4 @@ def main():
 
 
 if __name__ == '__main__':
-
     main()
