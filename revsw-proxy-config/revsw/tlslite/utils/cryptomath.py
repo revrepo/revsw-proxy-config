@@ -11,6 +11,7 @@ from __future__ import print_function
 import hmac
 import hashlib
 import os
+import math
 
 from .compat import *
 
