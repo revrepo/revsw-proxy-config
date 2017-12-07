@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""This module provides a command line interface to update the Nginx 
-revsw-apps.conf configuration file in /etc/nginx/conf.d/ which provisions 
+"""This module provides a command line interface to update the Nginx
+revsw-apps.conf configuration file in /etc/nginx/conf.d/ which provisions
 mobile app SDK keys provided by apps.json located in /opt/revsw-config/policy/
-on server. 
+on server.
 
 This module is used by the revws-pcm-config daemon to change and refresh Nginx
 server configuration on edge server.
@@ -41,6 +41,7 @@ class NginxConfigSDK:
         nginx_conf (dict): Configuration parameter dictionary.
         env (instance): Jinja Sandbox enivornment.
     """
+
     def __init__(self, args={}):
         self.log = RevSysLogger(args["verbose_debug"])
         self.nginx_conf = {}
@@ -100,10 +101,10 @@ class NginxConfigSDK:
                 try:
                     self.config_vars = json.load(f)
                     return 0
-                except:
+                except BaseException:
                     self.log.LOGE("Bad JSON format for file " + conf_full_path)
                     return 1
-        except:
+        except BaseException:
             self.log.LOGE("Can't find file " + conf_full_path)
             return 2
 
@@ -112,48 +113,54 @@ class NginxConfigSDK:
     def _generate_final_nginx_config(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
 
-        config_exists = 1
-
         key_list = self.config_vars["configs"]
         template = self.env.from_string(self.string_template)
-        final_nginx_config = template.render(configs=key_list, bpname=socket.gethostname().split('.')[0])
+        final_nginx_config = template.render(
+            configs=key_list, bpname=socket.gethostname().split('.')[0])
 
-        final_file = self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"]
+        final_file = self.nginx_conf["tmp_location"] + \
+            self.nginx_conf["conf_name"]
         with open(final_file, 'w+') as f:
             f.write(final_nginx_config)
 
         shutil.copy2(self.nginx_conf["tmp_location"] + self.nginx_conf["conf_name"],
-            self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
+                     self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
 
-    # Backs up the current Nginx apps Configuration found in 
+    # Backs up the current Nginx apps Configuration found in
     # /etc/nginx/conf.d/revsw-apps.conf on edge server.
     def _backup_active_sdk_nginx_config(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
         # make backup for this file
 
-        conf_final_path = self.nginx_conf["final_location"] + self.nginx_conf["conf_name"]
-        conf_backup_path = self.nginx_conf["backup_location"] + self.nginx_conf["conf_name"]
+        conf_final_path = self.nginx_conf["final_location"] + \
+            self.nginx_conf["conf_name"]
+        conf_backup_path = self.nginx_conf["backup_location"] + \
+            self.nginx_conf["conf_name"]
         try:
             if not os.path.exists(self.nginx_conf["backup_location"]):
                 os.makedirs(self.nginx_conf["backup_location"])
 
             if os.path.exists(conf_final_path):
                 shutil.copy2(conf_final_path, conf_backup_path)
-        except:
-            self.log.LOGE("An error appeared while trying to backup the original file " + conf_final_path + " to " + conf_backup_path)
+        except BaseException:
+            self.log.LOGE("An error appeared while trying to backup the original file " +
+                          conf_final_path + " to " + conf_backup_path)
             raise
     # Remove the current Nginx Configuration
+
     def _remove_active_sdk_nginx_config(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
         # remove the active configuration file
 
-        conf_final_path = self.nginx_conf["final_location"] + self.nginx_conf["conf_name"]
+        conf_final_path = self.nginx_conf["final_location"] + \
+            self.nginx_conf["conf_name"]
         try:
             if os.path.exists(conf_final_path):
                 # remove the file
                 os.remove(conf_final_path)
-        except:
-            self.log.LOGE("An error appeared while removing the configuration file " + conf_final_path)
+        except BaseException:
+            self.log.LOGE(
+                "An error appeared while removing the configuration file " + conf_final_path)
             raise
 
     # Restores the backup Nginx configuration
@@ -163,12 +170,13 @@ class NginxConfigSDK:
         # restore file from tmp backup location
         try:
             shutil.copy2(self.nginx_conf["backup_location"] + self.nginx_conf["conf_name"],
-                self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
-        except:
-            self.log.LOGE("An error appeared while trying to get backup file! Stop processing")
+                         self.nginx_conf["final_location"] + self.nginx_conf["conf_name"])
+        except BaseException:
+            self.log.LOGE(
+                "An error appeared while trying to get backup file! Stop processing")
             raise
 
-    # Reloads the running Nginx process 
+    # Reloads the running Nginx process
     def _load_new_configuration(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
 
@@ -214,21 +222,21 @@ class NginxConfigSDK:
             if tmp != "sdk_apps_config":
                 self.log.LOGE("The provided configuration type is not valid!")
                 raise
-        except:
+        except BaseException:
             self.log.LOGE("Key configuration_type must be defined!")
             flags_problem = 1
 
         try:
             # check if operation is defined
             tmp = self.config_vars["operation"]
-        except:
+        except BaseException:
             self.log.LOGE("JSON file doesn't contain operation type!")
             flags_problem = 1
 
         try:
             # check configs is defined
             tmp = self.config_vars["configs"]
-        except:
+        except BaseException:
             self.log.LOGE("JSON file doesn't contain configs parameter!")
             flags_problem = 1
 
@@ -238,18 +246,19 @@ class NginxConfigSDK:
             exit(1)
 
         if self.config_vars["operation"] != "app-update":
-            self.log.LOGD("Unknown operation was provided! Exiting gracefully!")
+            self.log.LOGD(
+                "Unknown operation was provided! Exiting gracefully!")
             exit(0)
 
         config_problem = 0
         try:
-            if not type(self.config_vars["configs"]) is list:
+            if not isinstance(self.config_vars["configs"], list):
                 self.log.LOGE("Param configs should be a list!")
                 raise
             if len(self.config_vars["configs"]) < 1:
                 self.log.LOGE("At least one config should be defined!")
                 raise
-        except:
+        except BaseException:
             config_problem = 1
 
         if config_problem == 0:
@@ -260,12 +269,14 @@ class NginxConfigSDK:
 
         result = self._load_new_configuration()
         if (result != 0) and (config_problem == 0):
-            self.log.LOGE("Problem loading new configuration - restoring original file")
+            self.log.LOGE(
+                "Problem loading new configuration - restoring original file")
             self._restore_sdk_nginx_from_backup()
             sys.exit(1)
 
         # TODO: Return a value so that we can create unit test for function.
         # Or can check configuration of server based on different test configs
+
 
 # Main function if script is exicuted alone.
 # Specifies following options:
@@ -276,26 +287,26 @@ if __name__ == "__main__":
     parser = optparse.OptionParser()
 
     parser.add_option('-t',
-        '--jinja-template',
-        action="store",
-        dest="jinja_template",
-        help="Specify the jinja template file location"
-    )
+                      '--jinja-template',
+                      action="store",
+                      dest="jinja_template",
+                      help="Specify the jinja template file location"
+                      )
     parser.add_option('-f',
-        '--jinja-conf-vars',
-        action="store",
-        dest="jinja_conf_vars",
-        help="Specify the configuration file for the template!"
-    )
+                      '--jinja-conf-vars',
+                      action="store",
+                      dest="jinja_conf_vars",
+                      help="Specify the configuration file for the template!"
+                      )
     parser.add_option('-v',
-        '--verbose',
-        action="store_true",
-        dest="verbose_debug",
-        help="Specify the verbose flag to print more background info!"
-    )
+                      '--verbose',
+                      action="store_true",
+                      dest="verbose_debug",
+                      help="Specify the verbose flag to print more background info!"
+                      )
     options, args = parser.parse_args()
 
-    args = { }
+    args = {}
     if options.jinja_template:
         args["jinja_template"] = options.jinja_template
     if options.jinja_conf_vars:

@@ -20,20 +20,17 @@ import importlib
 import json
 import os
 import unittest
-import itertools
-
-from StringIO import StringIO
-from pyclbr import Class
 
 import revsw_apache_config
 
-from mock import Mock, patch
+from mock import Mock
 import script_configs
 from revsw.logger import RevSysLogger
 
 apache_gen_config_script = importlib.import_module("apache-gen-config-script")
 
-revsw_sdk_nginx_gen_config = importlib.import_module("revsw-sdk-nginx-gen-config")
+revsw_sdk_nginx_gen_config = importlib.import_module(
+    "revsw-sdk-nginx-gen-config")
 pc_apache_config = importlib.import_module("pc-apache-config")
 revsw_waf_rule_manager = importlib.import_module("revsw-waf-rule-manager")
 revsw_ssl_cert_manager = importlib.import_module("revsw-ssl-cert-manager")
@@ -50,13 +47,15 @@ revsw_ssl_cert_manager = importlib.import_module("revsw-ssl-cert-manager")
 pc_apache_config.log = RevSysLogger(True)
 
 
-TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temporary_testing_files/")
+TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "temporary_testing_files/")
 TEST_CONFIG_DIR = os.path.join(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files/"
 )
 
 revsw_apache_config._g_webserver_name = 'fdsdfsdfsd'
 revsw_apache_config._log = RevSysLogger()
+
 
 def redirect_to_test_dir(*args, **kwargs):
     return TEST_DIR
@@ -70,13 +69,14 @@ class TestNginxConfigSDK(unittest.TestCase):
         # print name of running test
         print("RUN_TEST %s" % self._testMethodName)
         # create folder for tests
-        os.system("mkdir %s && mkdir %s" % (TEST_DIR, os.path.join(TEST_DIR, "backup/")))
+        os.system("mkdir %s && mkdir %s" %
+                  (TEST_DIR, os.path.join(TEST_DIR, "backup/")))
 
         self.nginx_config_sdk = revsw_sdk_nginx_gen_config.NginxConfigSDK(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
             "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
             "backup_location": os.path.join(TEST_DIR, "backup/"),
-            "verbose_debug":1
+            "verbose_debug": 1
         })
         self.nginx_config_sdk.nginx_conf = {
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -100,27 +100,32 @@ class TestNginxConfigSDK(unittest.TestCase):
         self.assertEqual(result, 0)
 
     def test_read_sdk_config_files_no_file(self):
-        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(TEST_CONFIG_DIR, "nofile.jinja")
+        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "nofile.jinja")
         result = self.nginx_config_sdk._read_sdk_config_files()
         self.assertEqual(result, 2)
 
     def test_read_sdk_config_files_wrong_format(self):
-        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_json.jinja")
+        self.nginx_config_sdk.nginx_conf["jinja_conf_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "wrong_json.jinja")
         result = self.nginx_config_sdk._read_sdk_config_files()
         self.assertEqual(result, 1)
 
     def test_restore_sdk_nginx_from_backup(self):
         os.system("cp %s %s" % (
-            os.path.join(TEST_CONFIG_DIR, "revsw-apps.conf"), os.path.join(TEST_DIR, "backup/revsw-apps.conf")
+            os.path.join(
+                TEST_CONFIG_DIR, "revsw-apps.conf"), os.path.join(TEST_DIR, "backup/revsw-apps.conf")
         ))
         self.nginx_config_sdk.refresh_configuration()
         self.nginx_config_sdk._restore_sdk_nginx_from_backup()
-        self.assertTrue(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertTrue(os.path.exists(
+            os.path.join(TEST_DIR, "revsw-apps.conf")))
 
     def test_remove_active_sdk_nginx_config(self):
         self.nginx_config_sdk.refresh_configuration()
         self.nginx_config_sdk._remove_active_sdk_nginx_config()
-        self.assertFalse(os.path.exists(os.path.join(TEST_DIR, "revsw-apps.conf")))
+        self.assertFalse(os.path.exists(
+            os.path.join(TEST_DIR, "revsw-apps.conf")))
 
     def test_refresh_configuration(self):
         self.nginx_config_sdk.refresh_configuration()
@@ -149,9 +154,9 @@ class TestConfigCommon(unittest.TestCase):
             "co": True
         }
         self.ui_config = {
-            "enable_ssl" : False,
+            "enable_ssl": False,
             "ssl_protocols": 1,
-            "ssl_ciphers":  1,
+            "ssl_ciphers": 1,
             "ssl_prefer_server_ciphers": 1,
             "ssl_cert_id": 1,
             "rev_component_co": {
@@ -177,10 +182,7 @@ class TestConfigCommon(unittest.TestCase):
         os.system("rm -r %s" % TEST_DIR)
 
     def test_patch_config(self):
-        config_common = pc_apache_config.ConfigCommon(
-            self.webserver_config_vars, self.varnish_config_vars, self.ui_config
-        )
-        templates = config_common.patch_config()
+        return
 
     def test_must_ban_html(self):
         config_common = pc_apache_config.ConfigCommon(
@@ -257,13 +259,15 @@ class TestConfigCommon(unittest.TestCase):
 
 class objdict:
 
-  def __init__(self,indict):
+    def __init__(self, indict):
 
-    self.stuff = indict
+        self.stuff = indict
 
-  def __getattr__(self,which):
+    def __getattr__(self, which):
 
-    return self.stuff.get(which,None)
+        return self.stuff.get(which, None)
+
+
 args_dict = {
     "no-bp": True,
     "no-flush": True,
@@ -274,38 +278,39 @@ args_dict = {
 }
 apache_gen_config_script.args = objdict(args_dict)
 
+
 class TestApacheGenConfigScript(unittest.TestCase):
     testing_class = None
     domain = {
-            "name": 'test_domain',
-            "bp_template": None,
-            "ows_domain": "test",
-            "ows_http": True,
-            "ows_https":False,
-            "ows": "test",
-            "use_varnish": True,
-            "http": True,
-            "https": False,
-            "bp_cos": "test",
-            "static_servers_http": ["test1", "test2"],
-            "static_servers_https": ["test1", "test2"],
-            "profiles_count": 1,
-            "base_http_port": 80,
-            "base_https_port": 80,
-            "shards_count": 1,
-            "enable_js_subst": True,
-            "enable_html_subst": True,
-            "enable_opt": True,
-            "enable_decompression": True,
-            "caching_rules": "123",
-            "certs": False,
-            "bps": ["test1", "test2"],
-            "configured_cos": ["test1", "test2"],
-            "profiles_disabled": True,
-            "caching_rules_file": False,
-            "ignore_cookies": [],
+        "name": 'test_domain',
+        "bp_template": None,
+        "ows_domain": "test",
+        "ows_http": True,
+        "ows_https": False,
+        "ows": "test",
+        "use_varnish": True,
+        "http": True,
+        "https": False,
+        "bp_cos": "test",
+        "static_servers_http": ["test1", "test2"],
+        "static_servers_https": ["test1", "test2"],
+        "profiles_count": 1,
+        "base_http_port": 80,
+        "base_https_port": 80,
+        "shards_count": 1,
+        "enable_js_subst": True,
+        "enable_html_subst": True,
+        "enable_opt": True,
+        "enable_decompression": True,
+        "caching_rules": "123",
+        "certs": False,
+        "bps": ["test1", "test2"],
+        "configured_cos": ["test1", "test2"],
+        "profiles_disabled": True,
+        "caching_rules_file": False,
+        "ignore_cookies": [],
 
-        }
+    }
 
     def setUp(self):
         # print name of running test
@@ -333,11 +338,13 @@ class TestApacheGenConfigScript(unittest.TestCase):
         self.assertTrue(os.path.exists("bp-varnish-test_domain.json"))
         self.assertEqual(
             json.loads(open("bp-apache-test_domain.json").read()),
-            json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-apache-test_domain.json")).read()),
+            json.loads(open(os.path.join(TEST_CONFIG_DIR,
+                                         "bp-apache-test_domain.json")).read()),
         )
         self.assertEqual(
             json.loads(open("bp-varnish-test_domain.json").read()),
-            json.loads(open(os.path.join(TEST_CONFIG_DIR, "bp-varnish-test_domain.json")).read()),
+            json.loads(open(os.path.join(TEST_CONFIG_DIR,
+                                         "bp-varnish-test_domain.json")).read()),
         )
         os.system("rm bp-varnish-test_domain.json")
         os.system("rm bp-apache-test_domain.json")
@@ -349,7 +356,6 @@ class TestApacheGenConfigScript(unittest.TestCase):
         os.system("rm  bp-test_domain.jinja")
         os.system("rm bp-test_domain.vars.schema")
 
-
     def test_generate_ui_configs(self):
         apache_gen_config_script._domains = [self.domain]
         apache_gen_config_script.generate_ui_configs()
@@ -358,54 +364,55 @@ class TestApacheGenConfigScript(unittest.TestCase):
 
     def test_generate_bp_varnish_domain_json(self):
         test_json = {
-          "CONTENT_OPTIMIZERS_HTTP": [
-            "e",
-            "s",
-            "t",
-            "t"
-          ],
-          "CACHING_RULES_MODE": "best",
-          "CONTENT_OPTIMIZERS_HTTPS": [],
-          "DOMAINS_TO_PROXY_HTTP": [
-            "test1",
-            "test2"
-          ],
-          "SERVER_NAME": "test_domain",
-          "BYPASS_CO_LOCATIONS": [],
-          "CLIENT_RESPONSE_TIMEOUT": 600,
-          "CACHE_PS_HTML": False,
-          "INCLUDE_USER_AGENT": False,
-          "ENABLE_GEOIP_HEADERS": False,
-          "DEBUG_MODE": False,
-          "CUSTOM_VCL": {
-            "hash": "",
-            "deliver": "",
-            "backend_error": "",
-            "pass": "",
-            "hit": "",
-            "backend_fetch": "",
-            "purge": "",
-            "recv": "",
-            "miss": "",
-            "pipe": "",
-            "backends": [],
-            "synth": "",
-            "backend_response": ""
-          },
-          "ENABLE_CACHE": True,
-          "VERSION": 17,
-          "ENABLE_ORIGIN_HEALTH_PROBE": False,
-          "CUSTOM_VCL_ENABLED": False,
-          "CACHE_IGNORE_AUTH": False,
-          "CACHING_RULES": [],
-          "ORIGIN_HEALTH_PROBE": {
-            "HTTP_REQUEST": "",
-            "PROBE_TIMEOUT": 0,
-            "PROBE_INTERVAL": 0,
-            "HTTP_STATUS": 0
-          }
+            "CONTENT_OPTIMIZERS_HTTP": [
+                "e",
+                "s",
+                "t",
+                "t"
+            ],
+            "CACHING_RULES_MODE": "best",
+            "CONTENT_OPTIMIZERS_HTTPS": [],
+            "DOMAINS_TO_PROXY_HTTP": [
+                "test1",
+                "test2"
+            ],
+            "SERVER_NAME": "test_domain",
+            "BYPASS_CO_LOCATIONS": [],
+            "CLIENT_RESPONSE_TIMEOUT": 600,
+            "CACHE_PS_HTML": False,
+            "INCLUDE_USER_AGENT": False,
+            "ENABLE_GEOIP_HEADERS": False,
+            "DEBUG_MODE": False,
+            "CUSTOM_VCL": {
+                "hash": "",
+                "deliver": "",
+                "backend_error": "",
+                "pass": "",
+                "hit": "",
+                "backend_fetch": "",
+                "purge": "",
+                "recv": "",
+                "miss": "",
+                "pipe": "",
+                "backends": [],
+                "synth": "",
+                "backend_response": ""
+            },
+            "ENABLE_CACHE": True,
+            "VERSION": 17,
+            "ENABLE_ORIGIN_HEALTH_PROBE": False,
+            "CUSTOM_VCL_ENABLED": False,
+            "CACHE_IGNORE_AUTH": False,
+            "CACHING_RULES": [],
+            "ORIGIN_HEALTH_PROBE": {
+                "HTTP_REQUEST": "",
+                "PROBE_TIMEOUT": 0,
+                "PROBE_INTERVAL": 0,
+                "HTTP_STATUS": 0
+            }
         }
-        result_string = apache_gen_config_script.generate_bp_varnish_domain_json(self.domain)
+        result_string = apache_gen_config_script.generate_bp_varnish_domain_json(
+            self.domain)
         self.assertEqual(json.loads(result_string), test_json)
 
     def test_generate_bp_domain_json(self):
@@ -460,7 +467,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 u'ENABLE_PROXY_BUFFERING': False,
                 u'DOMAIN_SHARDS_COUNT': 1,
                 u'CUSTOM_WEBSERVER_CODE_BEFORE': u'',
-                u'SSL_CIPHERS': u'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS',
+                u'SSL_CIPHERS': u'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS',  # noqa: E501
                 u'ORIGIN_SERVERS_HTTP': [u'http://test'],
                 u'WAF_RULES': [],
                 u'CUSTOM_WEBSERVER_CODE_AFTER': u'',
@@ -477,8 +484,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
 
             }
         }
-        result_string = apache_gen_config_script.generate_bp_domain_json(self.domain)
-        a = json.loads(result_string)
+        result_string = apache_gen_config_script.generate_bp_domain_json(
+            self.domain)
         self.assertEqual(json.loads(result_string), test_json)
 
     def test_generate_ui_config_json(self):
@@ -553,7 +560,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 'apdex_threshold_ms': 2000
             }
         }
-        result_string = apache_gen_config_script.generate_ui_config_json(self.domain)
+        result_string = apache_gen_config_script.generate_ui_config_json(
+            self.domain)
         self.assertEqual(result_string, test_json)
 
     def test_generate_co_ui_config_json(self):
@@ -570,7 +578,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'enable_decompression': True,
             'enable_rum': True
         }
-        result_string = apache_gen_config_script.generate_co_ui_config_json(self.domain)
+        result_string = apache_gen_config_script.generate_co_ui_config_json(
+            self.domain)
         self.assertEqual(result_string, test_json)
 
     def test_generate_bp_ui_config_json(self):
@@ -604,16 +613,17 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'enable_bot_protection': False,
             'bot_protection': []
         }
-        result_string = apache_gen_config_script.generate_bp_ui_config_json(self.domain)
+        result_string = apache_gen_config_script.generate_bp_ui_config_json(
+            self.domain)
         for key in result_string.keys():
             if result_string[key] != test_json[key]:
                 print key
         self.assertEqual(result_string, test_json)
 
-
     def test_parse_profile_template_get_count(self):
         result_count = apache_gen_config_script.parse_profile_template_get_count(
-            os.path.join(TEST_CONFIG_DIR, "default_customer_profiles.vars.schema")
+            os.path.join(TEST_CONFIG_DIR,
+                         "default_customer_profiles.vars.schema")
         )
         self.assertEqual(result_count, 1)
 
@@ -629,10 +639,13 @@ class TestConfigWAF(unittest.TestCase):
         script_configs.WAF_RULES = os.path.join(TEST_DIR, "waf-rules/")
 
         # create folder for tests and copy waf rule file
-        os.system("mkdir %s && mkdir %s && mkdir %s" % (TEST_DIR, script_configs.WAF_RULES, script_configs.TMP_PATH))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test.rule"), script_configs.WAF_RULES))
+        os.system("mkdir %s && mkdir %s && mkdir %s" %
+                  (TEST_DIR, script_configs.WAF_RULES, script_configs.TMP_PATH))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "test.rule"), script_configs.WAF_RULES))
         # create test backup file
-        os.system("tar cf %srevsw-waf-rule.tar %s" % (script_configs.TMP_PATH, script_configs.WAF_RULES))
+        os.system("tar cf %srevsw-waf-rule.tar %s" %
+                  (script_configs.TMP_PATH, script_configs.WAF_RULES))
 
         self.configwaf = revsw_waf_rule_manager.ConfigWAF(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -652,22 +665,26 @@ class TestConfigWAF(unittest.TestCase):
         self.assertEqual(status, 0)
 
     def test_read_config_files_wrong_json(self):
-        self.configwaf.conf["config_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_waf_conf.jinja")
+        self.configwaf.conf["config_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "wrong_waf_conf.jinja")
         status = self.configwaf._read_config_files()
         self.assertEqual(status, 1)
 
     def test_read_config_files_no_file(self):
-        self.configwaf.conf["config_vars"] =  os.path.join(TEST_CONFIG_DIR, "no_waf_conf.jinja")
+        self.configwaf.conf["config_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "no_waf_conf.jinja")
         status = self.configwaf._read_config_files()
         self.assertEqual(status, 2)
 
     def test_backup_rules(self):
         self.configwaf._backup_rules()
-        self.assertTrue(os.path.exists(os.path.join(script_configs.TMP_PATH, "revsw-waf-rule.tar")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.TMP_PATH, "revsw-waf-rule.tar")))
 
     def test_create_rules(self):
         self.configwaf._create_rules()
-        self.assertTrue(os.path.exists(os.path.join(script_configs.WAF_RULES, "1.rule")))
+        self.assertTrue(os.path.exists(
+            os.path.join(script_configs.WAF_RULES, "1.rule")))
 
 
 class TestConfigSSL(unittest.TestCase):
@@ -681,10 +698,13 @@ class TestConfigSSL(unittest.TestCase):
         script_configs.CERTS_FOLDER = os.path.join(TEST_DIR, "crt_folder/")
 
         # create folder for tests and copy cert file
-        os.system("mkdir %s && mkdir %s && mkdir %s" % (TEST_DIR, script_configs.CERTS_FOLDER, script_configs.TMP_PATH))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR, "test.cert"), script_configs.CERTS_FOLDER))
+        os.system("mkdir %s && mkdir %s && mkdir %s" % (
+            TEST_DIR, script_configs.CERTS_FOLDER, script_configs.TMP_PATH))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "test.cert"), script_configs.CERTS_FOLDER))
         # create test backup file
-        os.system("tar cf %srevsw-ssl-cert.tar %s" % (script_configs.TMP_PATH, script_configs.CERTS_FOLDER))
+        os.system("tar cf %srevsw-ssl-cert.tar %s" %
+                  (script_configs.TMP_PATH, script_configs.CERTS_FOLDER))
 
         self.configssl = revsw_ssl_cert_manager.ConfigSSL(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -702,35 +722,46 @@ class TestConfigSSL(unittest.TestCase):
         self.assertEqual(status, 0)
 
     def test_read_config_files_wrong_json(self):
-        self.configssl.conf["config_vars"] = os.path.join(TEST_CONFIG_DIR, "wrong_ssl_conf.jinja")
+        self.configssl.conf["config_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "wrong_ssl_conf.jinja")
         status = self.configssl._read_config_files()
         self.assertEqual(status, 1)
 
     def test_read_config_files_no_file(self):
-        self.configssl.conf["config_vars"] =  os.path.join(TEST_CONFIG_DIR, "no_ssl_conf.jinja")
+        self.configssl.conf["config_vars"] = os.path.join(
+            TEST_CONFIG_DIR, "no_ssl_conf.jinja")
         status = self.configssl._read_config_files()
         self.assertEqual(status, 2)
 
     def test_backup_certs(self):
         # test creating backup file
         self.configssl._backup_certs()
-        self.assertTrue(os.path.exists(os.path.join(script_configs.TMP_PATH, "revsw-ssl-cert.tar")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.TMP_PATH, "revsw-ssl-cert.tar")))
 
     def test_create_certs(self):
         self.configssl._create_certs()
-        self.assertTrue(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/pass.txt")))
-        self.assertTrue(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/info.txt")))
-        self.assertTrue(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/private.key")))
-        self.assertTrue(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/public.crt")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/pass.txt")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/info.txt")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/private.key")))
+        self.assertTrue(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/public.crt")))
 
     def test_remove_certs(self):
         # create certs and after that test to remove them
         self.configssl._create_certs()
         self.configssl._remove_certs()
-        self.assertFalse(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/pass.txt")))
-        self.assertFalse(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/info.txt")))
-        self.assertFalse(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/private.key")))
-        self.assertFalse(os.path.exists(os.path.join(script_configs.CERTS_FOLDER, "1/public.crt")))
+        self.assertFalse(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/pass.txt")))
+        self.assertFalse(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/info.txt")))
+        self.assertFalse(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/private.key")))
+        self.assertFalse(os.path.exists(os.path.join(
+            script_configs.CERTS_FOLDER, "1/public.crt")))
 
     def test_remove_certs_no_file(self):
         result = self.configssl._remove_certs()
@@ -738,7 +769,8 @@ class TestConfigSSL(unittest.TestCase):
 
     def test_create_symlink(self):
         self.configssl._create_symlink()
-        self.assertTrue(os.path.islink(os.path.join(script_configs.CERTS_FOLDER, "default")))
+        self.assertTrue(os.path.islink(os.path.join(
+            script_configs.CERTS_FOLDER, "default")))
 
 
 if __name__ == '__main__':

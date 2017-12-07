@@ -11,10 +11,11 @@ from revsw.tlslite.integration.clienthelper import ClientHelper
 # IMAP TLS PORT
 IMAP4_TLS_PORT = 993
 
+
 class IMAP4_TLS(IMAP4, ClientHelper):
     """This class extends L{imaplib.IMAP4} with TLS support."""
 
-    def __init__(self, host = '', port = IMAP4_TLS_PORT,
+    def __init__(self, host='', port=IMAP4_TLS_PORT,
                  username=None, password=None,
                  certChain=None, privateKey=None,
                  checker=None,
@@ -61,9 +62,9 @@ class IMAP4_TLS(IMAP4, ClientHelper):
         @type privateKey: L{tlslite.utils.rsakey.RSAKey}
         @param privateKey: Private key for client authentication.
         Requires the 'certChain' argument.  Excludes the SRP arguments.
-        
+
         @type checker: L{tlslite.checker.Checker}
-        @param checker: Callable object called after handshaking to 
+        @param checker: Callable object called after handshaking to
         evaluate the connection and raise an Exception if necessary.
 
         @type settings: L{tlslite.handshakesettings.HandshakeSettings}
@@ -73,15 +74,14 @@ class IMAP4_TLS(IMAP4, ClientHelper):
         """
 
         ClientHelper.__init__(self,
-                 username, password,
-                 certChain, privateKey,
-                 checker,
-                 settings)
+                              username, password,
+                              certChain, privateKey,
+                              checker,
+                              settings)
 
         IMAP4.__init__(self, host, port)
 
-
-    def open(self, host = '', port = IMAP4_TLS_PORT):
+    def open(self, host='', port=IMAP4_TLS_PORT):
         """Setup connection to remote server on "host:port".
 
         This connection will be used by the routines:

@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Google - parsing subject field
 #
@@ -53,47 +53,47 @@ class X509(object):
         self.bytes = bytearray(bytes)
         p = ASN1Parser(bytes)
 
-        #Get the tbsCertificate
+        # Get the tbsCertificate
         tbsCertificateP = p.getChild(0)
 
-        #Is the optional version field present?
-        #This determines which index the key is at.
-        if tbsCertificateP.value[0]==0xA0:
+        # Is the optional version field present?
+        # This determines which index the key is at.
+        if tbsCertificateP.value[0] == 0xA0:
             subjectPublicKeyInfoIndex = 6
         else:
             subjectPublicKeyInfoIndex = 5
 
-        #Get the subject
-        self.subject = tbsCertificateP.getChildBytes(\
-                           subjectPublicKeyInfoIndex - 1)
+        # Get the subject
+        self.subject = tbsCertificateP.getChildBytes(
+            subjectPublicKeyInfoIndex - 1)
 
-        #Get the subjectPublicKeyInfo
-        subjectPublicKeyInfoP = tbsCertificateP.getChild(\
-                                    subjectPublicKeyInfoIndex)
+        # Get the subjectPublicKeyInfo
+        subjectPublicKeyInfoP = tbsCertificateP.getChild(
+            subjectPublicKeyInfoIndex)
 
-        #Get the algorithm
+        # Get the algorithm
         algorithmP = subjectPublicKeyInfoP.getChild(0)
         rsaOID = algorithmP.value
         if list(rsaOID) != [6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0]:
             raise SyntaxError("Unrecognized AlgorithmIdentifier")
 
-        #Get the subjectPublicKey
+        # Get the subjectPublicKey
         subjectPublicKeyP = subjectPublicKeyInfoP.getChild(1)
 
-        #Adjust for BIT STRING encapsulation
-        if (subjectPublicKeyP.value[0] !=0):
+        # Adjust for BIT STRING encapsulation
+        if (subjectPublicKeyP.value[0] != 0):
             raise SyntaxError()
         subjectPublicKeyP = ASN1Parser(subjectPublicKeyP.value[1:])
 
-        #Get the modulus and exponent
+        # Get the modulus and exponent
         modulusP = subjectPublicKeyP.getChild(0)
         publicExponentP = subjectPublicKeyP.getChild(1)
 
-        #Decode them into numbers
+        # Decode them into numbers
         n = bytesToNumber(modulusP.value)
         e = bytesToNumber(publicExponentP.value)
 
-        #Create a public key instance
+        # Create a public key instance
         self.publicKey = _createPublicRSAKey(n, e)
 
     def getFingerprint(self):
@@ -106,5 +106,3 @@ class X509(object):
 
     def writeBytes(self):
         return self.bytes
-
-

@@ -4,6 +4,7 @@ import gzip
 import os.path
 import subprocess
 
+
 def dict_raise_on_duplicates(ordered_pairs):
     """
     Reject duplicate keys.
@@ -27,11 +28,13 @@ def run_cmd(cmd, logger, help=None, silent=False):
         if help or not silent:
             logger.LOGI(help or "Running '%s'" % cmd)
 
-        child = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        child = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = child.communicate()
 
         if child.returncode < 0:
-            errmsg = "'%s' was terminated by signal %d" % (cmd, -child.returncode)
+            errmsg = "'%s' was terminated by signal %d" % (
+                cmd, -child.returncode)
         elif child.returncode > 0:
             errmsg = "'%s' returned %d" % (cmd, child.returncode)
 
@@ -88,4 +91,3 @@ def base64_string_gzip_to_file(data, path):
         gz = gzip.GzipFile(mode="rb", fileobj=gz_buf)
         f.write(gz.read())
         gz.close()
-

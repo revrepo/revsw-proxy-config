@@ -33,129 +33,133 @@ $Id$
 import hashlib
 import socket
 
+
 class VarnishAdmin(object):
-	"""
-	VarnishAdmin is a thin wrapper class around the admin interface to
-	varnish (see www.varnish-cache.org). At this point, it contains
-	the most common operations only - use the "help" command in the
-	admin interface to find out about other availble commands.
-	"""
-	def __init__(self, port=6082, host="localhost", secret_file="/etc/varnish/secret"):
-		self.port = port
-		self.host = host
-		self.secret_file = secret_file
-		self.file = None
+    """
+    VarnishAdmin is a thin wrapper class around the admin interface to
+    varnish (see www.varnish-cache.org). At this point, it contains
+    the most common operations only - use the "help" command in the
+    admin interface to find out about other availble commands.
+    """
 
-	def __authenticate_challenge(self, challenge):
-	    with open(self.secret_file) as f:
-	        secret = f.read()
-	    return hashlib.sha256("%s\n%s%s\n" % (challenge, secret, challenge)).hexdigest()
+    def __init__(self, port=6082, host="localhost",
+                 secret_file="/etc/varnish/secret"):
+        self.port = port
+        self.host = host
+        self.secret_file = secret_file
+        self.file = None
 
-	def __connect(self):
-		""" If a connection has not yet been made, make one. """
-		if self.file:
-			return
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((self.host, self.port))
-		self.file = sock.makefile()
-		sock.close() # it's been dup()ed into self.file
+    def __authenticate_challenge(self, challenge):
+        with open(self.secret_file) as f:
+            secret = f.read()
+        return hashlib.sha256("%s\n%s%s\n" % (
+            challenge, secret, challenge)).hexdigest()
 
-		(code, msg) = self.__read_response()
-		if code == "107":	# authentication necessary
-			challenge = msg.split("\n", 1)[0]
-			auth = self.__authenticate_challenge(challenge)
-			self.__command("auth %s" % auth)
+    def __connect(self):
+        """ If a connection has not yet been made, make one. """
+        if self.file:
+            return
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((self.host, self.port))
+        self.file = sock.makefile()
+        sock.close()  # it's been dup()ed into self.file
 
-	def disconnect(self):
-		""" Disconnect from the varnish server. Will automatically
-		    reconnect if needed later. """
-		self.file.close()
-		self.file = None
+        (code, msg) = self.__read_response()
+        if code == "107":  # authentication necessary
+            challenge = msg.split("\n", 1)[0]
+            auth = self.__authenticate_challenge(challenge)
+            self.__command("auth %s" % auth)
 
-	def __read_response(self):
-		""" Read the status and response string from the server. """
-		status = self.file.readline()
-		(code, blen) = status.split()
+    def disconnect(self):
+        """ Disconnect from the varnish server. Will automatically
+            reconnect if needed later. """
+        self.file.close()
+        self.file = None
 
-		msg = self.file.read(int(blen)+1) # 1 extra for newline
-		return code, msg.rstrip()
+    def __read_response(self):
+        """ Read the status and response string from the server. """
+        status = self.file.readline()
+        (code, blen) = status.split()
 
-	def __command(self, command):
-		""" Execute a command and return a string with the full
-		    response from the varnish server. """
-		self.__connect()
-		self.file.write("%s\n" % command)
-		self.file.flush()
+        msg = self.file.read(int(blen) + 1)  # 1 extra for newline
+        return code, msg.rstrip()
 
-		(code, msg) = self.__read_response()
- 		if code != "200":
-			raise Exception("Error code %s returned from Varnish, message is '%s'" % (code, msg))
-		return msg
+    def __command(self, command):
+        """ Execute a command and return a string with the full
+            response from the varnish server. """
+        self.__connect()
+        self.file.write("%s\n" % command)
+        self.file.flush()
 
-	def status(self):
-		""" Get the status of the server. """
-		return self.__command("status")
+        (code, msg) = self.__read_response()
+        if code != "200":
+            raise Exception(
+                "Error code %s returned from Varnish, message is '%s'" % (code, msg))
+        return msg
 
-	def start(self):
-		""" Start the server (if stopped). """
-		return self.__command("start")
+    def status(self):
+        """ Get the status of the server. """
+        return self.__command("status")
 
-	def stop(self):
-		""" Stop the server (if started). """
-		return self.__command("stop")
+    def start(self):
+        """ Start the server (if stopped). """
+        return self.__command("start")
 
-	def purge(self, purgere):
-		""" Purge URLs matching a regexp from the cache. """
-		return self.__command("url.purge %s" % purgere)
+    def stop(self):
+        """ Stop the server (if started). """
+        return self.__command("stop")
 
-	def ban(self, expression):
-		"""
-		ban.url regexp
-		Invalidate all objects matching the specified expression.
-		"""
-		print expression
-		return self.__command("ban %s" % expression.replace("\\",r"\\"))
+    def purge(self, purgere):
+        """ Purge URLs matching a regexp from the cache. """
+        return self.__command("url.purge %s" % purgere)
 
-	def stats(self):
-		""" Get all statistics from the server as a
-		    dictionary. """
-		d = {}
-		for (val,key) in [l.strip().split(None,1) for l in 
-			self.__command("stats").splitlines()]:
-				d[key] = int(val)
-		return d
+    def ban(self, expression):
+        """
+        ban.url regexp
+        Invalidate all objects matching the specified expression.
+        """
+        print expression
+        return self.__command("ban %s" % expression.replace("\\", r"\\"))
 
-	def __parseparam(self, param):
-		""" Parse parameter output into dictionary of dictionaries. """
-		params = {}
-		current = ""
-		for l in self.__command("param.show %s" % param).splitlines():
-			if not l.strip():
-				continue
-			if l.startswith(" "):
-				# Starts with space, append to the current one
-				params[current]['description'] += l.lstrip() + " "
-			else:
-				# Starts with something else, this is a new parameter
-				(current, txt) = l.split(None, 1)
-				params[current] = {
-					'value': txt,
-					'description': '',
-				}
-		return params
+    def stats(self):
+        """ Get all statistics from the server as a
+            dictionary. """
+        d = {}
+        for (val, key) in [l.strip().split(None, 1) for l in
+                           self.__command("stats").splitlines()]:
+            d[key] = int(val)
+        return d
 
-	def showparam(self, param):
-		""" Return the value of a single parameter as a dictionary with
-		    keys 'description' and 'value'. """
-		return self.__parseparam(param)[param]
+    def __parseparam(self, param):
+        """ Parse parameter output into dictionary of dictionaries. """
+        params = {}
+        current = ""
+        for l in self.__command("param.show %s" % param).splitlines():
+            if not l.strip():
+                continue
+            if l.startswith(" "):
+                # Starts with space, append to the current one
+                params[current]['description'] += l.lstrip() + " "
+            else:
+                # Starts with something else, this is a new parameter
+                (current, txt) = l.split(None, 1)
+                params[current] = {
+                    'value': txt,
+                    'description': '',
+                }
+        return params
 
-	def allparams(self):
-		""" Return a dictionary containing all parameters. The
-		    dictionary is indexed by parameter name, and each entry
-		    is a dictionary with keys 'description' and 'value'. """
-		return self.__parseparam("-l")
+    def showparam(self, param):
+        """ Return the value of a single parameter as a dictionary with
+            keys 'description' and 'value'. """
+        return self.__parseparam(param)[param]
 
-	def setparam(self, param, value):
-		""" Set the value of a parameter. """
-		return self.__command("param.set %s %s" % (param, value))
+    def allparams(self):
+        """ Return a dictionary containing all parameters. The
+            dictionary is indexed by parameter name, and each entry
+            is a dictionary with keys 'description' and 'value'. """
+        return self.__parseparam("-l")
 
+    def setparam(self, param, value):
+        """ Set the value of a parameter. """
+        return self.__command("param.set %s %s" % (param, value))

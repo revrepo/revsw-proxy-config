@@ -1,4 +1,4 @@
-# Authors: 
+# Authors:
 #   Trevor Perrin
 #   Dimitris Moraitis - Anon ciphersuites
 #
@@ -11,16 +11,17 @@ A helper class for using TLS Lite with stdlib clients
 
 from revsw.tlslite.checker import Checker
 
+
 class ClientHelper(object):
     """This is a helper class used to integrate TLS Lite with various
     TLS clients (e.g. poplib, smtplib, httplib, etc.)"""
 
     def __init__(self,
-              username=None, password=None,
-              certChain=None, privateKey=None,
-              checker=None,
-              settings = None, 
-              anon = False):
+                 username=None, password=None,
+                 certChain=None, privateKey=None,
+                 checker=None,
+                 settings=None,
+                 anon=False):
         """
         For client authentication, use one of these argument
         combinations:
@@ -61,7 +62,7 @@ class ClientHelper(object):
         Requires the 'certChain' argument.  Excludes the SRP arguments.
 
         @type checker: L{tlslite.checker.Checker}
-        @param checker: Callable object called after handshaking to 
+        @param checker: Callable object called after handshaking to
         evaluate the connection and raise an Exception if necessary.
 
         @type settings: L{tlslite.handshakesettings.HandshakeSettings}
@@ -77,19 +78,19 @@ class ClientHelper(object):
         self.checker = None
         self.anon = anon
 
-        #SRP Authentication
+        # SRP Authentication
         if username and password and not \
                 (certChain or privateKey):
             self.username = username
             self.password = password
 
-        #Certificate Chain Authentication
+        # Certificate Chain Authentication
         elif certChain and privateKey and not \
                 (username or password):
             self.certChain = certChain
             self.privateKey = privateKey
 
-        #No Authentication
+        # No Authentication
         elif not password and not username and not \
                 certChain and not privateKey:
             pass
@@ -111,8 +112,8 @@ class ClientHelper(object):
                                              session=self.tlsSession)
         elif self.anon:
             tlsConnection.handshakeClientAnonymous(session=self.tlsSession,
-                                                settings=self.settings,
-                                                checker=self.checker)
+                                                   settings=self.settings,
+                                                   checker=self.checker)
         else:
             tlsConnection.handshakeClientCert(certChain=self.certChain,
                                               privateKey=self.privateKey,
