@@ -69,4 +69,3 @@ tests/node_modules
 tests/config/local.json
 tests/build
 /revsw-proxy-config/files/
-varnish_jinja_normal_test.vcl
