@@ -93,6 +93,9 @@ class ConfigWAF:
             if self.config_vars['operation'] == "update":
                 self._create_rules()
                 self.status = True
+            elif self.config_vars['operation'] == "update-batch":
+                self._create_rules()
+                self.status = False
             elif self.config_vars['operation'] == "delete":
                 self.status = self._remove_rules()
 

@@ -102,6 +102,11 @@ class ConfigSSL:
                 if self.config_vars['cert_type'] == "shared":
                     self._create_symlink()
                 self.status = True
+            elif self.config_vars['operation'] == "update-batch":
+                self._create_certs()
+                if self.config_vars['cert_type'] == "shared":
+                    self._create_symlink()
+                self.status = False
             elif self.config_vars['operation'] == "delete":
                 self.status = self._remove_certs()
 

@@ -1484,6 +1484,7 @@ def upgrade_all_domains():
         fail_msg = e.message
         fail_domains.add(domain_name)
         traceback.print_exc()
+        raise
 
     if fail_msg:
         transaction.rollback()
