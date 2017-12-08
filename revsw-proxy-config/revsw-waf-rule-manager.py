@@ -81,7 +81,7 @@ class ConfigWAF:
         self.conf = {}
         self.config_vars = {}
         self.rollbacks = []
-        self.status = False
+        self.require_reloading = False
 
         self._set_default_values()
         self._interpret_arguments(args)
@@ -92,9 +92,12 @@ class ConfigWAF:
             self._backup_rules()
             if self.config_vars['operation'] == "update":
                 self._create_rules()
-                self.status = True
+                self.require_reloading = True
+            elif self.config_vars['operation'] == "update-batch":
+                self._create_rules()
+                self.require_reloading = False
             elif self.config_vars['operation'] == "delete":
-                self.status = self._remove_rules()
+                self.require_reloading = self._remove_rules()
 
         self.log.LOGD("Config values: " + json.dumps(self.conf))
         self.log.LOGD("Config vars: " + json.dumps(self.config_vars))
@@ -134,8 +137,6 @@ class ConfigWAF:
         except BaseException:
             self.log.LOGE("Can't find file " + conf_full_path)
             return 2
-
-        return 3
 
     def _backup_rules(self):
         self.log.LOGI("Starting processing " + sys._getframe().f_code.co_name)
@@ -264,5 +265,5 @@ if __name__ == "__main__":
         args["verbose_debug"] = 0
 
     conf_manager = ConfigWAF(args=args)
-    if conf_manager.status:
+    if conf_manager.require_reloading:
         conf_manager._reload_nginx()

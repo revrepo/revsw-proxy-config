@@ -686,6 +686,25 @@ class TestConfigWAF(unittest.TestCase):
         self.assertTrue(os.path.exists(
             os.path.join(script_configs.WAF_RULES, "1.rule")))
 
+    def test_require_reloading(self):
+        configwaf = revsw_waf_rule_manager.ConfigWAF(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "waf_conf_update.jinja"),
+        })
+        self.assertTrue(configwaf.require_reloading)
+
+        configwaf = revsw_waf_rule_manager.ConfigWAF(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "waf_conf_update-batch.jinja"),
+        })
+        self.assertFalse(configwaf.require_reloading)
+
 
 class TestConfigSSL(unittest.TestCase):
 
@@ -694,7 +713,7 @@ class TestConfigSSL(unittest.TestCase):
     def setUp(self):
         # print name of running test
         print("RUN_TEST %s" % self._testMethodName)
-        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
+        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-ssl-configs/")
         script_configs.CERTS_FOLDER = os.path.join(TEST_DIR, "crt_folder/")
 
         # create folder for tests and copy cert file
@@ -771,6 +790,25 @@ class TestConfigSSL(unittest.TestCase):
         self.configssl._create_symlink()
         self.assertTrue(os.path.islink(os.path.join(
             script_configs.CERTS_FOLDER, "default")))
+
+    def test_require_reloading(self):
+        configssl = revsw_ssl_cert_manager.ConfigSSL(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf_update.jinja"),
+        })
+        self.assertTrue(configssl.require_reloading)
+
+        configssl = revsw_ssl_cert_manager.ConfigSSL(args={
+            "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
+            "backup_location": os.path.join(TEST_DIR, "backup/"),
+            "verbose_debug": "test",
+            "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf_update-batch.jinja"),
+        })
+        self.assertFalse(configssl.require_reloading)
 
 
 if __name__ == '__main__':
