@@ -713,7 +713,7 @@ class TestConfigSSL(unittest.TestCase):
     def setUp(self):
         # print name of running test
         print("RUN_TEST %s" % self._testMethodName)
-        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-waf-rules/")
+        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-ssl-configs/")
         script_configs.CERTS_FOLDER = os.path.join(TEST_DIR, "crt_folder/")
 
         # create folder for tests and copy cert file
