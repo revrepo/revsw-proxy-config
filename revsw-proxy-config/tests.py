@@ -686,7 +686,7 @@ class TestConfigWAF(unittest.TestCase):
         self.assertTrue(os.path.exists(
             os.path.join(script_configs.WAF_RULES, "1.rule")))
 
-    def test_check_status(self):
+    def test_require_reloading(self):
         configwaf = revsw_waf_rule_manager.ConfigWAF(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
             "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -694,7 +694,7 @@ class TestConfigWAF(unittest.TestCase):
             "verbose_debug": "test",
             "config_vars": os.path.join(TEST_CONFIG_DIR, "waf_conf_update.jinja"),
         })
-        self.assertTrue(configwaf.status)
+        self.assertTrue(configwaf.require_reloading)
 
         configwaf = revsw_waf_rule_manager.ConfigWAF(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -703,7 +703,7 @@ class TestConfigWAF(unittest.TestCase):
             "verbose_debug": "test",
             "config_vars": os.path.join(TEST_CONFIG_DIR, "waf_conf_update-batch.jinja"),
         })
-        self.assertFalse(configwaf.status)
+        self.assertFalse(configwaf.require_reloading)
 
 
 class TestConfigSSL(unittest.TestCase):
@@ -791,7 +791,7 @@ class TestConfigSSL(unittest.TestCase):
         self.assertTrue(os.path.islink(os.path.join(
             script_configs.CERTS_FOLDER, "default")))
 
-    def test_check_status(self):
+    def test_require_reloading(self):
         configssl = revsw_ssl_cert_manager.ConfigSSL(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
             "jinja_conf_vars": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -799,7 +799,7 @@ class TestConfigSSL(unittest.TestCase):
             "verbose_debug": "test",
             "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf_update.jinja"),
         })
-        self.assertTrue(configssl.status)
+        self.assertTrue(configssl.require_reloading)
 
         configssl = revsw_ssl_cert_manager.ConfigSSL(args={
             "jinja_template": os.path.join(TEST_CONFIG_DIR, "sdk_nginx_conf.jinja"),
@@ -808,7 +808,7 @@ class TestConfigSSL(unittest.TestCase):
             "verbose_debug": "test",
             "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf_update-batch.jinja"),
         })
-        self.assertFalse(configssl.status)
+        self.assertFalse(configssl.require_reloading)
 
 
 if __name__ == '__main__':
