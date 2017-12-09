@@ -92,9 +92,16 @@ class ConfigSSL:
 
         self._set_default_values()
         self._interpret_arguments(args)
+        self.status = self._read_config_files()
 
-        if self._read_config_files() != 0:
+        if self.status != 0:
             self.log.LOGE("Json configuration file has a problem!")
+            if self.status == 1:
+                sys.exit("The provided file is not in the correct json file")
+            elif self.status == 2:
+                sys.exit("The provided file doesn't exist")
+            else:
+                sys.exit()
         else:
             self._backup_certs()
             if self.config_vars['operation'] == "update":
