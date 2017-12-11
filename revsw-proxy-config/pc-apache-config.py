@@ -846,7 +846,7 @@ def delete_domain(domain_name):
     log.LOGI("Deleted domain '%s'" % domain_name)
 
 
-def add_or_update_domain(domain_name, ui_config, type_):
+def add_or_update_domain(domain_name, ui_config, operation_type):
     """Adds a new domain to the server or updates one if it already exists.
 
     Args:
@@ -864,7 +864,7 @@ def add_or_update_domain(domain_name, ui_config, type_):
         config = _gen_initial_domain_config(domain_name, ui_config)
         config.update(dict(varnish_changed=False))
         config.update(dict(config_changed=False))
-        config['commands'][0].update(dict(type=type_))
+        config['commands'][0].update(dict(type=operation_type))
         configure_all(config)
         log.LOGI("Added domain '%s'" % domain_name)
 
@@ -895,11 +895,10 @@ def add_or_update_domain(domain_name, ui_config, type_):
 
     log.LOGD(u"Updated JSON is: ", json.dumps(webserver_config_vars))
     # print json.dumps(varnish_config_vars)
-    if cfg_common.config_changed() or cfg_common.varnish_changed:
+    if cfg_common.config_changed() or cfg_common.varnish_changed():
         config = {
             "version": script_configs.API_VERSION,
-            # TODO: rename type variable
-            "type": type_,
+            "type": operation_type,
             "site_name": site_name,
             "config_vars": webserver_config_vars,
             "varnish_config_vars": varnish_config_vars,
@@ -1484,7 +1483,6 @@ def upgrade_all_domains():
         fail_msg = e.message
         fail_domains.add(domain_name)
         traceback.print_exc()
-        sys.exit("Failures during upgrade: %s" % fail_msg)
 
     if fail_msg:
         transaction.rollback()
