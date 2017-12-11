@@ -160,7 +160,6 @@ class ConfigCommon:
                 "\r\nTo: ",
                 json.dumps(val))
             self.varnish_config_vars[option] = val
-            self._config_changed = True
             self._varnish_changed = True
             if ban_html_if_changed:
                 self._must_ban_html = True
