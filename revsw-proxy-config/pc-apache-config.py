@@ -865,7 +865,6 @@ def add_or_update_domain(domain_name, ui_config, operation_type):
         config.update(dict(config_changed=False))
         config['commands'][0].update(dict(type=operation_type))
         configure_all(config)
-        # cfg_common.patch_config()
         log.LOGI("Added domain '%s'" % domain_name)
 
     log.LOGI("Updating domain '%s'" % domain_name)
