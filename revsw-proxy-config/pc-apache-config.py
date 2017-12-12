@@ -865,6 +865,7 @@ def add_or_update_domain(domain_name, ui_config, operation_type):
         config.update(dict(config_changed=False))
         config['commands'][0].update(dict(type=operation_type))
         configure_all(config)
+        # cfg_common.patch_config()
         log.LOGI("Added domain '%s'" % domain_name)
 
     log.LOGI("Updating domain '%s'" % domain_name)
@@ -890,6 +891,9 @@ def add_or_update_domain(domain_name, ui_config, operation_type):
 
     log.LOGD(u"Start config patch")
     cfg_common.patch_config()
+    if not os.path.exists(os.path.join(jinja_config_webserver_dir(site_name), "ui-config.json")):
+        # Here we check if ui-config.json exists or not. If not, then varnish reloading is not necessary
+        cfg_common._varnish_changed = False
     log.LOGD(u"End config patch")
 
     log.LOGD(u"Updated JSON is: ", json.dumps(webserver_config_vars))
