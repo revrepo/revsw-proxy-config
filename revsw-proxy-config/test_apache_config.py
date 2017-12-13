@@ -29,7 +29,7 @@ import revsw_apache_config
 import script_configs
 from revsw.logger import RevSysLogger
 from revsw_apache_config import WebServerConfig, ConfigTransaction, PlatformWebServer,\
-    VarnishConfig, NginxConfig
+    VarnishConfig, NginxConfig, underscore_url, configure_all
 
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.dirname(
@@ -232,11 +232,13 @@ class TestNginxConfig(TestAbstractConfig):
         revsw.misc.run_cmd = Mock(return_value=None)
         script_configs.NGINX_PATH = TEST_DIR
         script_configs.CONFIG_PATH = TEST_DIR
+        script_configs.VARNISH_PATH = TEST_CONFIG_DIR
         # create folder for tests and copy files for test
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-available/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-enabled/'))
+
 
         os.path.join(os.path.dirname(
             os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
@@ -290,6 +292,210 @@ class TestNginxConfig(TestAbstractConfig):
 
         domains = self.testing_class.get_all_active_domains()
         self.assertEqual(domains, ["test_domain", ])
+
+    def test_underscore_url(self):
+        self.assertEqual(underscore_url("www.google.com"), "www_google_com")
+        self.assertEqual(underscore_url("www_google.com"), "www___google_com")
+        self.assertEqual(underscore_url("www.google-online.com"), "www_google__online_com")
+        self.assertEqual(underscore_url("www_google-online.com"), "www___google__online_com")
+        self.assertEqual(underscore_url("1_2_and_3.com"), "1___2___and___3_com")
+        self.assertEqual(underscore_url("1_2_and_3-2.com"), "1___2___and___3__2_com")
+
+
+class TestNginxAndVarnishReload(unittest.TestCase):
+    with open(os.path.join(TEST_CONFIG_DIR, "config_vars.json"), "r") as cfg_vars:
+        webserver_config_vars = json.load(cfg_vars)
+    with open(os.path.join(TEST_CONFIG_DIR, "varnish_config_vars.json"), "r") as vrn_cfg_vars:
+        varnish_config_vars = json.load(vrn_cfg_vars)
+    config = {
+        "version": script_configs.API_VERSION,
+        "type": "",
+        "site_name": "test_site",
+        "config_vars": webserver_config_vars,
+        "varnish_config_vars": varnish_config_vars,
+    }
+    def setUp(self):
+        # print name of running test
+        print("RUN_TEST %s" % self._testMethodName)
+
+        # create folder for tests
+        os.system("mkdir %s" % TEST_DIR)
+        self.search_dirs_base = [os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(
+                __file__))), "revsw-proxy-config/templates"
+        )]
+        self.subdirs = ("all/bp",)
+        self.search_dirs = [os.path.join(base, subdir) for (base, subdir) in
+                            itertools.product(self.search_dirs_base, self.subdirs)]
+        self.platform = PlatformWebServer()
+        self.platform.etc_dir = Mock(TEST_DIR)
+        revsw_apache_config.jinja_config_webserver_base_dir = Mock(
+            return_value=TEST_DIR)
+        patch(
+            'revsw_apache_config._webserver_write_command',
+            lambda x: x).start()
+        script_configs.NGINX_PATH = TEST_DIR
+        script_configs.CONFIG_PATH = TEST_DIR
+        script_configs.VARNISH_PATH = TEST_CONFIG_DIR
+        # create folder for tests and copy files for test
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'test_site/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-available/'))
+        os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-enabled/'))
+        os.path.join(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
+        )
+        os.system("cp %s %s" % (
+            os.path.join(os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/conf_files_formatter.sh"
+            ),
+            os.path.join(TEST_DIR, 'bin/')
+        ))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.jinja"), os.path.join(TEST_DIR, 'test_site/')))
+        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
+                                             "main.vars.schema"), os.path.join(TEST_DIR, 'test_site/')))
+
+    def tearDown(self):
+        # remove all temporary test files
+        os.system("rm -r %s" % TEST_DIR)
+
+    def test_batch_nginx_changed(self):
+        self.config["type"] = "batch"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": False
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_batch_varnish_changed(self):
+        self.config["type"] = "batch"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": True
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_batch_nginx_and_varnish_changed(self):
+        self.config["type"] = "batch"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": True
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_batch_nginx_and_varnish_not_changed(self):
+        self.config["type"] = "batch"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": False
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_config_nginx_changed(self):
+        self.config["type"] = "config"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": False
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_config_varnish_changed(self):
+        self.config["type"] = "config"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": True
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+    def test_config_nginx_and_varnish_changed(self):
+        self.config["type"] = "config"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": True
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+    def test_config_nginx_and_varnish_not_changed(self):
+        self.config["type"] = "config"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": False
+        })
+        self.assertFalse(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, None)
+
+    def test_force_nginx_changed(self):
+        self.config["type"] = "force"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": False
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+    def test_force_varnish_changed(self):
+        self.config["type"] = "force"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": True
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+    def test_force_nginx_and_varnish_changed(self):
+        self.config["type"] = "force"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": True,
+            "varnish_changed": True
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+    def test_force_nginx_and_varnish_not_changed(self):
+        self.config["type"] = "force"
+        transaction = configure_all({
+            "version": self.config["version"],
+            "commands": [self.config],
+            "config_changed": False,
+            "varnish_changed": False
+        })
+        self.assertTrue(transaction.webserver_reload)
+        self.assertEqual(transaction.varnish_reload_cmd, "reload")
+
+
+
+
+
 
 
 if __name__ == '__main__':
