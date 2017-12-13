@@ -635,7 +635,7 @@ class ConfigTransaction:
         if not os.path.exists(varnish_dir):
             varnish_dir = ""
 
-        etc_dir = PlatformWebServer().etc_dir()
+        # etc_dir = PlatformWebServer().etc_dir()
 
         # self.run(lambda: run_cmd("rm -Rf /tmp/revsw-apache-config.%d.tar && tar cf "
         #                          "/tmp/revsw-apache-config.%d.tar /opt/revsw-config/apache "
@@ -644,7 +644,8 @@ class ConfigTransaction:
         #                           varnish_dir, ConfigTransaction.backup_file),
         #                          _log, "Backing up existing config"),
         #          lambda: run_cmd("rm -Rf /opt/revsw-config/apache /opt/revsw-config/varnish %s/"
-        #                          "sites-enabled %s/sites-available %s && tar -C / -xf /tmp/revsw-apache-config.%d.tar" %
+        #                          "sites-enabled %s/sites-available %s && tar -C / "
+        #                          "-xf /tmp/revsw-apache-config.%d.tar" %
         #                          (etc_dir, etc_dir, varnish_dir, self.curr_idx), _log, "Restoring previous config"))
 
     def rollback(self):
