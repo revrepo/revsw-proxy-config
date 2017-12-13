@@ -256,6 +256,12 @@ class TestConfigCommon(unittest.TestCase):
         config_common = pc_apache_config._get_domain_mapping("test_domain",)
         self.assertEqual(config_common, {})
 
+    def test_underscore_url(self):
+        self.assertEquals(pc_apache_config.underscore_url("www.google.com"),
+                          "www_google_com")
+        self.assertEquals(pc_apache_config.underscore_url("www_google.com"),
+                          "www_google_com")
+
 
 class objdict:
 

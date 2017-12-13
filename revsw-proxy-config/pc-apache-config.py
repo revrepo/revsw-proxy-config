@@ -160,7 +160,6 @@ class ConfigCommon:
                 "\r\nTo: ",
                 json.dumps(val))
             self.varnish_config_vars[option] = val
-            self._config_changed = True
             self._varnish_changed = True
             if ban_html_if_changed:
                 self._must_ban_html = True
@@ -891,6 +890,9 @@ def add_or_update_domain(domain_name, ui_config, operation_type):
 
     log.LOGD(u"Start config patch")
     cfg_common.patch_config()
+    if not os.path.exists(os.path.join(jinja_config_webserver_dir(site_name), "ui-config.json")):
+        # Here we check if ui-config.json exists or not. If not, then varnish reloading is not necessary
+        cfg_common._varnish_changed = False
     log.LOGD(u"End config patch")
 
     log.LOGD(u"Updated JSON is: ", json.dumps(webserver_config_vars))

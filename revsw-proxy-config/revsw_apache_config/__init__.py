@@ -1381,3 +1381,4 @@ def configure_all(config):
     _log.LOGD("Webserver reload status: '%s'" % transaction.webserver_reload)
     _log.LOGD("Varnish reload status: '%s'" % transaction.varnish_reload_cmd)
     transaction.finalize()
+    return transaction
