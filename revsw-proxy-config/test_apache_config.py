@@ -238,8 +238,6 @@ class TestNginxConfig(TestAbstractConfig):
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'bin/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-available/'))
         os.system("mkdir %s" % os.path.join(TEST_DIR, 'sites-enabled/'))
-
-
         os.path.join(os.path.dirname(
             os.path.dirname(os.path.abspath(__file__))), "revsw-proxy-config/test_files"
         )
@@ -314,6 +312,7 @@ class TestNginxAndVarnishReload(unittest.TestCase):
         "config_vars": webserver_config_vars,
         "varnish_config_vars": varnish_config_vars,
     }
+
     def setUp(self):
         # print name of running test
         print("RUN_TEST %s" % self._testMethodName)
@@ -491,11 +490,6 @@ class TestNginxAndVarnishReload(unittest.TestCase):
         })
         self.assertTrue(transaction.webserver_reload)
         self.assertEqual(transaction.varnish_reload_cmd, "reload")
-
-
-
-
-
 
 
 if __name__ == '__main__':
