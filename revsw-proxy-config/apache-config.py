@@ -45,8 +45,8 @@ def main():
     flush_sites = actions.add_parser("flush_sites",
                                      help="Remove all configured sites on the server")
     flush_sites.add_argument("-I", "--include-dir",
-                       help="Configuration template search directory, for 'include' and 'import'",
-                       action="append", default=[])
+                             help="Configuration template search directory, for 'include' and 'import'",
+                             action="append", default=[])
     add_mod = actions.add_parser("config",
                                  help="Configure site, adding it if necessary")
     add_mod.add_argument("-I", "--include-dir",
@@ -94,8 +94,8 @@ def main():
     copy.add_argument("copy_file_name",
                       help="File to copy to")
     copy.add_argument("-I", "--include-dir",
-                       help="Configuration template search directory, for 'include' and 'import'",
-                       action="append", default=[])
+                      help="Configuration template search directory, for 'include' and 'import'",
+                      action="append", default=[])
 
     args = parser.parse_args()
 
