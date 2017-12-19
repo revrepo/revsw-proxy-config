@@ -851,30 +851,34 @@ class TestApacheConfig(unittest.TestCase):
         self.assertEqual(status, 0)
 
     def test_apache_config_copy(self):
-        status = os.system('%s/apache-config.py copy %sapache-config.json' % (os.getcwd(), TEST_DIR))
+        status = os.system('%s/apache-config.py copy -I %s %sapache-config.json'
+                           % (os.getcwd(), TEST_DIR, TEST_DIR))
         self.assertEqual(status, 0)
 
     def test_apache_config_flush_sites(self):
-        status = os.system('%s/apache-config.py flush-sites' % os.getcwd())
+        status = os.system('%s/apache-config.py flush_sites -I %s'
+                           % (os.getcwd(), TEST_DIR))
         self.assertEqual(status, 0)
 
     def test_apache_config_varnish_template(self):
-        status = os.system('%s/apache-config.py varnish-template' % os.getcwd())
+        status = os.system('%s/apache-config.py varnish_template -I %s'
+                           % (os.getcwd(), TEST_DIR))
         self.assertEqual(status, 0)
 
     def test_apache_config_config(self):
-        status = os.system('%s/apache-config.py config -V %s/bp-varnish-test_domain.json '
+        status = os.system('%s/apache-config.py config -I %s -V %s/bp-varnish-test_domain.json '
                            'test_domain %s/main %s/bp-apache-test_domain.json'
-                           % (os.getcwd(), TEST_CONFIG_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR))
+                           % (os.getcwd(), TEST_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR))
         self.assertEqual(status, 0)
 
     def test_apache_config_del(self):
-        status = os.system('%s/apache-config.py del test_domain' % os.getcwd())
+        status = os.system('%s/apache-config.py del -I %s test_domain'
+                           % (os.getcwd(), TEST_DIR))
         self.assertEqual(status, 0)
 
     def test_apache_config_certs(self):
-        status = os.system('%s/apache-config.py certs test_domain %s/certs'
-                           % (os.getcwd(), script_configs.APACHE_GENERIC_SITE))
+        status = os.system('%s/apache-config.py certs -I %s test_domain %s/certs'
+                           % (os.getcwd(), TEST_DIR, script_configs.APACHE_GENERIC_SITE))
         self.assertEqual(status, 0)
 
 
