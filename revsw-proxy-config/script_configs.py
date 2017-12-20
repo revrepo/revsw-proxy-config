@@ -12,7 +12,7 @@ APACHE_PATH = "/opt/revsw-config/apache/"  # used in pc-apache-config._get_initi
 APACHE_GENERIC_SITE = "/opt/revsw-config/apache/generic-site/"  # used in revsw-ssl-cert-manager._set_default_values
 
 CERTS_FOLDER = "/opt/revsw-config/certs"  # used in revsw-ssl-cert-manager
-CONFIG_PATH = "/opt/revsw-config/"  # used in revsw_apache_config
+CONFIG_PATH = "/opt/revsw-config"  # used in revsw_apache_config
 CONF_NAME = "revsw-apps.conf"  # used in revsw-sdk-nginx-gen-config
 
 JINJA_CONF_VARS = "/opt/revsw-config/policy/apps.json"  # revsw-sdk-nginx-gen-config
