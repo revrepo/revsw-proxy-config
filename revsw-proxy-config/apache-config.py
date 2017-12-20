@@ -42,11 +42,8 @@ def main():
                        action="store_true")
     start.add_argument("server_addr",
                        help="Address of server to configure")
-    flush_sites = actions.add_parser("flush_sites",
-                                     help="Remove all configured sites on the server")
-    flush_sites.add_argument("-I", "--include-dir",
-                       help="Configuration template search directory, for 'include' and 'import'",
-                       action="append", default=[])
+    actions.add_parser("flush-sites",
+                       help="Remove all configured sites on the server")
     add_mod = actions.add_parser("config",
                                  help="Configure site, adding it if necessary")
     add_mod.add_argument("-I", "--include-dir",
@@ -67,35 +64,24 @@ def main():
                                 help="Delete site")
     delete.add_argument("site_name_del",
                         help="Unique identifier of site to delete")
-    delete.add_argument("-I", "--include-dir",
-                        help="Configuration template search directory, for 'include' and 'import'",
-                        action="append", default=[])
     certs = actions.add_parser("certs",
                                help="Send site certificates")
     certs.add_argument("site_name_certs",
                        help="Unique identifier of site for which certificates are provided")
     certs.add_argument("certs_dir",
                        help="Directory containing cert8.db, key3.db and secmod.db for the site")
-    certs.add_argument("-I", "--include-dir",
-                       help="Configuration template search directory, for 'include' and 'import'",
-                       action="append", default=[])
-    varnish_template = actions.add_parser("varnish_template",
-                                          help="Upload Varnish configuration template")
-    varnish_template.add_argument("-I", "--include-dir",
-                                  help="Configuration template search directory, for 'include' and 'import'",
-                                  action="append", default=[])
+    actions.add_parser("varnish-template",
+                       help="Upload Varnish configuration template")
     send = actions.add_parser("send",
                               help="Send the generated configuration to the server")
     send.add_argument("-I", "--include-dir",
                       help="Configuration template search directory, for 'include' and 'import'",
-                      action="append", default=[])
+                      action="append",
+                      default=[])
     copy = actions.add_parser("copy",
                               help="Copy the generated configuration to the specified file")
     copy.add_argument("copy_file_name",
                       help="File to copy to")
-    copy.add_argument("-I", "--include-dir",
-                       help="Configuration template search directory, for 'include' and 'import'",
-                       action="append", default=[])
 
     args = parser.parse_args()
 
@@ -119,7 +105,7 @@ def main():
 
         if args.command == "start":
             action = Actions.START
-        elif args.command == "flush_sites":
+        elif args.command == "flush-sites":
             action = Actions.FLUSH_SITES
         elif args.command == "del":
             action = Actions.DELETE
@@ -127,7 +113,7 @@ def main():
             action = Actions.CERTS
         elif args.command == "config":
             action = Actions.CONFIG
-        elif args.command == "varnish_template":
+        elif args.command == "varnish-template":
             action = Actions.VARNISH_TEMPLATE
         elif args.command == "send":
             action = Actions.SEND
@@ -199,7 +185,7 @@ def main():
             log.LOGD("Saving Varnish config template")
 
             search_dirs = ["."] + \
-                [TMP_PATH] + \
+                global_cfg["include_dir"] + \
                 [os.path.join(os.path.dirname(__file__), "templates/all/bp"),
                  "/opt/revsw-config/templates/all/bp"]
             config = {
@@ -210,9 +196,11 @@ def main():
         elif action == Actions.CONFIG:    # also add
             log.LOGD("Regenerate web server config for site '%s'" % args.site_name_config)
 
-            search_dirs_base = ["."] + [TMP_PATH] + \
-                               [os.path.join(os.path.dirname(__file__), "templates"),
-                                "/opt/revsw-config/templates"]
+            search_dirs_base = ["."] + \
+                global_cfg["include_dir"] + \
+                args.include_dir + \
+                [os.path.join(os.path.dirname(__file__), "templates"),
+                 "/opt/revsw-config/templates"]
 
             templates = {}
 
