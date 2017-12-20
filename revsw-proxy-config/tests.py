@@ -865,11 +865,11 @@ class TestApacheConfig(unittest.TestCase):
                            % (os.getcwd(), TEST_DIR))
         self.assertEqual(status, 0)
 
-    # def test_apache_config_config(self):
-    #     status = os.system('%s/apache-config.py config -I %s -V %s/bp-varnish-test_domain.json '
-    #                        'test_domain %s/main %s/bp-apache-test_domain.json'
-    #                        % (os.getcwd(), TEST_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR))
-    #     self.assertEqual(status, 0)
+    def test_apache_config_config(self):
+        status = os.system('%s/apache-config.py config -I %s -V %s/bp-varnish-test_domain.json '
+                           'test_domain %s/main %s/bp-apache-test_domain.json'
+                           % (os.getcwd(), TEST_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR))
+        self.assertEqual(status, 0)
 
     def test_apache_config_del(self):
         status = os.system('%s/apache-config.py del -I %s test_domain'
