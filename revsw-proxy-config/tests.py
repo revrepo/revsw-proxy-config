@@ -34,7 +34,6 @@ revsw_sdk_nginx_gen_config = importlib.import_module(
 pc_apache_config = importlib.import_module("pc-apache-config")
 revsw_waf_rule_manager = importlib.import_module("revsw-waf-rule-manager")
 revsw_ssl_cert_manager = importlib.import_module("revsw-ssl-cert-manager")
-apache_config = importlib.import_module("apache-config")
 
 
 # revsw_sdk_nginx_gen_config = __import__()
@@ -816,66 +815,6 @@ class TestConfigSSL(unittest.TestCase):
             "config_vars": os.path.join(TEST_CONFIG_DIR, "ssl_conf_update-batch.jinja"),
         })
         self.assertFalse(configssl.require_reloading)
-
-
-class TestApacheConfig(unittest.TestCase):
-
-    project_dir = os.getcwd()
-
-    def setUp(self):
-        # print name of running test
-        print("RUN_TEST %s" % self._testMethodName)
-        script_configs.TMP_PATH = os.path.join(TEST_DIR, "tmp-apache-configs/")
-        script_configs.CERTS_FOLDER = os.path.join(TEST_DIR, "crt_folder/")
-        # create folder for tests and copy cert file
-        os.system("mkdir %s && mkdir %s && mkdir %s" % (
-            TEST_DIR, script_configs.CERTS_FOLDER, script_configs.TMP_PATH))
-        os.system("cp %s %s" % (os.path.join(TEST_CONFIG_DIR,
-                                             "test.cert"), script_configs.CERTS_FOLDER))
-        script_configs.CONFIG_PATH = TEST_DIR
-        load_data = {"verbose": False, "command": "send", "simulate": True, "server_addr": "www.google3.com"}
-        with open("%sapache-config.conf" % TEST_DIR, "w") as c:
-            json.dump(load_data, c)
-        with open("%sapache-config.json" % TEST_DIR, "w") as j:
-            j.write('{"type": "apache", "version": %d, "commands": []}' % script_configs.API_VERSION)
-
-    def tearDown(self):
-        os.system("rm -r %s" % TEST_DIR)
-
-    def test_apache_config_start(self):
-        status = os.system('%s/apache-config.py start -I %s "www.google3.com"' % (os.getcwd(), TEST_DIR))
-        self.assertEqual(status, 0)
-
-    def test_apache_config_send(self):
-        status = os.system('%s/apache-config.py send -I %s' % (os.getcwd(), TEST_DIR))
-        self.assertEqual(status, 0)
-
-    def test_apache_config_copy(self):
-        status = os.system('%s/apache-config.py copy %sapache-config.json' % (os.getcwd(), TEST_DIR))
-        self.assertEqual(status, 0)
-
-    def test_apache_config_flush_sites(self):
-        status = os.system('%s/apache-config.py flush-sites' % os.getcwd())
-        self.assertEqual(status, 0)
-
-    def test_apache_config_varnish_template(self):
-        status = os.system('%s/apache-config.py varnish-template' % os.getcwd())
-        self.assertEqual(status, 0)
-
-    def test_apache_config_config(self):
-        status = os.system('%s/apache-config.py config -V %s/bp-varnish-test_domain.json '
-                           'test_domain %s/main %s/bp-apache-test_domain.json'
-                           % (os.getcwd(), TEST_CONFIG_DIR, TEST_CONFIG_DIR, TEST_CONFIG_DIR))
-        self.assertEqual(status, 0)
-
-    def test_apache_config_del(self):
-        status = os.system('%s/apache-config.py del test_domain' % os.getcwd())
-        self.assertEqual(status, 0)
-
-    def test_apache_config_certs(self):
-        status = os.system('%s/apache-config.py certs test_domain %s/certs'
-                           % (os.getcwd(), script_configs.APACHE_GENERIC_SITE))
-        self.assertEqual(status, 0)
 
 
 if __name__ == '__main__':

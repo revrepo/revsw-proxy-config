@@ -7,7 +7,7 @@ import sys
 import traceback
 from cStringIO import StringIO
 
-from script_configs import CONFIG_PATH, API_VERSION
+import script_configs
 from revsw.logger import RevStdLogger
 from revsw.misc import file_to_gzip_base64_string
 from revsw.tls import RevTLSCredentials, RevTLSClient
@@ -19,76 +19,66 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 sys.path.insert(0, os.path.realpath(
     os.path.join(os.path.dirname(__file__), ".")))
 
-
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Configure Apache and Varnish.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    actions = parser.add_subparsers(title="Subcommands",
-                                    dest="command")
-    start = actions.add_parser("start",
-                               help="Starts a configuration from scratch")
+    actions = parser.add_subparsers(title="Subcommands", dest="command")
+
+    start = actions.add_parser(
+        "start", help="Starts a configuration from scratch")
     start.add_argument("-I", "--include-dir",
                        help="Configuration template search directory, for 'include' and 'import'",
-                       action="append",
-                       default=[])
+                       action="append", default=[])
     start.add_argument("-c", "--customer-id",
-                       help="Customer database ID",
-                       default=1)
+                       help="Customer database ID", default=1)
     start.add_argument("-v", "--verbose",
-                       help="Verbose output",
+                       help="Verbose output", action="store_true")
+    start.add_argument("-s", "--simulate", help="Simulate configuration, but don't actually configure",
                        action="store_true")
-    start.add_argument("-s", "--simulate",
-                       help="Simulate configuration, but don't actually configure",
-                       action="store_true")
-    start.add_argument("server_addr",
-                       help="Address of server to configure")
-    actions.add_parser("flush-sites",
-                       help="Remove all configured sites on the server")
-    add_mod = actions.add_parser("config",
-                                 help="Configure site, adding it if necessary")
+    start.add_argument("server_addr", help="Address of server to configure")
+
+    actions.add_parser(
+        "flush-sites", help="Remove all configured sites on the server")
+
+    add_mod = actions.add_parser(
+        "config", help="Configure site, adding it if necessary")
     add_mod.add_argument("-I", "--include-dir",
                          help="Configuration template search directory, for 'include' and 'import'",
                          action="append", default=[])
     add_mod.add_argument("-V", "--varnish-vars",
                          help="Use Varnish cache and configure it using this JSON template variables file",
                          default=None)
-    add_mod.add_argument("site_name_config",
-                         help="Unique identifier for site specified in template")
+    add_mod.add_argument(
+        "site_name_config", help="Unique identifier for site specified in template")
     add_mod.add_argument("template_file",
                          help="Configuration template, without extension. The files <template>.jinja"
                               " and <template>.vars.schema must exist",
                          default="main")
-    add_mod.add_argument("vars_file",
-                         help="Input JSON template variables file")
-    delete = actions.add_parser("del",
-                                help="Delete site")
-    delete.add_argument("site_name_del",
-                        help="Unique identifier of site to delete")
-    certs = actions.add_parser("certs",
-                               help="Send site certificates")
-    certs.add_argument("site_name_certs",
-                       help="Unique identifier of site for which certificates are provided")
-    certs.add_argument("certs_dir",
-                       help="Directory containing cert8.db, key3.db and secmod.db for the site")
+    add_mod.add_argument(
+        "vars_file", help="Input JSON template variables file")
+
+    delete = actions.add_parser("del", help="Delete site")
+    delete.add_argument(
+        "site_name_del", help="Unique identifier of site to delete")
+
+    certs = actions.add_parser("certs", help="Send site certificates")
+    certs.add_argument(
+        "site_name_certs", help="Unique identifier of site for which certificates are provided")
+    certs.add_argument(
+        "certs_dir", help="Directory containing cert8.db, key3.db and secmod.db for the site")
+
     actions.add_parser("varnish-template",
                        help="Upload Varnish configuration template")
-    send = actions.add_parser("send",
-                              help="Send the generated configuration to the server")
-    send.add_argument("-I", "--include-dir",
-                      help="Configuration template search directory, for 'include' and 'import'",
-                      action="append",
-                      default=[])
-    copy = actions.add_parser("copy",
-                              help="Copy the generated configuration to the specified file")
-    copy.add_argument("copy_file_name",
-                      help="File to copy to")
+
+    actions.add_parser(
+        "send", help="Send the generated configuration to the server")
+
+    copy = actions.add_parser(
+        "copy", help="Copy the generated configuration to the specified file")
+    copy.add_argument("copy_file_name", help="File to copy to")
 
     args = parser.parse_args()
-
-    if "include_dir" in vars(args) and vars(args)["include_dir"] != []:
-        TMP_PATH = vars(args)["include_dir"][0]
-    else:
-        from script_configs import TMP_PATH
+    # print json.dumps(vars(args))
 
     global log
 
@@ -126,17 +116,17 @@ def main():
             log = RevStdLogger(args.verbose)
             log.LOGI("Starting new configuration for server '%s'" %
                      args.server_addr)
-            with open("%sapache-config.conf" % TMP_PATH, "w") as c:
+            with open("/tmp/apache-config.conf", "w") as c:
                 json.dump(vars(args), c)
-            with open("%sapache-config.json" % TMP_PATH, "w") as j:
+            with open("/tmp/apache-config.json", "w") as j:
                 j.write('{"type": "apache", "version": %d, "commands": []}' %
-                        API_VERSION)
+                        script_configs.API_VERSION)
             sys.exit(0)
 
-        with open("%sapache-config.conf" % TMP_PATH) as c:
+        with open("/tmp/apache-config.conf") as c:
             global_cfg = json.load(c)
 
-        with open("%sapache-config.json" % TMP_PATH) as j:
+        with open("/tmp/apache-config.json") as j:
             global_json = json.load(j)
 
         log = RevStdLogger(global_cfg["verbose"])
@@ -150,7 +140,7 @@ def main():
             json.dump(global_json, data)
 
             # Send config to server
-            creds_path = CONFIG_PATH
+            creds_path = script_configs.CONFIG_PATH
 
             tls_creds = RevTLSCredentials("%s/clicert.pem" % creds_path,
                                           "%s/clikey.pem" % creds_path,
@@ -186,8 +176,8 @@ def main():
 
             search_dirs = ["."] + \
                 global_cfg["include_dir"] + \
-                [os.path.join(os.path.dirname(__file__), "templates/all/bp"),
-                 "/opt/revsw-config/templates/all/bp"]
+                [os.path.join(os.path.dirname(__file__), "templates/bp"),
+                 "/opt/revsw-config/templates/bp"]
             config = {
                 "type": "varnish_template",
                 "templates": VarnishConfig().gather_template_files(search_dirs)
@@ -213,7 +203,7 @@ def main():
             with open(args.vars_file) as f:
                 config_vars = json.load(f)
 
-            NginxConfig(args.site_name_config)
+            cfg = NginxConfig(args.site_name_config)
             templates["nginx"] = WebServerConfig.gather_template_files(
                 args.template_file, search_dirs)
 
@@ -233,7 +223,7 @@ def main():
         elif action == Actions.DELETE:
             log.LOGD("Delete site '%s'" % args.site_name_del)
 
-            PlatformWebServer().config_class()(args.site_name_del)
+            cfg = PlatformWebServer().config_class()(args.site_name_del)
             config = {
                 "type": "delete",
                 "site_name": args.site_name_del
@@ -242,7 +232,7 @@ def main():
         elif action == Actions.CERTS:
             log.LOGD("Configure certificates for site '%s'" % args.site_name_certs)
 
-            PlatformWebServer().config_class()(args.site_name_certs)
+            cfg = PlatformWebServer().config_class()(args.site_name_certs)
             config = {
                 "type": "certs",
                 "site_name": args.site_name_certs
@@ -261,14 +251,10 @@ def main():
 
         # Add new command
         global_json["commands"].append(config)
-        with open("%sapache-config.json" % TMP_PATH, "w") as j:
+        with open("/tmp/apache-config.json", "w") as j:
             json.dump(global_json, j, indent=2)
 
     except Exception as e:
         traceback.print_exc()
         log.LOGE(e)
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
