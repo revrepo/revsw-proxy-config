@@ -81,6 +81,7 @@ mkdir -p $FOLDERNAME/$DST/templates/all/bp
 mkdir -p $FOLDERNAME/etc/nginx/conf.d
 mkdir -p $FOLDERNAME/etc/logrotate.d
 mkdir -p $FOLDERNAME/etc/varnish
+mkdir -p $FOLDERNAME/etc/cron.d
 mkdir -p $FOLDERNAME/usr/share/wurfl
 mkdir -p $FOLDERNAME/var/www
 mkdir -p $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
@@ -115,6 +116,9 @@ cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/www/robots.txt $FOLDERNAME/var
 cp -r $WORKSPACE/revsw-proxy-config/configs/nginx/logrotate_revsw-nginx $FOLDERNAME/etc/logrotate.d/revsw-nginx
 cp -r $WORKSPACE/revsw-proxy-config/configs/varnish/custom.vcl $FOLDERNAME/etc/varnish
 cp -r $WORKSPACE/revsw-proxy-config/configs/wurfl/wurfl.xml $FOLDERNAME/usr/share/wurfl/
+
+# Crontab
+cp -r $WORKSPACE/revsw-proxy-config/configs/crontab/wallarm $FOLDERNAME/etc/cron.d/
 
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
