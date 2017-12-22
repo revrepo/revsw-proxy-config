@@ -4,6 +4,7 @@
 {% import "common/balancer.jinja" as balancer_mod %}
 {% import "common/waf.jinja" as waf_mod %}
 {% import "common/bot_prot.jinja" as bot_prot %}
+{% import "common/wallarm_cfg.jinja" as wallarm_cfg %}
 
 {% macro _common_upstream_block_co(this, balancer_name, routeid_suffix, profiles_base_port, is_https) %}
   {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
@@ -334,12 +335,16 @@
   {% if not '/' in this.BYPASS_CO_LOCATIONS %}
     location / {
         {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
-        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
-          {{ bot_prot.get_rules(this, "/") }}
-        {% endif %}
         {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, "/") }}
         {% endif %}
+        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+          {{ bot_prot.get_rules(this, "/") }}
+        {% endif %}
+        {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
+          {{ wallarm_cfg.get_rules(this, "/") }}
+        {% endif %}
+
     }
   {% endif %}
 
@@ -351,9 +356,7 @@
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
 
-        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
-          {{ bot_prot.get_rules(this, url) }}
-        {% endif %}
+
 
         proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
         {#
@@ -371,22 +374,15 @@
         {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, url) }}
         {% endif %}
+        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+          {{ bot_prot.get_rules(this, url) }}
+        {% endif %}
+        {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
+          {{ cfg_wallarm.get_rules(this, url) }}
+        {% endif %}
       }
     {% endfor %}
   {% endif %}{# this.BYPASS_CO_LOCATIONS #}
-
-  {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
-    {% for botp in this.BOT_PROTECTION %}
-      {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
-        {% if botp.location != '/' %}
-          location {{ botp.location }} {
-            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
-            {{ bot_prot.get_rules(this, botp.location) }}
-          }
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
 
   {# WAF rules for location not present in BYPASS #}
   {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
@@ -400,6 +396,34 @@
         {% endif %}
       {% endif %}
     {% endfor %}
+
+  {# BOT PROTECTION rules for location not present in BYPASS #}
+  {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+    {% for botp in this.BOT_PROTECTION %}
+      {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
+        {% if botp.location != '/' %}
+          location {{ botp.location }} {
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
+            {{ bot_prot.get_rules(this, botp.location) }}
+          }
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {# WALLARM CONFIG rules for location not present in BYPASS #}
+  {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
+    {% for wall_cfg in this.WALLARM_CONFIG %}
+      {% if wall_cfg.location not in this.BYPASS_CO_LOCATIONS %}
+        {% if wall_cfg.location != '/' %}
+          location {{ wall_cfg.location }} {
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
+            {{ wallarm_cfg.get_rules(this, wall_cfg.location) }}
+          }
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 
     location = /50x.html {
       return 418;

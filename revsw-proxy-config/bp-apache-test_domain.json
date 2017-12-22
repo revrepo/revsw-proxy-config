@@ -1,0 +1,93 @@
+{
+  "co_profiles": {
+    "REV_OPTIMIZATION_LEVEL": "custom", 
+    "REV_CUSTOM_IMG_LEVEL": "medium", 
+    "VERSION": 2, 
+    "REV_CUSTOM_CSS_LEVEL": "medium", 
+    "REV_CUSTOM_JS_LEVEL": "medium"
+  }, 
+  "bp": {
+    "REV_PROFILES_BASE_PORT_HTTP": 80, 
+    "ENABLE_HTML_SUBSTITUTE": true, 
+    "DOMAINS_TO_OPTIMIZE_HTTPS": [
+      "test1", 
+      "test2"
+    ], 
+    "BYPASS_CO_LOCATIONS": [], 
+    "BP_LUA_LOCATIONS": [], 
+    "BYPASS_VARNISH_LOCATIONS": [], 
+    "ENABLE_OPTIMIZATION": true, 
+    "ENABLE_SPDY": true, 
+    "ENABLE_VARNISH": true, 
+    "ORIGIN_SERVERS_HTTPS": [], 
+    "REV_RUM_BEACON_URL": "http://rum-02-prod-sjc.revsw.net/service", 
+    "CUSTOM_WEBSERVER_CO_CODE_AFTER": "", 
+    "ENABLE_QUIC": false, 
+    "END_USER_RESPONSE_HEADERS": [], 
+    "PROXY_TIMEOUT": 5, 
+    "ENABLE_WAF": false, 
+    "ssl": {}, 
+    "VERSION": 29, 
+    "ORIGIN_SERVER_NAME": "test", 
+    "SSL_CERT_ID": "default", 
+    "ENABLE_DECOMPRESSION": true, 
+    "ENABLE_PROXY_BUFFERING": false, 
+    "SSL_CIPHERS": "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS", 
+    "ORIGIN_SERVERS_HTTP": [
+      "http://test"
+    ], 
+    "DOMAINS_TO_PROXY_HTTPS": [
+      "test1", 
+      "test2"
+    ], 
+    "ENABLE_HTTPS": false, 
+    "ORIGIN_REUSE_CONNS": true, 
+    "REV_PROFILES_BASE_PORT_HTTPS": 443, 
+    "BLOCK_CRAWLERS": true, 
+    "SERVER_NAME": "test_domain", 
+    "SSL_PROTOCOLS": "TLSv1 TLSv1.1 TLSv1.2", 
+    "WALLARM_CONFIG": [], 
+    "SERVER_REGEX_ALIAS": "", 
+    "REV_PROFILES_COUNT": 1, 
+    "CONTENT_OPTIMIZERS_HTTPS": [], 
+    "DOMAINS_TO_PROXY_HTTP": [
+      "test1", 
+      "test2"
+    ], 
+    "SSL_PREFER_SERVER_CIPHERS": true, 
+    "CUSTOM_WEBSERVER_CODE_BEFORE": "", 
+    "CONTENT_OPTIMIZERS_HTTP": [
+      "http://e", 
+      "http://s", 
+      "http://t", 
+      "http://t"
+    ], 
+    "ENABLE_JS_SUBSTITUTE": true, 
+    "SERVER_ALIASES": [], 
+    "ORIGIN_SECURE_PROTOCOL": "use_end_user_protocol", 
+    "DOMAINS_TO_OPTIMIZE_HTTP": [
+      "test1", 
+      "test2"
+    ], 
+    "ENABLE_RUM": false, 
+    "ORIGIN_IDLE_TIMEOUT": 80, 
+    "ENABLE_BOT_PROTECTION": false, 
+    "ENABLE_HTTP": true, 
+    "ENABLE_WALLARM": false, 
+    "WAF_RULES": [], 
+    "ENABLE_SSL": true, 
+    "BOT_PROTECTION": [], 
+    "ENABLE_VARNISH_GEOIP_HEADERS": false, 
+    "ENABLE_HTTP2": true, 
+    "acl": {
+      "action": "allow_except", 
+      "enabled": false, 
+      "acl_rules": []
+    }, 
+    "DEBUG_MODE": false, 
+    "ORIGIN_REQUEST_HEADERS": [], 
+    "CUSTOM_WEBSERVER_CODE_AFTER": "", 
+    "DOMAIN_SHARDS_COUNT": 1, 
+    "CO_LUA_LOCATIONS": []
+  }
+}

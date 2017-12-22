@@ -5,7 +5,7 @@
         "VERSION": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 28
+            "maximum": 29
         },
         "ssl": {% include "common/ssl" %},
         "acl": {% include "bp/acl" %},
@@ -323,6 +323,50 @@
                 }
             }
         },
+        "ENABLE_WALLARM": {
+           "type": "boolean"
+        },
+        "WALLARM_CONFIG": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string"
+                    },
+                    "wallarm_mode": {
+                        "type": "string",
+                        "pattern": "off|monitoring|block|aggressive"
+                    },
+                    "wallarm_instance": {
+                        "type": "integer"
+                    },
+                    "wallarm_mode_allow_override": {
+                        "type": "string",
+                        "pattern": "off|strict|on"
+                    },
+                    "wallarm_parse_response": {
+                        "type": "string",
+                        "pattern": "on|off"
+                    },
+                    "wallarm_parser_disable": {
+                        "type": "string",
+                        "pattern": "action|cookie|gzip|json|multipart|base64|path|percent|urlenc|xml"
+                    },
+                    "wallarm_process_time_limit": {
+                        "type": "integer"
+                    },
+                    "wallarm_process_time_limit_block": {
+                        "type": "string",
+                        "pattern": "on|off|attack"
+                    },
+                    "wallarm_unpack_response": {
+                        "type": "string",
+                        "pattern": "on|off"
+                    }
+                }
+            }
+        },
         "SECURITY_MODE": {
             "type": "string"
         }
@@ -385,5 +429,5 @@
         "ENABLE_BOT_PROTECTION",
         "BOT_PROTECTION"
     ],
-   "additionalProperties": false
+    "additionalProperties": false
 }
