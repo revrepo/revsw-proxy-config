@@ -432,8 +432,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
             },
             u'bp': {
                 u'REV_PROFILES_BASE_PORT_HTTP': 80,
-                u'ENABLE_VARNISH_GEOIP_HEADERS': False,
                 u'ENABLE_HTML_SUBSTITUTE': True,
+                u'ENABLE_VARNISH_GEOIP_HEADERS': False,
                 u'DOMAINS_TO_OPTIMIZE_HTTPS': [u'test1', u'test2'],
                 u'BYPASS_CO_LOCATIONS': [],
                 u'BP_LUA_LOCATIONS': [],
@@ -460,7 +460,7 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 u'BYPASS_VARNISH_LOCATIONS': [],
                 u'ENABLE_WAF': False, u'ssl': {},
                 u'CONTENT_OPTIMIZERS_HTTP': [u'http://e', u'http://s', u'http://t', u'http://t'],
-                u'VERSION': 28,
+                u'VERSION': 29,
                 u'ORIGIN_SERVER_NAME': u'test',
                 u'SSL_CERT_ID': u'default',
                 u'ENABLE_JS_SUBSTITUTE': True,
@@ -486,7 +486,9 @@ class TestApacheGenConfigScript(unittest.TestCase):
                 u'ENABLE_HTTP': True,
                 u'DOMAINS_TO_PROXY_HTTPS': [u'test1', u'test2'],
                 u"ENABLE_BOT_PROTECTION": False,
-                u"BOT_PROTECTION": []
+                u"BOT_PROTECTION": [],
+                u"ENABLE_WALLARM": False,
+                u"WALLARM_CONFIG": []
 
             }
         }
@@ -513,6 +515,8 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'rev_component_bp': {
                 'enable_bot_protection': False,
                 'bot_protection': [],
+                'enable_wallarm': False,
+                'wallarm_config': [],
                 'bp_apache_fe_custom_config': '',
                 'bp_apache_custom_config': '',
                 'cache_opt_choice': 'Extend CDN',
@@ -617,7 +621,9 @@ class TestApacheGenConfigScript(unittest.TestCase):
             'enable_decompression': True,
             'enable_rum': True,
             'enable_bot_protection': False,
-            'bot_protection': []
+            'bot_protection': [],
+            'enable_wallarm': False,
+            'wallarm_config': []
         }
         result_string = apache_gen_config_script.generate_bp_ui_config_json(
             self.domain)

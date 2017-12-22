@@ -27,7 +27,7 @@
     "PROXY_TIMEOUT": 5, 
     "ENABLE_WAF": false, 
     "ssl": {}, 
-    "VERSION": 28,
+    "VERSION": 29,
     "ORIGIN_SERVER_NAME": "test", 
     "SSL_CERT_ID": "default", 
     "ENABLE_DECOMPRESSION": true, 
@@ -86,6 +86,8 @@
     "DOMAIN_SHARDS_COUNT": 1, 
     "CO_LUA_LOCATIONS": [],
     "ENABLE_BOT_PROTECTION": false,
-    "BOT_PROTECTION": []
+    "BOT_PROTECTION": [],
+    "ENABLE_WALLARM": false,
+    "WALLARM_CONFIG": []
   }
 }
