@@ -258,6 +258,9 @@
     {% if this.ENABLE_BOT_PROTECTION %}
       {{ bot_prot.get_rules(this, "/") }}
     {% endif %}
+    {% if this.ENABLE_WALLARM %}
+      {{ wallarm_cfg.get_rules(this, "/") }}
+    {% endif %}
   }
   {#
     mod_rev_profile_selection
@@ -274,7 +277,12 @@
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
         {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
-        {{ bot_prot.get_rules(this, url) }}
+        {% if this.ENABLE_BOT_PROTECTION %}
+          {{ bot_prot.get_rules(this, url) }}
+        {% endif %}
+        {% if this.ENABLE_WALLARM %}
+          {{ wallarm_cfg.get_rules(this, url) }}
+        {% endif %}
       {# TODO: RevProfilesMode full #}
       }
     {% endfor %}
@@ -289,6 +297,19 @@
           proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
           proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
           {{ bot_prot.get_rules(this, url.location) }}
+        }
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% for url in this.WALLARM_CONFIG %}
+    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
+      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
+      {% if url.location != "/" %}
+        location {{url.location}} {
+          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+          {{ wallarm_cfg.get_rules(this, url.location) }}
         }
       {% endif %}
     {% endif %}
@@ -344,7 +365,6 @@
         {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
           {{ wallarm_cfg.get_rules(this, "/") }}
         {% endif %}
-
     }
   {% endif %}
 
@@ -355,8 +375,6 @@
     {% for url in this.BYPASS_CO_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-
-
 
         proxy_pass {{ ows_proto }}{{ balancer_mod.balancer_name(this, is_https, "bp_ows") }};
         {#
@@ -425,9 +443,9 @@
     {% endfor %}
   {% endif %}
 
-    location = /50x.html {
-      return 418;
-    }
+  location = /50x.html {
+    return 418;
+  }
   {% endif %}
 
   {% if this.ENABLE_VARNISH %}
