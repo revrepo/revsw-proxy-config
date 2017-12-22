@@ -332,6 +332,12 @@ class ConfigCommon:
             "BOT_PROTECTION", component_bp.get(
                 "bot_protection", []))
         self._patch_if_changed_bp_webserver(
+            "ENABLE_WALLARM", component_bp.get(
+                "enable_wallarm", False))
+        self._patch_if_changed_bp_webserver(
+            "WALLARM_CONFIG", component_bp.get(
+                "wallarm_config", []))
+        self._patch_if_changed_bp_webserver(
             "BLOCK_CRAWLERS", component_bp.get(
                 "block_crawlers", True))
 
@@ -347,6 +353,9 @@ class ConfigCommon:
         log.LOGD(
             "BOT_PROTECTION rules: %s" %
             component_bp.get("bot_protection"))
+        log.LOGD(
+            "WALLARM_CONFIG rules: %s" %
+            component_bp.get("wallarm_config"))
 
     def _patch_ssl_vars(self):
         if "enable_ssl" in self.ui_config:
@@ -1107,6 +1116,10 @@ def _upgrade_webserver_config(vars_, new_vars_for_version):
         if ver <= 28 < new_ver:
             bp["ENABLE_BOT_PROTECTION"] = False
             bp["BOT_PROTECTION"] = []
+
+        if ver <= 29 < new_ver:
+            bp["ENABLE_WALLARM"] = False
+            bp["WALLARM_CONFIG"] = []
 
         bp["VERSION"] = new_ver
 

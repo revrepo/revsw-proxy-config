@@ -694,6 +694,8 @@ def generate_bp_domain_json(domain):
         "WAF_RULES": [],
         "ENABLE_BOT_PROTECTION": False,
         "BOT_PROTECTION": [],
+        "ENABLE_WALLARM": False,
+        "WALLARM_CONFIG": [],
         "DOMAIN_SHARDS_COUNT": domain["shards_count"],
         "CUSTOM_WEBSERVER_CODE_BEFORE": "",
         "CUSTOM_WEBSERVER_CODE_AFTER": "",
@@ -867,6 +869,8 @@ def generate_bp_ui_config_json(domain):
         "waf": [],
         "enable_bot_protection": False,
         "bot_protection": [],
+        "enable_wallarm": False,
+        "wallarm_config": [],
         "ssl_certificates": "rev_certs",
         "certificate_urls": [],
         "acl": {
