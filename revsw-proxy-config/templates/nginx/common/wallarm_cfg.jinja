@@ -2,27 +2,13 @@
   {% for wallarm_cfg in this.WALLARM_CONFIG %}
     {% if wallarm_cfg.location == location and wallarm_cfg.wallarm_mode != "off" %}
       wallarm_mode {{ wallarm_cfg.wallarm_mode }};
-      {% if wallarm_cfg.wallarm_instance %}
-        wallarm_instance {{ wallarm_cfg.wallarm_instance }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_mode_allow_override %}
-        wallarm_mode_allow_override {{ wallarm_cfg.wallarm_mode_allow_override }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_parse_response %}
-        wallarm_parse_response {{ wallarm_cfg.wallarm_parse_response }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_parser_disable %}
-        wallarm_parser_disable {{ wallarm_cfg.wallarm_parser_disable }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_process_time_limit %}
-        wallarm_process_time_limit {{ wallarm_cfg.wallarm_process_time_limit }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_process_time_limit_block %}
-        wallarm_process_time_limit_block {{ wallarm_cfg.wallarm_process_time_limit_block }};
-      {% endif %}
-      {% if wallarm_cfg.wallarm_unpack_response %}
-        wallarm_unpack_response {{ wallarm_cfg.wallarm_unpack_response }};
-      {% endif %}
+      wallarm_instance {{ wallarm_cfg.wallarm_instance }};
+      wallarm_mode_allow_override {{ wallarm_cfg.wallarm_mode_allow_override }};
+      wallarm_parse_response {{ wallarm_cfg.wallarm_parse_response }};
+      wallarm_parser_disable {{ wallarm_cfg.wallarm_parser_disable }};
+      wallarm_process_time_limit {{ wallarm_cfg.wallarm_process_time_limit }};
+      wallarm_process_time_limit_block {{ wallarm_cfg.wallarm_process_time_limit_block }};
+      wallarm_unpack_response {{ wallarm_cfg.wallarm_unpack_response }};
     {% endif %}
   {% endfor %}
 {%- endmacro %}
