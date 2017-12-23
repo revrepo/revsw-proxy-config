@@ -119,6 +119,7 @@ cp -r $WORKSPACE/revsw-proxy-config/configs/wurfl/wurfl.xml $FOLDERNAME/usr/shar
 
 # Crontab
 cp -r $WORKSPACE/revsw-proxy-config/configs/crontab/wallarm $FOLDERNAME/etc/cron.d/
+chmod g-w $FOLDERNAME/etc/cron.d/wallarm
 
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
