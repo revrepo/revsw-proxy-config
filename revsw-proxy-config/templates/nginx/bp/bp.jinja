@@ -289,15 +289,50 @@
     {# End Varnish bypass #}
   {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
 
+{#  {% for url in this.BOT_PROTECTION %}#}
+{#    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}#}
+{#      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}#}
+{#      {% if url.location != "/" %}#}
+{#        location {{url.location}} {#}
+{#          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};#}
+{#          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;#}
+{#          {{ bot_prot.get_rules(this, url.location) }}#}
+{#        }#}
+{#      {% endif %}#}
+{#    {% endif %}#}
+{#  {% endfor %}#}
+{##}
+{#  {% for url in this.WALLARM_CONFIG %}#}
+{#    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}#}
+{#      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}#}
+{#      {% if url.location != "/" %}#}
+{#        location {{url.location}} {#}
+{#          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};#}
+{#          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;#}
+{#          {{ wallarm_cfg.get_rules(this, url.location) }}#}
+{#        }#}
+{#      {% endif %}#}
+{#    {% endif %}#}
+{#  {% endfor %}#}
+
   {% for url in this.BOT_PROTECTION %}
     {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
       {% if url.location != "/" %}
-        location {{url.location}} {
-          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
-          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
-          {{ bot_prot.get_rules(this, url.location) }}
-        }
+        {% if url in this.WALLARM_CONFIG %}
+          location {{url.location}} {
+            proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+            proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+            {{ bot_prot.get_rules(this, url.location) }}
+            {{ wallarm_cfg.get_rules(this, url.location) }}
+          }
+        {% else %}
+          location {{url.location}} {
+            proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+            proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+            {{ bot_prot.get_rules(this, url.location) }}
+          }
+        {% endif %}
       {% endif %}
     {% endif %}
   {% endfor %}
@@ -306,14 +341,17 @@
     {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
       {% if url.location != "/" %}
-        location {{url.location}} {
-          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
-          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
-          {{ wallarm_cfg.get_rules(this, url.location) }}
-        }
+        {% if url not in this.BOT_RPOTECTION %}
+          location {{url.location}} {
+            proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
+            proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
+            {{ wallarm_cfg.get_rules(this, url.location) }}
+          }
       {% endif %}
     {% endif %}
   {% endfor %}
+
+
 {%- endmacro %}{# _common_proxy_config_step1 #}
 
 {% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) -%}
