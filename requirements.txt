@@ -6,7 +6,7 @@ flake8==3.5.0
 flake8-builtins==1.0.post0
 funcsigs==1.0.2
 functools32==3.2.3-2
-Jinja2==2.9.6
+Jinja2==2.10
 jsonschema==2.6.0
 MarkupSafe==1.0
 mccabe==0.6.1

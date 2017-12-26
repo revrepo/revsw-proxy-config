@@ -6,6 +6,7 @@
 {% import "common/bot_prot.jinja" as bot_prot %}
 {% import "common/wallarm_cfg.jinja" as wallarm_cfg %}
 
+
 {% macro _common_upstream_block_co(this, balancer_name, routeid_suffix, profiles_base_port, is_https) %}
   {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
   {% if content_optimizers|list|length > 0 %}
@@ -290,11 +291,11 @@
   {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
 
   {% set locations = [] %}
-  {% for location in this.BOT_PROTECTION %}
-    {% do locations.append(location.url) %}
+  {% for bot_rule in this.BOT_PROTECTION %}
+    {% do locations.append(bot_rule.location) %}
   {% endfor %}
-  {% for location in this.WALLARM_CONFIG %}
-    {% do locations.append(location.url) %}
+  {% for wallarm_rule in this.WALLARM_CONFIG %}
+    {% do locations.append(wallarm_rule.location) %}
   {% endfor %}
 
   {% for location in locations|unique %}
