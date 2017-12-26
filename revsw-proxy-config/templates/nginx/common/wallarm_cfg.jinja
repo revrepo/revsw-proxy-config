@@ -6,7 +6,9 @@
         wallarm_instance {{ wallarm_cfg.wallarm_instance }};
         wallarm_mode_allow_override {{ wallarm_cfg.wallarm_mode_allow_override }};
         wallarm_parse_response {{ wallarm_cfg.wallarm_parse_response }};
-        wallarm_parser_disable {{ wallarm_cfg.wallarm_parser_disable }};
+        {% for parser_disable in wallarm_cfg.wallarm_parser_disable %}
+          wallarm_parser_disable {{ parser_disable }};
+        {% endfor %}
         wallarm_process_time_limit {{ wallarm_cfg.wallarm_process_time_limit }};
         wallarm_process_time_limit_block {{ wallarm_cfg.wallarm_process_time_limit_block }};
         wallarm_unpack_response {{ wallarm_cfg.wallarm_unpack_response }};

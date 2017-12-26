@@ -8,93 +8,93 @@
     		"type": "object",
     		"properties": {
 		    "VERSION": {
-			"type": "integer",
-			"minimum": 15,
-			"maximum": 17
+				"type": "integer",
+				"minimum": 15,
+				"maximum": 17
 		    },
-    		    "SERVER_NAME": {
+    		"SERVER_NAME": {
     			"type": "string",
-            		"pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
-    		    },
-    		    "ENABLE_CACHE": {
+            	"pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,61}[a-zA-Z0-9]))*$"
+    		},
+    		"ENABLE_CACHE": {
     			"type": "boolean"
-    		    },
-    		    "INCLUDE_USER_AGENT": {
+    		},
+    		"INCLUDE_USER_AGENT": {
     			"type": "boolean"
-    		    },
-    		    "CACHE_PS_HTML": {
+    		},
+    		"CACHE_PS_HTML": {
     			"type": "boolean"
-    		    },
-    		    "CACHE_IGNORE_AUTH": {
+    		},
+    		"CACHE_IGNORE_AUTH": {
     			"type": "boolean"
-    		    },
+    		},
 		    "CONTENT_OPTIMIZERS_HTTP": {
-			"type": "array",
-			"items": {
-			    "type": "string",
-			    "format": "uri"
-			}
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "uri"
+				}
 		    },
 		    "CONTENT_OPTIMIZERS_HTTPS": {
-			"type": "array",
-			"items": {
-			    "type": "string",
-			    "format": "uri"
-			}
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "uri"
+				}
 		    },
 		    "DOMAINS_TO_PROXY_HTTP": {
-			"type": "array",
-			"items": {
-			    "type": "string",
-			    "format": "uri"
-			}
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "uri"
+				}
 		    },
 		    "CACHING_RULES_MODE": {
-			"type": "string"
+				"type": "string"
 		    },
 		    "CACHING_RULES": {
-			"type": "array",
-			"items": {% include "caching_rules" %}
+				"type": "array",
+				"items": {% include "caching_rules" %}
 		    },
 		    "DEBUG_MODE": {
-			"type": "boolean"
+				"type": "boolean"
 		    },
 		    "BYPASS_CO_LOCATIONS": {
-			"type": "array",
-			"items": {
-			    "type": "string",
-			    "format": "uri"
-			}
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "uri"
+				}
 		    },
 		    "CUSTOM_VCL_ENABLED": {
-			"type": "boolean"
+				"type": "boolean"
 		    },
 		    "CUSTOM_VCL": {% include "custom_vcl" %},
 		    "ENABLE_GEOIP_HEADERS": {
-			"type": "boolean"
+				"type": "boolean"
 		    },
 		    "CLIENT_RESPONSE_TIMEOUT": {
-			"type": "integer",
-			"minimum": 0
+				"type": "integer",
+				"minimum": 0
 		    },
 		    "ENABLE_ORIGIN_HEALTH_PROBE": {
-			"type": "boolean"
+				"type": "boolean"
 		    },
 		    "ORIGIN_HEALTH_PROBE": {
-			"type": "object",
-			"properties": {
-			    "HTTP_REQUEST": {
-			        "type": "string"
-			    },
-			    "HTTP_STATUS": {
-                                "type": "integer"
-			    },
-			    "PROBE_INTERVAL": {
-			        "type": "integer"
-			    },
-			    "PROBE_TIMEOUT": {
-			        "type": "integer"
-			    }
+				"type": "object",
+				"properties": {
+					"HTTP_REQUEST": {
+						"type": "string"
+					},
+					"HTTP_STATUS": {
+						"type": "integer"
+					},
+					"PROBE_INTERVAL": {
+						"type": "integer"
+					},
+					"PROBE_TIMEOUT": {
+						"type": "integer"
+					}
 			},
 			"additionalProperties": false,
 			"required": [
