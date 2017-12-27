@@ -562,17 +562,16 @@ class PlatformWebServer:
 
     def __init__(self):
         global _g_webserver_name
-        # if not _g_webserver_name:
-        #     for pkg, name in (("revsw-nginx-full", "NGINX"),
-        #                       ("revsw-nginx-naxsi", "NGINX")):
-        #         try:
-        #             run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
-        #             if _g_webserver_name:
-        #                 raise RuntimeError("Both Nginx versions are installed; please check your configuration")
-        #             _g_webserver_name = name
-        #         except OSError:
-        #             pass
-        _g_webserver_name = "NGINX"  # test
+        if not _g_webserver_name:
+            for pkg, name in (("revsw-nginx-full", "NGINX"),
+                              ("revsw-nginx-naxsi", "NGINX")):
+                try:
+                    run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
+                    if _g_webserver_name:
+                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
+                    _g_webserver_name = name
+                except OSError:
+                    pass
         if not _g_webserver_name:
             raise RuntimeError(
                 "Neither Nginx Full nor Nginx Naxsi are installed; please check your configuration")
@@ -638,15 +637,15 @@ class ConfigTransaction:
 
         etc_dir = PlatformWebServer().etc_dir()
 
-        # self.run(lambda: run_cmd("rm -Rf /tmp/revsw-apache-config.%d.tar && tar cf "
-        #                          "/tmp/revsw-apache-config.%d.tar /opt/revsw-config/apache "
-        #                          "/opt/revsw-config/varnish %s/sites-enabled %s/sites-available %s --exclude=%s" %
-        #                          (self.curr_idx, self.curr_idx, etc_dir, etc_dir,
-        #                           varnish_dir, ConfigTransaction.backup_file),
-        #                          _log, "Backing up existing config"),
-        #          lambda: run_cmd("rm -Rf /opt/revsw-config/apache /opt/revsw-config/varnish %s/"
-        #                          "sites-enabled %s/sites-available %s && tar -C / -xf /tmp/revsw-apache-config.%d.tar" %
-        #                          (etc_dir, etc_dir, varnish_dir, self.curr_idx), _log, "Restoring previous config"))
+        self.run(lambda: run_cmd("rm -Rf /tmp/revsw-apache-config.%d.tar && tar cf "
+                                 "/tmp/revsw-apache-config.%d.tar /opt/revsw-config/apache "
+                                 "/opt/revsw-config/varnish %s/sites-enabled %s/sites-available %s --exclude=%s" %
+                                 (self.curr_idx, self.curr_idx, etc_dir, etc_dir,
+                                  varnish_dir, ConfigTransaction.backup_file),
+                                 _log, "Backing up existing config"),
+                 lambda: run_cmd("rm -Rf /opt/revsw-config/apache /opt/revsw-config/varnish %s/"
+                                 "sites-enabled %s/sites-available %s && tar -C / -xf /tmp/revsw-apache-config.%d.tar" %
+                                 (etc_dir, etc_dir, varnish_dir, self.curr_idx), _log, "Restoring previous config"))
 
     def rollback(self):
         while self.rollbacks:
@@ -678,48 +677,47 @@ class ConfigTransaction:
                 this exception.
         """
         if self.webserver_reload:
-            _log.LOGI("nginx reloaded")
-            # reload_func = NginxConfig.reload_or_start
-            # self.run(reload_func)
-            #
-            # # In case the Varnish reload fails, reload Apache again after the
-            # # old config has been restored
-            # self.rollbacks.insert(0, reload_func)
+            reload_func = NginxConfig.reload_or_start
+            self.run(reload_func)
+
+            # In case the Varnish reload fails, reload Apache again after the
+            # old config has been restored
+            self.rollbacks.insert(0, reload_func)
 
         if self.varnish_reload_cmd:
             _log.LOGI("varnish reloaded")
-            # if VarnishConfig.varnish_is_installed():
-            #     v_reload_cmd = self.varnish_reload_cmd
-            #     try:
-            #         run_cmd("service revsw-varnish4 status", _log,
-            #                 "Checking if Varnish is running", True)
-            #     except OSError:
-            #         v_reload_cmd = "start"
-            #     VarnishConfig(transaction=self).write_config_file()
-            #
-            #     def reload_varnish():
-            #         # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
-            #         # failures.
-            #         child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
-            #                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            #         (stdout, stderr) = child.communicate()
-            #
-            #         _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
-            #         if child.returncode != 0:
-            #             for line in stderr.split("\n"):
-            #                 _log.LOGE(line)
-            #             raise ConfigException("Varnish %s failed" % v_reload_cmd,
-            #                                   VarnishConfig.get_error_domains(stderr))
-            #
-            #     self.run(reload_varnish)
-            # else:
-            #     _log.LOGI("Varnish is not installed; not %sing it" %
-            #               self.varnish_reload_cmd)
+            if VarnishConfig.varnish_is_installed():
+                v_reload_cmd = self.varnish_reload_cmd
+                try:
+                    run_cmd("service revsw-varnish4 status", _log,
+                            "Checking if Varnish is running", True)
+                except OSError:
+                    v_reload_cmd = "start"
+                VarnishConfig(transaction=self).write_config_file()
+
+                def reload_varnish():
+                    # Can't use run_cmd because we need the stderr output to determine which site(s) have caused
+                    # failures.
+                    child = subprocess.Popen("service revsw-varnish4 %s" % v_reload_cmd, shell=True,
+                                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    (stdout, stderr) = child.communicate()
+
+                    _log.LOGI("%sing Varnish" % v_reload_cmd.capitalize())
+                    if child.returncode != 0:
+                        for line in stderr.split("\n"):
+                            _log.LOGE(line)
+                        raise ConfigException("Varnish %s failed" % v_reload_cmd,
+                                              VarnishConfig.get_error_domains(stderr))
+
+                self.run(reload_varnish)
+            else:
+                _log.LOGI("Varnish is not installed; not %sing it" %
+                          self.varnish_reload_cmd)
 
         # Finally, save the previous config for reference
-        # run_cmd("mv -f /tmp/revsw-apache-config.%d.tar %s" %
-        #         (self.curr_idx, ConfigTransaction.backup_file), _log,
-        #         "Saving previous config to '%s'" % ConfigTransaction.backup_file)
+        run_cmd("mv -f /tmp/revsw-apache-config.%d.tar %s" %
+                (self.curr_idx, ConfigTransaction.backup_file), _log,
+                "Saving previous config to '%s'" % ConfigTransaction.backup_file)
 
 
 def _webserver_write_command(f):
