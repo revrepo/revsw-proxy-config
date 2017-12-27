@@ -568,7 +568,8 @@ class PlatformWebServer:
                 try:
                     run_cmd("dpkg-query -s %s" % pkg, _log, silent=True)
                     if _g_webserver_name:
-                        raise RuntimeError("Both Nginx versions are installed; please check your configuration")
+                        raise RuntimeError(
+                            "Both Nginx versions are installed; please check your configuration")
                     _g_webserver_name = name
                 except OSError:
                     pass
@@ -685,7 +686,6 @@ class ConfigTransaction:
             self.rollbacks.insert(0, reload_func)
 
         if self.varnish_reload_cmd:
-            _log.LOGI("varnish reloaded")
             if VarnishConfig.varnish_is_installed():
                 v_reload_cmd = self.varnish_reload_cmd
                 try:
