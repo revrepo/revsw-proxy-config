@@ -10,7 +10,7 @@ from urlparse import urlparse
 import dns.resolver
 import jinja2
 from jinja2.runtime import StrictUndefined
-from jinja2.sandbox import ImmutableSandboxedEnvironment
+from jinja2.sandbox import SandboxedEnvironment
 import json
 import jsonschema as jsch
 import re
@@ -898,12 +898,13 @@ class NginxConfig(WebServerConfig):
             jsch.validate(input_vars, schema,
                           format_checker=jsch.FormatChecker())
 
-            env = ImmutableSandboxedEnvironment(
+            env = SandboxedEnvironment(
                 line_statement_prefix=None,
                 trim_blocks=True,
                 lstrip_blocks=True,
                 loader=jinja2.FileSystemLoader(search_dirs),
-                undefined=StrictUndefined
+                undefined=StrictUndefined,
+                extensions=["jinja2.ext.do"]
             )
 
             (hostname_short, hostname_full) = _get_hostname_short_and_full()
@@ -1057,12 +1058,13 @@ class VarnishConfig:
 
         (hostname_short, hostname_full) = _get_hostname_short_and_full()
 
-        self.env = ImmutableSandboxedEnvironment(
+        self.env = SandboxedEnvironment(
             line_statement_prefix=None,
             trim_blocks=True,
             lstrip_blocks=True,
             loader=jinja2.FileSystemLoader(search_path),
-            undefined=StrictUndefined
+            undefined=StrictUndefined,
+            extensions=["jinja2.ext.do"]
         )
         self.env.filters["flatten_to_set"] = flatten_to_set
         self.env.filters["parse_url"] = parse_url

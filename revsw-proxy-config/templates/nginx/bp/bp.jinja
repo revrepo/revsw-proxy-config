@@ -6,6 +6,7 @@
 {% import "common/bot_prot.jinja" as bot_prot %}
 {% import "common/wallarm_cfg.jinja" as wallarm_cfg %}
 
+
 {% macro _common_upstream_block_co(this, balancer_name, routeid_suffix, profiles_base_port, is_https) %}
   {% set content_optimizers = this.CONTENT_OPTIMIZERS_HTTPS if is_https else this.CONTENT_OPTIMIZERS_HTTP %}
   {% if content_optimizers|list|length > 0 %}
@@ -261,6 +262,14 @@
     {% if this.ENABLE_WALLARM %}
       {{ wallarm_cfg.get_rules(this, "/") }}
     {% endif %}
+    {% for lua in this.BP_LUA_LOCATIONS %}
+      {% if lua.location == "/" %}
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+      {% endif %}
+    {% endfor %}
   }
   {#
     mod_rev_profile_selection
@@ -276,44 +285,60 @@
     {% for url in this.BYPASS_VARNISH_LOCATIONS %}
       {% set rel_url = url if url[0] != "/" else url[1:] %}
       location /{{rel_url}} {
-        {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+        {% if url in this.BYPASS_CO_LOCATIONS %}
+          {{ _common_co_location_params(this, "bp_ows", profiles_base_port, is_https, "")|indent(4) }}
+        {% else %}
+          {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+        {% endif %}
         {% if this.ENABLE_BOT_PROTECTION %}
           {{ bot_prot.get_rules(this, url) }}
         {% endif %}
         {% if this.ENABLE_WALLARM %}
           {{ wallarm_cfg.get_rules(this, url) }}
         {% endif %}
+        {% for lua in this.BP_LUA_LOCATIONS %}
+          {% if lua.location == url %}
+            default_type 'text/plain';
+            content_by_lua '
+            {{lua.code}}
+            ';
+          {% endif %}
+        {% endfor %}
       {# TODO: RevProfilesMode full #}
       }
     {% endfor %}
     {# End Varnish bypass #}
   {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
 
-  {% for url in this.BOT_PROTECTION %}
-    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
-      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
-      {% if url.location != "/" %}
-        location {{url.location}} {
+  {% set locations = [] %}
+  {% for bot_rule in this.BOT_PROTECTION %}
+    {% do locations.append(bot_rule.location) %}
+  {% endfor %}
+  {% for wallarm_rule in this.WALLARM_CONFIG %}
+    {% do locations.append(wallarm_rule.location) %}
+  {% endfor %}
+
+  {% for location in locations|unique %}
+    {% if location not in this.BYPASS_VARNISH_LOCATIONS %}
+      {% if location != "/" %}
+        location {{location}} {
           proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
           proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
-          {{ bot_prot.get_rules(this, url.location) }}
+          {{ bot_prot.get_rules(this, location) }}
+          {{ wallarm_cfg.get_rules(this, location) }}
+          {% for lua in this.BP_LUA_LOCATIONS %}
+            {% if lua.location == location %}
+              default_type 'text/plain';
+              content_by_lua '
+              {{lua.code}}
+              ';
+            {% endif %}
+          {% endfor %}
         }
       {% endif %}
     {% endif %}
   {% endfor %}
 
-  {% for url in this.WALLARM_CONFIG %}
-    {% if url.location not in this.BYPASS_VARNISH_LOCATIONS %}
-      {% set rel_url = url.location if url.location[0] != "/" else url.location[1:] %}
-      {% if url.location != "/" %}
-        location {{url.location}} {
-          proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
-          proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
-          {{ wallarm_cfg.get_rules(this, url.location) }}
-        }
-      {% endif %}
-    {% endif %}
-  {% endfor %}
 {%- endmacro %}{# _common_proxy_config_step1 #}
 
 {% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) -%}
@@ -348,23 +373,31 @@
     RevJSSubstituteEnabled on; # turn on for whole context
     RevJSDoNotCompress off;
     location /rev-js/ {
-    	RevJSSubstituteEnabled off;
+      RevJSSubstituteEnabled off;
       root /usr/share/revsw-libapache2-mod-rev-js-substitute/;
     }
   {% endif %}{# ENABLE_JS_SUBSTITUTE #}
 
   {% if not '/' in this.BYPASS_CO_LOCATIONS %}
     location / {
-        {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
-        {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
-          {{ waf_mod.get_rules(this, "/") }}
+      {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "/")|indent(4) }}
+      {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
+        {{ waf_mod.get_rules(this, "/") }}
+      {% endif %}
+      {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
+        {{ bot_prot.get_rules(this, "/") }}
+      {% endif %}
+      {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
+        {{ wallarm_cfg.get_rules(this, "/") }}
+      {% endif %}
+      {% for lua in this.BP_LUA_LOCATIONS %}
+        {% if lua.location == "/" %}
+          default_type 'text/plain';
+          content_by_lua '
+          {{lua.code}}
+          ';
         {% endif %}
-        {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
-          {{ bot_prot.get_rules(this, "/") }}
-        {% endif %}
-        {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
-          {{ wallarm_cfg.get_rules(this, "/") }}
-        {% endif %}
+      {% endfor %}
     }
   {% endif %}
 
@@ -396,8 +429,16 @@
           {{ bot_prot.get_rules(this, url) }}
         {% endif %}
         {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
-          {{ cfg_wallarm.get_rules(this, url) }}
+          {{ wallarm_cfg.get_rules(this, url) }}
         {% endif %}
+        {% for lua in this.BP_LUA_LOCATIONS %}
+          {% if lua.location == url %}
+            default_type 'text/plain';
+            content_by_lua '
+            {{lua.code}}
+            ';
+          {% endif %}
+        {% endfor %}
       }
     {% endfor %}
   {% endif %}{# this.BYPASS_CO_LOCATIONS #}
@@ -410,42 +451,52 @@
           location {{ waf.location }} {
             {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
             {{ waf_mod.get_rules(this, waf.location) }}
+            {% for lua in this.BP_LUA_LOCATIONS %}
+              {% if lua.location == waf.location %}
+                default_type 'text/plain';
+                content_by_lua '
+                {{lua.code}}
+                ';
+              {% endif %}
+            {% endfor %}
           }
         {% endif %}
       {% endif %}
     {% endfor %}
 
-  {# BOT PROTECTION rules for location not present in BYPASS #}
-  {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
-    {% for botp in this.BOT_PROTECTION %}
-      {% if botp.location not in this.BYPASS_CO_LOCATIONS %}
-        {% if botp.location != '/' %}
-          location {{ botp.location }} {
-            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
-            {{ bot_prot.get_rules(this, botp.location) }}
-          }
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
-  {# WALLARM CONFIG rules for location not present in BYPASS #}
-  {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
-    {% for wall_cfg in this.WALLARM_CONFIG %}
-      {% if wall_cfg.location not in this.BYPASS_CO_LOCATIONS %}
-        {% if wall_cfg.location != '/' %}
-          location {{ wall_cfg.location }} {
-            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
-            {{ wallarm_cfg.get_rules(this, wall_cfg.location) }}
-          }
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
-  location = /50x.html {
+  location /50x.html {
     return 418;
   }
+  {% endif %}
+
+  {% set locations = [] %}
+  {% for bot_rule in this.BOT_PROTECTION %}
+    {% do locations.append(bot_rule.location) %}
+  {% endfor %}
+  {% for wallarm_rule in this.WALLARM_CONFIG %}
+    {% do locations.append(wallarm_rule.location) %}
+  {% endfor %}
+
+  {% if not this.ENABLE_VARNISH %}
+    {% for location in locations|unique %}
+      {% if location not in this.BYPASS_CO_LOCATIONS %}
+        {% if location != "/" %}
+          location {{location}} {
+            {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
+            {{ bot_prot.get_rules(this, location) }}
+            {{ wallarm_cfg.get_rules(this, location) }}
+            {% for lua in this.BP_LUA_LOCATIONS %}
+              {% if lua.location == location %}
+                default_type 'text/plain';
+                content_by_lua '
+                {{lua.code}}
+                ';
+              {% endif %}
+            {% endfor %}
+          }
+        {% endif %}
+      {% endif %}
+    {% endfor %}
   {% endif %}
 
   {% if this.ENABLE_VARNISH %}
@@ -481,16 +532,16 @@
   {% endif %}
   {# End optional user customizations in BP frontend #}
   {# Optional user lua locations in BP frontend #}
-  {% if this.BP_LUA_LOCATIONS %}
-    {% for lua in this.BP_LUA_LOCATIONS %}
-    location {{lua.location}} {
-        default_type 'text/plain';
-        content_by_lua '
-        {{lua.code}}
-        ';
-    }
-    {% endfor %}
-  {% endif %}
+{#  {% if this.BP_LUA_LOCATIONS %}#}
+{#    {% for lua in this.BP_LUA_LOCATIONS %}#}
+{#    location {{lua.location}} {#}
+{#        default_type 'text/plain';#}
+{#        content_by_lua '#}
+{#        {{lua.code}}#}
+{#        ';#}
+{#    }#}
+{#    {% endfor %}#}
+{#  {% endif %}#}
   {# End optional user lua locations in BP frontend #}
 {%- endmacro %}{# _common_frontend #}
 {# BEGIN: (BP-342) Common macros for headers #}
@@ -616,16 +667,16 @@
       {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
       {# End optional customizations after generic BP config #}
       {# Optional user lua locations in BP frontend #}
-        {% if this.BP_LUA_LOCATIONS %}
-          {% for lua in this.BP_LUA_LOCATIONS %}
-          location {{lua.location}} {
-              default_type 'text/plain';
-              content_by_lua '
-              {{lua.code}}
-              ';
-          }
-          {% endfor %}
-        {% endif %}
+{#        {% if this.BP_LUA_LOCATIONS %}#}
+{#          {% for lua in this.BP_LUA_LOCATIONS %}#}
+{#          location {{lua.location}} {#}
+{#              default_type 'text/plain';#}
+{#              content_by_lua '#}
+{#              {{lua.code}}#}
+{#              ';#}
+{#          }#}
+{#          {% endfor %}#}
+{#        {% endif %}#}
       {# End optional user lua locations in BP frontend #}
     }
   {% endif %}{# this.ENABLE_HTTP #}
@@ -686,16 +737,16 @@
       {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
       {# End optional customizations after generic BP config #}
       {# Optional user lua locations in BP frontend #}
-      {% if this.BP_LUA_LOCATIONS %}
-        {% for lua in this.BP_LUA_LOCATIONS %}
-        location {{lua.location}} {
-            default_type 'text/plain';
-            content_by_lua '
-            {{lua.code}}
-            ';
-        }
-        {% endfor %}
-      {% endif %}
+{#      {% if this.BP_LUA_LOCATIONS %}#}
+{#        {% for lua in this.BP_LUA_LOCATIONS %}#}
+{#        location {{lua.location}} {#}
+{#            default_type 'text/plain';#}
+{#            content_by_lua '#}
+{#            {{lua.code}}#}
+{#            ';#}
+{#        }#}
+{#        {% endfor %}#}
+{#      {% endif %}#}
       {# End optional user lua locations in BP frontend #}
     }
   {% endif %}
@@ -759,7 +810,27 @@
           {# BEGIN: Setting up the default headers #}
           {{ _common_co_headers(this, this.ORIGIN_SERVER_NAME) }}
           {# END: Setting up the default headers #}
+          {% for lua in this.CO_LUA_LOCATIONS %}
+            {% if lua.location == "/" %}
+              default_type 'text/plain';
+              content_by_lua '
+              {{lua.code}}
+              ';
+            {% endif %}
+          {% endfor %}
         }
+        {# Optional user lua locations in CO frontend #}
+        {% for lua in this.CO_LUA_LOCATIONS %}
+          {% if lua.location != "/" %}
+            location {{ lua.location }} {
+              default_type 'text/plain';
+              content_by_lua '
+              {{lua.code}}
+              ';
+            }
+          {% endif %}
+        {% endfor %}
+        {# End optional user lua locations in CO frontend #}
 
         {# Make sure the origin sees the right Host header #}
         proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
@@ -833,18 +904,6 @@
         {{ this.CUSTOM_WEBSERVER_CO_CODE_AFTER|extract_custom_webserver_code("NGINX") }}
       {% endif %}
 	    {# End optional customizations after generic options #}
-	    {# Optional user lua locations in CO frontend #}
-      {% if this.CO_LUA_LOCATIONS %}
-        {% for lua in this.CO_LUA_LOCATIONS %}
-        location {{lua.location}} {
-            default_type 'text/plain';
-            content_by_lua '
-            {{lua.code}}
-            ';
-        }
-        {% endfor %}
-      {% endif %}
-      {# End optional user lua locations in CO frontend #}
 
       {% if this.SERVER_NAME != this.ORIGIN_SERVER_NAME %}
           {# Make sure absolute URLs pointing to the origin go through us instead #}

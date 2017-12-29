@@ -350,8 +350,11 @@
                         "pattern": "on|off"
                     },
                     "wallarm_parser_disable": {
-                        "type": "string",
-                        "pattern": "action|cookie|gzip|json|multipart|base64|path|percent|urlenc|xml"
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "action|cookie|gzip|json|multipart|base64|path|percent|urlenc|xml"
+                        }
                     },
                     "wallarm_process_time_limit": {
                         "type": "integer"
@@ -364,7 +367,11 @@
                         "type": "string",
                         "pattern": "on|off"
                     }
-                }
+                },
+                "required": [
+                    "location",
+                    "wallarm_mode"
+                ]
             }
         },
         "SECURITY_MODE": {
@@ -427,7 +434,9 @@
         "ENABLE_WAF",
         "WAF_RULES",
         "ENABLE_BOT_PROTECTION",
-        "BOT_PROTECTION"
+        "BOT_PROTECTION",
+        "ENABLE_WALLARM",
+        "WALLARM_CONFIG"
     ],
     "additionalProperties": false
 }

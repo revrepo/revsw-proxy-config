@@ -66,7 +66,10 @@ class TestAbstractConfig(unittest.TestCase):
         os.system("mkdir %s" % TEST_DIR)
 
         self.env = Environment(
-            loader=self.loader, trim_blocks=True, lstrip_blocks=True)
+            loader=self.loader,
+            trim_blocks=True,
+            lstrip_blocks=True,
+            extensions=["jinja2.ext.do"])
 
     def tearDown(self):
         # remove all temporary test files
@@ -807,6 +810,20 @@ class TestAbstractBpJinja(TestAbstractConfig):
                 "username_cookie_name": "test_cookie_name",
                 "sessionid_cookie_name": "test_sessionid_cookie_name",
                 "bot_protection_id": "test_bot_protection_id"
+            }
+        ],
+        "ENABLE_WALLARM": False,
+        "WALLARM_CONFIG": [
+            {
+                "location": "/",
+                "wallarm_mode": "aggressive",
+                "wallarm_instance": 2,
+                "wallarm_mode_allow_override": "on",
+                "wallarm_parse_response": "on",
+                "wallarm_parser_disable": ["gzip", "json", "base64"],
+                "wallarm_process_time_limit": 26,
+                "wallarm_process_time_limit_block": "off",
+                "wallarm_unpack_response": "off"
             }
         ]
     }
