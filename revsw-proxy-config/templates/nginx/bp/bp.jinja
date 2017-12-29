@@ -312,13 +312,17 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% do locations.append(bot_rule.location) %}
+    {% if bot_rule.location not in locations %}
+      {% do locations.append(bot_rule.location) %}
+    {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% do locations.append(wallarm_rule.location) %}
+    {% if wallarm_rule.location not in locations %}
+      {% do locations.append(wallarm_rule.location) %}
+    {% endif %}
   {% endfor %}
 
-  {% for location in locations|unique %}
+  {% for location in locations %}
     {% if location not in this.BYPASS_VARNISH_LOCATIONS %}
       {% if location != "/" %}
         location {{location}} {
@@ -471,14 +475,18 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% do locations.append(bot_rule.location) %}
+    {% if bot_rule.location not in locations %}
+      {% do locations.append(bot_rule.location) %}
+    {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% do locations.append(wallarm_rule.location) %}
+    {% if wallarm_rule.location not in locations %}
+      {% do locations.append(wallarm_rule.location) %}
+    {% endif %}
   {% endfor %}
 
   {% if not this.ENABLE_VARNISH %}
-    {% for location in locations|unique %}
+    {% for location in locations %}
       {% if location not in this.BYPASS_CO_LOCATIONS %}
         {% if location != "/" %}
           location {{location}} {
