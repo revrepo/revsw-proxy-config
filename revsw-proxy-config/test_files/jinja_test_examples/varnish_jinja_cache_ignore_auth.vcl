@@ -481,15 +481,15 @@ sub vcl_recv {
                   return (pass);
               }
         # END: (BP-344) Check for bypass cookies
-
+  
         if (req.url ~ "^test$") {
-
+  
             set req.http.test-header = "fsdfdf";
-
+  
             revvar.set_duration(true, 17, 1s);
-
+  
             set req.http.X-Rev-Rules-Hash = req.http.X-Rev-Rules-Hash + ":OR1OO1-1-1test-keep-or-removeOE-1-1C1111test-ignore";
-
+  
             # Should we remove ignored cookies from request/response ?
             revvar.set_bool(true, 1, true);
             revvar.set_bool(true, 2, true);
@@ -498,12 +498,11 @@ sub vcl_recv {
             revvar.unset(true, 6);
             revvar.unset(true, 7);
             revvar.unset(true, 9);
-
+  
             # Ignore all query string parameters EXCEPT these.
             revvar.set_string_literal(true, 12, "test-keep-or-remove");
             revvar.unset(true, 13);
       }
-
 
     }
     chromelogger.log("recv " + req.xid + ": delreq_cook=" + revvar.get_bool(true, 1));
@@ -706,9 +705,9 @@ sub vcl_backend_response {
             set beresp.do_esi = true;
             set beresp.http.X-Rev-Esi = "esi";
         }
-
+  
         # Does not cache when Set-Cookies are true
-
+  
         if (bereq.url ~ "^test$") {
             # Override caching time (0 means "don't cache").
                 set beresp.ttl = 1s;
@@ -718,13 +717,12 @@ sub vcl_backend_response {
             revvar.set_bool(false, 0, true); # will always set Age to 0 before returning to browser
             set beresp.http.Cache-Control = "public, max-age=1, must-revalidate";
           chromelogger.log("backend_response NONE: new_cache_control=public, max-age=1, must-revalidate");
-
+  
             revvar.set_bool(false, 16, true);
-
+  
             set beresp.http.test = "test";
             revvar.set_duration(false, 18, 1s);
       }
-
 
     }
     chromelogger.log("backend_response " + bereq.xid + ": new_ttl=" + revvar.get_duration(false, 8));
