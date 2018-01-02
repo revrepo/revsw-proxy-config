@@ -312,12 +312,12 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% if bot_rule.location not in locations %}
+    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION %}
       {% do locations.append(bot_rule.location) %}
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
@@ -492,12 +492,12 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% if bot_rule.location not in locations %}
+    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION%}
       {% do locations.append(bot_rule.location) %}
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
