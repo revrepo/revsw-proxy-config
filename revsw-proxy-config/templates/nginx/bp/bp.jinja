@@ -312,12 +312,13 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% if bot_rule.location not in locations %}
+    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION %}
       {% do locations.append(bot_rule.location) %}
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
@@ -340,6 +341,19 @@
           {% endfor %}
         }
       {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% for lua in this.BP_LUA_LOCATIONS %}
+    {% if lua.location != "/" and lua.location not in locations
+           and lua.location not in this.BYPASS_VARNISH_LOCATIONS
+           and lua.location not in this.BYPASS_CO_LOCATIONS %}
+      location {{ lua.location }} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+      }
     {% endif %}
   {% endfor %}
 
@@ -448,6 +462,7 @@
   {% endif %}{# this.BYPASS_CO_LOCATIONS #}
 
   {# WAF rules for location not present in BYPASS #}
+  {% set waf_locations = [] %}
   {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
     {% for waf in this.WAF_RULES %}
       {% if waf.location not in this.BYPASS_CO_LOCATIONS %}
@@ -463,6 +478,9 @@
                 ';
               {% endif %}
             {% endfor %}
+            {% if waf.location not in waf_locations %}
+              {% do waf_locations.append(waf.location) %}
+            {% endif %}
           }
         {% endif %}
       {% endif %}
@@ -475,12 +493,13 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% if bot_rule.location not in locations %}
+    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION%}
       {% do locations.append(bot_rule.location) %}
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
@@ -506,6 +525,20 @@
       {% endif %}
     {% endfor %}
   {% endif %}
+
+  {% for lua in this.BP_LUA_LOCATIONS %}
+    {% if lua.location != "/" and lua.location not in locations
+           and lua.location not in waf_locations
+           and lua.location not in this.BYPASS_VARNISH_LOCATIONS
+           and lua.location not in this.BYPASS_CO_LOCATIONS %}
+      location {{ lua.location }} {
+        default_type 'text/plain';
+        content_by_lua '
+        {{lua.code}}
+        ';
+      }
+    {% endif %}
+  {% endfor %}
 
   {% if this.ENABLE_VARNISH %}
     {# TODO: RevProfilesMode varnish_step2 #}
@@ -539,18 +572,7 @@
     {{ this.CUSTOM_WEBSERVER_CODE_BEFORE|extract_custom_webserver_code("NGINX") }}
   {% endif %}
   {# End optional user customizations in BP frontend #}
-  {# Optional user lua locations in BP frontend #}
-{#  {% if this.BP_LUA_LOCATIONS %}#}
-{#    {% for lua in this.BP_LUA_LOCATIONS %}#}
-{#    location {{lua.location}} {#}
-{#        default_type 'text/plain';#}
-{#        content_by_lua '#}
-{#        {{lua.code}}#}
-{#        ';#}
-{#    }#}
-{#    {% endfor %}#}
-{#  {% endif %}#}
-  {# End optional user lua locations in BP frontend #}
+
 {%- endmacro %}{# _common_frontend #}
 {# BEGIN: (BP-342) Common macros for headers #}
 {% macro _common_bp_headers(this, host_name) %}
@@ -674,18 +696,6 @@
       {{ caller(False) }}
       {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
       {# End optional customizations after generic BP config #}
-      {# Optional user lua locations in BP frontend #}
-{#        {% if this.BP_LUA_LOCATIONS %}#}
-{#          {% for lua in this.BP_LUA_LOCATIONS %}#}
-{#          location {{lua.location}} {#}
-{#              default_type 'text/plain';#}
-{#              content_by_lua '#}
-{#              {{lua.code}}#}
-{#              ';#}
-{#          }#}
-{#          {% endfor %}#}
-{#        {% endif %}#}
-      {# End optional user lua locations in BP frontend #}
     }
   {% endif %}{# this.ENABLE_HTTP #}
 
@@ -744,18 +754,6 @@
       {{ caller(False) }}
       {% if this.CUSTOM_WEBSERVER_CODE_AFTER %}{{ this.CUSTOM_WEBSERVER_CODE_AFTER|extract_custom_webserver_code("NGINX") }}{% endif %}
       {# End optional customizations after generic BP config #}
-      {# Optional user lua locations in BP frontend #}
-{#      {% if this.BP_LUA_LOCATIONS %}#}
-{#        {% for lua in this.BP_LUA_LOCATIONS %}#}
-{#        location {{lua.location}} {#}
-{#            default_type 'text/plain';#}
-{#            content_by_lua '#}
-{#            {{lua.code}}#}
-{#            ';#}
-{#        }#}
-{#        {% endfor %}#}
-{#      {% endif %}#}
-      {# End optional user lua locations in BP frontend #}
     }
   {% endif %}
 

@@ -815,7 +815,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "ENABLE_WALLARM": False,
         "WALLARM_CONFIG": [
             {
-                "location": "/",
+                "location": "/wallarm_location",
                 "wallarm_mode": "aggressive",
                 "wallarm_instance": 2,
                 "wallarm_mode_allow_override": "on",
@@ -1988,6 +1988,115 @@ class TestBotProtJinja(TestAbstractBpJinja):
                             % initial_data['bp']["BOT_PROTECTION"][0]["sessionid_cookie_name"]:
                         find_line = True
         self.assertTrue(find_line)
+
+
+class TestWallarmJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_wallarm_jinja_macros_get_rules_mode_enabled(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_WALLARM"] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        for location in find_server.locations:
+            if location.value == '/wallarm_location':
+                find_line = True
+        self.assertTrue(find_line)
+
+    def test_wallarm_jinja_macros_get_rules_mode_disabled(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_WALLARM"] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        for location in find_server.locations:
+            self.assertNotEqual(location.value, '/wallarm_location')
+
+    def test_wallarm_jinja_macros_get_rules_enabled_but_mode_off(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_WALLARM"] = True
+        initial_data['bp']["WALLARM_CONFIG"][0]["wallarm_mode"] = "off"
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        for location in find_server.locations:
+            self.assertNotEqual(location.value, '/wallarm_location')
+
+    def test_wallarm_jinja_macros_check_lines(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_WALLARM"] = True
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        wallarm_lines = [
+            "location /wallarm_location {\n",
+            "    wallarm_mode aggressive;\n",
+            "    wallarm_instance 2;\n",
+            "    wallarm_mode_allow_override on;\n",
+            "    wallarm_parse_response on;\n",
+            "    wallarm_parser_disable gzip;\n",
+            "    wallarm_parser_disable json;\n",
+            "    wallarm_parser_disable base64;\n",
+            "    wallarm_process_time_limit 26;\n",
+            "    wallarm_process_time_limit_block off;\n",
+            "    wallarm_unpack_response off;\n"
+        ]
+        for location in find_server.locations:
+            if location.value == '/wallarm_location':
+                for line in location.as_strings:
+                    if line in wallarm_lines:
+                        wallarm_lines.remove(line)
+        self.assertEqual(wallarm_lines, [])
 
 
 if __name__ == '__main__':
