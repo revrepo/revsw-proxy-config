@@ -317,7 +317,8 @@
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
@@ -497,7 +498,8 @@
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
