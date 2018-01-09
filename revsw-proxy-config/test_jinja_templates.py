@@ -2011,7 +2011,7 @@ class TestWallarmJinja(TestAbstractBpJinja):
             if find_server:
                 break
             for line in server.as_dict['server']:
-                if line.get("listen") and line["listen"]:
+                if line.get("listen") and line["listen"] == "50000":
                     find_server = server
                     break
         find_line = False
@@ -2034,7 +2034,7 @@ class TestWallarmJinja(TestAbstractBpJinja):
             if find_server:
                 break
             for line in server.as_dict['server']:
-                if line.get("listen") and line["listen"]:
+                if line.get("listen") and line["listen"] == "50000":
                     find_server = server
                     break
         for location in find_server.locations:
@@ -2055,7 +2055,7 @@ class TestWallarmJinja(TestAbstractBpJinja):
             if find_server:
                 break
             for line in server.as_dict['server']:
-                if line.get("listen") and line["listen"]:
+                if line.get("listen") and line["listen"] == "50000":
                     find_server = server
                     break
         for location in find_server.locations:
@@ -2075,7 +2075,7 @@ class TestWallarmJinja(TestAbstractBpJinja):
             if find_server:
                 break
             for line in server.as_dict['server']:
-                if line.get("listen") and line["listen"]:
+                if line.get("listen") and line["listen"] == "50000":
                     find_server = server
                     break
         wallarm_lines = [
@@ -2097,6 +2097,27 @@ class TestWallarmJinja(TestAbstractBpJinja):
                     if line in wallarm_lines:
                         wallarm_lines.remove(line)
         self.assertEqual(wallarm_lines, [])
+
+    def test_wallarm_jinja_macros_get_rules_co_bypass(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_WALLARM"] = True
+        initial_data['bp']["BYPASS_CO_LOCATIONS"].append("/wallarm_location")
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"] == "50000":
+                    find_server = server
+                    break
+        for location in find_server.locations:
+            self.assertNotEqual(location.value, '/wallarm_location')
 
 
 if __name__ == '__main__':
