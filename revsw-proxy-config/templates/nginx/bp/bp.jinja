@@ -259,7 +259,7 @@
     {% if this.ENABLE_BOT_PROTECTION %}
       {{ bot_prot.get_rules(this, "/") }}
     {% endif %}
-    {% if this.ENABLE_WALLARM and "/" in this.BYPASS_CO_LOCATIONS %}
+    {% if this.ENABLE_WALLARM %}
       {{ wallarm_cfg.get_rules(this, "/") }}
     {% endif %}
     {% for lua in this.BP_LUA_LOCATIONS %}
@@ -293,7 +293,7 @@
         {% if this.ENABLE_BOT_PROTECTION %}
           {{ bot_prot.get_rules(this, url) }}
         {% endif %}
-        {% if this.ENABLE_WALLARM and url in this.BYPASS_CO_LOCATIONS %}
+        {% if this.ENABLE_WALLARM %}
           {{ wallarm_cfg.get_rules(this, url) }}
         {% endif %}
         {% for lua in this.BP_LUA_LOCATIONS %}
@@ -317,10 +317,8 @@
     {% endif %}
   {% endfor %}
   {% for wallarm_rule in this.WALLARM_CONFIG %}
-    {% if wallarm_rule.location not in locations
-            and this.ENABLE_WALLARM
-            and wallarm_rule.wallarm_mode != "off"
-            and wallarm_rule.location in this.BYPASS_CO_LOCATIONS %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
       {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
@@ -332,9 +330,7 @@
           proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }};
           proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
           {{ bot_prot.get_rules(this, location) }}
-          {% if location in this.BYPASS_CO_LOCATIONS %}
-            {{ wallarm_cfg.get_rules(this, location) }}
-          {% endif %}
+          {{ wallarm_cfg.get_rules(this, location) }}
           {% for lua in this.BP_LUA_LOCATIONS %}
             {% if lua.location == location %}
               default_type 'text/plain';
@@ -408,6 +404,9 @@
       {% endif %}
       {% if this.ENABLE_BOT_PROTECTION and not this.ENABLE_VARNISH %}
         {{ bot_prot.get_rules(this, "/") }}
+      {% endif %}
+      {% if this.ENABLE_WALLARM and not this.ENABLE_VARNISH %}
+        {{ wallarm_cfg.get_rules(this, "/") }}
       {% endif %}
       {% for lua in this.BP_LUA_LOCATIONS %}
         {% if lua.location == "/" %}
@@ -494,8 +493,14 @@
 
   {% set locations = [] %}
   {% for bot_rule in this.BOT_PROTECTION %}
-    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION %}
+    {% if bot_rule.location not in locations and this.ENABLE_BOT_PROTECTION%}
       {% do locations.append(bot_rule.location) %}
+    {% endif %}
+  {% endfor %}
+  {% for wallarm_rule in this.WALLARM_CONFIG %}
+    {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
+            and wallarm_rule.wallarm_mode != "off" %}
+      {% do locations.append(wallarm_rule.location) %}
     {% endif %}
   {% endfor %}
 
@@ -506,7 +511,7 @@
           location {{location}} {
             {{ _common_co_location_params(this, "bp_cos", profiles_base_port, is_https, "")|indent(4) }}
             {{ bot_prot.get_rules(this, location) }}
-{#            {{ wallarm_cfg.get_rules(this, location) }}#}
+            {{ wallarm_cfg.get_rules(this, location) }}
             {% for lua in this.BP_LUA_LOCATIONS %}
               {% if lua.location == location %}
                 default_type 'text/plain';
@@ -803,19 +808,6 @@
         proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
       {% set proxy_params = "keepalive=On" + (" ttl=" + this.ORIGIN_IDLE_TIMEOUT|string if this.ORIGIN_IDLE_TIMEOUT and this.ORIGIN_REUSE_CONNS else "") + (" disablereuse=On" if not this.ORIGIN_REUSE_CONNS else "") %}
       {% set ows_proto = "https" if origins[0]|truncate(5, True, "") == "https" else "http" %}
-        {% set locations = [] %}
-        {% for lua_code in this.CO_LUA_LOCATIONS %}
-          {% if lua_code.location not in locations %}
-            {% do locations.append(lua_code.location) %}
-          {% endif %}
-        {% endfor %}
-        {% for wallarm_rule in this.WALLARM_CONFIG %}
-          {% if wallarm_rule.location not in locations and this.ENABLE_WALLARM
-                  and wallarm_rule.wallarm_mode != "off"
-                  and wallarm_rule.location not in this.BYPASS_CO_LOCATIONS %}
-            {% do locations.append(wallarm_rule.location) %}
-          {% endif %}
-        {% endfor %}
         location / {
           {# TODO: make 'lowercase_escapes' configurable - this is only useful for Metacafe now #}
           proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes;
@@ -824,33 +816,27 @@
           {# BEGIN: Setting up the default headers #}
           {{ _common_co_headers(this, this.ORIGIN_SERVER_NAME) }}
           {# END: Setting up the default headers #}
-          {% if "/" in locations %}
-            {{ wallarm_cfg.get_rules(this, "/") }}
-            {% for lua in this.BP_LUA_LOCATIONS %}
-              {% if lua.location == "/" %}
-                default_type 'text/plain';
-                content_by_lua '
-                {{lua.code}}
-                ';
-              {% endif %}
-            {% endfor %}
-          {% endif %}
+          {% for lua in this.CO_LUA_LOCATIONS %}
+            {% if lua.location == "/" %}
+              default_type 'text/plain';
+              content_by_lua '
+              {{lua.code}}
+              ';
+            {% endif %}
+          {% endfor %}
         }
-        {% for location in locations %}
-          {% if location != "/" and location not in this.BYPASS_CO_LOCATIONS %}
-            location {{location}} {
-              {{ wallarm_cfg.get_rules(this, location) }}
-              {% for lua in this.CO_LUA_LOCATIONS %}
-                {% if lua.location == location %}
-                  default_type 'text/plain';
-                  content_by_lua '
-                  {{lua.code}}
-                  ';
-                {% endif %}
-              {% endfor %}
+        {# Optional user lua locations in CO frontend #}
+        {% for lua in this.CO_LUA_LOCATIONS %}
+          {% if lua.location != "/" %}
+            location {{ lua.location }} {
+              default_type 'text/plain';
+              content_by_lua '
+              {{lua.code}}
+              ';
             }
           {% endif %}
         {% endfor %}
+        {# End optional user lua locations in CO frontend #}
 
         {# Make sure the origin sees the right Host header #}
         proxy_ssl_name {{this.ORIGIN_SERVER_NAME}};
