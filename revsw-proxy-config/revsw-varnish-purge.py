@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/revsw-config/env/bin python
 """This module is purges objects that are set by the user in the revAPM portal.
 This script is usually executed by rev-pcm-purge Daemon Process. The purge
 JSON configuration is located in /opt/revsw-config/policy/ui-purge.json
