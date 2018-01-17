@@ -124,6 +124,9 @@ chmod g-w $FOLDERNAME/etc/cron.d/wallarm
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
 
+# Python env
+cp -r $WORKSPACE/revsw-proxy-config/env/* $FOLDERNAME/$DST/env/
+
 cp -r $WORKSPACE/DEBIAN $FOLDERNAME/ || 1
 
 sudo chown -R root:root $FOLDERNAME || 1
