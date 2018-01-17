@@ -822,7 +822,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
                 "wallarm_parse_response": "on",
                 "wallarm_parser_disable": ["gzip", "json", "base64"],
                 "wallarm_process_time_limit": 26,
-                "wallarm_process_time_limit_block": "off",
+                "wallarm_process_time_limit_block": "attack",
                 "wallarm_unpack_response": "off"
             }
         ]
@@ -2088,7 +2088,7 @@ class TestWallarmJinja(TestAbstractBpJinja):
             "    wallarm_parser_disable json;\n",
             "    wallarm_parser_disable base64;\n",
             "    wallarm_process_time_limit 26;\n",
-            "    wallarm_process_time_limit_block off;\n",
+            "    wallarm_process_time_limit_block attack;\n",
             "    wallarm_unpack_response off;\n"
         ]
         for location in find_server.locations:

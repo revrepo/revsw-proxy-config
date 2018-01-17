@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/revsw-config/env/bin/python
 """This module provides a command line interface to update the SSL certs
 for Nginx edge server.
 

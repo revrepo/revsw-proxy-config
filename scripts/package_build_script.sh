@@ -68,6 +68,7 @@ Homepage: www.revsw.com" >> $FOLDERNAME/DEBIAN/control
 DST='opt/revsw-config'
 
 mkdir -p $FOLDERNAME/$DST/bin
+mkdir -p $FOLDERNAME/$DST/env
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/certs
@@ -123,6 +124,9 @@ chmod g-w $FOLDERNAME/etc/cron.d/wallarm
 
 # js
 cp -r $WORKSPACE/rev_js_substitute/js/*  $FOLDERNAME/usr/share/revsw-libapache2-mod-rev-js-substitute/rev-js
+
+# Python env
+cp -r $WORKSPACE/revsw-proxy-config/env/* $FOLDERNAME/$DST/env/
 
 cp -r $WORKSPACE/DEBIAN $FOLDERNAME/ || 1
 
