@@ -1,4 +1,4 @@
-#!/opt/revsw-config/env/bin python
+#!/opt/revsw-config/env/bin/python
 """This script is used for the following purposes, usually started by the
 revsw-pcm-config:
     1. To parse the JSON configuration file from /opt/revsw-config/policy/.

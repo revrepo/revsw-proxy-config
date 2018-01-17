@@ -68,6 +68,7 @@ Homepage: www.revsw.com" >> $FOLDERNAME/DEBIAN/control
 DST='opt/revsw-config'
 
 mkdir -p $FOLDERNAME/$DST/bin
+mkdir -p $FOLDERNAME/$DST/env
 mkdir -p $FOLDERNAME/$DST/lib
 mkdir -p $FOLDERNAME/$DST/policy
 mkdir -p $FOLDERNAME/$DST/certs

@@ -1,4 +1,4 @@
-#!/opt/revsw-config/env/bin python
+#!/opt/revsw-config/env/bin/python
 # Depends: python-m2crypto
 
 import re

@@ -1,4 +1,4 @@
-#!/opt/revsw-config/env/bin python
+#!/opt/revsw-config/env/bin/python
 """This module provides a command line interface to update the Nginx
 revsw-apps.conf configuration file in /etc/nginx/conf.d/ which provisions
 mobile app SDK keys provided by apps.json located in /opt/revsw-config/policy/

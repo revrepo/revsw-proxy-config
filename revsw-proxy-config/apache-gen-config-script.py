@@ -1,4 +1,4 @@
-#!/opt/revsw-config/env/bin python
+#!/opt/revsw-config/env/bin/python
 import argparse
 import json
 import os
