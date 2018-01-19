@@ -1,0 +1,115 @@
+{
+  "name": "wallarm",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/png",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/jpeg",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/jpeg?id=10 UNION SELECT 1,null,null--",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/webp",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/webp?id='or+1=1--a-<script>prompt(1)</script>",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 403 for blocked location",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/svg",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/jpeg?id=10 UNION SELECT 1,null,null--",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/webp?id='or+1=1--a-<script>prompt(1)</script>",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "wallarm",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/image/svg",
+      "check": {
+        "status": 200
+      }
+    }
+  ]
+}

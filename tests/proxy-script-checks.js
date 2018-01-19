@@ -51,7 +51,7 @@ var merge = function () {
 };
 
 var checking = function (host, url, domain, values, set, method) {
-  //console.log(host, url, domain, values, set, method);
+  // console.log(host, url, domain, values, set, method);
   return new Promise(function (response, reject) {
     var request = null;
     switch (method) {
@@ -75,7 +75,11 @@ var checking = function (host, url, domain, values, set, method) {
 
       default:
         if (!set || set === '') {
-          request = tools.getHostRequest(host, url, domain);
+          var expect = 200;
+          if (values.status) {
+            expect = values.status;
+          }
+          request = tools.getHostRequest(host, url, domain, expect);
         } else {
           var setValues = {
             'Host': domain
@@ -93,15 +97,21 @@ var checking = function (host, url, domain, values, set, method) {
         }
         if (development === true) {
           console.log(res.header);
-          //console.log(res.text);
         }
-        //console.log(values);
         for (var key in values) {
           var header = null;
           var text = null;
           var reg = null;
           if (values[key] !=='') {
             switch (key) {
+              case 'status':
+                // console.log(res.status);
+                // console.log(values.status);
+                if (development === true) {
+                  console.log(res.status + ' <=> ' + values.status);
+                }
+                res.status.should.eql(values.status);
+                break;
 
               case 'header':
                 for (header in values[key]) {
