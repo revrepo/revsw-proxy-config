@@ -680,7 +680,8 @@
         "ssl_ciphers": "",
         "ssl_prefer_server_ciphers": false
       }
-    },{
+    },
+    {
       "command": "group_create",
       "description": "should create domains and enable bot protection",
       "name": "bot-protection",
@@ -724,8 +725,7 @@
           ]
         }
       }
-    },
-    {
+    },{
       "command": "group_create",
       "description": "should create domains and disable bot protection",
       "name": "bot-protection",
@@ -737,6 +737,83 @@
           "co_bypass_locations": ["/headers"],
           "enable_bot_protection": false,
           "bot_protection": []
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domains and enable wallarm",
+      "name": "wallarm",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/image/png",
+              "wallarm_mode": "monitoring",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "off",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/image/jpeg",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/image/webp",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/image/svg",
+              "wallarm_mode": "aggressive",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ]
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domains and disable wallarm",
+      "name": "wallarm",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_wallarm": false,
+          "wallarm_config": []
         }
       }
     }
