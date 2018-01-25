@@ -16,7 +16,7 @@ describe('Proxy WAF control', function () {
 
   this.timeout(500000);
   it('should make http request', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/?a=<>', testDomain, 418).then(function (res, rej) {
+    tools.getHostRequest(testHTTPUrl, '/?a=<>', testDomain).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -29,7 +29,7 @@ describe('Proxy WAF control', function () {
   });
 
   it('should make https request', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/?a=<>', testDomain, 418).then(function (res, rej) {
+    tools.getHostRequest(testHTTPSUrl, '/?a=<>', testDomain).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -43,7 +43,7 @@ describe('Proxy WAF control', function () {
 
     this.timeout(500000);
   it('should make http request', function (done) {
-    tools.getHostRequest(testHTTPUrl, '/allow_sqli?a=<>', testDomain, 418).then(function (res, rej) {
+    tools.getHostRequest(testHTTPUrl, '/test_waf?a=<>', testDomain, 418).then(function (res, rej) {
       if (rej) {
         throw rej;
       }
@@ -56,7 +56,7 @@ describe('Proxy WAF control', function () {
   });
 
   it('should make https request', function (done) {
-    tools.getHostRequest(testHTTPSUrl, '/allow_sqli?a=<>', testDomain, 418).then(function (res, rej) {
+    tools.getHostRequest(testHTTPSUrl, '/test_waf?a=<>', testDomain, 418).then(function (res, rej) {
       if (rej) {
         throw rej;
       }

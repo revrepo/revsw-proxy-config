@@ -448,7 +448,7 @@ describe('Proxy check', function () {
   var items = fs.readdirSync(sctiptsFolder);
   var files = [];
 
-  if (process.argv[33]) {  // RETURN 33 to 3
+  if (process.argv[3]) {
     files.push(process.argv[3]);
   } else {
     for (var i = 0; i < items.length; i++) {
