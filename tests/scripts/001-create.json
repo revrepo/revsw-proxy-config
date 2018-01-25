@@ -1,0 +1,1312 @@
+{
+  "name": "creating domains for locations",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/cookies",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/get",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/headers",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": [],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/cookies",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/get",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/headers",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": ["/headers"],
+          "enable_bot_protection": true,
+          "bot_protection": [
+                       {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-3",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/cookies",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/headers",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ],
+          "cache_bypass_locations": ["/get"],
+          "co_bypass_locations": [],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-4",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/cookies",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/headers",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ],
+          "cache_bypass_locations": ["/get", "/headers"],
+          "co_bypass_locations": ["/headers"],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-5",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": false,
+          "wallarm_config": [],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": [],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-6",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": true,
+          "caching_rules": [
+            {
+              "version": 1,
+              "url": {
+                "is_wildcard": true,
+                "value": "**"
+              },
+              "edge_caching": {
+                "override_origin": false,
+                "new_ttl": 0,
+                "override_no_cc": false
+              },
+              "browser_caching": {
+                "override_edge": false,
+                "new_ttl": 0,
+                "force_revalidate": false
+              },
+              "cookies": {
+                "override": false,
+                "ignore_all": false,
+                "list_is_keep": false,
+                "keep_or_ignore_list": [],
+                "remove_ignored_from_request": false,
+                "remove_ignored_from_response": false
+              }
+            }
+          ],
+          "enable_security": true,
+          "enable_wallarm": false,
+          "wallarm_config": [],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": [],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": false,
+          "waf": []
+        }
+      }
+    },
+    {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-7",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": false,
+          "caching_rules": [],
+          "enable_security": true,
+          "enable_wallarm": false,
+          "wallarm_config": [],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": ["/headers"],
+          "enable_bot_protection": true,
+          "bot_protection": [
+            {
+              "location": "/get",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            },
+            {
+              "location": "/headers",
+              "mode": "active_protection",
+              "call_type": 1,
+              "username_cookie_name": "username",
+              "sessionid_cookie_name": "SSMCCD",
+              "bot_protection_id": "16b2c2c4-de4c-4469-a656-599591c660d1"
+            }
+          ],
+          "enable_waf": true,
+          "waf": [
+            {
+              "location": "/",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/headers",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            },
+            {
+              "location": "/get",
+              "enable_waf": true,
+              "enable_learning_mode": false,
+              "enable_sql_injection_lib": true,
+              "enable_xss_injection_lib": true,
+              "waf_rules": [
+                "58ec620c2499eb41279788d8"
+              ],
+              "waf_actions": [
+                {
+                  "condition": "$SQL >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$UWA >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$EVADE >= 4",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_XSS >= 8",
+                  "action": "BLOCK"
+                },
+                {
+                  "condition": "$LIBINJECTION_SQL >= 8",
+                  "action": "BLOCK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+        {
+      "command": "group_create",
+      "description": "should create domain and configure locations",
+      "name": "locations",
+      "step": "step-8",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": false,
+          "caching_rules": [],
+          "enable_security": true,
+          "enable_wallarm": true,
+          "wallarm_config": [
+            {
+              "location": "/",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/cookies",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/get",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            },
+            {
+              "location": "/headers",
+              "wallarm_mode": "block",
+              "wallarm_instance": 1,
+              "wallarm_mode_allow_override": "off",
+              "wallarm_parse_response": "on",
+              "wallarm_process_time_limit": 1000,
+              "wallarm_process_time_limit_block": "attack",
+              "wallarm_parser_disable": [
+                "action"
+              ],
+              "wallarm_unpack_response": "off"
+            }
+          ],
+          "cache_bypass_locations": [],
+          "co_bypass_locations": [],
+          "enable_bot_protection": false,
+          "bot_protection": [],
+          "enable_waf": false,
+          "waf": []
+        }
+      }
+    }
+  ]
+}
