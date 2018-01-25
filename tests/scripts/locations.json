@@ -1,0 +1,690 @@
+{
+  "name": "locations",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+     {
+      "name": "locations",
+      "step": "step-1",
+      "command": "purge",
+      "description": "should purge step-1 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "purge",
+      "description": "should purge step-2 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "purge",
+      "description": "should purge step-3 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "purge",
+      "description": "should purge step-4 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "purge",
+      "description": "should purge step-5 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "purge",
+      "description": "should purge step-6 domain",
+      "delay": 0,
+      "is_wildcard": true,
+      "expression": "/**/*"
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "set": {
+        "Cookie": [
+          "myApp-token=12345679"
+        ]
+      },
+      "url": "/headers",
+      "check": {
+        "header": {
+          "x-rev-cache": "MISS",
+          "x-rev-hit-for-pass": "YES",
+          "content-type": "application/json"
+        },
+        "content": [
+          "myApp-token"
+        ]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check cache disabled for the location",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check cache enabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check cache disabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-8",
+      "command": "check",
+      "description": "should check cache disabled",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check status 418",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/images/jpeg?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 418
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check status 418",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/images/jpeg?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 418
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check status 418",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 418
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check status 200",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 200
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-8",
+      "command": "check",
+      "description": "should check status 403",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers?a=<10 UNION SELECT 1,null,null-->",
+      "check": {
+        "status": 403
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check headers for cache_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations and cache_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["x-rev-cache"],
+        "header_not_properties": ["set-cookie"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check headers for location with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check headers for co_bypass_locations with active bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/headers",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_properties": ["set-cookie"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check headers for location with disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie", "x-rev-cache"]
+      }
+    },
+    {
+      "name": "locations",
+      "step": "step-8",
+      "command": "check",
+      "description": "should check headers for disabled bot protection",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/cookies",
+      "check": {
+        "header": {
+          "content-type": "application/json"
+        },
+        "header_not_properties": ["set-cookie", "x-rev-cache"]
+      }
+    }
+  ]
+}

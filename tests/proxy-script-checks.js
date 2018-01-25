@@ -28,7 +28,7 @@ var development = false;
 
 var merge = function () {
   var destination = {},
-    sources = [].slice.call(arguments, 0);
+  sources = [].slice.call(arguments, 0);
   sources.forEach(function (source) {
     var prop;
     for (prop in source) {
@@ -98,6 +98,8 @@ var checking = function (host, url, domain, values, set, method) {
         if (development === true) {
           console.log(res.header);
         }
+        // console.log(res);
+        // console.log("HEREEE");
         for (var key in values) {
           var header = null;
           var text = null;
@@ -206,7 +208,7 @@ var purge = function (newDomainName, is_wildcard, expression) {
         responseJson.message.should.be.equal('The purge request has been successfully queued');
         responseJson.request_id.should.be.type('string');
         requestID = responseJson.request_id;
-        console.log('      ♦ Cache purged');
+        // console.log('      ♦ Cache purged');
         response(true);
       }).catch(function (err) {
       reject(err);
