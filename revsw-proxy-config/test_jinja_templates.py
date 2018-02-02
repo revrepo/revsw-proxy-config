@@ -717,7 +717,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
         },
         "SERVER_NAME": "test-server-name",
         "SERVER_ALIASES": ["test-alias", ],
-        "SERVER_REGEX_ALIAS": '1',
+        "SERVER_REGEX_ALIAS": '*.test13-alias',
         "ORIGIN_SERVER_NAME": "test-server-name",
         "ENABLE_VARNISH": True,
         "REV_PROFILES_COUNT": 3,
@@ -2097,6 +2097,100 @@ class TestWallarmJinja(TestAbstractBpJinja):
                     if line in wallarm_lines:
                         wallarm_lines.remove(line)
         self.assertEqual(wallarm_lines, [])
+
+
+class TestWildcardsJinja(TestAbstractBpJinja):
+    schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
+    schema_file_name = 'bp/bp'
+    loader = FileSystemLoader(TEST_DIR)
+
+    template_file = os.path.join(TEMPLATES_DIR, 'nginx/bp/bp.jinja')
+
+    def test_domain_alias_jinja_with_cache_enabled(self):
+        initial_data = deepcopy(self.initial_data)
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        if initial_data['bp']['SERVER_ALIASES'][0] in find_server.as_dict['server'][1]['server_name']:
+            find_line = True
+        self.assertTrue(find_line)
+
+    def test_domain_alias_jinja_with_cache_disabled(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_CACHE"] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        if initial_data['bp']['SERVER_ALIASES'][0] in find_server.as_dict['server'][1]['server_name']:
+            find_line = True
+        self.assertTrue(find_line)
+
+    def test_domain_regex_alias_jinja_with_cache_enabled(self):
+        initial_data = deepcopy(self.initial_data)
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        if '"~' + initial_data['bp']['SERVER_REGEX_ALIAS'] + '"' == find_server.as_dict['server'][2]['server_name']:
+            find_line = True
+        self.assertTrue(find_line)
+
+    def test_domain_regex_alias_jinja_with_cache_disabled(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_CACHE"] = False
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required lines in conf file
+        find_server = None
+        for server in nginx_conf.servers:
+            if find_server:
+                break
+            for line in server.as_dict['server']:
+                if line.get("listen") and line["listen"]:
+                    find_server = server
+                    break
+        find_line = False
+        if '"~' + initial_data['bp']['SERVER_REGEX_ALIAS'] + '"' == find_server.as_dict['server'][2]['server_name']:
+            find_line = True
+        self.assertTrue(find_line)
 
 
 if __name__ == '__main__':
