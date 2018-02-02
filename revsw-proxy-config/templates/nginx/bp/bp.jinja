@@ -241,10 +241,6 @@
 {%- endmacro %}
 
 {% macro _common_proxy_config_step1(this, co_profiles_mod, co_profiles, varnish_port, profiles_base_port, is_https) -%}
-  server_name {{ this.SERVER_NAME }} {%- for alias in this.SERVER_ALIASES %} {{ alias }}{%- endfor -%};
-  {% if this.SERVER_REGEX_ALIAS %}
-    server_name "~{{ this.SERVER_REGEX_ALIAS }}";
-  {% endif %}
   {# Save original Host header for Varnish caching rules #}
   proxy_set_header X-Orig-Host $host;
   {{ _common_sharding(this) }}
@@ -360,8 +356,6 @@
 {%- endmacro %}{# _common_proxy_config_step1 #}
 
 {% macro _common_proxy_config_step2(this, co_profiles_mod, co_profiles, profiles_base_port, is_https) -%}
-  server_name {{this.SERVER_NAME}};
-
   {{ _common_proxy_settings(this) }}
 
   {% if not this.ENABLE_VARNISH %}
@@ -654,6 +648,10 @@
 
     server {
       listen 80;
+      server_name {{ this.SERVER_NAME }} {%- for alias in this.SERVER_ALIASES %} {{ alias }}{%- endfor -%};
+      {% if this.SERVER_REGEX_ALIAS %}
+        server_name "~{{ this.SERVER_REGEX_ALIAS }}";
+      {% endif %}
       {% if this.ENABLE_QUIC %}
         add_header Alt-Svc 'quic=":443"; p="1"; ma=120';
         more_set_headers Alternate-Protocol:443:quic,p=1;
@@ -666,6 +664,7 @@
 
     server {
       listen 127.0.0.1:9080;
+      server_name {{this.SERVER_NAME}};
       {# Don't log accesses on this vhost; they all come from localhost #}
       access_log off;
       {# Make sure the connections between Varnish and BP are kept alive for 10 minutes #}
@@ -711,6 +710,10 @@
     {{ balancer_mod.define_bp_ows_balancer(this, true) }}
     server {
       listen 443 ssl http2;
+      server_name {{ this.SERVER_NAME }} {%- for alias in this.SERVER_ALIASES %} {{ alias }}{%- endfor -%};
+      {% if this.SERVER_REGEX_ALIAS %}
+        server_name "~{{ this.SERVER_REGEX_ALIAS }}";
+      {% endif %}
       {% if this.ENABLE_QUIC %}
         add_header Alt-Svc 'quic=":443"; p="1"; ma=120';
         more_set_headers Alternate-Protocol:443:quic,p=1;
@@ -728,6 +731,7 @@
     }
     server {
         listen 127.0.0.1:9443;
+        server_name {{this.SERVER_NAME}};
         {{ ssl_mod.setup_proxy_only(this) }}
         {# Don't log accesses on this vhost; they all come from localhost #}
         access_log off;
