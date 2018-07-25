@@ -560,6 +560,7 @@
   }
   proxy_set_header X-Forwarded-For $clientip;
   proxy_set_header X-Real-IP $clientip;
+  proxy_set_header True-Client-IP $clientip;
 
   {# Optional user customizations in BP frontend #}
   {% if this.CUSTOM_WEBSERVER_CODE_BEFORE %}
