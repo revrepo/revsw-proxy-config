@@ -391,6 +391,7 @@ sub vcl_miss {
         chromelogger.log("miss " + req.xid);
     }
     # END SITE 'test_server_1'
+    unset req.http.Range;
 }
 
 # Block 4: In vcl_recv, on receiving a request, call the method responsible for
