@@ -1744,8 +1744,7 @@ class TestLoopDetectJinja(TestAbstractBpJinja):
             "if ($http_x_rev_co_nodes ~ test)": [
                 {'return': '508 "A CO redirection loop was detected on \'test\'. '
                            'Please review the server configuration."'}
-            ],
-            'proxy_set_header': 'Connection ""'
+            ]
         }
         template = self.env.get_template('bp_test.jinja')
         result = template.render(**initial_data)
