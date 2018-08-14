@@ -375,6 +375,7 @@
     {% if this.ENABLE_JS_SUBSTITUTE %}
       RevJSSubstituteEnabled off;
     {% endif %}
+    proxy_pass http://rev-js-source.revdn.net;
   }
 
   {% if this.ENABLE_JS_SUBSTITUTE %}
