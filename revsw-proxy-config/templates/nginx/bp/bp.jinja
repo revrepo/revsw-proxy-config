@@ -376,6 +376,8 @@
       RevJSSubstituteEnabled off;
     {% endif %}
     proxy_pass http://rev-js-source.revdn.net;
+    proxy_set_header Host $proxy_host;
+    proxy_set_header Connection "";
   }
 
   {% if this.ENABLE_JS_SUBSTITUTE %}
@@ -570,6 +572,9 @@
 {# BEGIN: (BP-342) Common macros for headers #}
 {% macro _common_bp_headers(this, host_name) %}
   {# Don't propagate "Connection: close" from client #}
+  proxy_set_header Connection "";
+  {# _common_bp_headers for {{host_name}} #}
+  proxy_set_header Host {{host_name}};
   {# _common_bp_headers #}
   {# BEGIN: (BP-92) Response headers #}
   {% if this.END_USER_RESPONSE_HEADERS %}
@@ -594,6 +599,8 @@
 {# BEGIN: (BP-342) Common macros for headers #}
 {% macro _common_co_headers(this, host_name) %}
   {# Don't propagate "Connection: close" from client #}
+  proxy_set_header Connection "";
+  proxy_set_header Host {{host_name}};
   {# BEGIN: (BP-92) Request headers #}
   {% if this.ORIGIN_REQUEST_HEADERS %}
     {% for key in this.ORIGIN_REQUEST_HEADERS %}
