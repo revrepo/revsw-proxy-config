@@ -249,7 +249,15 @@
   {{ loop_detect_mod.loop_detect_bp(this) }}
   {# Never disable the Varnish backend, even if it has temporary problems. #}
   location / {
-    proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }}/;
+
+    {% if "/" in this.BYPASS_CO_LOCATIONS %}
+      {{ _common_co_location_params(this, "bp_ows", profiles_base_port, is_https, "")|indent(4) }}
+    {% else %}
+      {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+    {% endif %}
+    {% if "/" not in this.BYPASS_VARNISH_LOCATIONS %}
+      proxy_pass http://{{ balancer_mod.balancer_name(this, is_https, "varnish") }}/;
+    {% endif %}
     {# Wait at most for configured seconds for a reply from Varnish, then return error message. #}
     proxy_read_timeout {{this.PROXY_TIMEOUT}}s;
     {% if this.ENABLE_BOT_PROTECTION %}
@@ -279,29 +287,32 @@
       First set up CO balancer
     #}
     {% for url in this.BYPASS_VARNISH_LOCATIONS %}
-      {% set rel_url = url if url[0] != "/" else url[1:] %}
-      location /{{rel_url}} {
-        {% if url in this.BYPASS_CO_LOCATIONS %}
-          {{ _common_co_location_params(this, "bp_ows", profiles_base_port, is_https, "")|indent(4) }}
-        {% else %}
-          {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+        {% if url != "/" %}
+          {% set rel_url = url if url[0] != "/" else url[1:] %}
+          location /{{rel_url}} {
+            {% if url in this.BYPASS_CO_LOCATIONS %}
+              {{ _common_co_location_params(this, "bp_ows", profiles_base_port, is_https, "")|indent(4) }}
+            {% else %}
+              {{ _common_co_location_params(this, "bp_cos_bypass", profiles_base_port, is_https, "")|indent(4) }}{# same balancer name as _common_upstream_block_co #}
+            {% endif %}
+            {% if this.ENABLE_BOT_PROTECTION %}
+              {{ bot_prot.get_rules(this, url) }}
+            {% endif %}
+            {% if this.ENABLE_WALLARM %}
+              {{ wallarm_cfg.get_rules(this, url) }}
+            {% endif %}
+            {% for lua in this.BP_LUA_LOCATIONS %}
+              {% if lua.location == url %}
+                default_type 'text/plain';
+                content_by_lua '
+                {{lua.code}}
+                ';
+              {% endif %}
+            {% endfor %}
+          {# TODO: RevProfilesMode full #}
+          }
         {% endif %}
-        {% if this.ENABLE_BOT_PROTECTION %}
-          {{ bot_prot.get_rules(this, url) }}
-        {% endif %}
-        {% if this.ENABLE_WALLARM %}
-          {{ wallarm_cfg.get_rules(this, url) }}
-        {% endif %}
-        {% for lua in this.BP_LUA_LOCATIONS %}
-          {% if lua.location == url %}
-            default_type 'text/plain';
-            content_by_lua '
-            {{lua.code}}
-            ';
-          {% endif %}
-        {% endfor %}
-      {# TODO: RevProfilesMode full #}
-      }
+
     {% endfor %}
     {# End Varnish bypass #}
   {% endif %}{# this.BYPASS_VARNISH_LOCATIONS #}
