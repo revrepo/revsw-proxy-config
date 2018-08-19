@@ -99,7 +99,8 @@ class ConfigCommon:
             "origin_secure_protocol": "use_end_user_protocol",
             "proxy_timeout": 5,
             "debug": False,
-            "client_response_timeout": 600
+            "client_response_timeout": 600,
+            "ip_address_anonymizer": False
         }
 
         for opt in self.ui_config.get("config_command_options", "").split():
@@ -129,6 +130,8 @@ class ConfigCommon:
                 self.cmd_opts["proxy_timeout"] = int(opt[14:])
             elif opt.startswith("client_response_timeout="):
                 self.cmd_opts["client_response_timeout"] = int(opt[24:])
+            elif opt.startswith("ip_address_anonymizer="):
+                self.cmd_opts["ip_address_anonymizer"] = True
             # Don't use options
             elif opt.startswith("ows-http-only"):
                 self.cmd_opts["ows-http-only"] = True
@@ -597,6 +600,10 @@ class ConfigCommon:
 
         self._patch_if_changed_bp_webserver(
             "ORIGIN_SECURE_PROTOCOL", origin_secure_protocol)
+
+        self._patch_if_changed_bp_webserver(
+            "IP_ADDRESS_ANONYMIZER", self.cmd_opts["ip_address_anonymizer"]
+        )
 
         log.LOGD("Finished vars update in misc")
 
