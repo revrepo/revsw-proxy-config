@@ -376,6 +376,9 @@
         },
         "SECURITY_MODE": {
             "type": "string"
+        },
+        "IP_ADDRESS_ANONYMIZER": {
+            "type": "boolean"
         }
     },
     "required": [
@@ -425,6 +428,7 @@
         "REV_RUM_BEACON_URL",
         "CUSTOM_WEBSERVER_CO_CODE_AFTER",
         "ENABLE_QUIC",
+        "IP_ADDRESS_ANONYMIZER",
 
         "ENABLE_SSL",
         "SSL_PROTOCOLS",
