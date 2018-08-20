@@ -558,6 +558,10 @@
   if ($clientip = "") {
     set  $clientip $remote_addr;
   }
+  set $clientip2 $clientip;
+  {% if this.IP_ADDRESS_ANONYMIZER %}
+    if ($clientip ~ (\d+).(\d+).(\d+).(\d+)) { set $clientip2 $1.$2.$3.0; }
+  {% endif %}
   proxy_set_header X-Forwarded-For $clientip;
   proxy_set_header X-Real-IP $clientip;
 
