@@ -750,6 +750,7 @@ class TestAbstractBpJinja(TestAbstractConfig):
         "ORIGIN_IDLE_TIMEOUT": 12,
         "ORIGIN_REUSE_CONNS": True,
         "ENABLE_VARNISH_GEOIP_HEADERS": True,
+        "IP_ADDRESS_ANONYMIZER": False,
         "ENABLE_PROXY_BUFFERING": True,
         "END_USER_RESPONSE_HEADERS": [
             {
