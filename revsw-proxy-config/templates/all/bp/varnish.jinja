@@ -694,6 +694,7 @@ sub vcl_miss {
     {% call (site) _for_each_site("DEBUG_MODE", "req") %}
     chromelogger.log("miss " + req.xid);
     {%- endcall %}{# _for_each_site("DEBUG_MODE") #}
+    unset req.http.Range;
 }
 
 # Block 4: In vcl_recv, on receiving a request, call the method responsible for
