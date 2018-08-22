@@ -1685,6 +1685,55 @@ class TestBalancerJinja(TestAbstractBpJinja):
                 find_list = conf['upstream %s' % test_str]
         self.assertEqual(find_list, test_data)
 
+    def test_balancer_jinja_bypass_co_bypass_varnish(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = ["/"]
+        initial_data['bp']["BYPASS_VARNISH_LOCATIONS"] = ["/"]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required proxy_pass value in server 80 section
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('server') and conf['server'][0]['listen'] == '80':
+                for server_line in conf['server']:
+                    if server_line.get('location /'):
+                        self.assertEquals(server_line['location /'][0]['proxy_pass'],
+                                          'https://bp_ows_test__server__name_http')
+
+    def test_balancer_jinja_bypass_co(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = ["/"]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required proxy_pass value in server 80 section
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('server') and conf['server'][0]['listen'] == '80':
+                for server_line in conf['server']:
+                    if server_line.get('location /'):
+                        self.assertEquals(server_line['location /'][0]['proxy_pass'],
+                                          'http://varnish_test__server__name_http/')
+
+    def test_balancer_jinja_bypass_varnish(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["BYPASS_VARNISH_LOCATIONS"] = ["/"]
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find required proxy_pass value in server 80 section
+        for conf in nginx_conf.as_dict['conf']:
+            if conf.get('server') and conf['server'][0]['listen'] == '80':
+                for server_line in conf['server']:
+                    if server_line.get('location /'):
+                        self.assertEquals(server_line['location /'][0]['proxy_pass'],
+                                          'https://bp_cos_bypass_test__server__name_http')
+
 
 class TestLoopDetectJinja(TestAbstractBpJinja):
     schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
