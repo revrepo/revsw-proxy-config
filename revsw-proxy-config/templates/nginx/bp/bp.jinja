@@ -442,7 +442,6 @@
           if this.BYPASS_CO_LOCATIONS
           Don't propagate "Connection: close" from client
         #}
-        proxy_set_header Connection "";
         {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, url) }}
         {% endif %}
