@@ -387,8 +387,6 @@
       RevJSSubstituteEnabled off;
     {% endif %}
     proxy_pass http://rev-js-source.revdn.net;
-    proxy_set_header Host $proxy_host;
-    proxy_set_header Connection "";
   }
 
   {% if this.ENABLE_JS_SUBSTITUTE %}
@@ -444,7 +442,6 @@
           if this.BYPASS_CO_LOCATIONS
           Don't propagate "Connection: close" from client
         #}
-        proxy_set_header Connection "";
         {% if this.ENABLE_WAF and this.ENABLE_VARNISH %}
           {{ waf_mod.get_rules(this, url) }}
         {% endif %}
@@ -833,9 +830,6 @@
           proxy_pass {{ows_proto}}://{{ balancer_mod.balancer_name(this, is_https, "co_ows") }}/ lowercase_escapes;
             {# TODO: retry=0 {{proxy_params}} #}
 
-          {# BEGIN: Setting up the default headers #}
-          {{ _common_co_headers(this, this.ORIGIN_SERVER_NAME) }}
-          {# END: Setting up the default headers #}
           {% for lua in this.CO_LUA_LOCATIONS %}
             {% if lua.location == "/" %}
               default_type 'text/plain';

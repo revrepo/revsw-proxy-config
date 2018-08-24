@@ -1735,6 +1735,49 @@ class TestBalancerJinja(TestAbstractBpJinja):
                         self.assertEquals(server_line['location /'][0]['proxy_pass'],
                                           'https://bp_cos_bypass_test__server__name_http')
 
+    def test_with_cache_location_for_proxy_set_header(self):
+        initial_data = deepcopy(self.initial_data)
+        # there is only one place with proxy_set_header inside location:
+        # inside BYPASS_CO_LOCATIONS - bp.jinja line 440
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = []
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find proxy_set_header parameters inside locations
+        find_line = False
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                for location_name, location_value in location.as_dict.items():
+                    for line in location_value:
+                        if line.get('proxy_set_header') \
+                                and 'rev-third-party-http' not in location_name:
+                            find_line = True
+        self.assertFalse(find_line)
+
+    def test_without_cache_location_for_proxy_set_header(self):
+        initial_data = deepcopy(self.initial_data)
+        initial_data['bp']["ENABLE_CACHE"] = False
+        # there is only one place with proxy_set_header inside location:
+        # inside BYPASS_CO_LOCATIONS - bp.jinja line 440
+        initial_data['bp']["BYPASS_CO_LOCATIONS"] = []
+        template = self.env.get_template('bp_test.jinja')
+        result = template.render(**initial_data)
+        with open(os.path.join(TEST_DIR, 'bp.vcl'), 'w') as f:
+            f.write(result)
+        nginx_conf = nginx.loadf(os.path.join(TEST_DIR, 'bp.vcl'))
+        # try to find proxy_set_header parameters inside locations
+        find_line = False
+        for server in nginx_conf.servers:
+            for location in server.locations:
+                for location_name, location_value in location.as_dict.items():
+                    for line in location_value:
+                        if line.get('proxy_set_header') \
+                                and 'rev-third-party-http' not in location_name:
+                            find_line = True
+        self.assertFalse(find_line)
+
 
 class TestLoopDetectJinja(TestAbstractBpJinja):
     schema_file_location = os.path.join(TEMPLATES_DIR, 'all')
