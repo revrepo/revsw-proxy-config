@@ -206,7 +206,6 @@
     This will make recovery from CO failure quicker.
     The DNS monitor will assign another CO to the same domain name.
   #}
-  proxy_read_timeout {{ this.PROXY_TIMEOUT }}s;
   {#
     mod_rev_profile_selection
     TODO: ProxyConnPoolCount {{this.REV_PROFILES_COUNT}}
