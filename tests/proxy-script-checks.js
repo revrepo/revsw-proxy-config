@@ -145,6 +145,18 @@ var checking = function (host, url, domain, values, set, method) {
                 }
                 break;
 
+              case 'body_headers':
+                for (header in values[key]) {
+                  res.body.headers.should.have.properties(values[key][header]);
+                }
+                break;
+
+              case 'body_not_headers':
+                for (header in values[key]) {
+                  res.body.headers.should.not.have.properties(values[key][header]);
+                }
+                break;
+
               case 'content':
                 for (text in values[key]) {
                   //console.log(res.text);
