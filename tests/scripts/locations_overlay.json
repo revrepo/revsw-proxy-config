@@ -1,0 +1,152 @@
+{
+  "name": "Locations overlay",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "name": "locations_overlay",
+      "step": "step-1",
+      "command": "check",
+      "description": "should check headers",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-2",
+      "command": "check",
+      "description": "should check headers with cache bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-3",
+      "command": "check",
+      "description": "should check headers with cache bypass and co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_not_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check headers with cache bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-4",
+      "command": "check",
+      "description": "should check headers",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/gzip",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check headers with cache bypass and co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_not_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-5",
+      "command": "check",
+      "description": "should check headers",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/gzip",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check headers with co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_not_headers": ["X-Rev-Co-Nodes"],
+        "header_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-6",
+      "command": "check",
+      "description": "should check headers with co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/gzip",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-7",
+      "command": "check",
+      "description": "should check headers with cache bypass and co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_not_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-8",
+      "command": "check",
+      "description": "should check headers with cache bypass and co bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/get",
+      "check": {
+        "body_not_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    },{
+      "name": "locations_overlay",
+      "step": "step-8",
+      "command": "check",
+      "description": "should check headers with cache bypass",
+      "delay": 0,
+      "protocol": "HTTP",
+      "url": "/gzip",
+      "check": {
+        "body_headers": ["X-Rev-Co-Nodes"],
+        "header_not_properties": ["x-rev-cache"]
+      }
+    }
+  ]
+}

@@ -1732,8 +1732,8 @@ class TestBalancerJinja(TestAbstractBpJinja):
             if conf.get('server') and conf['server'][0]['listen'] == '80':
                 for server_line in conf['server']:
                     if server_line.get('location /'):
-                        self.assertEquals(server_line['location /'][0]['proxy_pass'],
-                                          'https://bp_cos_bypass_test__server__name_http;    proxy_read_timeout 1s')
+                        self.assertIn('https://bp_cos_bypass_test__server__name_http;',
+                                      server_line['location /'][0]['proxy_pass'])
 
     def test_with_cache_location_for_proxy_set_header(self):
         initial_data = deepcopy(self.initial_data)

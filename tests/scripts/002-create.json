@@ -1,0 +1,104 @@
+{
+  "name": "creating domains",
+  "enabled": true,
+  "timeout": 240000,
+  "tasks": [
+    {
+      "command": "group_create",
+      "description": "should create domain without bypass",
+      "name": "locations_overlay",
+      "step": "step-1",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": [],
+          "co_bypass_locations": []
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain with cache bypass for '/'",
+      "name": "locations_overlay",
+      "step": "step-2",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/"],
+          "co_bypass_locations": []
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain with cache bypass and co bypass for '/'",
+      "name": "locations_overlay",
+      "step": "step-3",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/"],
+          "co_bypass_locations": ["/"]
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain with cache bypass for '/headers'",
+      "name": "locations_overlay",
+      "step": "step-4",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/get"],
+          "co_bypass_locations": []
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain with cache bypass and co bypass for '/headers'",
+      "name": "locations_overlay",
+      "step": "step-5",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": ["/get"],
+          "co_bypass_locations": ["/get"]
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain with cache bypass for '/headers'",
+      "name": "locations_overlay",
+      "step": "step-6",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "cache_bypass_locations": [],
+          "co_bypass_locations": ["/get"]
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain without cache with co bypass for '/'",
+      "name": "locations_overlay",
+      "step": "step-7",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": false,
+          "co_bypass_locations": ["/"]
+        }
+      }
+    },{
+      "command": "group_create",
+      "description": "should create domain without cache with co bypass for '/headers'",
+      "name": "locations_overlay",
+      "step": "step-8",
+      "origin": "httpbin_org.revsw.net",
+      "set": {
+        "rev_component_bp": {
+          "enable_cache": false,
+          "co_bypass_locations": ["/get"]
+        }
+      }
+    }
+  ]
+}
